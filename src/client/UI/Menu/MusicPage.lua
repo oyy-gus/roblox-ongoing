@@ -166,6 +166,9 @@ function MusicPage.new(callbacks)
 	local handleFavToggle = function(song, isFav)
 		if song and song.sound_id then
 			self.FavoriteMap[tostring(song.sound_id)] = isFav
+			-- Paksa re-render kedua kartu dengan mereset cache key
+			if self.PlaylistCard then self.PlaylistCard._lastKey = nil end
+			if self.FavPlaylistCard then self.FavPlaylistCard._lastKey = nil end
 		end
 		if callbacks.onFavoriteToggled then
 			callbacks.onFavoriteToggled(song, isFav)
@@ -257,11 +260,9 @@ function MusicPage:SetFavorites(favList)
 		for _, soundId in ipairs(favList) do
 			self.FavoriteMap[tostring(soundId)] = true
 		end
-		if self.PlaylistCard then self.PlaylistCard.FavoriteMap = self.FavoriteMap end
-		if self.FavPlaylistCard then self.FavPlaylistCard.FavoriteMap = self.FavoriteMap end
-		-- Force re-render favorit
-		self.FavPlaylistCard.LastPlaylistData = nil
-		self.FavPlaylistCard.LastSoundId = nil
+		-- Paksa re-render kedua kartu
+		if self.PlaylistCard then self.PlaylistCard._lastKey = nil end
+		if self.FavPlaylistCard then self.FavPlaylistCard._lastKey = nil end
 	end
 end
 
@@ -283,11 +284,7 @@ function MusicPage:Update(stateData)
 	end
 
 	if stateData.playlist then
-		-- Sync favorite maps
-		self.PlaylistCard.FavoriteMap = self.FavoriteMap
-		self.FavPlaylistCard.FavoriteMap = self.FavoriteMap
-
-		-- 1. Update View Playlist (Daftar)
+		-- 1. Update Daftar Lagu
 		local query = self.GetSearchQuery()
 		local listPL = stateData.playlist
 		if query ~= "" then
@@ -299,21 +296,20 @@ function MusicPage:Update(stateData)
 			end
 			listPL = filtered
 		end
-		self.PlaylistCard:Update(listPL, stateData.soundId)
+		-- Pass FavoriteMap ke PlaylistCard agar render bintang benar
+		self.PlaylistCard:Update(listPL, stateData.soundId, self.FavoriteMap)
 
-		-- 2. Update View Favorites (filter dari playlist berdasarkan FavoriteMap)
+		-- 2. Update Favorit: filter dari playlist berdasarkan FavoriteMap
 		local favQuery = self.GetFavSearchQuery()
 		local favList = {}
 		for _, song in ipairs(stateData.playlist) do
-			local isFav = (self.FavoriteMap[tostring(song.sound_id)] == true)
+			local isFav = self.FavoriteMap[tostring(song.sound_id)] == true
 			local okQuery = (favQuery == "") or string.find(string.lower(song.title or ""), favQuery, 1, true)
 			if isFav and okQuery then
 				table.insert(favList, song)
 			end
 		end
-		-- Force update favorit jika FavoriteMap berubah (bypass LastPlaylistData check)
-		self.FavPlaylistCard.LastPlaylistData = nil
-		self.FavPlaylistCard:Update(favList, stateData.soundId)
+		self.FavPlaylistCard:Update(favList, stateData.soundId, self.FavoriteMap)
 	end
 
 	if self.QueueList then

@@ -1,5 +1,7 @@
 --[[
-	PlaylistCard.lua — Daftar lagu hitam-putih, bersih dan rapi.
+	PlaylistCard.lua - Daftar lagu hitam-putih, bersih dan rapi.
+	FavoriteMap TIDAK disimpan di sini -- diterima dari luar via Update(favoriteMap).
+	Ini memastikan single source of truth ada di MusicPage.
 ]]
 
 local TweenService = game:GetService("TweenService")
@@ -51,7 +53,7 @@ function PlaylistCard.new(onSongSelected, onSongQueued, onFavoriteToggled, heade
 	hLbl.Size = UDim2.new(1, -8, 1, 0)
 	hLbl.Position = UDim2.new(0, 8, 0, 0)
 	hLbl.BackgroundTransparency = 1
-	hLbl.Text = (headerText and ("🎶 " .. headerText)) or ("🎶 " .. UIStrings.Music.GlobalPlaylistHeader)
+	hLbl.Text = "🎶 " .. (headerText or UIStrings.Music.GlobalPlaylistHeader)
 	hLbl.TextColor3 = Theme.Colors.Text
 	hLbl.Font = Theme.Fonts.Header
 	hLbl.TextSize = Theme.TextSizes.Header
@@ -80,30 +82,43 @@ function PlaylistCard.new(onSongSelected, onSongQueued, onFavoriteToggled, heade
 		scroll.CanvasSize = UDim2.new(0,0,0, layout.AbsoluteContentSize.Y + 4)
 	end)
 
-	self.Instance = container
-	self.Scroll = scroll
-	self.OnSongSelected = onSongSelected
-	self.OnSongQueued = onSongQueued
+	self.Instance    = container
+	self.Scroll      = scroll
+	self.OnSongSelected   = onSongSelected
+	self.OnSongQueued     = onSongQueued
 	self.OnFavoriteToggled = onFavoriteToggled
-	self.FavoriteMap = {}
-	self.EmptyText = emptyText
+	self.EmptyText   = emptyText
+	self._lastKey    = nil   -- cache key untuk deteksi perubahan
 	return self
 end
 
-function PlaylistCard:Update(playlistData, currentSoundId)
-	if self.LastPlaylistData == playlistData and self.LastSoundId == currentSoundId then
-		return
-	end
-	self.LastPlaylistData = playlistData
-	self.LastSoundId = currentSoundId
+--[[
+	Update(playlistData, currentSoundId, favoriteMap)
+	  playlistData  : tabel lagu { {title, sound_id, ...}, ... }
+	  currentSoundId: sound_id lagu yang sedang diputar (rbxassetid://... atau string number)
+	  favoriteMap   : { [soundId_string] = true } -- dari MusicPage (single source of truth)
+]]
+function PlaylistCard:Update(playlistData, currentSoundId, favoriteMap)
+	favoriteMap = favoriteMap or {}
 
+	-- Cache key: jumlah lagu + soundId aktif + jumlah favorit
+	-- Re-render hanya ketika salah satunya berubah
+	local favCount = 0
+	for _ in pairs(favoriteMap) do favCount += 1 end
+	local newKey = tostring(#(playlistData or {})) .. "|" .. tostring(currentSoundId) .. "|fav" .. favCount
+
+	if self._lastKey == newKey then return end
+	self._lastKey = newKey
+
+	-- Bersihkan elemen lama
 	for _, c in ipairs(self.Scroll:GetChildren()) do
 		if c:IsA("Frame") or c:IsA("TextLabel") then c:Destroy() end
 	end
 
+	-- Pesan kosong
 	if not playlistData or #playlistData == 0 then
 		local lbl = Instance.new("TextLabel")
-		lbl.Size = UDim2.new(1, 0, 0, 40)
+		lbl.Size = UDim2.new(1, 0, 0, 60)
 		lbl.BackgroundTransparency = 1
 		lbl.Text = "⚠ " .. (self.EmptyText or UIStrings.Music.EmptyPlaylist)
 		lbl.TextColor3 = Theme.Colors.TextSubtle
@@ -114,9 +129,12 @@ function PlaylistCard:Update(playlistData, currentSoundId)
 		return
 	end
 
+	-- Render setiap lagu
 	for idx, song in ipairs(playlistData) do
-		local isCurrent = (tostring(song.sound_id) == tostring(currentSoundId))
-		local isFav = self.FavoriteMap[tostring(song.sound_id)] or false
+		local soundIdStr = tostring(song.sound_id)
+		local isCurrent  = (soundIdStr == tostring(currentSoundId))
+		-- isFav ditangkap saat RENDER ini (bukan dari event click)
+		local isFav = favoriteMap[soundIdStr] == true
 
 		local card = Instance.new("Frame")
 		card.Name = "Song_" .. idx
@@ -130,11 +148,11 @@ function PlaylistCard:Update(playlistData, currentSoundId)
 
 		local cStroke = Instance.new("UIStroke")
 		cStroke.Color = isCurrent and Theme.Colors.StrokeBright or Theme.Colors.Stroke
-		cStroke.Thickness = isCurrent and 1 or 1
+		cStroke.Thickness = 1
 		cStroke.Transparency = isCurrent and 0.2 or 0.6
 		cStroke.Parent = card
 
-		-- Nomor
+		-- Nomor / indikator
 		local num = Instance.new("TextLabel")
 		num.Size = UDim2.new(0, 28, 1, 0)
 		num.Position = UDim2.new(0, 28, 0, 0)
@@ -146,7 +164,7 @@ function PlaylistCard:Update(playlistData, currentSoundId)
 		num.TextXAlignment = Enum.TextXAlignment.Center
 		num.Parent = card
 
-		-- Bintang favorit
+		-- Tombol bintang favorit
 		local favBtn = Instance.new("TextButton")
 		favBtn.Size = UDim2.new(0, 20, 0, 20)
 		favBtn.Position = UDim2.new(0, 5, 0.5, -10)
@@ -156,16 +174,16 @@ function PlaylistCard:Update(playlistData, currentSoundId)
 		favBtn.Font = Theme.Fonts.Header
 		favBtn.TextSize = 13
 		favBtn.AutoButtonColor = false
+		-- Kirim status BARU (kebalikan isFav saat render) ke callback
+		-- MusicPage akan update FavoriteMap & paksa re-render
 		favBtn.MouseButton1Click:Connect(function()
-			local nv = not (self.FavoriteMap[tostring(song.sound_id)] or false)
-			self.FavoriteMap[tostring(song.sound_id)] = nv
-			favBtn.Text = nv and "★" or "☆"
-			favBtn.TextColor3 = nv and Theme.Colors.Text or Theme.Colors.TextSubtle
-			if self.OnFavoriteToggled then self.OnFavoriteToggled(song, nv) end
+			if self.OnFavoriteToggled then
+				self.OnFavoriteToggled(song, not isFav)
+			end
 		end)
 		favBtn.Parent = card
 
-		-- Judul
+		-- Label judul
 		local title = Instance.new("TextLabel")
 		title.Size = UDim2.new(1, -155, 1, 0)
 		title.Position = UDim2.new(0, 58, 0, 0)
@@ -178,7 +196,7 @@ function PlaylistCard:Update(playlistData, currentSoundId)
 		title.TextXAlignment = Enum.TextXAlignment.Left
 		title.Parent = card
 
-		-- Tombol ➕ Antre
+		-- Tombol Antre
 		local qBtn = Instance.new("TextButton")
 		qBtn.Size = UDim2.new(0, 82, 0, 22)
 		qBtn.Position = UDim2.new(1, -88, 0.5, -11)
