@@ -1,0 +1,126 @@
+--[[
+	PlaylistService.lua
+	Tujuan: Mengelola pengambilan daftar putar dari API publik dan menyediakan data cadangan lengkap.
+]]
+
+local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Config = require(ReplicatedStorage.Shared.Config)
+local TitleCleaner = require(ReplicatedStorage.Shared.Utils.TitleCleaner)
+local UIStrings = require(ReplicatedStorage.Shared.UIStrings)
+
+local PlaylistService = {}
+local cachedPlaylist = {}
+local isLoaded = false
+
+local function processList(rawList)
+	local cleaned = {}
+	for idx, song in ipairs(rawList) do
+		local cleanTitle = TitleCleaner.CleanTitle(song.title or song.name)
+		table.insert(cleaned, {
+			id = song.id or tostring(idx),
+			title = cleanTitle,
+			sound_id = tostring(song.sound_id or song.id or song.soundId or ""),
+			artist = song.artist or UIStrings.Music.UnknownArtist,
+			category = song.category or UIStrings.Categories.All,
+		})
+	end
+	return cleaned
+end
+
+-- Fallback playlist lengkap sesuai API JSON terbaru (64 Lagu)
+local FALLBACK_PLAYLIST = {
+	{ title = "You Dont Even Know", sound_id = "111149969264803" },
+	{ title = "Breakbeat Remix", sound_id = "104227537425198" },
+	{ title = "DJ ALWAYS LOVING YOU", sound_id = "84552280374794" },
+	{ title = "DJ JEALOUSY VELOCITY", sound_id = "89501777604655" },
+	{ title = "DJ UNTUNGNYA HIDUP HARUS TETAP BERJALAN", sound_id = "100076054127542" },
+	{ title = "DJ MANGU", sound_id = "117289628255606" },
+	{ title = "DJ SAMPAI AKHIR", sound_id = "126888998031809" },
+	{ title = "DJ TERTAWAN HATI X TAK SEGAMPANG ITU X SISA RASA", sound_id = "139735519149522" },
+	{ title = "DJ BERDUA LEBIH BAIK", sound_id = "95531563140400" },
+	{ title = "DJ KONCO MESRA", sound_id = "123369864623197" },
+	{ title = "DJ SALAH", sound_id = "104873341103232" },
+	{ title = "DJ MERINDUKANMU X MASIH CINTA", sound_id = "120871173590822" },
+	{ title = "TABOLA BALE X MASHUP LATIN LATIN", sound_id = "87936147630400" },
+	{ title = "DJ MAMA MUDA", sound_id = "89565604812206" },
+	{ title = "DJ SIK ASIK", sound_id = "94988199114736" },
+	{ title = "DJ MYSTERIOUS GIRL X SECOND LIFE", sound_id = "72900428417922" },
+	{ title = "DJ SEPARUH AKU", sound_id = "95059052240252" },
+	{ title = "DJ BINTANG 5 VELOCITY", sound_id = "74615701371170" },
+	{ title = "DJ BERUBAH", sound_id = "105075687529834" },
+	{ title = "DJ WHAT IT IS", sound_id = "113215045230122" },
+	{ title = "DJ LELAKI CADANGAN VELOCITY", sound_id = "90452453882378" },
+	{ title = "DJ MENGAPA TAK MENCOBA JUJUR", sound_id = "98832732044326" },
+	{ title = "DJ KEONG RACUN", sound_id = "81776659797651" },
+	{ title = "DJ LAMUNAN X CI JIU MEN HUI YI", sound_id = "119306273479281" },
+	{ title = "DJ CLBK", sound_id = "113483520563503" },
+	{ title = "DJ TAPI BERPUTAR PUTAR", sound_id = "125330716469130" },
+	{ title = "DJ LAGI SYANTIK X LAGI TAMVAN KACIW", sound_id = "93970774672931" },
+	{ title = "NEMEN", sound_id = "95364428935155" },
+	{ title = "TETEG ATI", sound_id = "91886220273489" },
+	{ title = "LINTANG SEWENGI", sound_id = "97932398471551" },
+	{ title = "MENDUNG TANPO UDAN", sound_id = "78005341046657" },
+	{ title = "OJO NANGIS", sound_id = "135010021293259" },
+	{ title = "TOP TOPAN", sound_id = "99746128640072" },
+	{ title = "AMBYAR MAK PYAR", sound_id = "95994860588240" },
+	{ title = "KLEBUS", sound_id = "102338618401121" },
+	{ title = "APA KABAR SAYANG", sound_id = "101072297669982" },
+	{ title = "FULL SENYUM SAYANG", sound_id = "122568100043600" },
+	{ title = "RUNGKAD", sound_id = "80349323931005" },
+	{ title = "RASAH BALI", sound_id = "77820667865130" },
+	{ title = "EGO", sound_id = "128762602594044" },
+	{ title = "SANES", sound_id = "132867293181670" },
+	{ title = "CRITO MUSTAHIL", sound_id = "88776506586351" },
+	{ title = "KALIH WELASKU", sound_id = "86519417104882" },
+	{ title = "GINIO", sound_id = "131598875335490" },
+	{ title = "ASAL KAU BAHAGIA", sound_id = "80299177169182" },
+	{ title = "DADI SIJI", sound_id = "115856527967172" },
+	{ title = "KISINAN", sound_id = "114051364615893" },
+	{ title = "KISINAN 2", sound_id = "127507765651759" },
+	{ title = "DUMES", sound_id = "98025729761965" },
+	{ title = "WIRANG", sound_id = "77180286715949" },
+	{ title = "PELANGGARAN", sound_id = "108376776695772" },
+	{ title = "ANAK LANANG", sound_id = "72013801888677" },
+	{ title = "TRESNO TEKANE MATI", sound_id = "136516571083206" },
+	{ title = "TAMBAL BAN", sound_id = "118498276710036" },
+	{ title = "NRESNANI", sound_id = "124091533388883" },
+	{ title = "LAMUNAN", sound_id = "138615617324411" },
+	{ title = "SIGAR", sound_id = "79042285639391" },
+	{ title = "KALAH", sound_id = "75185286552242" },
+	{ title = "Feel The Vibe", sound_id = "76715413817412" },
+	{ title = "BADBOY", sound_id = "105950471754734" },
+	{ title = "So Time", sound_id = "123851588906131" },
+	{ title = "Move Dat Thing", sound_id = "140634938219264" },
+	{ title = "Boy bye", sound_id = "90212195706356" },
+	{ title = "Voodoo", sound_id = "74097685710561" },
+}
+
+function PlaylistService.FetchPlaylist()
+	local ok, result = pcall(function()
+		local json = HttpService:GetAsync(Config.PLAYLIST_URL, true)
+		return HttpService:JSONDecode(json)
+	end)
+
+	if ok and result and type(result) == "table" and result.dj and #result.dj > 0 then
+		cachedPlaylist = processList(result.dj)
+		isLoaded = true
+		print(string.format("[PlaylistService] Berhasil memuat & membersihkan %d lagu dari API.", #cachedPlaylist))
+	else
+		warn("[PlaylistService] Menggunakan daftar lagu API bawaan (dibersihkan).")
+		cachedPlaylist = processList(FALLBACK_PLAYLIST)
+		isLoaded = true
+		end
+
+	return cachedPlaylist
+end
+
+function PlaylistService.GetPlaylist()
+	if not isLoaded then
+		return PlaylistService.FetchPlaylist()
+	end
+	return cachedPlaylist
+end
+
+return PlaylistService
