@@ -70,4 +70,6 @@ return {
 	
 	
 	-- When a cursor is hovering above, a controller highlighting, or touchpad (mobile) pressing (but not released)
-	--{"IconSpot", "BackgroundTransparency", 0.75, "Viewing"},
+	-- {"IconSpot", "BackgroundTransparency", 0.75, "Viewing"},
+}
+

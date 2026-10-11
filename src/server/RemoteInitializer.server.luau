@@ -57,9 +57,11 @@ ensureRemoteEvent(Remotes, "SyncNotification")
 -- Bug report
 ensureRemoteEvent(Remotes, "SendBugReport")
 
--- Friend system
-ensureRemoteEvent(Remotes, "GetFollowerCount")
-ensureRemoteEvent(Remotes, "GetFollowingCount")
+-- Friend system (RemoteFunction — FriendServer uses OnServerInvoke)
+ensureRemoteFunction(Remotes, "GetFollowerCount")
+ensureRemoteFunction(Remotes, "GetFollowingCount")
+ensureRemoteFunction(Remotes, "GetSocialCounts")
+ensureRemoteFunction(Remotes, "GetFriendCountServer")
 
 -- ============================================================
 -- 2) Folder: SyncRemotes (animasi sinkron / emote)

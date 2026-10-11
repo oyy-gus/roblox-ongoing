@@ -41,9 +41,25 @@ local EndRemote = remoteFolder:WaitForChild("CarryEnd", 10)
 -- ============================================
 local gui = script.Parent
 if not gui:IsA("ScreenGui") then
-	warn("[CARRY UI] Parent bukan ScreenGui!")
-	return
+	-- Fallback: buat ScreenGui sendiri jika parent bukan ScreenGui
+	warn("[CARRY UI] Parent bukan ScreenGui — membuat fallback ScreenGui")
+	local Players = game:GetService("Players")
+	local localPlayer = Players.LocalPlayer
+	local playerGui = localPlayer:WaitForChild("PlayerGui")
+	local existing = playerGui:FindFirstChild("CarryGui")
+	if existing then
+		gui = existing
+	else
+		gui = Instance.new("ScreenGui")
+		gui.Name = "CarryGui"
+		gui.ResetOnSpawn = false
+		gui.IgnoreGuiInset = true
+		gui.DisplayOrder = 100
+		gui.Parent = playerGui
+	end
+	script.Parent = gui
 end
+
 
 -- ★ Setup ScreenGui properties jika perlu
 gui.ResetOnSpawn = false
