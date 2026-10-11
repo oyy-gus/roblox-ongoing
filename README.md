@@ -39,7 +39,6 @@ src/
 │
 ├── shared/                          ← ReplicatedStorage
 │   ├── Bridges.luau
-│   ├── FreecamConfig.luau
 │   ├── AutoScaleSystem/
 │   ├── BridgeNet/
 │   ├── ContextModule/
@@ -65,8 +64,7 @@ src/
     ├── DonationGUI/
     ├── EmoteGui/
     ├── LoadingScreen/
-    ├── MenuGUI/
-    └── MobileFreecam/
+    └── MenuGUI/
 ```
 
 ---
