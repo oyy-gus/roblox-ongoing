@@ -58,12 +58,14 @@ gui:SetAttribute("PanelInitialized", true)
 -- ========================================
 -- SCREEN GUI SETUP
 -- ========================================
-gui.Name           = "MenuGUI"
-gui.ResetOnSpawn   = false
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.DisplayOrder   = 100
-gui.IgnoreGuiInset = true
-gui.Enabled        = true
+gui.Name = "MenuGUI"
+if gui:IsA("ScreenGui") then
+	gui.ResetOnSpawn   = false
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.DisplayOrder   = 100
+	gui.IgnoreGuiInset = true
+	gui.Enabled        = true
+end
 
 -- ========================================
 -- START GRADIENT ANIMATION SYSTEM

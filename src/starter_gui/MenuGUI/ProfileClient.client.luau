@@ -29,10 +29,10 @@ local GiveRoleClient = require(
 
 MenuConfig.WaitForGUIReady(15)
 
-local screenGui   = MenuConfig.GUI.ScreenGui
+local screenGui   = MenuConfig.GUI and MenuConfig.GUI.ScreenGui
 local localPlayer = Players.LocalPlayer
 local camera      = workspace.CurrentCamera
-local mainScaler  = ScaleSystem.new(screenGui)
+local mainScaler  = (screenGui and screenGui:IsA("ScreenGui")) and ScaleSystem.new(screenGui) or nil
 
 -- ========================================
 -- CONSTANTS

@@ -596,7 +596,7 @@ function GUIBuilder.build(gui)
 	local main    = buildMainFrame(gui)
 	local msg     = buildMessageFrame(gui)
 	local notif   = buildNotificationFrame(gui)
-	local _scaler = ScaleSystem.new(gui)
+	local _scaler = gui:IsA("ScreenGui") and ScaleSystem.new(gui) or nil
 
 	print("[GUIBuilder] ✅ Semua GUI berhasil dibuat!")
 

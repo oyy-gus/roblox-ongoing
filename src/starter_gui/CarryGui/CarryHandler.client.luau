@@ -62,9 +62,11 @@ end
 
 
 -- ★ Setup ScreenGui properties jika perlu
-gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
-gui.DisplayOrder = 100
+if gui:IsA("ScreenGui") then
+	gui.ResetOnSpawn = false
+	gui.IgnoreGuiInset = true
+	gui.DisplayOrder = 100
+end
 
 -- ★ INITIALIZE AUTO SCALE SYSTEM
 local guiScaler = ScaleSystem.new(gui)

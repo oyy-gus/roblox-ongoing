@@ -80,7 +80,9 @@ local BTN_SPACING = 8
 -- GUI SETUP
 -- ====================================
 local gui = playerGui:WaitForChild("EmoteGui")
-gui.IgnoreGuiInset = true
+if gui:IsA("ScreenGui") then
+	gui.IgnoreGuiInset = true
+end
 
 local scaler = ScaleSystem.new(gui)
 print("[EmoteHandler] AutoScale applied - Current scale:", scaler:GetCurrentScale())

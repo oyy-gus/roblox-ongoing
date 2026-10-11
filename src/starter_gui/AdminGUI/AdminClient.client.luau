@@ -67,12 +67,14 @@ gui:SetAttribute("AdminInitialized", true)
 -- ========================================
 -- SCREEN GUI SETUP
 -- ========================================
-gui.Name           = "AdminGUI"
-gui.ResetOnSpawn   = false
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.DisplayOrder   = 100
-gui.IgnoreGuiInset = true
-gui.Enabled        = true
+gui.Name = "AdminGUI"
+if gui:IsA("ScreenGui") then
+	gui.ResetOnSpawn   = false
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.DisplayOrder   = 100
+	gui.IgnoreGuiInset = true
+	gui.Enabled        = true
+end
 
 -- ========================================
 -- START GRADIENT ANIMATION SYSTEM
