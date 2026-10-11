@@ -1,83 +1,172 @@
-# 🎶 Dangdut Music System — Roblox
+# 🎮 Roblox Ongoing — Map Dangdut
 
-Sistem musik sinkronisasi global untuk map dangdut. Semua pemain mendengarkan **lagu yang sama di menit yang sama**, tanpa selisih sedikitpun.
+Proyek Roblox berbasis **Rojo** untuk map dangdut dengan berbagai sistem terintegrasi.  
+Semua skrip dikelola via Rojo, ditulis dalam **Luau**, dan dipetakan ke Roblox Studio secara langsung.
 
 ---
 
-## 📁 Struktur File
+## 📁 Struktur Proyek
 
 ```
 src/
-├── server/
-│   └── init.server.luau     ← Server controller (master clock)
-├── client/
-│   └── init.client.luau     ← Client player + GUI dangdut
-└── shared/
-    └── Hello.luau           ← Shared config / constants
+├── client/                          ← StarterPlayerScripts
+│   ├── ChatTagClient.client.luau
+│   ├── DeviceDetectorClient.client.luau
+│   ├── GLightsClient.client.luau
+│   └── UnifiedToolbarUI.client.luau
+│
+├── server/                          ← ServerScriptService
+│   ├── CarryServer.server.luau
+│   ├── FriendServer.server.luau
+│   ├── GLightsServer.server.luau
+│   ├── MusicFetcher.server.luau
+│   ├── DonationBroadcastHandler/
+│   ├── DonationServerHandler/
+│   ├── GamePass/GamePassHandler/
+│   ├── GiveSystem/
+│   ├── MessageSystem/MessageServer/
+│   ├── MusicServer/MusicSystem/
+│   ├── OverheadSystem/
+│   ├── Setting/
+│   ├── VIPBanefit/
+│   └── VIPZoneServer/
+│
+├── server_storage/                  ← ServerStorage
+│   └── Modules/
+│       ├── MusicPlaylistBridge.luau
+│       ├── RoleSystem.luau
+│       └── VIPZoneModule.luau
+│
+├── shared/                          ← ReplicatedStorage
+│   ├── Bridges.luau
+│   ├── FreecamConfig.luau
+│   ├── AutoScaleSystem/
+│   ├── BridgeNet/
+│   ├── ContextModule/
+│   ├── GiveModule/
+│   ├── Icon/                        ← TopbarPlus v3
+│   └── Modules/
+│       ├── AdminConfig.luau
+│       ├── BugReportConfig.luau
+│       ├── CarryConfig.luau
+│       ├── FriendConfig.luau
+│       ├── MenuConfig.luau
+│       ├── MusicModule.luau
+│       ├── MusicStorageHandler.luau
+│       ├── NotifModule.luau
+│       ├── ThemeModule.luau
+│       └── CountryService/
+│
+└── starter_gui/                     ← StarterGui
+    ├── AdminGUI/
+    ├── CarryGui/
+    ├── CustomInventory/
+    ├── DonationDisplayGUI/
+    ├── DonationGUI/
+    ├── EmoteGui/
+    ├── LoadingScreen/
+    └── MenuGUI/
 ```
 
 ---
 
-## ⚙️ Cara Kerja Sinkronisasi
+## 🎵 Sistem Musik
 
-### Server (Master Clock)
-1. Saat server start, fetch playlist dari API via `HttpService:GetAsync()`
-2. Simpan `songStartTime = os.clock()` saat lagu mulai
-3. Setiap **5 detik**, broadcast `SyncState` ke semua client:
-   ```
-   position = os.clock() - songStartTime
-   serverClock = os.clock()
-   ```
+Sistem musik sinkronisasi global — semua pemain mendengarkan **lagu yang sama di menit yang sama**.
 
-### Client (Latency Compensation)
-1. Saat menerima `SyncState`, hitung posisi yang seharusnya:
-   ```lua
-   corrected = state.position + (os.clock() - state.serverClock)
-   ```
-2. Jika selisih posisi > 0.3 detik → langsung `TimePosition = corrected`
-3. Saat join baru → request state via `RemoteFunction:InvokeServer()`
+### Cara Kerja
+1. **Server** fetch playlist dari API via `HttpService:GetAsync()`
+2. `MusicPlaylistBridge` (ServerStorage) menyediakan data playlist ke server
+3. `MusicServer/MusicSystem` mengelola pemutaran, antrean, skip vote, dan validasi
+4. Setiap beberapa detik, state musik di-broadcast ke semua client
+5. **Client** menerima state, kompensasi latency, dan update GUI musik
 
----
-
-## 🎛️ Remote Events
-
-| Remote | Arah | Fungsi |
-|--------|------|--------|
-| `SyncState` | Server → Client | Broadcast posisi + lagu |
-| `NextSong` | Client → Server | Skip ke lagu berikutnya |
-| `PrevSong` | Client → Server | Kembali ke lagu sebelumnya |
-| `GetState` | Client → Server (RF) | Request state saat join |
-| `GetPlaylist` | Client → Server (RF) | Request full playlist |
+### Komponen Musik
+| File | Lokasi | Fungsi |
+|------|--------|--------|
+| `MusicFetcher.server.luau` | ServerScriptService | Fetch & init playlist dari API |
+| `MusicSystem/init.server.luau` | ServerScriptService | Orkestrasi musik server |
+| `MusicPlaybackManager.luau` | ServerScriptService | Logika pemutaran lagu |
+| `MusicQueueManager.luau` | ServerScriptService | Manajemen antrean lagu |
+| `MusicSkipVoteManager.luau` | ServerScriptService | Sistem voting skip |
+| `MusicPlaylistBridge.luau` | ServerStorage | Bridge fetch playlist |
+| `MusicModule.luau` | ReplicatedStorage | Shared config & constants |
+| `MusicClient.client.luau` | StarterGui/MenuGUI | GUI musik client |
 
 ---
 
-## 🎨 GUI Features
+## 🛠️ Sistem Lainnya
 
-- **Header emas** bisa di-drag untuk pindahkan window
-- **EQ Bars** animasi warna-warni (20 bar)
-- **Marquee** scroll title lagu
-- **Progress bar** gradient pink-gold
-- **Tombol PREV / NEXT** dengan hover & click animation  
-- **Scroll wheel** di atas GUI = ubah volume
-- **Tombol –/+** untuk minimize/maximize
-
----
-
-## 🔧 Konfigurasi
-
-Edit `src/shared/Hello.luau`:
-
-| Konstanta | Default | Keterangan |
-|-----------|---------|------------|
-| `SYNC_INTERVAL` | `5` detik | Seberapa sering server sync |
-| `SEEK_THRESHOLD` | `0.3` detik | Toleransi drift sebelum re-seek |
-| `DEFAULT_VOLUME` | `0.6` | Volume awal (0–1) |
+| Sistem | Lokasi | Keterangan |
+|--------|--------|------------|
+| **Admin GUI** | StarterGui/AdminGUI | Panel admin, broadcast, title management |
+| **Carry System** | StarterGui/CarryGui + server | Sistem angkat pemain |
+| **Donation** | StarterGui/DonationGUI + server | Tampilan & handler donasi |
+| **Emote** | StarterGui/EmoteGui | Sistem emote karakter |
+| **GamePass** | ServerScriptService/GamePass | Handler game pass & manfaat |
+| **Give System** | ServerScriptService/GiveSystem | Pemberian role & title |
+| **GLights** | client + server | Sistem efek lampu dinamis |
+| **Loading Screen** | StarterGui/LoadingScreen | Layar loading kustom |
+| **Menu GUI** | StarterGui/MenuGUI | Menu utama (TopbarPlus) |
+| **Message System** | ServerScriptService/MessageSystem | Pesan server custom |
+| **Overhead System** | ServerScriptService/OverheadSystem | Tag nama & overhead UI |
+| **Role System** | ServerStorage/Modules | Manajemen role pemain |
+| **Setting** | ServerScriptService/Setting | Config & animasi server |
+| **VIP Zone** | server + server_storage | Zona khusus VIP |
 
 ---
 
-## ✅ Checklist Enable
+## 🌐 Topbar & UI
 
-Pastikan di **Game Settings**:
-- [x] `HttpService` → Allow HTTP Requests: **ON**
-- [x] `SoundService` → RespectFilteringEnabled: **true**
-- [x] `Workspace` → FilteringEnabled: **true**
+- Menggunakan **TopbarPlus v3** (`ReplicatedStorage > Icon`)
+- Satu ikon topbar → Menu utama
+- Menu berisi: Musik, Profil, Pengaturan, GamePass, dll.
+- UI responsif dengan `AutoScaleSystem` untuk berbagai ukuran layar
+
+---
+
+## ⚙️ Konfigurasi & Setup
+
+### Prasyarat
+- [Rojo](https://rojo.space/) — untuk sync file ke Roblox Studio
+- Roblox Studio dengan **Allow HTTP Requests** diaktifkan
+
+### Menjalankan dengan Rojo
+```bash
+rojo serve
+```
+Lalu di Roblox Studio: **Rojo → Connect**
+
+### Game Settings yang Diperlukan
+- ✅ `HttpService` → Allow HTTP Requests: **ON**
+- ✅ `SoundService` → RespectFilteringEnabled: **true**
+- ✅ `Workspace` → FilteringEnabled: **true**
+
+---
+
+## 🔧 Tooling
+
+| Tool | Versi | Fungsi |
+|------|-------|--------|
+| [Rojo](https://rojo.space/) | lihat `aftman.toml` | Sync file ↔ Roblox Studio |
+| [Aftman](https://github.com/LPGhatguy/aftman) | — | Toolchain manager |
+
+Instalasi toolchain:
+```bash
+aftman install
+```
+
+---
+
+## 📡 API Musik
+
+Playlist diambil dari:
+```
+https://oyy-gus.github.io/api/v2/roblox/music/playlist.json
+```
+
+---
+
+## 📝 Lisensi
+
+Proyek pribadi — tidak untuk didistribusikan.

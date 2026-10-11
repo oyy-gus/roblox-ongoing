@@ -1,25 +1,27 @@
 {
-  "name": "test",
+  "name": "roblox-ongoing",
   "tree": {
     "$className": "DataModel",
 
     "ReplicatedStorage": {
-      "Shared": {
-        "$path": "src/shared"
-      }
+      "$path": "src/shared"
     },
 
     "ServerScriptService": {
-      "Server": {
-        "$path": "src/server"
-      }
+      "$path": "src/server"
+    },
+
+    "ServerStorage": {
+      "$path": "src/server_storage"
+    },
+
+    "StarterGui": {
+      "$path": "src/starter_gui"
     },
 
     "StarterPlayer": {
       "StarterPlayerScripts": {
-        "Client": {
-          "$path": "src/client"
-        }
+        "$path": "src/client"
       }
     },
 

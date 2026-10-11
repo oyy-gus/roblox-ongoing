@@ -6,3 +6,8 @@
 /*.rbxl.lock
 
 sourcemap.json
+
+# Internal working files (not for repo)
++.md
+migrasi.md
+src/update.md
