@@ -1320,62 +1320,53 @@ local Input = {} do
 		RightShift = 0,
 	}
 	
-	script.Parent.MobileControls.Movement.forward.TextButton.MouseButton1Down:Connect(function()
-		keyboard["W"] = 1
-	end)
-	script.Parent.MobileControls.Movement.forward.TextButton.MouseLeave:Connect(function()
-		keyboard["W"] = 0
-	end)
-	
-	script.Parent.MobileControls.Movement.back.TextButton.MouseButton1Down:Connect(function()
-		keyboard["S"] = 1
-	end)
-	script.Parent.MobileControls.Movement.back.TextButton.MouseLeave:Connect(function()
-		keyboard["S"] = 0
-	end)
-	
-	script.Parent.MobileControls.Movement.right.TextButton.MouseButton1Down:Connect(function()
-		keyboard["D"] = 1
-	end)
-	script.Parent.MobileControls.Movement.right.TextButton.MouseLeave:Connect(function()
-		keyboard["D"] = 0
-	end)
-	
-	script.Parent.MobileControls.Movement.left.TextButton.MouseButton1Down:Connect(function()
-		keyboard["A"] = 1
-	end)
-	script.Parent.MobileControls.Movement.left.TextButton.MouseLeave:Connect(function()
-		keyboard["A"] = 0
-	end)
-	
 	local mouse = {
 		Delta = Vector2.new(),
 		MouseWheel = 0,
 	}
 	
-	local zoomingOut = false
-	local zoomingIn = false
-	script.Parent.MobileControls.zoomIn.TextButton.MouseButton1Down:Connect(function()
-		zoomingIn = true
-		while zoomingIn do
-			wait()
-			mouse.MouseWheel -= 0.5
+	local mobileControls = script.Parent:FindFirstChild("MobileControls")
+	if mobileControls then
+		local movement = mobileControls:FindFirstChild("Movement")
+		if movement then
+			local function bindDir(dirName, key)
+				local dirObj = movement:FindFirstChild(dirName)
+				local btn = dirObj and dirObj:FindFirstChild("TextButton")
+				if btn and btn:IsA("GuiButton") then
+					btn.MouseButton1Down:Connect(function()
+						keyboard[key] = 1
+					end)
+					btn.MouseLeave:Connect(function()
+						keyboard[key] = 0
+					end)
+				end
+			end
+			bindDir("forward", "W")
+			bindDir("back", "S")
+			bindDir("right", "D")
+			bindDir("left", "A")
 		end
-	end)
-	script.Parent.MobileControls.zoomIn.TextButton.MouseLeave:Connect(function()
-		zoomingIn = false
-	end)
-	
-	script.Parent.MobileControls.zoomOut.TextButton.MouseButton1Down:Connect(function()
-		zoomingOut = true
-		while zoomingOut do
-			wait()
-			mouse.MouseWheel += 0.5
+
+		local function bindZoom(zoomName, delta)
+			local zoomObj = mobileControls:FindFirstChild(zoomName)
+			local btn = zoomObj and zoomObj:FindFirstChild("TextButton")
+			if btn and btn:IsA("GuiButton") then
+				local isZooming = false
+				btn.MouseButton1Down:Connect(function()
+					isZooming = true
+					while isZooming do
+						task.wait()
+						mouse.MouseWheel += delta
+					end
+				end)
+				btn.MouseLeave:Connect(function()
+					isZooming = false
+				end)
+			end
 		end
-	end)
-	script.Parent.MobileControls.zoomOut.TextButton.MouseLeave:Connect(function()
-		zoomingOut = false
-	end)
+		bindZoom("zoomIn", -0.5)
+		bindZoom("zoomOut", 0.5)
+	end
 	
 	local NAV_GAMEPAD_SPEED  = Vector3.new(1, 1, 1)
 	local NAV_KEYBOARD_SPEED = Vector3.new(1, 1, 1)
@@ -1709,36 +1700,55 @@ do
 	local Controls = PlayerModule:GetControls()
 	local hidden = false
 	
-	script.Parent:WaitForChild("Toggle").Event:Connect(function(state)
+	local toggleEvent = script.Parent:FindFirstChild("Toggle")
+	if not toggleEvent then
+		toggleEvent = Instance.new("BindableEvent")
+		toggleEvent.Name = "Toggle"
+		toggleEvent.Parent = script.Parent
+	end
+
+	local function setMobileControlsVisible(vis)
+		local mc = script.Parent:FindFirstChild("MobileControls")
+		if mc and mc:IsA("GuiObject") then
+			mc.Visible = vis
+		end
+	end
+
+	local function setHideControlsVisible(vis, isHidden)
+		local hc = script.Parent:FindFirstChild("hidecontrols")
+		if hc and hc:IsA("GuiObject") then
+			hc.Visible = vis
+			local shown = hc:FindFirstChild("shown")
+			local hiddenFrame = hc:FindFirstChild("hidden")
+			if shown and shown:IsA("GuiObject") then shown.Visible = not isHidden end
+			if hiddenFrame and hiddenFrame:IsA("GuiObject") then hiddenFrame.Visible = isHidden end
+		end
+	end
+
+	toggleEvent.Event:Connect(function(state)
 		enabled = not state
 		if enabled then
 			Controls:Enable()
-			script.Parent.hidecontrols.Visible = false
-			script.Parent.MobileControls.Visible = false
+			setHideControlsVisible(false, false)
+			setMobileControlsVisible(false)
 		else
 			hidden = false
-			script.Parent.hidecontrols.Visible = true
-			script.Parent.hidecontrols.shown.Visible = true
-			script.Parent.hidecontrols.hidden.Visible = false
-			script.Parent.MobileControls.Visible = true
+			setHideControlsVisible(true, false)
+			setMobileControlsVisible(true)
 			Controls:Disable()
 		end
 		ToggleFreecam()
 	end)
 	
-	script.Parent.hidecontrols.TextButton.MouseButton1Click:Connect(function()
-		if hidden then
-			hidden = false
-			script.Parent.hidecontrols.shown.Visible = true
-			script.Parent.hidecontrols.hidden.Visible = false
-			script.Parent.MobileControls.Visible = true
-		else
-			hidden = true
-			script.Parent.hidecontrols.shown.Visible = false
-			script.Parent.hidecontrols.hidden.Visible = true
-			script.Parent.MobileControls.Visible = false
-		end
-	end)
+	local hc = script.Parent:FindFirstChild("hidecontrols")
+	local toggleBtn = hc and hc:FindFirstChild("TextButton")
+	if toggleBtn and toggleBtn:IsA("GuiButton") then
+		toggleBtn.MouseButton1Click:Connect(function()
+			hidden = not hidden
+			setHideControlsVisible(true, hidden)
+			setMobileControlsVisible(not hidden)
+		end)
+	end
 end
 
 local ReplicatedStorage  = game:GetService("ReplicatedStorage")
@@ -1748,23 +1758,38 @@ local GuiService = game:GetService("GuiService")
 local UserId = game.Players.LocalPlayer.UserId
 local config
 
-if not game:GetService('ReplicatedStorage'):WaitForChild('FreecamConfig', 4) then
+local freecamConfigMod = ReplicatedStorage:WaitForChild('FreecamConfig', 4)
+if not freecamConfigMod then
 	warn('[MOBILE FREECAM]: FreecamConfig missing!')
 	config = nil
 else
-	config = require(game:GetService('ReplicatedStorage'):WaitForChild('FreecamConfig'))
+	config = require(freecamConfigMod)
 
 	-- Cek apakah player diizinkan (untuk PC dan Mobile)
 	if (table.find(config.AllowedPlayers, UserId) or table.find(config.AllowedPlayers, 0)) then
+		local toggleEvent = script.Parent:FindFirstChild("Toggle")
+		if not toggleEvent then
+			toggleEvent = Instance.new("BindableEvent")
+			toggleEvent.Name = "Toggle"
+			toggleEvent.Parent = script.Parent
+		end
+
 		local ToggleFreecam = Icon.new()
 			:setImage(6790558611)
 			:bindEvent("selected", function(self)
-				script.Parent.Toggle:Fire(true)
+				toggleEvent:Fire(true)
+			end)
+			:bindEvent("deselected", function(self)
+				toggleEvent:Fire(false)
 			end)
 
-		script.Parent.hidecontrols.close.MouseButton1Click:Connect(function()
-			script.Parent.Toggle:Fire(false)
-			ToggleFreecam:setState("deselected")
-		end)
+		local hidecontrols = script.Parent:FindFirstChild("hidecontrols")
+		local closeBtn = hidecontrols and hidecontrols:FindFirstChild("close")
+		if closeBtn and closeBtn:IsA("GuiButton") then
+			closeBtn.MouseButton1Click:Connect(function()
+				toggleEvent:Fire(false)
+				ToggleFreecam:setState("deselected")
+			end)
+		end
 	end
 end
