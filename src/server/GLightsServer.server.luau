@@ -1,7 +1,8 @@
-║              GLights Server Handler (BridgeNet Edition)                    ║
+--[[
+    ║              GLights Server Handler (BridgeNet Edition)                    ║
     ║     Menangani aksi dari client menggunakan BridgeNet                       ║
     ╚═══════════════════════════════════════════════════════════════════════════╝
-    
+
     Letakkan script ini di ServerScriptService.
     Pastikan modul Bridges sudah ada di ReplicatedStorage.
 ]]

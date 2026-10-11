@@ -300,5 +300,3 @@ end)
 print("✅ [FriendServer] Loaded!")
 print("📡 Using RoProxy:", CONFIG.PROXY_URL)
 
---[[
-    ╔═══════════════════════════════════════════════════════════════════════════╗

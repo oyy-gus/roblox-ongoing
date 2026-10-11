@@ -562,11 +562,12 @@ local SS = game:GetService("ServerStorage")
 local Players = game:GetService("Players")
 local Market = game:GetService("MarketplaceService")
 
-local showDonationGUI = RS:FindFirstChild("Remotes"):FindFirstChild("ShowDonationGUI")
+local showDonationGUI = RS:WaitForChild("Remotes"):WaitForChild("ShowDonationGUI")
 
 showDonationGUI.OnServerEvent:Connect(function(player)
 	player:Kick("Exploit Detection: Unauthorized RemoteEvent call")
 end)
+
 
 local DISPLAY_DURATION = 5
 

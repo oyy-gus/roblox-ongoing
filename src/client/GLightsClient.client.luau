@@ -1,8 +1,10 @@
-║              GLights Pro Controller v4.1 (BridgeNet Edition)               ║
+--[[
+    ║              GLights Pro Controller v4.1 (BridgeNet Edition)               ║
     ║     Auto Mode ON • Party Preset Auto • TopbarPlus • Developer Only         ║
     ║     ✨ Redesigned UI with classic Top Tabs & Stable Layout                 ║
     ╚═══════════════════════════════════════════════════════════════════════════╝
 ]]
+
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")

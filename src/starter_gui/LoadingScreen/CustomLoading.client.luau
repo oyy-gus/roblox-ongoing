@@ -38,10 +38,13 @@ end)
 
 -- GUI ROOT
 local gui = script.Parent
-gui.IgnoreGuiInset = true
-gui.ResetOnSpawn = false
-gui.DisplayOrder = 10000
+if gui:IsA("ScreenGui") then
+	gui.IgnoreGuiInset = true
+	gui.ResetOnSpawn = false
+	gui.DisplayOrder = 10000
+end
 gui.Parent = playerGui
+
 
 -- BACKGROUND
 local bg = Instance.new("Frame")

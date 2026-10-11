@@ -21,5 +21,4 @@ if getDeviceRemote then
 	print("✅ [DeviceDetectorClient] Ready")
 end
 
---[[
-    ╔═══════════════════════════════════════════════════════════════════════════╗
+
