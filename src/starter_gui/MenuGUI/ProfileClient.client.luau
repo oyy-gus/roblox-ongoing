@@ -1696,8 +1696,24 @@ do
 
 	ContextActionService:BindActionAtPriority("FreecamToggle", HandleActivationInput, false, TOGGLE_INPUT_PRIORITY, FREECAM_MACRO_KB[#FREECAM_MACRO_KB])
 	
-	local PlayerModule = require(game.Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule"))
-	local Controls = PlayerModule:GetControls()
+	local Controls = nil
+	local function getControls()
+		if not Controls then
+			local playerScripts = LocalPlayer:FindFirstChild("PlayerScripts")
+			if not playerScripts then
+				playerScripts = LocalPlayer:WaitForChild("PlayerScripts", 2)
+			end
+			local pm = playerScripts and (playerScripts:FindFirstChild("PlayerModule") or playerScripts:WaitForChild("PlayerModule", 2))
+			if pm then
+				local success, playerModule = pcall(require, pm)
+				if success and type(playerModule) == "table" and playerModule.GetControls then
+					Controls = playerModule:GetControls()
+				end
+			end
+		end
+		return Controls
+	end
+
 	local hidden = false
 	
 	local toggleEvent = script.Parent:FindFirstChild("Toggle")
@@ -1727,15 +1743,16 @@ do
 
 	toggleEvent.Event:Connect(function(state)
 		enabled = not state
+		local ctrl = getControls()
 		if enabled then
-			Controls:Enable()
+			if ctrl then ctrl:Enable() end
 			setHideControlsVisible(false, false)
 			setMobileControlsVisible(false)
 		else
 			hidden = false
 			setHideControlsVisible(true, false)
 			setMobileControlsVisible(true)
-			Controls:Disable()
+			if ctrl then ctrl:Disable() end
 		end
 		ToggleFreecam()
 	end)
