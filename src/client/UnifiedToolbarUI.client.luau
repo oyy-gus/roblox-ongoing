@@ -37,16 +37,16 @@ local function getThemeColor(name, fallback)
 end
 
 local T = {
-	Bg        = Color3.fromRGB(20, 16, 32),
-	Card      = Color3.fromRGB(28, 22, 42),
-	CardHover = Color3.fromRGB(38, 30, 55),
-	Accent    = getThemeColor("Primary1", Color3.fromRGB(255, 215, 0)),
-	Accent2   = getThemeColor("Primary2", Color3.fromRGB(255, 140, 0)),
-	AccDim    = Color3.fromRGB(50, 40, 20),
-	Text      = getThemeColor("TextWhite", Color3.fromRGB(250, 248, 240)),
-	TextDim   = getThemeColor("TextGray",  Color3.fromRGB(180, 175, 165)),
-	Sub       = getThemeColor("TextMuted", Color3.fromRGB(100, 95, 88)),
-	Border    = Color3.fromRGB(55, 45, 75),
+	Bg        = getThemeColor("BackgroundDark", Color3.fromHex("#080808")),
+	Card      = getThemeColor("BackgroundLight", Color3.fromHex("#1C1C1C")),
+	CardHover = getThemeColor("BackgroundLighter", Color3.fromHex("#262626")),
+	Accent    = getThemeColor("Primary1", Color3.fromHex("#FFFFFF")),
+	Accent2   = getThemeColor("Primary2", Color3.fromHex("#888888")),
+	AccDim    = Color3.fromHex("#333333"),
+	Text      = getThemeColor("TextWhite", Color3.fromHex("#FFFFFF")),
+	TextDim   = getThemeColor("TextGray",  Color3.fromHex("#A0A0A0")),
+	Sub       = getThemeColor("TextMuted", Color3.fromHex("#666666")),
+	Border    = getThemeColor("Border", Color3.fromHex("#353535")),
 }
 
 -- ════════════════════════════════════════════
@@ -156,7 +156,7 @@ local panel = make("Frame", {
 	AnchorPoint            = Vector2.new(0.5, 0.5),
 	Size                   = UDim2.new(0, PANEL_W, 0, HEADER_H),
 	Position               = UDim2.new(0.5, 0, 0.5, 0),
-	BackgroundColor3       = Color3.fromRGB(18, 18, 26),
+	BackgroundColor3       = T.Bg,
 	BackgroundTransparency = 1,
 	BorderSizePixel        = 0,
 	Visible                = false,
@@ -168,7 +168,7 @@ ThemeModule.CreateAnimatedStroke(panel, 1.5, "Primary", 1.2)
 -- ── HEADER ──────────────────────────────────
 local header = make("Frame", {
 	Size             = UDim2.new(1, 0, 0, HEADER_H),
-	BackgroundColor3 = Color3.fromRGB(28, 28, 38),
+	BackgroundColor3 = T.Card,
 	BorderSizePixel  = 0,
 }, panel)
 crn(14, header)

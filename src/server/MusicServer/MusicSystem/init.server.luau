@@ -312,6 +312,9 @@ end
 local playNextSong
 
 playNextSong = function()
+	if skipVoteManager:IsActive() then
+		skipVoteManager:EndVote(Dispatcher, true)
+	end
 	if not queueManager:IsEmpty() then
 		local nextSong = queueManager:GetNext()
 		local duration = loadSongOnDemand(nextSong.musicData.id, nextSong.musicData.judul)
@@ -417,28 +420,22 @@ function ActionHandlers:CONTROL_NEXT(player, data)
 	local role          = RoleSystem:GetPlayerRole(player)
 	local roleHierarchy = RoleSystem.Config.RoleHierarchy[role] or 0
 
-	if roleHierarchy < 2 then
-		Dispatcher:Notify(player, "Minimal rank VIP untuk skip!")
-		return
-	end
-
-	if roleHierarchy >= 5 then
-		local currentSong = playbackManager:GetCurrentSong()
-		if currentSong then
-			-- DIPERTAHANKAN: notifikasi skip dari admin tetap relevan
-			Dispatcher:NotifyAll(string.format("%s (%s) skip: %s", player.DisplayName, role, currentSong.judul or "Unknown"))
-			playNextSong()
-		else
-			Dispatcher:Notify(player, "Tidak ada lagu yang sedang diputar!")
-		end
-		return
-	end
-
 	local currentSong = playbackManager:GetCurrentSong()
 	if not currentSong then Dispatcher:Notify(player, "Tidak ada lagu yang sedang diputar!"); return end
 
-	if playbackManager:IsFromPlaylist() then
-		Dispatcher:Notify(player, "Tidak bisa skip lagu auto-playlist! Tunggu lagu dari antrean.")
+	-- Admin (roleHierarchy >= 5) bisa langsung skip instan
+	if roleHierarchy >= 5 then
+		Dispatcher:NotifyAll(string.format("%s (%s) skip: %s", player.DisplayName, role, currentSong.judul or "Unknown"))
+		if skipVoteManager:IsActive() then
+			skipVoteManager:EndVote(Dispatcher, true)
+		end
+		playNextSong()
+		return
+	end
+
+	-- Jika vote skip sudah aktif, jadikan klik ini sebagai vote YES
+	if skipVoteManager:IsActive() then
+		ActionHandlers:SKIP_VOTE_YES(player, data)
 		return
 	end
 
@@ -451,8 +448,12 @@ function ActionHandlers:CONTROL_NEXT(player, data)
 	if not success then
 		Dispatcher:Notify(player, msg)
 	else
-		-- DIPERTAHANKAN: notifikasi vote skip tetap relevan
 		Dispatcher:NotifyAll(string.format("%s memulai vote skip untuk: %s", player.DisplayName, currentSong.judul or "Unknown"))
+		-- Jika langsung lolos (misal hanya 1 pemain di server)
+		if not skipVoteManager:IsActive() then
+			task.wait(0.5)
+			playNextSong()
+		end
 	end
 end
 

@@ -9,104 +9,108 @@ local RunService = game:GetService("RunService")
 -- WARNA UTAMA
 -- ========================================
 ThemeModule.Colors = {
-	-- Primary Colors (Gold Theme)
-	Primary1 = Color3.fromRGB(255, 215, 0),      -- Gold
-	Primary2 = Color3.fromRGB(170, 0, 0),      -- Orange Gold
+	-- Primary Colors (Monochrome Black & White Theme)
+	Primary1 = Color3.fromHex("#FFFFFF"),      -- Pure White Accent
+	Primary2 = Color3.fromHex("#888888"),      -- Smooth Gray Transition
 
-	-- Background Colors
-	BackgroundDark = Color3.fromRGB(20, 20, 30),
-	BackgroundMedium = Color3.fromRGB(25, 25, 40),
-	BackgroundLight = Color3.fromRGB(30, 25, 40),
-	BackgroundLighter = Color3.fromRGB(35, 30, 50),
+	-- Background Colors (Monochrome)
+	BackgroundDark = Color3.fromHex("#080808"),   -- Hitam pekat
+	BackgroundMedium = Color3.fromHex("#151515"), -- Secondary background
+	BackgroundLight = Color3.fromHex("#1C1C1C"),  -- Panel background
+	BackgroundLighter = Color3.fromHex("#262626"),-- Surface / Card background
 
 	-- Text Colors
-	TextWhite = Color3.fromRGB(255, 255, 255),
-	TextGray = Color3.fromRGB(180, 180, 180),
-	TextDark = Color3.fromRGB(100, 100, 100),
-	TextMuted = Color3.fromRGB(150, 150, 150),
+	TextWhite = Color3.fromHex("#FFFFFF"),
+	TextGray = Color3.fromHex("#A0A0A0"),
+	TextSecondary = Color3.fromHex("#A0A0A0"),
+	TextDark = Color3.fromHex("#111111"),
+	TextMuted = Color3.fromHex("#666666"),
 	
-	TextOnGradient = Color3.fromRGB(30, 25, 40),  -- Dark text untuk di atas gradient
+	TextOnGradient = Color3.fromHex("#111111"),  -- Dark text untuk di atas gradient putih
 
-	-- Accent Colors
-	CloseRed = Color3.fromRGB(255, 100, 100),
-	CloseRedHover = Color3.fromRGB(255, 50, 50),
-	Success = Color3.fromRGB(100, 255, 100),
-	SuccessDark = Color3.fromRGB(50, 200, 50),
-	Warning = Color3.fromRGB(255, 200, 100),
-	WarningDark = Color3.fromRGB(255, 150, 50),
-	Error = Color3.fromRGB(255, 100, 100),
-	ErrorDark = Color3.fromRGB(200, 50, 50),
-	Info = Color3.fromRGB(100, 150, 255),
-	InfoDark = Color3.fromRGB(50, 100, 200),
+	-- Accent Colors (Monokromatis)
+	CloseRed = Color3.fromHex("#2A2A2A"),        -- Sleek dark close button
+	CloseRedHover = Color3.fromHex("#404040"),   -- Hover state
+	Success = Color3.fromHex("#FFFFFF"),         -- White indicator
+	SuccessDark = Color3.fromHex("#888888"),
+	Warning = Color3.fromHex("#D0D0D0"),
+	WarningDark = Color3.fromHex("#707070"),
+	Error = Color3.fromHex("#B0B0B0"),
+	ErrorDark = Color3.fromHex("#505050"),
+	Info = Color3.fromHex("#FFFFFF"),
+	InfoDark = Color3.fromHex("#888888"),
 
-	-- VIP Colors
-	VIPGold = Color3.fromRGB(255, 215, 0),
-	VIPOrange = Color3.fromRGB(255, 140, 0),
+	-- VIP Colors (Monochrome Silver/White)
+	VIPGold = Color3.fromHex("#FFFFFF"),
+	VIPOrange = Color3.fromHex("#888888"),
 
 	-- Disabled State
-	Disabled = Color3.fromRGB(80, 80, 80),
-	DisabledText = Color3.fromRGB(120, 120, 120),
+	Disabled = Color3.fromHex("#353535"),
+	DisabledText = Color3.fromHex("#666666"),
 
-	-- Stroke Base Color
-	StrokeBase = Color3.fromRGB(255, 255, 255),
+	-- Stroke Base Color & Borders
+	StrokeBase = Color3.fromHex("#353535"),
+	Border = Color3.fromHex("#353535"),
 }
 
 -- ========================================
 -- GRADIENT SEQUENCES
 -- ========================================
 ThemeModule.Gradients = {
-	-- Primary gradient (Gold)
+	-- Primary gradient (Black & White with Gray transition)
 	Primary = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, ThemeModule.Colors.Primary1),
-		ColorSequenceKeypoint.new(1, ThemeModule.Colors.Primary2)
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#151515")),
+		ColorSequenceKeypoint.new(0.5, Color3.fromHex("#FFFFFF")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#353535"))
 	}),
 
 	-- Primary reversed
 	PrimaryReversed = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, ThemeModule.Colors.Primary2),
-		ColorSequenceKeypoint.new(1, ThemeModule.Colors.Primary1)
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#353535")),
+		ColorSequenceKeypoint.new(0.5, Color3.fromHex("#FFFFFF")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#151515"))
 	}),
 
-	-- Background gradient
+	-- Background gradient (Hitam pekat ke Panel dark)
 	Background = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 25, 40)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 35))
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#1C1C1C")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#080808"))
 	}),
 
 	-- Success gradient
 	Success = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, ThemeModule.Colors.Success),
-		ColorSequenceKeypoint.new(1, ThemeModule.Colors.SuccessDark)
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#FFFFFF")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#888888"))
 	}),
 
 	-- Warning gradient
 	Warning = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, ThemeModule.Colors.Warning),
-		ColorSequenceKeypoint.new(1, ThemeModule.Colors.WarningDark)
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#D0D0D0")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#707070"))
 	}),
 
 	-- Error gradient
 	Error = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, ThemeModule.Colors.Error),
-		ColorSequenceKeypoint.new(1, ThemeModule.Colors.ErrorDark)
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#B0B0B0")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#505050"))
 	}),
 
 	-- Info gradient
 	Info = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, ThemeModule.Colors.Info),
-		ColorSequenceKeypoint.new(1, ThemeModule.Colors.InfoDark)
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#FFFFFF")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#888888"))
 	}),
 
-	-- VIP gradient
+	-- VIP gradient (Monochrome Silver/White)
 	VIP = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, ThemeModule.Colors.VIPGold),
-		ColorSequenceKeypoint.new(1, ThemeModule.Colors.VIPOrange)
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#FFFFFF")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#666666"))
 	}),
 
 	-- Dark to light
 	DarkToLight = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, ThemeModule.Colors.BackgroundDark),
-		ColorSequenceKeypoint.new(1, ThemeModule.Colors.BackgroundLight)
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#080808")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#1C1C1C"))
 	}),
 }
 

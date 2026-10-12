@@ -11,7 +11,7 @@ local HttpService       = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local API_URL        = "https://oyy-gus.github.io/api/v2/roblox/music/playlist.json"
-local DEFAULT_SAMPUL = "rbxassetid://YOUR_LOGO_ASSET_ID"
+local DEFAULT_SAMPUL = "rbxassetid://118306547253139"
 local MAX_RETRIES    = 3
 local RETRY_DELAY    = 3
 

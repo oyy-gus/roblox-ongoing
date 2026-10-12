@@ -246,6 +246,7 @@ function MusicPlaybackManager:BroadcastSongUpdate(remotes, musicData, uploaderNa
 		remotes.MusicBroadcast:FireAllClients("SongUpdate", {
 			SoundId         = musicData.id,
 			Title           = musicData.judul or "Unknown",
+			Thumbnail       = musicData.sampul,
 			AddedBy         = uploaderName or "Unknown",
 			Duration        = duration,
 			IsPlaying       = true,
@@ -286,6 +287,7 @@ function MusicPlaybackManager:SyncToPlayer(remotes, player)
 		remotes.MusicUpdate:FireClient(player, "SyncMusic", {
 			SoundId         = self.currentSong.id,
 			Title           = self.currentSong.judul,
+			Thumbnail       = self.currentSong.sampul,
 			AddedBy         = self.currentUploader,
 			TimePosition    = elapsed,
 			Duration        = self.songDuration,

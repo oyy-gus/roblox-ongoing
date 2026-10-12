@@ -32,14 +32,7 @@ end
 -- ====================================
 
 function MusicSkipVoteManager:GetEligibleVoters()
-	local voters = {}
-	for _, player in ipairs(Players:GetPlayers()) do
-		local role = self.roleSystem:GetPlayerRole(player)
-		if self.roleSystem.Config.RoleHierarchy[role] >= self.roleSystem.Config.RoleHierarchy.VIP then
-			table.insert(voters, player)
-		end
-	end
-	return voters
+	return Players:GetPlayers()
 end
 
 -- ====================================
@@ -51,7 +44,7 @@ function MusicSkipVoteManager:CheckRateLimit(player)
 	local lastTime = self.skipVoteRateLimit[userId]
 	if lastTime then
 		local elapsed = workspace:GetServerTimeNow() - lastTime
-		if elapsed < self.config.SKIP_VOTE_COOLDOWN then
+		if elapsed < (self.config.SKIP_VOTE_COOLDOWN or 1) then
 			return false
 		end
 	end
@@ -64,7 +57,7 @@ end
 -- ====================================
 
 function MusicSkipVoteManager:IsActive()
-	return self.skipVote.active
+	return self.skipVote.active == true
 end
 
 function MusicSkipVoteManager:GetVoteState()
@@ -83,30 +76,41 @@ function MusicSkipVoteManager:StartVote(initiatorPlayer, songData, dispatcher)
 	end
 
 	local eligible = self:GetEligibleVoters()
-	if #eligible < 2 then
-		return false, "Tidak cukup player untuk memulai vote."
+	if #eligible < 1 then
+		return false, "Tidak ada player di server."
 	end
+
+	local requiredVotes = (#eligible <= 1) and 1 or (math.floor(#eligible / 2) + 1)
 
 	self.skipVote = {
 		active    = true,
 		initiator = initiatorPlayer.DisplayName,
 		songData  = songData,
-		voters    = {},
-		yesVotes  = 0,
+		voters    = {
+			[initiatorPlayer.UserId] = "yes",
+		},
+		yesVotes  = 1,
 		noVotes   = 0,
 		startTime = workspace:GetServerTimeNow(),
 	}
 
-	for _, player in ipairs(eligible) do
-		dispatcher:SendToClient(player, "SKIP_VOTE_START", {
-			initiator   = initiatorPlayer.DisplayName,
-			songTitle   = songData.judul,
-			totalVoters = #eligible,
-		})
+	dispatcher:SendToAll("SKIP_VOTE_START", {
+		initiator   = initiatorPlayer.DisplayName,
+		songTitle   = songData and songData.judul or "Unknown",
+		totalVoters = #eligible,
+		yesVotes    = 1,
+		noVotes     = 0,
+		required    = requiredVotes,
+	})
+
+	-- Jika langsung lolos (misal hanya 1 pemain di server)
+	if self.skipVote.yesVotes >= requiredVotes then
+		self:EndVote(dispatcher, false, true)
+		return true, nil
 	end
 
 	local voteStartTime = self.skipVote.startTime
-	task.delay(self.config.SKIP_VOTE_DURATION, function()
+	task.delay(self.config.SKIP_VOTE_DURATION or 30, function()
 		if self.skipVote.active and self.skipVote.startTime == voteStartTime then
 			self:EndVote(dispatcher, false)
 		end
@@ -133,31 +137,29 @@ function MusicSkipVoteManager:CastVote(player, voteType, dispatcher)
 	end
 
 	local eligible = self:GetEligibleVoters()
-	for _, p in ipairs(Players:GetPlayers()) do
-		local role = self.roleSystem:GetPlayerRole(p)
-		if self.roleSystem.Config.RoleHierarchy[role] >= self.roleSystem.Config.RoleHierarchy.VIP then
-			dispatcher:SendToClient(p, "SKIP_VOTE_UPDATE", {
-				yesVotes    = self.skipVote.yesVotes,
-				noVotes     = self.skipVote.noVotes,
-				totalVoters = #eligible,
-			})
-		end
-	end
+	local requiredVotes = (#eligible <= 1) and 1 or (math.floor(#eligible / 2) + 1)
 
-	local requiredVotes = math.floor(#eligible / 2) + 1
+	dispatcher:SendToAll("SKIP_VOTE_UPDATE", {
+		yesVotes    = self.skipVote.yesVotes,
+		noVotes     = self.skipVote.noVotes,
+		totalVoters = #eligible,
+		required    = requiredVotes,
+	})
+
 	if self.skipVote.yesVotes >= requiredVotes then
+		self:EndVote(dispatcher, false, true)
 		return true, true
 	end
 
 	return true, false
 end
 
-function MusicSkipVoteManager:EndVote(dispatcher, forced)
+function MusicSkipVoteManager:EndVote(dispatcher, forced, passedParam)
 	if not self.skipVote.active then return false end
 
 	local eligible      = #self:GetEligibleVoters()
-	local requiredVotes = math.floor(eligible / 2) + 1
-	local passed        = self.skipVote.yesVotes >= requiredVotes
+	local requiredVotes = (eligible <= 1) and 1 or (math.floor(eligible / 2) + 1)
+	local passed        = (passedParam == true) or (self.skipVote.yesVotes >= requiredVotes)
 
 	self.skipVote = {
 		active    = false,
@@ -170,7 +172,7 @@ function MusicSkipVoteManager:EndVote(dispatcher, forced)
 	}
 
 	dispatcher:SendToAll("SKIP_VOTE_END", {
-		result = passed and "passed" or "failed",
+		result = (passed and not forced) and "passed" or "failed",
 	})
 
 	return passed
@@ -188,15 +190,17 @@ function MusicSkipVoteManager:UpdateVoteOnPlayerLeave(userId, dispatcher)
 		self.skipVote.voters[userId] = nil
 
 		local eligible = self:GetEligibleVoters()
-		for _, p in ipairs(Players:GetPlayers()) do
-			local role = self.roleSystem:GetPlayerRole(p)
-			if self.roleSystem.Config.RoleHierarchy[role] >= self.roleSystem.Config.RoleHierarchy.VIP then
-				dispatcher:SendToClient(p, "SKIP_VOTE_UPDATE", {
-					yesVotes    = self.skipVote.yesVotes,
-					noVotes     = self.skipVote.noVotes,
-					totalVoters = #eligible,
-				})
-			end
+		local requiredVotes = (#eligible <= 1) and 1 or (math.floor(#eligible / 2) + 1)
+
+		dispatcher:SendToAll("SKIP_VOTE_UPDATE", {
+			yesVotes    = self.skipVote.yesVotes,
+			noVotes     = self.skipVote.noVotes,
+			totalVoters = #eligible,
+			required    = requiredVotes,
+		})
+
+		if self.skipVote.yesVotes >= requiredVotes and #eligible > 0 then
+			self:EndVote(dispatcher, false, true)
 		end
 	end
 end

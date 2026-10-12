@@ -53,7 +53,7 @@ function MusicValidationService:ValidateMusicId(musicId)
 		local data = {
 			id       = musicId,
 			judul    = info.Name:sub(1, 100),
-			sampul   = "rbxthumb://type=Asset&id=" .. musicId .. "&w=150&h=150",
+			sampul   = "rbxassetid://118306547253139",
 			Duration = 0,
 		}
 		self.musicIdCache[musicId] = {

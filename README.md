@@ -12,13 +12,11 @@ src/
 ├── client/                          ← StarterPlayerScripts
 │   ├── ChatTagClient.client.luau
 │   ├── DeviceDetectorClient.client.luau
-│   ├── GLightsClient.client.luau
 │   └── UnifiedToolbarUI.client.luau
 │
 ├── server/                          ← ServerScriptService
 │   ├── CarryServer.server.luau
 │   ├── FriendServer.server.luau
-│   ├── GLightsServer.server.luau
 │   ├── MusicFetcher.server.luau
 │   ├── DonationBroadcastHandler/
 │   ├── DonationServerHandler/
@@ -38,7 +36,6 @@ src/
 │       └── VIPZoneModule.luau
 │
 ├── shared/                          ← ReplicatedStorage
-│   ├── Bridges.luau
 │   ├── AutoScaleSystem/
 │   ├── BridgeNet/
 │   ├── ContextModule/
@@ -104,7 +101,6 @@ Sistem musik sinkronisasi global — semua pemain mendengarkan **lagu yang sama 
 | **Emote** | StarterGui/EmoteGui | Sistem emote karakter |
 | **GamePass** | ServerScriptService/GamePass | Handler game pass & manfaat |
 | **Give System** | ServerScriptService/GiveSystem | Pemberian role & title |
-| **GLights** | client + server | Sistem efek lampu dinamis |
 | **Loading Screen** | StarterGui/LoadingScreen | Layar loading kustom |
 | **Menu GUI** | StarterGui/MenuGUI | Menu utama (TopbarPlus) |
 | **Message System** | ServerScriptService/MessageSystem | Pesan server custom |

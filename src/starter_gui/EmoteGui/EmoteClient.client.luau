@@ -150,10 +150,7 @@ corner(headerFrame, 12)
 
 do
 	local g = Instance.new("UIGradient")
-	g.Color = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 30, 50)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 40)),
-	})
+	g.Color = G.Background
 	g.Rotation = 90
 	g.Parent   = headerFrame
 end
@@ -161,8 +158,8 @@ end
 local hdrLine = Instance.new("Frame")
 hdrLine.Size             = UDim2.new(1, 0, 0, 1)
 hdrLine.Position         = UDim2.new(0, 0, 1, -1)
-hdrLine.BackgroundColor3 = C.Primary1
-hdrLine.BackgroundTransparency = 0.6
+hdrLine.BackgroundColor3 = C.Border
+hdrLine.BackgroundTransparency = 0
 hdrLine.BorderSizePixel  = 0
 hdrLine.Parent           = headerFrame
 
@@ -186,9 +183,9 @@ closeBtn.Size                   = UDim2.new(0, 28, 0, 28)
 closeBtn.AnchorPoint            = Vector2.new(1, 0.5)
 closeBtn.Position               = UDim2.new(1, -6, 0.5, 0)
 closeBtn.BackgroundTransparency = 1
-closeBtn.Text                   = "X"
-closeBtn.TextColor3             = Color3.fromRGB(220, 50, 50)
-closeBtn.TextSize               = 16
+closeBtn.Text                   = "✕"
+closeBtn.TextColor3             = C.TextGray or Color3.fromHex("#A0A0A0")
+closeBtn.TextSize               = 14
 closeBtn.Font                   = Enum.Font.GothamBold
 closeBtn.BorderSizePixel        = 0
 closeBtn.ZIndex                 = 5
@@ -196,12 +193,12 @@ closeBtn.Parent                 = headerFrame
 
 closeBtn.MouseEnter:Connect(function()
 	TweenService:Create(closeBtn, TweenInfo.new(0.12), {
-		TextColor3 = Color3.fromRGB(255, 80, 80)
+		TextColor3 = C.TextWhite or Color3.fromHex("#FFFFFF")
 	}):Play()
 end)
 closeBtn.MouseLeave:Connect(function()
 	TweenService:Create(closeBtn, TweenInfo.new(0.12), {
-		TextColor3 = Color3.fromRGB(220, 50, 50)
+		TextColor3 = C.TextGray or Color3.fromHex("#A0A0A0")
 	}):Play()
 end)
 
@@ -1017,7 +1014,7 @@ local function toggleFavorite(animation, favBtn)
 	favoritedAnimations[animation.Name] = not favoritedAnimations[animation.Name]
 
 	favBtn.TextColor3 = favoritedAnimations[animation.Name]
-		and Color3.fromRGB(255, 215, 0) 
+		and C.TextWhite
 		or C.TextDark
 
 	saveFavoritedAnimations()
@@ -1044,7 +1041,7 @@ local function createEmoteButton(animation, category)
 
 	if fBtn then
 		fBtn.TextColor3 = favoritedAnimations[animation.Name]
-			and Color3.fromRGB(255, 215, 0) 
+			and C.TextWhite
 			or C.TextDark
 
 		fBtn.MouseButton1Click:Connect(function()

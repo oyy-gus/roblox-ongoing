@@ -49,40 +49,72 @@ gui.Parent = playerGui
 -- BACKGROUND
 local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1,0,1,0)
-bg.BackgroundColor3 = Color3.fromRGB(15,15,20)
+bg.BackgroundColor3 = Color3.fromHex("#080808")
 bg.BorderSizePixel = 0
 bg.Parent = gui
+
+local bgGrad = Instance.new("UIGradient")
+bgGrad.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromHex("#141414")),
+	ColorSequenceKeypoint.new(1, Color3.fromHex("#050505")),
+})
+bgGrad.Rotation = 45
+bgGrad.Parent = bg
 
 -- OVERLAY
 local overlay = Instance.new("Frame")
 overlay.Size = UDim2.new(1,0,1,0)
-overlay.BackgroundColor3 = Color3.new(0,0,0)
-overlay.BackgroundTransparency = 0.4
+overlay.BackgroundColor3 = Color3.fromHex("#000000")
+overlay.BackgroundTransparency = 0.5
 overlay.BorderSizePixel = 0
 overlay.Parent = gui
 
--- CENTER
+-- CENTER CARD (Glassmorphic Container)
 local center = Instance.new("Frame")
-center.Size = UDim2.new(0,420,0,230)
+center.Size = UDim2.new(0,440,0,240)
 center.Position = UDim2.new(0.5,0,0.5,0)
 center.AnchorPoint = Vector2.new(0.5,0.5)
-center.BackgroundTransparency = 1
+center.BackgroundColor3 = Color3.fromHex("#101010")
+center.BackgroundTransparency = 0.25
+center.BorderSizePixel = 0
 center.Parent = gui
+
+local centerCorner = Instance.new("UICorner")
+centerCorner.CornerRadius = UDim.new(0, 16)
+centerCorner.Parent = center
+
+local centerStroke = Instance.new("UIStroke")
+centerStroke.Color = Color3.fromHex("#282828")
+centerStroke.Thickness = 1.2
+centerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+centerStroke.Parent = center
 
 -- TITLE
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1,0,0,50)
+title.Size = UDim2.new(1,0,0,46)
+title.Position = UDim2.new(0,0,0,22)
 title.BackgroundTransparency = 1
-title.Text = "3F1 DANGDUT COMMUNITY"
-title.Font = Enum.Font.GothamBold
+title.Text = "MAXI STRONG"
+title.Font = Enum.Font.GothamBlack
 title.TextSize = 34
-title.TextColor3 = Color3.new(1,1,1)
+title.TextColor3 = Color3.fromHex("#FFFFFF")
 title.Parent = center
+
+-- SUBTITLE
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(1,0,0,16)
+subtitle.Position = UDim2.new(0,0,0,68)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "COMMUNITY EXPERIENCE"
+subtitle.Font = Enum.Font.GothamMedium
+subtitle.TextSize = 10
+subtitle.TextColor3 = Color3.fromHex("#888888")
+subtitle.Parent = center
 
 -- DOTS
 local dotsFrame = Instance.new("Frame")
-dotsFrame.Size = UDim2.new(0,90,0,20)
-dotsFrame.Position = UDim2.new(0.5,0,0,60)
+dotsFrame.Size = UDim2.new(0,80,0,16)
+dotsFrame.Position = UDim2.new(0.5,0,0,96)
 dotsFrame.AnchorPoint = Vector2.new(0.5,0)
 dotsFrame.BackgroundTransparency = 1
 dotsFrame.Parent = center
@@ -90,10 +122,10 @@ dotsFrame.Parent = center
 local dots = {}
 for i = 1,3 do
 	local d = Instance.new("Frame")
-	d.Size = UDim2.new(0,12,0,12)
-	d.Position = UDim2.new(0,(i-1)*30,0.5,0)
+	d.Size = UDim2.new(0,8,0,8)
+	d.Position = UDim2.new(0,(i-1)*28 + 6,0.5,0)
 	d.AnchorPoint = Vector2.new(0,0.5)
-	d.BackgroundColor3 = Color3.new(1,1,1)
+	d.BackgroundColor3 = Color3.fromHex("#555555")
 	d.BorderSizePixel = 0
 	d.Parent = dotsFrame
 	Instance.new("UICorner", d).CornerRadius = UDim.new(1,0)
@@ -102,40 +134,54 @@ end
 
 -- BAR BG
 local barBg = Instance.new("Frame")
-barBg.Size = UDim2.new(1,0,0,8)
-barBg.Position = UDim2.new(0,0,0,100)
-barBg.BackgroundColor3 = Color3.fromRGB(50,50,60)
+barBg.Size = UDim2.new(1,-80,0,6)
+barBg.Position = UDim2.new(0.5,0,0,130)
+barBg.AnchorPoint = Vector2.new(0.5,0)
+barBg.BackgroundColor3 = Color3.fromHex("#1C1C1C")
 barBg.BorderSizePixel = 0
 barBg.Parent = center
 Instance.new("UICorner", barBg).CornerRadius = UDim.new(1,0)
 
+local barStroke = Instance.new("UIStroke")
+barStroke.Color = Color3.fromHex("#333333")
+barStroke.Thickness = 1
+barStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+barStroke.Parent = barBg
+
 -- BAR
 local bar = Instance.new("Frame")
 bar.Size = UDim2.new(0,0,1,0)
-bar.BackgroundColor3 = Color3.fromRGB(0,200,255)
+bar.BackgroundColor3 = Color3.fromHex("#FFFFFF")
 bar.BorderSizePixel = 0
 bar.Parent = barBg
 Instance.new("UICorner", bar).CornerRadius = UDim.new(1,0)
 
+local barGrad = Instance.new("UIGradient")
+barGrad.Color = ColorSequence.new({
+	ColorSequenceKeypoint.new(0, Color3.fromHex("#777777")),
+	ColorSequenceKeypoint.new(1, Color3.fromHex("#FFFFFF")),
+})
+barGrad.Parent = bar
+
 -- PERCENT
 local percent = Instance.new("TextLabel")
-percent.Size = UDim2.new(1,0,0,30)
-percent.Position = UDim2.new(0,0,0,115)
+percent.Size = UDim2.new(1,0,0,24)
+percent.Position = UDim2.new(0,0,0,146)
 percent.BackgroundTransparency = 1
 percent.Font = Enum.Font.GothamBold
-percent.TextSize = 22
-percent.TextColor3 = Color3.new(1,1,1)
+percent.TextSize = 18
+percent.TextColor3 = Color3.fromHex("#FFFFFF")
 percent.Text = "0%"
 percent.Parent = center
 
 -- SKIP TEXT
 local skipText = Instance.new("TextLabel")
-skipText.Size = UDim2.new(1,0,0,24)
-skipText.Position = UDim2.new(0,0,0,150)
+skipText.Size = UDim2.new(1,0,0,20)
+skipText.Position = UDim2.new(0,0,0,182)
 skipText.BackgroundTransparency = 1
 skipText.Font = Enum.Font.Gotham
-skipText.TextSize = 15
-skipText.TextColor3 = Color3.fromRGB(150,150,160)
+skipText.TextSize = 12
+skipText.TextColor3 = Color3.fromHex("#777777")
 skipText.Text = ""
 skipText.Parent = center
 
@@ -159,19 +205,19 @@ local function notifyGroupStatus()
 	end
 end
 
--- DOT ANIMATION
+-- DOT ANIMATION (Sleek Monochrome Bounce)
 task.spawn(function()
 	while isLoading do
 		for _,d in ipairs(dots) do
 			if not isLoading then break end
-			TweenService:Create(d, TweenInfo.new(0.25), {
-				Size = UDim2.new(0,12,0,24),
-				BackgroundColor3 = Color3.fromRGB(0,200,255)
+			TweenService:Create(d, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				Size = UDim2.new(0,8,0,16),
+				BackgroundColor3 = Color3.fromHex("#FFFFFF")
 			}):Play()
 			task.wait(0.12)
-			TweenService:Create(d, TweenInfo.new(0.25), {
-				Size = UDim2.new(0,12,0,12),
-				BackgroundColor3 = Color3.new(1,1,1)
+			TweenService:Create(d, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+				Size = UDim2.new(0,8,0,8),
+				BackgroundColor3 = Color3.fromHex("#555555")
 			}):Play()
 		end
 	end
@@ -208,6 +254,8 @@ local function finish()
 			TweenService:Create(v, fade, {BackgroundTransparency = 1}):Play()
 		elseif v:IsA("TextLabel") then
 			TweenService:Create(v, fade, {TextTransparency = 1}):Play()
+		elseif v:IsA("UIStroke") then
+			TweenService:Create(v, fade, {Transparency = 1}):Play()
 		end
 	end
 
@@ -297,7 +345,7 @@ task.spawn(function()
 		percent.Text = i.."%"
 		if i == 50 then
 			canSkip = true
-			skipText.Text = "Klik dimana saja/Klik spasi untuk lewati!"
+			skipText.Text = "Klik dimana saja atau Tekan Spasi untuk lewati"
 		end
 		task.wait(LOADING_TIME/100)
 	end

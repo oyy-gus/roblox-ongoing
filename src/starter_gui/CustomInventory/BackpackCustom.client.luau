@@ -30,16 +30,17 @@ local SETTINGS = {
 	SLOT_PADDING = 4,
 	HOTBAR_INNER_PADDING = 5,
 
-	SLOT_COLOR = Color3.fromRGB(35, 35, 48),
-	SLOT_HOVER_COLOR = Color3.fromRGB(50, 50, 65),
-	SLOT_EQUIPPED_COLOR = Color3.fromRGB(255, 215, 0),
-	SLOT_DISABLED_COLOR = Color3.fromRGB(80, 40, 40),
-	SLOT_DROP_TARGET_COLOR = Color3.fromRGB(80, 180, 80),
-	HOTBAR_BG_COLOR = Color3.fromRGB(18, 18, 26),
-	INVENTORY_BG_COLOR = Color3.fromRGB(22, 22, 32),
-	TEXT_COLOR = Color3.fromRGB(255, 255, 255),
-	ACCENT_COLOR = Color3.fromRGB(255, 215, 0),
-	ACCENT_COLOR_2 = Color3.fromRGB(255, 140, 0),
+	SLOT_COLOR = Color3.fromHex("#1C1C1C"),
+	SLOT_HOVER_COLOR = Color3.fromHex("#262626"),
+	SLOT_EQUIPPED_COLOR = Color3.fromHex("#FFFFFF"),
+	SLOT_DISABLED_COLOR = Color3.fromHex("#121212"),
+	SLOT_DROP_TARGET_COLOR = Color3.fromHex("#A0A0A0"),
+	SLOT_STROKE_COLOR = Color3.fromHex("#353535"),
+	HOTBAR_BG_COLOR = Color3.fromHex("#080808"),
+	INVENTORY_BG_COLOR = Color3.fromHex("#151515"),
+	TEXT_COLOR = Color3.fromHex("#FFFFFF"),
+	ACCENT_COLOR = Color3.fromHex("#FFFFFF"),
+	ACCENT_COLOR_2 = Color3.fromHex("#888888"),
 
 	INVENTORY_KEYBIND = Enum.KeyCode.Tab,
 	SCROLL_HOTBAR_WITH_WHEEL = true,
@@ -187,7 +188,7 @@ openBtn.AnchorPoint = Vector2.new(0.5, 0)
 openBtn.Position = UDim2.new(0.5, 0, 1, -67)
 openBtn.BackgroundTransparency = 1
 openBtn.Text = "^"
-openBtn.TextColor3 = Color3.fromRGB(200, 200, 220)
+openBtn.TextColor3 = Color3.fromHex("#A0A0A0")
 openBtn.TextSize = 12
 openBtn.Font = Enum.Font.GothamBold
 openBtn.AutoButtonColor = false
@@ -199,7 +200,7 @@ openBtn.MouseEnter:Connect(function()
 	tweenProperty(openBtn, {TextColor3 = SETTINGS.ACCENT_COLOR}, 0.15)
 end)
 openBtn.MouseLeave:Connect(function()
-	tweenProperty(openBtn, {TextColor3 = Color3.fromRGB(200, 200, 220)}, 0.15)
+	tweenProperty(openBtn, {TextColor3 = Color3.fromHex("#A0A0A0")}, 0.15)
 end)
 
 -- ============================================================
@@ -303,7 +304,7 @@ addGradient(invStroke, SETTINGS.ACCENT_COLOR, SETTINGS.ACCENT_COLOR_2, 45)
 local invHeader = Instance.new("Frame")
 invHeader.Name = "Header"
 invHeader.Size = UDim2.new(1, 0, 0, 24)
-invHeader.BackgroundColor3 = Color3.fromRGB(28, 28, 40)
+invHeader.BackgroundColor3 = Color3.fromHex("#1C1C1C")
 invHeader.BorderSizePixel = 0
 invHeader.ClipsDescendants = true
 invHeader.ZIndex = 3
@@ -316,7 +317,7 @@ headerCorner.Parent = invHeader
 local headerCover = Instance.new("Frame")
 headerCover.Size = UDim2.new(1, 0, 0, 10)
 headerCover.Position = UDim2.new(0, 0, 1, -10)
-headerCover.BackgroundColor3 = Color3.fromRGB(28, 28, 40)
+headerCover.BackgroundColor3 = Color3.fromHex("#1C1C1C")
 headerCover.BorderSizePixel = 0
 headerCover.ZIndex = 3
 headerCover.Parent = invHeader
@@ -344,7 +345,7 @@ searchContainer.Name = "SearchContainer"
 searchContainer.Size = UDim2.new(0, 90, 0, 18)
 searchContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
 searchContainer.AnchorPoint = Vector2.new(0.5, 0.5)
-searchContainer.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+searchContainer.BackgroundColor3 = Color3.fromHex("#262626")
 searchContainer.ZIndex = 4
 searchContainer.Parent = invHeader
 
@@ -356,7 +357,7 @@ searchPlaceholder.Size = UDim2.new(1, -16, 1, 0)
 searchPlaceholder.Position = UDim2.new(0, 8, 0, 0)
 searchPlaceholder.BackgroundTransparency = 1
 searchPlaceholder.Text = "Search..."
-searchPlaceholder.TextColor3 = Color3.fromRGB(100, 100, 120)
+searchPlaceholder.TextColor3 = Color3.fromHex("#777777")
 searchPlaceholder.TextSize = 9
 searchPlaceholder.Font = Enum.Font.Gotham
 searchPlaceholder.TextXAlignment = Enum.TextXAlignment.Left
@@ -392,10 +393,10 @@ closeBtn.Name = "CloseBtn"
 closeBtn.Size = UDim2.new(0, 22, 0, 18)
 closeBtn.Position = UDim2.new(1, -28, 0.5, 0)
 closeBtn.AnchorPoint = Vector2.new(0, 0.5)
-closeBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 40)
+closeBtn.BackgroundColor3 = Color3.fromHex("#2A2A2A")
 closeBtn.BackgroundTransparency = 0.5
 closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.fromRGB(220, 180, 180)
+closeBtn.TextColor3 = Color3.fromHex("#A0A0A0")
 closeBtn.TextSize = 10
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.AutoButtonColor = false
@@ -405,10 +406,10 @@ closeBtn.Parent = invHeader
 addCorner(closeBtn, 4)
 
 closeBtn.MouseEnter:Connect(function()
-	tweenProperty(closeBtn, {BackgroundTransparency = 0.2, TextColor3 = Color3.fromRGB(255, 120, 120)}, 0.1)
+	tweenProperty(closeBtn, {BackgroundTransparency = 0.2, TextColor3 = Color3.fromHex("#FFFFFF")}, 0.1)
 end)
 closeBtn.MouseLeave:Connect(function()
-	tweenProperty(closeBtn, {BackgroundTransparency = 0.5, TextColor3 = Color3.fromRGB(220, 180, 180)}, 0.1)
+	tweenProperty(closeBtn, {BackgroundTransparency = 0.5, TextColor3 = Color3.fromHex("#A0A0A0")}, 0.1)
 end)
 
 -- Content container
@@ -524,7 +525,7 @@ local function createToolSlot(position, parent, isHotbar)
 
 	local slotStroke = Instance.new("UIStroke")
 	slotStroke.Name = "SlotStroke"
-	slotStroke.Color = Color3.fromRGB(60, 60, 80)
+	slotStroke.Color = SETTINGS.SLOT_STROKE_COLOR
 	slotStroke.Thickness = 1
 	slotStroke.Transparency = 0.2
 	slotStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -600,7 +601,7 @@ local function createToolSlot(position, parent, isHotbar)
 	toolAmount.AutomaticSize = Enum.AutomaticSize.X
 	toolAmount.BackgroundTransparency = 1
 	toolAmount.Text = ""
-	toolAmount.TextColor3 = Color3.fromRGB(25, 25, 25)
+	toolAmount.TextColor3 = Color3.fromHex("#111111")
 	toolAmount.TextSize = 7
 	toolAmount.Font = Enum.Font.GothamBold
 	toolAmount.ZIndex = 4
@@ -695,7 +696,7 @@ function ToolObject:setEquipped(equipped)
 		tweenProperty(self.Frame, {BackgroundTransparency = 0}, 0.1)
 	else
 		if stroke then
-			stroke.Color = Color3.fromRGB(60, 60, 80)
+			stroke.Color = SETTINGS.SLOT_STROKE_COLOR
 			stroke.Thickness = 1
 			stroke.Transparency = 0.2
 		end
@@ -732,7 +733,7 @@ function ToolObject:showDescription()
 	local descFrame = Instance.new("Frame")
 	descFrame.Name = "DescriptionFrame"
 	descFrame.AnchorPoint = Vector2.new(0.5, 1)
-	descFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+	descFrame.BackgroundColor3 = Color3.fromHex("#151515")
 	descFrame.BackgroundTransparency = 0.05
 	descFrame.BorderSizePixel = 0
 	descFrame.AutomaticSize = Enum.AutomaticSize.XY
@@ -904,7 +905,7 @@ function InventoryModule:updateDrag()
 			if slot and slot ~= State.draggedObject.Frame then
 				local stroke = slot:FindFirstChild("SlotStroke")
 				if stroke then
-					stroke.Color = Color3.fromRGB(60, 60, 80)
+					stroke.Color = SETTINGS.SLOT_STROKE_COLOR
 				end
 			end
 		end
@@ -915,7 +916,7 @@ function InventoryModule:updateDrag()
 			if slot and slot ~= State.draggedObject.Frame then
 				local stroke = slot:FindFirstChild("SlotStroke")
 				if stroke then
-					stroke.Color = Color3.fromRGB(60, 60, 80)
+					stroke.Color = SETTINGS.SLOT_STROKE_COLOR
 				end
 			end
 		end
@@ -1047,7 +1048,7 @@ function InventoryModule:endDrag()
 			if slot then
 				local stroke = slot:FindFirstChild("SlotStroke")
 				if stroke then
-					stroke.Color = Color3.fromRGB(60, 60, 80)
+					stroke.Color = SETTINGS.SLOT_STROKE_COLOR
 				end
 			end
 		end
@@ -1058,7 +1059,7 @@ function InventoryModule:endDrag()
 			if slot then
 				local stroke = slot:FindFirstChild("SlotStroke")
 				if stroke then
-					stroke.Color = Color3.fromRGB(60, 60, 80)
+					stroke.Color = SETTINGS.SLOT_STROKE_COLOR
 				end
 			end
 		end
