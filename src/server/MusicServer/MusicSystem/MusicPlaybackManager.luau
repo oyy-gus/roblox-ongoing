@@ -15,10 +15,10 @@ local ServerMusicAudioHandler = require(script.Parent.ServerMusicAudioHandler)
 local MusicPlaybackManager = {}
 MusicPlaybackManager.__index = MusicPlaybackManager
 
--- Konfigurasi fade & preload
-local FADE_IN_DURATION  = 0.3   -- DIPERCEPAT: dari 0.8 ke 0.3 (mengurangi desync window)
-local FADE_OUT_DURATION = 0.3   -- DIPERCEPAT: dari 0.6 ke 0.3
-local PRE_FADE_BUFFER   = 0.5   -- DIPERKECIL: dari 0.8 ke 0.5
+-- Konfigurasi fade & preload (Transisi Lagu Halus & Mulus)
+local FADE_IN_DURATION  = 1.2   -- Transisi fade-in lagu baru lebih mulus (1.2 detik)
+local FADE_OUT_DURATION = 1.0   -- Transisi fade-out lagu lama lebih lembut (1.0 detik)
+local PRE_FADE_BUFFER   = 1.5   -- Mulai fade out 1.5 detik sebelum lagu berakhir
 local PRELOAD_THRESHOLD = 0.80  -- Mulai preload pada 80% durasi
 
 function MusicPlaybackManager.new(config)
@@ -61,7 +61,15 @@ function MusicPlaybackManager:GetState()
 end
 
 function MusicPlaybackManager:IsPlaying()
-	return self.isPlaying and self.audioHandler:IsPlaying()
+	if not self.isPlaying then return false end
+	if self.songDuration > 0 then
+		local elapsed = self:GetElapsedTime()
+		local wallTime = (self.songStartTime > 0) and (workspace:GetServerTimeNow() - self.songStartTime) or 0
+		if elapsed >= (self.songDuration + 1) or wallTime >= (self.songDuration + 3) then
+			return false
+		end
+	end
+	return self.audioHandler:IsPlaying()
 end
 
 function MusicPlaybackManager:GetCurrentSong()
@@ -134,6 +142,19 @@ function MusicPlaybackManager:StartProgressBroadcast(remotes)
 				if self.preloadCallback then
 					task.spawn(self.preloadCallback)
 				end
+			end
+		end
+
+		-- WATCHDOG: Jika durasi lagu habis tapi sound.Ended tidak terpanggil oleh engine Roblox
+		if not self.isTransitioning and self.songDuration > 0 and self.autoNextCallback then
+			local wallElapsed = (self.songStartTime > 0) and (now - self.songStartTime) or 0
+			if (elapsed >= self.songDuration + 0.5) or (wallElapsed >= self.songDuration + 2) then
+				self.isTransitioning = true
+				task.spawn(function()
+					local success, err = pcall(self.autoNextCallback)
+					if not success then warn("[PlaybackManager] Watchdog AutoNext error:", err) end
+				end)
+				return
 			end
 		end
 
@@ -211,6 +232,8 @@ function MusicPlaybackManager:Stop(remotes)
 	self.currentSong      = nil
 	self.currentUploader  = nil
 	self.isPlaying        = false
+	self.songStartTime    = 0
+	self.songDuration     = 0
 	self.isPlaylistMode   = false
 	self.autoNextCallback = nil
 	self.preloadCallback  = nil
@@ -227,6 +250,8 @@ function MusicPlaybackManager:StopWithFade(remotes, fadeDuration)
 		self.currentSong      = nil
 		self.currentUploader  = nil
 		self.isPlaying        = false
+		self.songStartTime    = 0
+		self.songDuration     = 0
 		self.isPlaylistMode   = false
 		self.autoNextCallback = nil
 		self.preloadCallback  = nil

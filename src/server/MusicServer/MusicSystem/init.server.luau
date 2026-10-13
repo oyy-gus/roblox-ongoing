@@ -310,8 +310,19 @@ end
 -- PLAYBACK
 -- ====================================
 local playNextSong
+local isPlayingNext = false
 
 playNextSong = function()
+	if isPlayingNext then
+		warn("[MusicSystem] playNextSong sedang berjalan, abaikan panggilan ganda")
+		return
+	end
+	isPlayingNext = true
+
+	local function resetLock()
+		isPlayingNext = false
+	end
+
 	if skipVoteManager:IsActive() then
 		skipVoteManager:EndVote(Dispatcher, true)
 	end
@@ -324,12 +335,13 @@ playNextSong = function()
 			playbackManager.autoNextCallback = playNextSong
 			playbackManager.preloadCallback  = preloadNextSong
 			local success = playbackManager:Play(Remotes, nextSong, nextSong.uploader, false)
+			resetLock()
 			if success then scheduleBatchedSync("state")
-			else task.delay(1, playNextSong) end
+			else task.delay(0.5, playNextSong) end
 		else
-			-- DIHAPUS: Dispatcher:NotifyAll("Gagal memuat lagu, melewati...")
-			warn("[MusicSystem] Gagal memuat lagu, melewati...")
-			task.delay(1, playNextSong)
+			warn(string.format("[MusicSystem] Gagal memuat lagu queue '%s' (ID: %s), melewati...", tostring(nextSong.musicData.judul), tostring(nextSong.musicData.id)))
+			resetLock()
+			task.delay(0.5, playNextSong)
 		end
 
 	elseif CONFIG.AUTO_PLAYLIST_ENABLED then
@@ -342,17 +354,22 @@ playNextSong = function()
 				playbackManager.autoNextCallback = playNextSong
 				playbackManager.preloadCallback  = preloadNextSong
 				local success = playbackManager:Play(Remotes, songData, "Auto-Playlist", true)
+				resetLock()
 				if success then scheduleBatchedSync("state")
-				else task.delay(1, playNextSong) end
+				else task.delay(0.5, playNextSong) end
 			else
-				task.delay(1, playNextSong)
+				warn(string.format("[MusicSystem] Gagal memuat lagu playlist '%s' (ID: %s), melewati...", tostring(playlistSong.judul), tostring(playlistSong.id)))
+				resetLock()
+				task.delay(0.5, playNextSong)
 			end
 		else
 			playbackManager:StopWithFade(Remotes)
+			resetLock()
 			scheduleBatchedSync("state")
 		end
 	else
 		playbackManager:StopWithFade(Remotes)
+		resetLock()
 		scheduleBatchedSync("state")
 	end
 end
@@ -393,15 +410,40 @@ function ActionHandlers:ADD_TO_QUEUE(player, data)
 	task.spawn(function()
 		local musicData
 		if isFromPlaylist then
-			musicData = MusicModule:GetMusicById(musicId)
-			if not musicData then Dispatcher:Notify(player, "Lagu tidak ditemukan di playlist!"); return end
+			local found = MusicModule:GetMusicById(musicId)
+			if not found then Dispatcher:Notify(player, "Lagu tidak ditemukan di playlist!"); return end
+			musicData = {
+				id       = tostring(found.id),
+				judul    = found.judul,
+				sampul   = found.sampul,
+				Duration = found.Duration or 0,
+			}
 		else
 			local valid, vdata, reason = validationService:ValidateMusicId(musicId)
 			if not valid then Dispatcher:Notify(player, "Music ID tidak valid! Periksa kembali."); return end
 			musicData = vdata
 		end
 
-		musicData.Duration = CONFIG.DEFAULT_SONG_DURATION
+		-- Ambil durasi ASLI lagu
+		local sound, cachedDur = MusicStorageHandler:GetSound(musicData.id)
+		if cachedDur and cachedDur > 0 then
+			musicData.Duration = math.round(cachedDur)
+		elseif not musicData.Duration or musicData.Duration <= 0 then
+			-- Muat Sound on-demand untuk membaca TimeLength asli
+			local realDur = loadSongOnDemand(musicData.id, musicData.judul)
+			if realDur and realDur > 0 then
+				musicData.Duration = math.round(realDur)
+			else
+				musicData.Duration = CONFIG.DEFAULT_SONG_DURATION
+			end
+		end
+
+		-- Simpan durasi ke playlist cache agar instan pada panggilan berikutnya
+		if isFromPlaylist and musicData.Duration > 0 then
+			local found = MusicModule:GetMusicById(musicId)
+			if found then found.Duration = musicData.Duration end
+		end
+
 		local success, errorMsg = queueManager:AddToQueue(musicData, player.DisplayName, player.UserId)
 		if not success then Dispatcher:Notify(player, errorMsg); return end
 
@@ -409,6 +451,24 @@ function ActionHandlers:ADD_TO_QUEUE(player, data)
 		scheduleBatchedSync("queue")
 		local queuePosition = queueManager:GetSize()
 		Dispatcher:Notify(player, string.format("'%s' ditambahkan ke antrean (Posisi: #%d)", musicData.judul, queuePosition))
+
+		-- Jika saat dimasukkan durasi masih berupa fallback 180s (misal karena delay jaringan), perbarui di background
+		if musicData.Duration == CONFIG.DEFAULT_SONG_DURATION then
+			task.spawn(function()
+				local realDur = loadSongOnDemand(musicData.id, musicData.judul)
+				if realDur and realDur > 0 and realDur ~= CONFIG.DEFAULT_SONG_DURATION then
+					musicData.Duration = math.round(realDur)
+					-- Update durasi di dalam entry queue yang sebenarnya
+					queueManager:UpdateDuration(musicData.id, realDur)
+					if isFromPlaylist then
+						local found = MusicModule:GetMusicById(musicId)
+						if found then found.Duration = musicData.Duration end
+					end
+					scheduleBatchedSync("queue")
+				end
+			end)
+		end
+
 		if not playbackManager:IsPlaying() then
 			task.delay(0.5, playNextSong)
 		end
@@ -425,6 +485,10 @@ function ActionHandlers:CONTROL_NEXT(player, data)
 
 	-- Admin (roleHierarchy >= 5) bisa langsung skip instan
 	if roleHierarchy >= 5 then
+		if not RateLimiter:CheckLimit(player, "CONTROL_NEXT") then
+			Dispatcher:Notify(player, "Tunggu sebentar sebelum skip lagi!")
+			return
+		end
 		Dispatcher:NotifyAll(string.format("%s (%s) skip: %s", player.DisplayName, role, currentSong.judul or "Unknown"))
 		if skipVoteManager:IsActive() then
 			skipVoteManager:EndVote(Dispatcher, true)
@@ -524,7 +588,7 @@ end)
 -- ====================================
 Players.PlayerAdded:Connect(function(player)
 	RoleSystem:InitializePlayer(player)
-	task.wait(0.3)
+	task.wait(0.5)
 	if validationService:ValidatePlayer(player) then
 		Dispatcher:SyncToPlayer(player)
 		-- DIHAPUS: semua notifikasi welcome dan status sistem
@@ -533,11 +597,19 @@ Players.PlayerAdded:Connect(function(player)
 	player.CharacterAdded:Connect(function(character)
 		local hrp = character:WaitForChild("HumanoidRootPart", 5)
 		if not hrp then return end
-		task.wait(0.3)
+		task.wait(0.5)
 		if validationService:ValidatePlayer(player) then
 			Dispatcher:SyncToPlayer(player)
+			-- Verifikasi sync: kirim ulang setelah 1.5 detik untuk memastikan
+			-- client sudah siap dan posisi audio tepat
+			task.delay(1.5, function()
+				if validationService:ValidatePlayer(player) then
+					Dispatcher:SyncToPlayer(player)
+				end
+			end)
 		end
 	end)
+
 
 	player.Chatted:Connect(function(message)
 		local role = RoleSystem:GetPlayerRole(player)
@@ -606,7 +678,8 @@ end)
 Players.PlayerRemoving:Connect(function(player)
 	local userId = player.UserId
 	validationService:CleanupPlayer(userId)
-	queueManager:RemoveUserSongs(userId)
+	-- PERBAIKAN: Pertahankan lagu di antrean saat player disconnect/rejoin
+	-- queueManager:RemoveUserSongs(userId)
 	skipVoteManager:UpdateVoteOnPlayerLeave(userId, Dispatcher)
 	RateLimiter:Cleanup(userId)
 	RetryTracker:Cleanup(userId)

@@ -44,7 +44,7 @@ local DEFAULT_SETTINGS = {
 	hideOverhead      = false,
 	hideShadow        = false,
 	muteMusic         = false,
-	musicVolume       = 50,
+	musicVolume       = 100,
 }
 
 -- ========================================

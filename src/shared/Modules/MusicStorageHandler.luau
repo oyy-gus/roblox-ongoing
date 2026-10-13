@@ -15,12 +15,12 @@ local MusicStorageHandler = {}
 -- ====================================
 local CONFIG = {
 	MAX_CACHED_SOUNDS     = 20,
-	LOAD_TIMEOUT          = 15,
+	LOAD_TIMEOUT          = 3.5,  -- DIPERCEPAT: dari 15 ke 3.5s agar audio rusak/502 langsung di-skip tanpa freeze
 	PARALLEL_BATCH_SIZE   = 5,
 	CLEANUP_INTERVAL      = 300,
 	MIN_USAGE_THRESHOLD   = 60,
-	RETRY_ATTEMPTS        = 2,
-	RETRY_DELAY           = 1,
+	RETRY_ATTEMPTS        = 1,    -- 1x coba cukup, hindari 30 detik freeze saat asset bermasalah
+	RETRY_DELAY           = 0.5,
 }
 
 -- ====================================

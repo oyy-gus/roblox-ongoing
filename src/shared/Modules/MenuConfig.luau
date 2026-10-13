@@ -137,7 +137,7 @@ MenuConfig.State = {
 -- USER SETTINGS
 -- ========================================
 MenuConfig.UserSettings = {
-	musicVolume        = 50,
+	musicVolume        = 100,
 	muteMusic          = false,
 	hideBubbleChat     = false,
 	hidePlayerEffects  = false,

@@ -4,14 +4,14 @@
 -- ====================================
 -- Perbaikan SINKRONISASI:
 --   ✅ DESYNC_THRESHOLD diperkecil dari 2.0s ke 0.5s (koreksi lebih cepat)
---   ✅ syncServerSoundPosition: mute→tunggu load→seek→fade-in (tanpa audio bocor)
+--   ✅ syncServerSoundPosition: mute→tunggu load→seek→VERIFIKASI→fade-in
 --   ✅ Progress bar menggunakan shared-clock interpolation (smooth, tanpa lompatan)
---   ✅ Hanya SATU posisi koreksi per lagu baru (tidak berulang-ulang)
---   ✅ Hilangkan koreksi posisi di Progress handler (penyebab audio "kasar")
---   ✅ Hilangkan koreksi posisi di watchServerSound (penyebab audio loncat)
+--   ✅ Post-seek verifikasi: cek posisi setelah engine update, koreksi ulang jika drift > 0.3s
+--   ✅ Gentle drift correction: koreksi lembut via Progress broadcast jika drift > 1.5s (cooldown 5s)
 --   ✅ Client fade lebih cepat untuk mengurangi celah
 -- Perbaikan NOTIFIKASI:
 --   ✅ Filter notifikasi server: blokir pesan sistem yang mengganggu
+
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService      = game:GetService("SoundService")
@@ -48,8 +48,8 @@ end
 -- SYNC CONSTANTS (DIPERBAIKI)
 -- ====================================
 local DESYNC_THRESHOLD    = 0.5   -- DIPERKECIL: dari 2.0 ke 0.5 detik
-local CLIENT_FADE_IN_DUR  = 0.3   -- DIPERCEPAT: dari 0.6 ke 0.3
-local CLIENT_FADE_OUT_DUR = 0.3   -- DIPERCEPAT: dari 0.4 ke 0.3
+local CLIENT_FADE_IN_DUR  = 1.2   -- Transisi fade-in mulus (1.2 detik)
+local CLIENT_FADE_OUT_DUR = 1.0   -- Transisi fade-out halus (1.0 detik)
 
 local function getPlayerHierarchy()
 	local roleValue = player:FindFirstChild("Role")
@@ -157,30 +157,53 @@ local T = {
 local DEFAULT_THUMBNAIL = "rbxassetid://118306547253139"
 
 local function resolveThumbnail(thumb, soundId)
-	if not thumb or type(thumb) ~= "string" then return DEFAULT_THUMBNAIL end
-	local t = thumb:gsub("%s", "")  -- strip whitespace
-	if t == "" or t == "0" or t == "rbxassetid://0" then return DEFAULT_THUMBNAIL end
-	if t:find("YOUR_LOGO_ASSET_ID") then return DEFAULT_THUMBNAIL end
-	-- rbxthumb audio assets don't have thumbnails in Roblox; they appear blank/black
-	if t:find("rbxthumb://") then return DEFAULT_THUMBNAIL end
-	if soundId and tostring(soundId) ~= "" and (t == tostring(soundId) or t == "rbxassetid://" .. tostring(soundId)) then
-		return DEFAULT_THUMBNAIL
+	local sId = soundId and tostring(soundId):match("%d+")
+	local rbxThumbUrl = sId and string.format("rbxthumb://type=Asset&id=%s&w=420&h=420", sId) or nil
+
+	if not thumb or type(thumb) ~= "string" then
+		return rbxThumbUrl or DEFAULT_THUMBNAIL
 	end
+
+	local t = thumb:gsub("%s", "")  -- strip whitespace
+	if t == "" or t == "0" or t == "rbxassetid://0" or t:find("YOUR_LOGO_ASSET_ID") then
+		return rbxThumbUrl or DEFAULT_THUMBNAIL
+	end
+
+	-- Jika sudah format rbxthumb://, langsung gunakan
+	if t:find("^rbxthumb://") then
+		return t
+	end
+
+	-- Jika asset default, utamakan rbxthumb langsung dari asset audio jika ada soundId
+	if t == DEFAULT_THUMBNAIL or t:find("118306547253139") then
+		return rbxThumbUrl or DEFAULT_THUMBNAIL
+	end
+
+	-- Jika soundId sama dengan thumb (misal soundId diteruskan di arg thumb)
+	if sId and (t == sId or t == "rbxassetid://" .. sId) then
+		return rbxThumbUrl or DEFAULT_THUMBNAIL
+	end
+
 	if t:find("rbxassetid://") then
 		local num = t:match("rbxassetid://(%d+)")
 		if not num or num == "0" or tonumber(num) == 0 then
-			return DEFAULT_THUMBNAIL
+			return rbxThumbUrl or DEFAULT_THUMBNAIL
 		end
 		return t
 	end
+
 	if t:match("^%d+$") then
-		if t == "0" or tonumber(t) == 0 then return DEFAULT_THUMBNAIL end
+		if t == "0" or tonumber(t) == 0 then
+			return rbxThumbUrl or DEFAULT_THUMBNAIL
+		end
 		return "rbxassetid://" .. t
 	end
+
 	if t:find("^http") or t:find("^rbxasset://") then
 		return t
 	end
-	return DEFAULT_THUMBNAIL
+
+	return rbxThumbUrl or DEFAULT_THUMBNAIL
 end
 
 -- setThumb() dideklarasikan setelah thumbImg dibuat (di bawah)
@@ -297,7 +320,7 @@ local voteSkipState = {
 }
 
 local isMuted    = false
-local userVolume = 0.5
+local userVolume = 1.0
 local currentFadeTween = nil
 
 -- ====================================
@@ -310,22 +333,64 @@ local function cancelClientFade()
 	end
 end
 
+-- ====================================
+-- CLEANUP SISA EKSPERIMENTAL AUDIO API (Mencegah Double Audio)
+-- ====================================
+local function cleanupAudioAPINodes()
+	local toDestroy = {
+		"ClientMusicFader",
+		"ClientAudioOutput",
+		"ServerAudioPlayer",
+		"ServerAudioFader",
+		"FiestaAudioEqualizer",
+	}
+	for _, name in ipairs(toDestroy) do
+		local node = SoundService:FindFirstChild(name)
+		if node then
+			pcall(function() node:Destroy() end)
+		end
+	end
+	local camera = workspace.CurrentCamera
+	if camera then
+		local oldListener = camera:FindFirstChild("ClientMusicListener")
+		if oldListener then
+			pcall(function() oldListener:Destroy() end)
+		end
+	end
+end
+task.spawn(cleanupAudioAPINodes)
+
+-- ====================================
+-- 2D GLOBAL AUDIO SETUP (BEBAS PUTARAN KAMERA)
+-- ====================================
+local function getServerSound()
+	local s = SoundService:FindFirstChild("ServerMusicSound")
+	if s and s:IsA("Sound") then return s end
+	return workspace:FindFirstChild("ServerMusicSound", true)
+end
+
+-- Reset listener ke default Camera (karena audio di SoundService, otomatis 2D seimbang di headset & speaker)
+pcall(function()
+	SoundService:SetListener(Enum.ListenerType.Camera)
+end)
+
 local function applyVolume()
+	cancelClientFade()
 	local musicGroup = SoundService:FindFirstChild("MusicGroup")
 	if musicGroup and musicGroup:IsA("SoundGroup") then
-		cancelClientFade()
 		musicGroup.Volume = isMuted and 0 or userVolume
 	end
 end
 
 local function clientFadeIn(duration)
-	local musicGroup = SoundService:FindFirstChild("MusicGroup")
-	if not musicGroup or isMuted then return end
+	if isMuted then return end
 	cancelClientFade()
+	local musicGroup = SoundService:FindFirstChild("MusicGroup")
+	if not musicGroup or not musicGroup:IsA("SoundGroup") then return end
 	musicGroup.Volume = 0
 	local tween = TweenService:Create(
 		musicGroup,
-		TweenInfo.new(duration or CLIENT_FADE_IN_DUR, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		TweenInfo.new(duration or CLIENT_FADE_IN_DUR, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
 		{ Volume = userVolume }
 	)
 	currentFadeTween = tween
@@ -333,12 +398,12 @@ local function clientFadeIn(duration)
 end
 
 local function clientFadeOut(duration)
-	local musicGroup = SoundService:FindFirstChild("MusicGroup")
-	if not musicGroup then return end
 	cancelClientFade()
+	local musicGroup = SoundService:FindFirstChild("MusicGroup")
+	if not musicGroup or not musicGroup:IsA("SoundGroup") then return end
 	local tween = TweenService:Create(
 		musicGroup,
-		TweenInfo.new(duration or CLIENT_FADE_OUT_DUR, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		TweenInfo.new(duration or CLIENT_FADE_OUT_DUR, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
 		{ Volume = 0 }
 	)
 	currentFadeTween = tween
@@ -346,7 +411,7 @@ local function clientFadeOut(duration)
 end
 
 -- ====================================
--- SYNC HELPERS (DIPERBAIKI TOTAL)
+-- SYNC HELPERS (MULUS & BEBAS PATAH-PATAH)
 -- ====================================
 
 --- Hitung posisi lagu yang benar berdasarkan shared clock
@@ -359,12 +424,14 @@ end
 
 --- Flag sinkronisasi
 local syncInProgress = false
+local currentSyncId = 0
+local lastDriftCorrection = 0  -- timestamp koreksi drift terakhir
 
---- PERBAIKAN: Sinkronkan TimePosition SEKALI saat lagu baru/join
---- Mute → tunggu sound ready → seek ke posisi tepat → fade-in
---- Tidak ada koreksi berulang yang menyebabkan audio "kasar"
 local function syncServerSoundPosition(expectedSoundId, serverStartTime, duration)
+	currentSyncId = currentSyncId + 1
+	local mySyncId = currentSyncId
 	syncInProgress = true
+
 	local musicGroup = SoundService:FindFirstChild("MusicGroup")
 	if musicGroup and musicGroup:IsA("SoundGroup") then
 		cancelClientFade()
@@ -372,53 +439,94 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 	end
 
 	task.spawn(function()
-		local serverSound = SoundService:FindFirstChild("ServerMusicSound")
+		local function finishSync()
+			if mySyncId == currentSyncId then
+				syncInProgress = false
+				if not isMuted then
+					clientFadeIn(CLIENT_FADE_IN_DUR)
+				end
+			end
+		end
+
+		local serverSound = getServerSound()
 		if not serverSound or not serverSound:IsA("Sound") then
-			syncInProgress = false
-			if not isMuted then applyVolume() end
+			finishSync()
 			return
 		end
 
 		local targetSoundId = "rbxassetid://" .. tostring(expectedSoundId)
 
-		-- Tunggu SoundId tepat (replication delay)
+		-- Tunggu SoundId tepat (replication delay, maks 5 detik)
 		local waitStart = workspace:GetServerTimeNow()
 		while serverSound.SoundId ~= targetSoundId and (workspace:GetServerTimeNow() - waitStart) < 5 do
 			task.wait(0.05)
+			if mySyncId ~= currentSyncId then return end
 		end
 
 		if serverSound.SoundId ~= targetSoundId then
-			syncInProgress = false
-			if not isMuted then applyVolume() end
+			finishSync()
 			return
 		end
 
-		-- Tunggu sound loaded
-		if not serverSound.IsLoaded then
-			serverSound.Loaded:Wait()
+		-- Tunggu sound loaded dan TimeLength terdeteksi (maks 6 detik)
+		local loadStart = workspace:GetServerTimeNow()
+		while (not serverSound.IsLoaded or serverSound.TimeLength <= 0) and (workspace:GetServerTimeNow() - loadStart) < 6 do
+			task.wait(0.05)
+			if mySyncId ~= currentSyncId then return end
 		end
 
-		-- Tunggu playing
+		-- Tunggu playing (maks 5 detik)
 		waitStart = workspace:GetServerTimeNow()
 		while not serverSound.IsPlaying and (workspace:GetServerTimeNow() - waitStart) < 5 do
 			task.wait(0.05)
+			if mySyncId ~= currentSyncId then return end
 		end
 
-		-- PERBAIKAN: Hitung posisi tepat sekarang (setelah semua delay loading)
+		local maxLen = (serverSound.TimeLength > 0) and serverSound.TimeLength or duration
 		local correctPosition = calculateSyncPosition(serverStartTime, duration)
+		local actualPos = serverSound.TimePosition
+		local drift = math.abs(correctPosition - actualPos)
 
-		-- Set posisi SEKALI (ini satu-satunya tempat kita koreksi posisi)
-		if serverSound.IsPlaying and correctPosition > 0 then
-			serverSound.TimePosition = correctPosition
-			task.wait(0.05)  -- Beri waktu engine update
+		-- PERBAIKAN TOTAL: Hanya seek SEKALI dan hanya jika selisih > 1.2 detik
+		-- Jeda 0.35s selagi volume masih 0 agar buffer audio internal Roblox tenang sebelum unmuting/fade-in
+		if serverSound.IsPlaying and drift > 1.2 and correctPosition > 0 and (maxLen <= 0 or correctPosition < maxLen - 0.5) then
+			pcall(function()
+				serverSound.TimePosition = correctPosition
+			end)
+			task.wait(0.35)
+			if mySyncId ~= currentSyncId then return end
 		end
 
-		-- Selesai: fade-in
-		syncInProgress = false
-		if not isMuted then
-			clientFadeIn(CLIENT_FADE_IN_DUR)
-		end
+		lastDriftCorrection = workspace:GetServerTimeNow()
+		finishSync()
 	end)
+end
+
+--- Koreksi drift lembut: HANYA jika terjadi lag/desync parah (misal tab freeze)
+--- Threshold ditinggikan ke 6.0 detik agar TIDAK memotong audio saat lagu berjalan normal
+local function gentleDriftCorrect(serverStartTime, duration)
+	if syncInProgress or isMuted then return end
+	local now = workspace:GetServerTimeNow()
+	-- Jangan koreksi terlalu sering (min 10 detik antar koreksi)
+	if (now - lastDriftCorrection) < 10 then return end
+
+	local serverSound = getServerSound()
+	if not serverSound or not serverSound:IsA("Sound") or not serverSound.IsPlaying then return end
+
+	local expectedPos = calculateSyncPosition(serverStartTime, duration)
+	local actualPos = serverSound.TimePosition
+	local drift = math.abs(expectedPos - actualPos)
+
+	-- Hanya seek jika drift benar-benar parah (> 6.0 detik)
+	if drift > 6.0 then
+		local maxLen = (serverSound.TimeLength > 0) and serverSound.TimeLength or duration
+		if expectedPos > 0 and (maxLen <= 0 or expectedPos < maxLen - 0.5) then
+			pcall(function()
+				serverSound.TimePosition = expectedPos
+			end)
+			lastDriftCorrection = now
+		end
+	end
 end
 
 -- SUB-TAB BAR
@@ -535,12 +643,12 @@ setThumb = function(url, soundId)
 		thumbImg.Image = DEFAULT_THUMBNAIL
 		return
 	end
-	-- Tampilkan default dulu agar tidak hitam saat loading thumbnail kustom
-	thumbImg.Image = DEFAULT_THUMBNAIL
+
+	local currentTarget = resolved
+	thumbImg.Image = resolved
 	task.spawn(function()
-		thumbImg.Image = resolved
-		task.wait(2.5)
-		if thumbImg.Image == resolved and not thumbImg.IsLoaded then
+		task.wait(4)
+		if thumbImg.Image == currentTarget and not thumbImg.IsLoaded then
 			thumbImg.Image = DEFAULT_THUMBNAIL
 		end
 	end)
@@ -1077,7 +1185,7 @@ local loudnessAvg = 0
 local lastBeatTime = 0
 
 local function updateBeatAnalysis(dt, now)
-	local serverSound = SoundService:FindFirstChild("ServerMusicSound")
+	local serverSound = getServerSound()
 	local realLoudness = 0
 	if serverSound and serverSound.IsPlaying then
 		local ok, loudness = pcall(function() return serverSound.PlaybackLoudness end)
@@ -1195,8 +1303,7 @@ local function updateQueue()
 		reqLbl.BackgroundTransparency = 1; reqLbl.Text = "👤 "..(song.uploader or T.Unknown)
 		reqLbl.TextColor3 = C.QueueRequester; reqLbl.TextSize = 11; reqLbl.Font = Enum.Font.Gotham
 		reqLbl.TextTruncate = Enum.TextTruncate.AtEnd
-		reqLbl.TextXAlignment = Enum.TextXAlignment.Left; reqLbl.Parent = item; addSC(reqLbl,11)
-		local dur = songData.Duration or 0
+		local dur = tonumber(songData.Duration or songData.duration or song.Duration or song.duration or 0) or 0
 		if dur > 0 then
 			local durLbl = Instance.new("TextLabel")
 			durLbl.Size = UDim2.new(0.35,-8,1,0); durLbl.Position = UDim2.new(0.65,0,0,0)
@@ -1317,7 +1424,8 @@ local function updateFavorites()
 		ft.Size = UDim2.new(0,FAV_THUMB_SZ,0,FAV_THUMB_SZ)
 		ft.Position = UDim2.new(0,6,0.5,-FAV_THUMB_SZ/2); ft.BackgroundColor3 = C.FavThumb
 		ft.BorderSizePixel = 0; ft.ScaleType = Enum.ScaleType.Crop
-		ft.Image = resolveThumbnail(song.sampul or song.thumbnail); ft.Parent = item
+		local songId = song.id or song.sound_id or song.SoundId
+		ft.Image = resolveThumbnail(song.sampul or song.thumbnail, songId); ft.Parent = item
 		addCorner(ft, CORNER_SM)
 		local ix = FAV_THUMB_SZ + 12
 		local nameLbl = Instance.new("TextLabel")
@@ -1713,10 +1821,11 @@ musicBroadcast.OnClientEvent:Connect(function(broadcastType, payload)
 			clientState.serverStartTime = payload.ServerStartTime
 		end
 
-		-- PERBAIKAN: TIDAK ada koreksi posisi di sini!
-		-- Sebelumnya di sini ada auto-desync correction yang menyebabkan
-		-- audio "kasar" karena terus-menerus mengeset TimePosition.
-		-- Sekarang progress bar hanya menggunakan shared-clock interpolation.
+		-- Koreksi drift lembut: hanya berjalan jika selisih > 1.5 detik
+		-- Tidak menyebabkan audio kasar karena threshold tinggi dan cooldown 5 detik
+		if clientState.isPlaying and clientState.serverStartTime > 0 then
+			gentleDriftCorrect(clientState.serverStartTime, clientState.duration)
+		end
 	end
 end)
 
@@ -1819,7 +1928,7 @@ task.spawn(function()
 	task.wait(1)
 	loadFavorites()
 	isMuted    = MenuConfig.UserSettings and MenuConfig.UserSettings.muteMusic or false
-	userVolume = (MenuConfig.UserSettings and MenuConfig.UserSettings.musicVolume or 50) / 100
+	userVolume = (MenuConfig.UserSettings and MenuConfig.UserSettings.musicVolume or 100) / 100
 	refreshRoleUI()
 	requestSync:FireServer()
 	task.wait(0.5)
@@ -1829,20 +1938,10 @@ task.spawn(function()
 	switchSubTab("player")
 end)
 
-SoundService.ChildAdded:Connect(function(child)
-	if child.Name == "ServerMusicSound" then
-		task.wait(0.2)
-		if not syncInProgress then
-			applyVolume()
-		end
-		watchServerSound()
-	end
-end)
-
 local ssConn
 local function watchServerSound()
 	if ssConn then ssConn:Disconnect() end
-	local ss = SoundService:FindFirstChild("ServerMusicSound")
+	local ss = getServerSound()
 	if ss then
 		ssConn = ss:GetPropertyChangedSignal("IsPlaying"):Connect(function()
 			if ss.IsPlaying then
@@ -1850,12 +1949,27 @@ local function watchServerSound()
 				if not syncInProgress then
 					applyVolume()
 				end
-				-- PERBAIKAN: TIDAK ada koreksi posisi di sini!
-				-- Koreksi hanya dilakukan SEKALI oleh syncServerSoundPosition()
-				-- saat lagu baru dimulai atau player baru join.
-				-- Koreksi berulang di sini menyebabkan audio "kasar".
 			end
 		end)
 	end
 end
 watchServerSound()
+
+workspace.DescendantAdded:Connect(function(child)
+	if child.Name == "ServerMusicSound" and child:IsA("Sound") then
+		task.wait(0.2)
+		if not syncInProgress then
+			applyVolume()
+		end
+		watchServerSound()
+	end
+end)
+SoundService.ChildAdded:Connect(function(child)
+	if child.Name == "ServerMusicSound" and child:IsA("Sound") then
+		task.wait(0.2)
+		if not syncInProgress then
+			applyVolume()
+		end
+		watchServerSound()
+	end
+end)

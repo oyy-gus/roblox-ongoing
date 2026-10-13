@@ -34,6 +34,7 @@ function MusicQueueManager:AddToQueue(musicData, uploaderName, userId)
 		musicData = musicData,
 		uploader  = uploaderName,
 		userId    = userId,
+		Duration  = (musicData and (musicData.Duration or musicData.duration)) or 0,
 		addedTime = workspace:GetServerTimeNow(),  -- ← SHARED CLOCK
 	})
 
@@ -79,6 +80,23 @@ end
 
 function MusicQueueManager:GetUserQueueCount(userId)
 	return self.playerQueueCount[userId] or 0
+end
+
+-- Update durasi nyata pada entry queue berdasarkan musicId
+function MusicQueueManager:UpdateDuration(musicId, duration)
+	if not musicId or not duration or duration <= 0 then return false end
+	local updated = false
+	for _, entry in ipairs(self.queue) do
+		local entryId = entry.musicData and entry.musicData.id
+		if entryId == musicId then
+			entry.Duration = math.round(duration)
+			if entry.musicData then
+				entry.musicData.Duration = math.round(duration)
+			end
+			updated = true
+		end
+	end
+	return updated
 end
 
 function MusicQueueManager:Clear()

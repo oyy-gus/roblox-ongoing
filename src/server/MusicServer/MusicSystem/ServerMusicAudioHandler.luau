@@ -1,76 +1,161 @@
 -- ====================================
--- SERVER MUSIC AUDIO HANDLER (IMPROVED)
+-- SERVER MUSIC AUDIO HANDLER (2D MONO/BALANCED STEREO + PUNCHY BASS)
 -- Place in: ServerScriptService > MusicServer(Folder) > MusicSystem(Script) > ServerMusicAudioHandler(ModuleScript)
 -- ====================================
--- Changes:
---   ✅ Added FadeIn / FadeOut / PlayWithFade / StopWithFade using TweenService
---   ✅ Fade-out sebelum stop, fade-in setelah play
---   ✅ CancelFade() untuk membatalkan tween yang sedang berjalan
---   ✅ Volume dimulai dari 0, dikendalikan oleh server fade (client hanya kontrol SoundGroup)
+-- Fitur:
+--   ✅ 2D Global Audio di SoundService (100% seimbang di headset & speaker, bebas putaran kamera)
+--   ✅ Punchy Bass Boost: LowGain +4.5 dB (bass lebih nendang & berbobot, enak di headset & speaker)
+--   ✅ Clarity EQ: MidGain -0.4 dB (vokal bersih), HighGain +1.2 dB (treble renyah & jernih)
+--   ✅ Single Sound Source (Murni, tanpa gema/phase cancellation)
+--   ✅ Smooth Fade In & Fade Out menggunakan TweenService
+--   ✅ 100% Kompatibel dengan kontrol volume, mute, seek, dan beat visualizer
 
 local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
 
 local ServerMusicAudioHandler = {}
 ServerMusicAudioHandler.__index = ServerMusicAudioHandler
 
 local CONFIG = {
 	Audio = {
-		DefaultVolume  = 1,
-		FadeInDuration  = 0.8,
-		FadeOutDuration = 0.6,
+		DefaultVolume   = 1.0,  -- Standar 1.0 murni (mencegah digital clipping/distorsi)
+		FadeInDuration  = 1.2,  -- Transisi fade-in lebih mulus (1.2 detik)
+		FadeOutDuration = 1.0,  -- Transisi fade-out lebih halus (1.0 detik)
+		-- EQ: Bass Padat & Vokal Lebih Maju
+		EQ_LowGain      = 3.6,   -- Bass berbobot (+3.8 dB): padat dan punchy
+		EQ_MidGain      = 1.0,   -- Vokal dinaikkan (+1.2 dB): artikulasi lirik & vokal lebih jelas dan maju
+		EQ_HighGain     = 2.0,   -- Treble jernih & renyah (+2.4 dB)
+		-- Nuansa Akustik Ruangan Halus (Indoor Room Ambience)
+		Reverb_DecayTime = 1.05,  -- Durasi pantulan ruang pas (1.05 detik, tidak sepanjang 1.2s sebelumnya)
+		Reverb_Density   = 0.72,  -- Kepadatan pantulan akustik ruangan
+		Reverb_Diffusion = 0.8,   -- Penyebaran pantulan dinding yang halus
+		Reverb_DryLevel  = 0,     -- Suara asli lagu tetap 100% jernih & tajam
+		Reverb_WetLevel  = -14.5, -- Dinaikkan sedikit (-14.5 dB): pas di antara -16.5 dB dan batas -13 dB sebelumnya
 	},
 }
 
 function ServerMusicAudioHandler.new()
 	local self = setmetatable({}, ServerMusicAudioHandler)
-	self.serverSound    = nil
-	self.soundContainer = nil
-	self.musicGroup     = nil
-	self.currentSoundId = nil
-	self.isPlaying      = false
+	self.serverSound      = nil
+	self.musicGroup       = nil
+	self.currentSoundId   = nil
+	self.isPlaying        = false
 	self.currentFadeTween = nil
-	self:CreateSoundContainer()
+
+	-- Bersihkan node eksperimental dan part speaker di workspace
+	self:CleanupUnusedNodes()
+
+	self:CreateSoundGroup()
 	self:CreateServerSound()
+
 	return self
 end
 
 -- ====================================
--- SETUP
+-- CLEANUP
 -- ====================================
 
-function ServerMusicAudioHandler:CreateSoundContainer()
-	local soundService = game:GetService("SoundService")
-	local musicGroup = soundService:FindFirstChild("MusicGroup")
+function ServerMusicAudioHandler:CleanupUnusedNodes()
+	local toDestroy = {
+		"ServerAudioPlayer",
+		"FiestaAudioEqualizer",
+		"ServerAudioFader",
+		"ClientMusicFader",
+		"ClientAudioOutput",
+	}
+	for _, name in ipairs(toDestroy) do
+		local node = SoundService:FindFirstChild(name)
+		if node then
+			pcall(function() node:Destroy() end)
+		end
+	end
+
+	-- Hapus part speaker dari workspace agar audio murni 2D seimbang
+	local oldSpeakers = { "MusicSpeaker", "DefaultMusicSpeaker" }
+	for _, name in ipairs(oldSpeakers) do
+		local sp = workspace:FindFirstChild(name)
+		if sp then
+			pcall(function() sp:Destroy() end)
+		end
+	end
+end
+
+-- ====================================
+-- SOUND SETUP (2D SOUNDSERVICE)
+-- ====================================
+
+function ServerMusicAudioHandler:CreateSoundGroup()
+	local musicGroup = SoundService:FindFirstChild("MusicGroup")
 	if not musicGroup then
 		musicGroup        = Instance.new("SoundGroup")
 		musicGroup.Name   = "MusicGroup"
-		musicGroup.Parent = soundService
+		musicGroup.Parent = SoundService
 		musicGroup.Volume = 1
 	end
-	self.soundContainer = soundService
-	self.musicGroup     = musicGroup
-	return soundService
+	self.musicGroup = musicGroup
+	return musicGroup
 end
 
 function ServerMusicAudioHandler:CreateServerSound()
-	if self.serverSound and self.serverSound.Parent then return self.serverSound end
+	if self.serverSound and self.serverSound.Parent == SoundService then
+		return self.serverSound
+	end
 	if self.serverSound then
 		pcall(function() self.serverSound:Stop(); self.serverSound:Destroy() end)
 	end
-	if not self.soundContainer then self:CreateSoundContainer() end
-	local existing = self.soundContainer:FindFirstChild("ServerMusicSound")
+	if not self.musicGroup then self:CreateSoundGroup() end
+
+	-- Hapus jika sound ada di Workspace
+	local straySound = workspace:FindFirstChild("ServerMusicSound", true)
+	if straySound and straySound:IsA("Sound") then
+		pcall(function() straySound:Destroy() end)
+	end
+
+	local existing = SoundService:FindFirstChild("ServerMusicSound")
 	if existing and existing:IsA("Sound") then
 		self.serverSound = existing
-		return existing
+	else
+		local sound = Instance.new("Sound")
+		sound.Name       = "ServerMusicSound"
+		sound.Parent     = SoundService -- 2D Global Audio (bebas dari rotasi kamera)
+		sound.Volume     = 0
+		sound.Looped     = false
+		self.serverSound = sound
 	end
-	local sound = Instance.new("Sound")
-	sound.Name       = "ServerMusicSound"
-	sound.Parent     = self.soundContainer
-	sound.Volume     = 0   -- Dimulai dari 0, fade-in akan menaikkan
-	sound.Looped     = false
-	sound.SoundGroup = self.musicGroup
-	self.serverSound = sound
-	return sound
+
+	self.serverSound.SoundGroup = self.musicGroup
+
+	-- Pasang Equalizer
+	local eq = self.serverSound:FindFirstChild("FiestaEqualizer")
+	if not eq or not eq:IsA("EqualizerSoundEffect") then
+		eq = Instance.new("EqualizerSoundEffect")
+		eq.Name   = "FiestaEqualizer"
+		eq.Parent = self.serverSound
+	end
+	eq.LowGain  = CONFIG.Audio.EQ_LowGain
+	eq.MidGain  = CONFIG.Audio.EQ_MidGain
+	eq.HighGain = CONFIG.Audio.EQ_HighGain
+
+	-- Pasang Reverb: Nuansa Akustik Ruangan (Indoor Room / Venue Ambience)
+	local reverb = self.serverSound:FindFirstChild("FiestaReverb")
+	if not reverb or not reverb:IsA("ReverbSoundEffect") then
+		reverb = Instance.new("ReverbSoundEffect")
+		reverb.Name   = "FiestaReverb"
+		reverb.Parent = self.serverSound
+	end
+	reverb.DecayTime = CONFIG.Audio.Reverb_DecayTime
+	reverb.Density   = CONFIG.Audio.Reverb_Density
+	reverb.Diffusion = CONFIG.Audio.Reverb_Diffusion
+	reverb.DryLevel  = CONFIG.Audio.Reverb_DryLevel
+	reverb.WetLevel  = CONFIG.Audio.Reverb_WetLevel
+
+	-- Hapus Compressor jika ada agar dinamika kick bass & musik bebas bergerak lepas
+	local comp = self.serverSound:FindFirstChild("FiestaCompressor")
+	if comp then
+		pcall(function() comp:Destroy() end)
+	end
+
+	return self.serverSound
 end
 
 -- ====================================
@@ -88,12 +173,14 @@ end
 function ServerMusicAudioHandler:FadeIn(duration, targetVolume)
 	self:CancelFade()
 	if not self.serverSound then return nil end
+
 	local dur    = duration or CONFIG.Audio.FadeInDuration
 	local target = targetVolume or CONFIG.Audio.DefaultVolume
+
 	self.serverSound.Volume = 0
 	local tween = TweenService:Create(
 		self.serverSound,
-		TweenInfo.new(dur, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		TweenInfo.new(dur, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
 		{ Volume = target }
 	)
 	self.currentFadeTween = tween
@@ -108,19 +195,22 @@ function ServerMusicAudioHandler:FadeOut(duration, callback)
 		if callback then callback() end
 		return nil
 	end
+
 	local dur = duration or CONFIG.Audio.FadeOutDuration
 	local tween = TweenService:Create(
 		self.serverSound,
-		TweenInfo.new(dur, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+		TweenInfo.new(dur, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
 		{ Volume = 0 }
 	)
 	self.currentFadeTween = tween
 	tween:Play()
+
 	if callback then
 		tween.Completed:Connect(function()
 			callback()
 		end)
 	end
+
 	return tween
 end
 
@@ -128,26 +218,55 @@ end
 -- PLAYBACK
 -- ====================================
 
---- Play tanpa fade (internal use). Volume di-set 0.
 function ServerMusicAudioHandler:Play(soundId, timePosition)
-	if not self.serverSound or not self.serverSound.Parent then self:CreateServerSound() end
+	if not self.serverSound or self.serverSound.Parent ~= SoundService then
+		self:CreateServerSound()
+	end
 	self:CancelFade()
-	if self.serverSound.IsPlaying then self.serverSound:Stop() end
+
+	if self.serverSound.IsPlaying then
+		pcall(function() self.serverSound:Stop() end)
+	end
+
 	self.serverSound.Volume       = 0
-	self.serverSound.SoundId      = "rbxassetid://" .. soundId
+	self.serverSound.SoundId      = "rbxassetid://" .. tostring(soundId)
 	self.serverSound.TimePosition = timePosition or 0
-	local success = pcall(function() self.serverSound:Play() end)
+
+	local eq = self.serverSound:FindFirstChild("FiestaEqualizer")
+	if eq and eq:IsA("EqualizerSoundEffect") then
+		eq.LowGain  = CONFIG.Audio.EQ_LowGain
+		eq.MidGain  = CONFIG.Audio.EQ_MidGain
+		eq.HighGain = CONFIG.Audio.EQ_HighGain
+	end
+
+	local reverb = self.serverSound:FindFirstChild("FiestaReverb")
+	if reverb and reverb:IsA("ReverbSoundEffect") then
+		reverb.DecayTime = CONFIG.Audio.Reverb_DecayTime
+		reverb.Density   = CONFIG.Audio.Reverb_Density
+		reverb.Diffusion = CONFIG.Audio.Reverb_Diffusion
+		reverb.DryLevel  = CONFIG.Audio.Reverb_DryLevel
+		reverb.WetLevel  = CONFIG.Audio.Reverb_WetLevel
+	end
+
+	local comp = self.serverSound:FindFirstChild("FiestaCompressor")
+	if comp then
+		pcall(function() comp:Destroy() end)
+	end
+
+	local success = pcall(function()
+		self.serverSound:Play()
+	end)
+
 	if success then
 		self.currentSoundId = soundId
 		self.isPlaying      = true
 		return true
 	else
-		warn("[ServerAudio] Failed to play:", soundId)
+		warn("[ServerAudio] Failed to play sound:", soundId)
 		return false
 	end
 end
 
---- Play lagu baru dengan fade-in
 function ServerMusicAudioHandler:PlayWithFade(soundId, timePosition, fadeDuration)
 	local success = self:Play(soundId, timePosition)
 	if success then
@@ -156,34 +275,32 @@ function ServerMusicAudioHandler:PlayWithFade(soundId, timePosition, fadeDuratio
 	return success
 end
 
---- Stop dengan fade-out terlebih dahulu
 function ServerMusicAudioHandler:StopWithFade(fadeDuration, callback)
-	if not self.serverSound or not self.isPlaying then
+	if not self.isPlaying or not self.serverSound then
 		self.isPlaying      = false
 		self.currentSoundId = nil
 		if callback then callback() end
 		return
 	end
+
 	self:FadeOut(fadeDuration or CONFIG.Audio.FadeOutDuration, function()
-		pcall(function() self.serverSound:Stop() end)
-		self.isPlaying      = false
-		self.currentSoundId = nil
+		self:Stop()
 		if callback then callback() end
 	end)
 end
 
---- Stop langsung tanpa fade
 function ServerMusicAudioHandler:Stop()
 	self:CancelFade()
-	if not self.serverSound then return end
-	pcall(function() self.serverSound:Stop() end)
-	self.serverSound.Volume = 0
+	if self.serverSound then
+		pcall(function() self.serverSound:Stop() end)
+		self.serverSound.Volume = 0
+	end
 	self.isPlaying      = false
 	self.currentSoundId = nil
 end
 
 -- ====================================
--- STATUS
+-- STATUS & ACCESSORS
 -- ====================================
 
 function ServerMusicAudioHandler:IsPlaying()
@@ -219,6 +336,7 @@ function ServerMusicAudioHandler:Cleanup()
 		pcall(function() self.serverSound:Stop(); self.serverSound:Destroy() end)
 		self.serverSound = nil
 	end
+	self:CleanupUnusedNodes()
 end
 
 return ServerMusicAudioHandler

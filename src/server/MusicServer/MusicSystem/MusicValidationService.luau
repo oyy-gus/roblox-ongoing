@@ -50,10 +50,11 @@ function MusicValidationService:ValidateMusicId(musicId)
 	end)
 
 	if success and info and info.AssetTypeId == 3 then
+		local soundIdStr = tostring(musicId)
 		local data = {
-			id       = musicId,
+			id       = soundIdStr,
 			judul    = info.Name:sub(1, 100),
-			sampul   = "rbxassetid://118306547253139",
+			sampul   = string.format("rbxthumb://type=Asset&id=%s&w=420&h=420", soundIdStr),
 			Duration = 0,
 		}
 		self.musicIdCache[musicId] = {

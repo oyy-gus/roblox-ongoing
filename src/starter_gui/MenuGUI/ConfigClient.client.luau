@@ -195,7 +195,7 @@ local DEFAULT_SETTINGS = {
 	hideOverhead = false,
 	hideShadow = false,
 	muteMusic = false,
-	musicVolume = 50
+	musicVolume = 100
 }
 
 -- ========================================
@@ -265,7 +265,7 @@ end
 -- MUSIC SYSTEM FUNCTIONS
 -- ========================================
 local function getMusicGroup()
-	return SoundService:FindFirstChild("ServerMusicSound")
+	return SoundService:FindFirstChild("MusicGroup") or SoundService:FindFirstChild("ServerMusicSound")
 end
 
 local function setMusicMuted(muted)
@@ -275,7 +275,7 @@ local function setMusicMuted(muted)
 		if muted then
 			musicGroup.Volume = 0
 		else
-			musicGroup.Volume = (userSettings.musicVolume or 50) / 100
+			musicGroup.Volume = (userSettings.musicVolume or 100) / 100
 		end
 	end
 end
@@ -848,7 +848,7 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 		Font = Enum.Font.GothamSemibold,
 	}, item)
 
-	local currentValue = userSettings[settingKey] or 50
+	local currentValue = userSettings[settingKey] or (DEFAULT_SETTINGS[settingKey] or 100)
 	local progress = (currentValue - minValue) / (maxValue - minValue)
 	local sliderY = 38
 

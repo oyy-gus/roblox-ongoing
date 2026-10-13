@@ -36,10 +36,11 @@ local function doFetch()
 			if decoded and decoded.dj then
 				for _, song in ipairs(decoded.dj) do
 					if song.sound_id and song.title then
+						local soundIdStr = tostring(song.sound_id)
 						table.insert(list, {
-							id     = tostring(song.sound_id),
+							id     = soundIdStr,
 							judul  = song.title,
-							sampul = DEFAULT_SAMPUL,
+							sampul = song.thumbnail or song.sampul or string.format("rbxthumb://type=Asset&id=%s&w=420&h=420", soundIdStr),
 						})
 					end
 				end
