@@ -73,11 +73,11 @@ end
 
 local C = {
 	SubTabActive       = Color3.fromHex("#FFFFFF"),
-	SubTabInactive     = Color3.fromHex("#151515"),
-	SubTabDisabled     = Color3.fromHex("#1C1C1C"),
-	SubTabText         = Color3.fromHex("#A0A0A0"),
+	SubTabInactive     = Color3.fromHex("#121212"),
+	SubTabDisabled     = Color3.fromHex("#181818"),
+	SubTabText         = Color3.fromHex("#8E8E93"),
 	SubTabTextActive   = Color3.fromHex("#111111"),
-	SubTabTextDisabled = Color3.fromHex("#555555"),
+	SubTabTextDisabled = Color3.fromHex("#4D4D4D"),
 	NowPlayingBg       = Color3.fromHex("#151515"),
 	ThumbnailBg        = Color3.fromHex("#080808"),
 	SongNameText       = Color3.fromHex("#FFFFFF"),
@@ -97,41 +97,45 @@ local C = {
 	VoteYesBtn         = Color3.fromHex("#FFFFFF"),
 	VoteNoBtn          = Color3.fromHex("#2E2E2E"),
 	VoteBg             = Color3.fromHex("#151515"),
-	InputBg            = Color3.fromHex("#111111"),
+	InputBg            = Color3.fromHex("#121212"),
 	InputText          = Color3.fromHex("#FFFFFF"),
-	QueueBg            = Color3.fromHex("#121212"),
-	QueueItem          = Color3.fromHex("#1C1C1C"),
+	QueueBg            = Color3.fromHex("#0F0F0F"),
+	QueueItem          = Color3.fromHex("#151515"),
 	QueueSongText      = Color3.fromHex("#FFFFFF"),
-	QueueRequester     = Color3.fromHex("#A0A0A0"),
+	QueueRequester     = Color3.fromHex("#8E8E93"),
 	ScrollBar          = Color3.fromHex("#353535"),
-	SongsBg            = Color3.fromHex("#121212"),
-	SongsItem          = Color3.fromHex("#1C1C1C"),
+	SongsBg            = Color3.fromHex("#0F0F0F"),
+	SongsItem          = Color3.fromHex("#151515"),
 	SongText           = Color3.fromHex("#FFFFFF"),
-	FavBg              = Color3.fromHex("#121212"),
-	FavItem            = Color3.fromHex("#1C1C1C"),
+	FavBg              = Color3.fromHex("#0F0F0F"),
+	FavItem            = Color3.fromHex("#151515"),
 	FavSongText        = Color3.fromHex("#FFFFFF"),
 	FavThumb           = Color3.fromHex("#080808"),
-	FavPlayBtn         = Color3.fromHex("#262626"),
-	FavRemoveBtn       = Color3.fromHex("#222222"),
+	FavPlayBtn         = Color3.fromHex("#222222"),
+	FavRemoveBtn       = Color3.fromHex("#202020"),
 	FavBtnText         = Color3.fromHex("#FFFFFF"),
 	FavLocked          = Color3.fromHex("#888888"),
 	ClearBtn           = Color3.fromHex("#222222"),
-	Border             = Color3.fromHex("#353535"),
+	Border             = Color3.fromHex("#242424"),
 }
 
 local T = {
-	SubTabPlayer      = "▶  Pemutar",
+	SubTabPlayer      = "🎧  Pemutar",
 	SubTabSongs       = "🎵  Lagu",
 	SubTabFavorites   = "⭐  Favorit",
 	SubTabFavLocked   = "🔒  Favorit",
 	NoSongPlaying     = "Tidak ada lagu diputar",
 	RequestedBy       = "Diminta: ",
 	AutoplayLabel     = "🎵  Autoplay",
-	QueueTitle        = "Antrean Lagu",
-	QueueEmpty        = "Antrean kosong — Autoplay aktif",
-	DefaultSongs      = "Lagu Tersedia",
-	MyFavorites       = "Favorit Saya",
-	FavoritesLocked   = "🔒  Fitur Favorit hanya untuk VIP+",
+	QueueTitle        = "📋  Antrean Lagu",
+	QueueEmpty        = "Antrean Kosong",
+	QueueEmptySub     = "Autoplay aktif — Lagu diputar otomatis oleh sistem",
+	DefaultSongs      = "🎵  Lagu Tersedia",
+	MyFavorites       = "⭐  Favorit Saya",
+	FavoritesLocked   = "Fitur Khusus VIP+",
+	FavoritesLockedSub= "Simpan daftar lagu favoritmu tanpa batas dengan status VIP ke atas.",
+	FavEmpty          = "Belum Ada Lagu Favorit",
+	FavEmptySub       = "Tekan tombol bintang (★) pada Pemutar untuk menyimpan lagu di sini.",
 	DurationFormat    = "%s / %s",
 	Unknown           = "Tidak Diketahui",
 	MuteBtn           = "🔊  Mute Musik",
@@ -141,8 +145,8 @@ local T = {
 	VoteYes           = "✓  Ya",
 	VoteNo            = "✕  Tidak",
 	AddFavorite       = "★",
-	AddToQueue        = "Tambah",
-	SongIDPlaceholder = "Masukkan ID Lagu...",
+	AddToQueue        = "+ Antre",
+	SongIDPlaceholder = "🎵  Masukkan ID lagu Roblox (cth: 1843404007)...",
 	Remove            = "✕",
 	SuccessTitle      = "Sukses",
 	ErrorTitle        = "Error",
@@ -151,7 +155,7 @@ local T = {
 	MusicTitle        = "Musik",
 	SearchTitle       = "Pencarian",
 	NoSongToSkip      = "Tidak ada lagu yang sedang diputar!",
-	SearchPlaceholder = "🔍  Cari lagu...",
+	SearchPlaceholder = "🔍  Cari lagu berdasarkan judul...",
 }
 
 local DEFAULT_THUMBNAIL = "rbxassetid://118306547253139"
@@ -206,36 +210,70 @@ local function resolveThumbnail(thumb, soundId)
 	return rbxThumbUrl or DEFAULT_THUMBNAIL
 end
 
--- setThumb() dideklarasikan setelah thumbImg dibuat (di bawah)
-local setThumb
+local DIM = {
+	SUBTAB_H           = 36,
+	NP_H               = 388,  -- Tinggi penuh viewport kartu Now Playing (sesuai tinggi contentContainer 450-46-16)
+	THUMB_SZ           = 70,
+	PROGRESS_H         = 5,
+	CONTROLS_H         = 32,
+	VOTE_H             = 62,
+	REQ_H              = 40,
+	REQ_BTN_W          = 84,
+	QTITLE_H           = 26,
+	QUEUE_H            = 150,
+	QUEUE_ITEM_H       = 44,
+	SONG_ITEM_H        = 46,
+	FAV_ITEM_H         = 50,
+	FAV_THUMB_SZ       = 38,
+	SEARCH_H           = 38,
+	CLEAR_BTN_W        = 32,
+	PAD                = 8,
+	CORNER_SM          = 6,
+	CORNER_MD          = 8,
+	CORNER_LG          = 10,
+	SCROLL_PAD         = 6,
+	QUEUE_CARD_H       = 40 + 8 + 26 + 6 + 150 + 16,
+	PLAYLIST_CARD_H    = 78,
+	PLAYLIST_SECTION_H = 26 + 8 + 78 + 20,
+	SEARCH_SECTION_H   = 38 + 8 + 32 + 16,
+}
 
-local SUBTAB_H   = 34
-local NP_H       = 350  -- Tinggi penuh viewport kartu Now Playing (full-view sampai batas bawah panel)
-local THUMB_SZ   = 70
-local PROGRESS_H = 5
-local CONTROLS_H = 32
-local VOTE_H     = 62
-local REQ_H      = 36
-local REQ_BTN_W  = 76
-local QTITLE_H   = 22
-local QUEUE_H    = 140
-local QUEUE_ITEM_H = 38
-local SONG_ITEM_H  = 42
-local FAV_ITEM_H   = 44
-local FAV_THUMB_SZ = 36
-local SEARCH_H   = 34
-local CLEAR_BTN_W = 34
-local PAD        = 8
-local CORNER_SM  = 6
-local CORNER_MD  = 8
-local SCROLL_PAD = 6
+local UI = {
+	navButtons     = {},
+	visualizerBars = {},
+	filterButtons  = {},
+}
 
--- Area bawah: req input + queue title + queue scroll
-local BOTTOM_H = REQ_H + PAD + QTITLE_H + 4 + QUEUE_H + PAD  -- ~218px
-local CANVAS_H = NP_H + PAD + BOTTOM_H + 20
+local function setThumb(url, soundId)
+	if not UI.thumbImg then return end
+	local resolved = resolveThumbnail(url, soundId)
+	if UI.thumbImg.Image == resolved then return end
+	if resolved == DEFAULT_THUMBNAIL then
+		UI.thumbImg.Image = DEFAULT_THUMBNAIL
+		return
+	end
+
+	local currentTarget = resolved
+	UI.thumbImg.Image = resolved
+	task.spawn(function()
+		task.wait(4)
+		if UI.thumbImg and UI.thumbImg.Image == currentTarget and not UI.thumbImg.IsLoaded then
+			UI.thumbImg.Image = DEFAULT_THUMBNAIL
+		end
+	end)
+end
 
 local function addCorner(p, r)
-	local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, r or CORNER_SM); c.Parent = p; return c
+	local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, r or DIM.CORNER_SM); c.Parent = p; return c
+end
+local function addStroke(p, color, thickness, transparency)
+	local s = Instance.new("UIStroke")
+	s.Thickness = thickness or 1
+	s.Color = color or Color3.fromHex("#242424")
+	s.Transparency = transparency or 0
+	s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	s.Parent = p
+	return s
 end
 local function addSC(p, mx, mn)
 	local c = Instance.new("UITextSizeConstraint"); c.MaxTextSize = mx; c.MinTextSize = mn or 8; c.Parent = p; return c
@@ -309,6 +347,7 @@ local filteredSongs      = {}
 local currentSearchQuery = ""
 local lastNoResults      = 0
 local canFavorite        = false
+local activePlaylistType = "all"
 
 local voteSkipState = {
 	active        = false,
@@ -529,636 +568,75 @@ local function gentleDriftCorrect(serverStartTime, duration)
 	end
 end
 
--- SUB-TAB BAR
-local subTabFrame = Instance.new("Frame")
-subTabFrame.Name = "SubTabs"; subTabFrame.Size = UDim2.new(1,0,0,SUBTAB_H)
-subTabFrame.BackgroundTransparency = 1; subTabFrame.Parent = musicPage
-
-local function makeSubTab(name, text, posX, active)
-	local btn = Instance.new("TextButton")
-	btn.Name = name; btn.Text = text
-	btn.Size = UDim2.new(0.32,0,1,0); btn.Position = UDim2.new(posX,0,0,0)
-	btn.BackgroundColor3 = active and C.SubTabActive or C.SubTabInactive
-	btn.BorderSizePixel = 0
-	btn.TextColor3 = active and C.SubTabTextActive or C.SubTabText
-	btn.TextSize = 13; btn.Font = Enum.Font.GothamBold
-	btn.ClipsDescendants = true; btn.AutoButtonColor = false; btn.Parent = subTabFrame
-	addCorner(btn, CORNER_SM); addSC(btn, 14)
-	if active then addGradient(btn, 90, false) end
-	return btn
-end
-
-local playerSubTab    = makeSubTab("PlayerTab",    T.SubTabPlayer,    0,    true)
-local songsSubTab     = makeSubTab("SongsTab",     T.SubTabSongs,     0.34, false)
-local favoritesSubTab = makeSubTab("FavoritesTab", T.SubTabFavorites, 0.68, false)
-
-local musicContent = Instance.new("Frame")
-musicContent.Name = "MusicContent"
-musicContent.Size = UDim2.new(1,0,1,-(SUBTAB_H+PAD))
-musicContent.Position = UDim2.new(0,0,0,SUBTAB_H+PAD)
-musicContent.BackgroundTransparency = 1
-musicContent.ClipsDescendants = true; musicContent.Parent = musicPage
-
--- PLAYER PAGE
-local playerPage = Instance.new("Frame")
-playerPage.Name = "PlayerPage"; playerPage.Size = UDim2.new(1,0,1,0)
-playerPage.BackgroundTransparency = 1; playerPage.ClipsDescendants = true; playerPage.Parent = musicContent
-
-local playerScroll = Instance.new("ScrollingFrame")
-playerScroll.Name = "PlayerScroll"; playerScroll.Size = UDim2.new(1,0,1,0)
-playerScroll.BackgroundTransparency = 1; playerScroll.BorderSizePixel = 0
-playerScroll.ScrollBarThickness = 5; playerScroll.ScrollBarImageColor3 = C.ScrollBar
-playerScroll.CanvasSize = UDim2.new(0, 0, 0, CANVAS_H)
-playerScroll.ClipsDescendants = true; playerScroll.Parent = playerPage
-setupFixedScroll(playerScroll)
-
--- NowPlaying: card yang memenuhi seluruh tinggi layar tampilan awal (full-view)
-local nowPlayingFrame = Instance.new("Frame")
-nowPlayingFrame.Name = "NowPlaying"
-nowPlayingFrame.Size = UDim2.new(1, -6, 0, NP_H)
-nowPlayingFrame.Position = UDim2.new(0, 0, 0, 0)
-nowPlayingFrame.BackgroundColor3 = Color3.fromHex("#080808")
-nowPlayingFrame.BorderSizePixel = 0
-nowPlayingFrame.ClipsDescendants = true
-nowPlayingFrame.Parent = playerScroll
-addCorner(nowPlayingFrame, 12)
-
--- Animated Monochrome Stroke for NowPlaying
-local npStroke = Instance.new("UIStroke")
-npStroke.Name = "NPStroke"; npStroke.Thickness = 1.2; npStroke.Color = Color3.fromRGB(255,255,255)
-npStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; npStroke.Parent = nowPlayingFrame
-
-local npStrokeGrad = Instance.new("UIGradient")
-npStrokeGrad.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromHex("#151515")),
-	ColorSequenceKeypoint.new(0.5, Color3.fromHex("#FFFFFF")),
-	ColorSequenceKeypoint.new(1, Color3.fromHex("#353535")),
-})
-npStrokeGrad.Rotation = 45; npStrokeGrad.Parent = npStroke
-
--- Thumbnail: full-bleed background (fills entire card)
-local thumbImg = Instance.new("ImageLabel")
-thumbImg.Name = "Thumbnail"
-thumbImg.Size = UDim2.new(1, 0, 1, 0)
-thumbImg.Position = UDim2.new(0, 0, 0, 0)
-thumbImg.BackgroundTransparency = 1
-thumbImg.BorderSizePixel = 0
-thumbImg.ScaleType = Enum.ScaleType.Crop
-thumbImg.ImageTransparency = 0
-thumbImg.Image = DEFAULT_THUMBNAIL
-thumbImg.ZIndex = 1
-thumbImg.Parent = nowPlayingFrame
-
--- Bottom gradient overlay for text readability (bayangan hitam ke transparan dari judul ke progress bar)
-local darkOverlay = Instance.new("Frame")
-darkOverlay.Name = "DarkOverlay"
-darkOverlay.Size = UDim2.new(1, 0, 0, 160)
-darkOverlay.Position = UDim2.new(0, 0, 1, -160)
-darkOverlay.BackgroundColor3 = Color3.fromHex("#000000")
-darkOverlay.BackgroundTransparency = 0
-darkOverlay.BorderSizePixel = 0
-darkOverlay.ZIndex = 2
-darkOverlay.Parent = nowPlayingFrame
-addCorner(darkOverlay, 12)
-
-local overlayGrad = Instance.new("UIGradient")
-overlayGrad.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromHex("#000000")),
-	ColorSequenceKeypoint.new(1, Color3.fromHex("#000000")),
-})
-overlayGrad.Transparency = NumberSequence.new({
-	NumberSequenceKeypoint.new(0, 1.0),     -- Transparan di atas (area tengah gambar)
-	NumberSequenceKeypoint.new(0.40, 0.75), -- Bayangan lembut transparan mulai di atas judul lagu
-	NumberSequenceKeypoint.new(0.70, 0.35), -- Bayangan sedang di area requester & visualizer
-	NumberSequenceKeypoint.new(1.0, 0.05),  -- Gelap pekat di dasar area progress bar
-})
-overlayGrad.Rotation = 90
-overlayGrad.Parent = darkOverlay
-
--- setThumb(): Set thumbnail dengan fallback ke DEFAULT_THUMBNAIL
-setThumb = function(url, soundId)
-	local resolved = resolveThumbnail(url, soundId)
-	if thumbImg.Image == resolved then return end
-	if resolved == DEFAULT_THUMBNAIL then
-		thumbImg.Image = DEFAULT_THUMBNAIL
-		return
-	end
-
-	local currentTarget = resolved
-	thumbImg.Image = resolved
-	task.spawn(function()
-		task.wait(4)
-		if thumbImg.Image == currentTarget and not thumbImg.IsLoaded then
-			thumbImg.Image = DEFAULT_THUMBNAIL
+-- ====================================
+-- DYNAMIC SCROLL LAYOUT CALCULATION
+-- ====================================
+local function getViewportHeight()
+	local panelH = 450
+	local headerH = 46
+	if MenuConfig and MenuConfig.Config then
+		if MenuConfig.Config.PanelSize and MenuConfig.Config.PanelSize.Height then
+			panelH = MenuConfig.Config.PanelSize.Height
 		end
-	end)
-end
-
--- "NOW PLAYING" badge (top-left)
-local npBadge = Instance.new("Frame")
-npBadge.Name = "Badge"
-npBadge.Size = UDim2.new(0, 90, 0, 18)
-npBadge.Position = UDim2.new(0, 8, 0, 8)
-npBadge.BackgroundColor3 = Color3.fromHex("#080808")
-npBadge.BackgroundTransparency = 0.15
-npBadge.BorderSizePixel = 0
-npBadge.ZIndex = 4
-npBadge.Parent = nowPlayingFrame
-addCorner(npBadge, 9)
-
-local badgeStroke = Instance.new("UIStroke")
-badgeStroke.Thickness = 1
-badgeStroke.Color = Color3.fromHex("#505050")
-badgeStroke.Transparency = 0.2
-badgeStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-badgeStroke.Parent = npBadge
-
-local badgeDot = Instance.new("Frame")
-badgeDot.Name = "Dot"
-badgeDot.Size = UDim2.new(0, 5, 0, 5)
-badgeDot.Position = UDim2.new(0, 8, 0.5, -2)
-badgeDot.BackgroundColor3 = Color3.fromHex("#FFFFFF")
-badgeDot.BorderSizePixel = 0
-badgeDot.ZIndex = 5
-badgeDot.Parent = npBadge
-addCorner(badgeDot, 3)
-
-local badgeText = Instance.new("TextLabel")
-badgeText.Name = "Text"
-badgeText.Size = UDim2.new(1, -20, 1, 0)
-badgeText.Position = UDim2.new(0, 18, 0, 0)
-badgeText.BackgroundTransparency = 1
-badgeText.Text = "NOW PLAYING"
-badgeText.TextColor3 = Color3.fromHex("#FFFFFF")
-badgeText.TextSize = 9
-badgeText.Font = Enum.Font.GothamBold
-badgeText.TextXAlignment = Enum.TextXAlignment.Left
-badgeText.ZIndex = 5
-badgeText.Parent = npBadge
-
--- Favorite Button (top-right)
-local addFavBtn = Instance.new("TextButton")
-addFavBtn.Name = "AddFavBtn"
-addFavBtn.Text = T.AddFavorite
-addFavBtn.Size = UDim2.new(0, 28, 0, 28)
-addFavBtn.Position = UDim2.new(1, -36, 0, 8)
-addFavBtn.BackgroundColor3 = Color3.fromHex("#1A1A1A")
-addFavBtn.BackgroundTransparency = 0.1
-addFavBtn.BorderSizePixel = 0
-addFavBtn.TextColor3 = Color3.fromHex("#FFFFFF")
-addFavBtn.TextSize = 15
-addFavBtn.Font = Enum.Font.GothamBold
-addFavBtn.Visible = false
-addFavBtn.AutoButtonColor = false
-addFavBtn.ZIndex = 5
-addFavBtn.Parent = nowPlayingFrame
-addCorner(addFavBtn, 14)
-
-local favBtnStroke = Instance.new("UIStroke")
-favBtnStroke.Thickness = 1
-favBtnStroke.Color = Color3.fromHex("#505050")
-favBtnStroke.Transparency = 0.2
-favBtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-favBtnStroke.Parent = addFavBtn
-
-addFavBtn.MouseEnter:Connect(function()
-	if canFavorite then
-		TweenService:Create(addFavBtn, TweenInfo.new(0.15), {
-			BackgroundColor3 = Color3.fromHex("#333333"),
-		}):Play()
+		if MenuConfig.Config.HeaderHeight then
+			headerH = MenuConfig.Config.HeaderHeight
+		end
 	end
-end)
-addFavBtn.MouseLeave:Connect(function()
-	if canFavorite then
-		TweenService:Create(addFavBtn, TweenInfo.new(0.15), {
-			BackgroundColor3 = Color3.fromHex("#1A1A1A"),
-		}):Play()
+	local mainPanel = MenuConfig.GUI and MenuConfig.GUI.MainPanel
+	if mainPanel and mainPanel.Size.Y.Offset > 0 then
+		panelH = mainPanel.Size.Y.Offset
 	end
-end)
-
--- Info overlay: song name + requester at bottom (above progress bar)
-local npContent = Instance.new("Frame")
-npContent.Name = "NPContent"
-npContent.Size = UDim2.new(1, -16, 0, 72)
-npContent.Position = UDim2.new(0, 8, 1, -(72 + 30))  -- 30 = progressFrame height + gap
-npContent.BackgroundTransparency = 1
-npContent.ZIndex = 10
-npContent.Parent = nowPlayingFrame
-
--- Song Title
-local songNameLbl = Instance.new("TextLabel")
-songNameLbl.Name = "SongName"
-songNameLbl.Text = T.NoSongPlaying
-songNameLbl.Size = UDim2.new(1, 0, 0, 24)
-songNameLbl.Position = UDim2.new(0, 0, 0, 0)
-songNameLbl.BackgroundTransparency = 1
-songNameLbl.TextColor3 = Color3.fromHex("#FFFFFF")
-songNameLbl.TextSize = 14
-songNameLbl.Font = Enum.Font.GothamBold
-songNameLbl.TextWrapped = false
-songNameLbl.TextTruncate = Enum.TextTruncate.AtEnd
-songNameLbl.TextXAlignment = Enum.TextXAlignment.Left
-songNameLbl.TextStrokeTransparency = 0.75
-songNameLbl.TextStrokeColor3 = Color3.new(0, 0, 0)
-songNameLbl.ZIndex = 12
-songNameLbl.Parent = npContent
-addSC(songNameLbl, 15)
-
--- Requester / Artist (terang, tajam, di atas overlay)
-local requesterLbl = Instance.new("TextLabel")
-requesterLbl.Name = "Requester"
-requesterLbl.Text = ""
-requesterLbl.Size = UDim2.new(1, 0, 0, 18)
-requesterLbl.Position = UDim2.new(0, 0, 0, 25)
-requesterLbl.BackgroundTransparency = 1
-requesterLbl.TextColor3 = C.RequesterText
-requesterLbl.TextSize = 12
-requesterLbl.Font = Enum.Font.GothamMedium
-requesterLbl.TextWrapped = false
-requesterLbl.TextTruncate = Enum.TextTruncate.AtEnd
-requesterLbl.TextXAlignment = Enum.TextXAlignment.Left
-requesterLbl.TextStrokeTransparency = 0.75
-requesterLbl.TextStrokeColor3 = Color3.new(0, 0, 0)
-requesterLbl.ZIndex = 12
-requesterLbl.Parent = npContent
-addSC(requesterLbl, 13, 10)
-
--- Audio Visualizer Bars
-local visualizerBars = {}
-local barShapes = { 0.45, 0.75, 1.0, 0.85, 0.65, 0.90, 0.50 }
-local vizContainer = Instance.new("Frame")
-vizContainer.Name = "VizContainer"
-vizContainer.Size = UDim2.new(0, 56, 0, 16)
-vizContainer.Position = UDim2.new(0, 0, 1, -16)
-vizContainer.BackgroundTransparency = 1
-vizContainer.ZIndex = 12
-vizContainer.Parent = npContent
-
-for i = 1, 7 do
-	local bar = Instance.new("Frame")
-	bar.Name = "Bar"..i
-	bar.AnchorPoint = Vector2.new(0, 1)
-	bar.Size = UDim2.new(0, 5, 0, 3)
-	bar.Position = UDim2.new(0, (i-1)*8, 1, 0)
-	bar.BackgroundColor3 = Color3.fromHex("#FFFFFF")
-	bar.BorderSizePixel = 0
-	bar.ZIndex = 13
-	addCorner(bar, 2)
-	bar.Parent = vizContainer
-	table.insert(visualizerBars, bar)
+	return math.max(388, panelH - headerH - 16)
 end
 
--- PROGRESS BAR (inside NowPlaying, anchored to bottom)
-local progressFrame = Instance.new("Frame")
-progressFrame.Name = "ProgressFrame"
-progressFrame.Size = UDim2.new(1, -16, 0, 22)
-progressFrame.Position = UDim2.new(0, 8, 1, -28)
-progressFrame.BackgroundTransparency = 1
-progressFrame.ZIndex = 10
-progressFrame.Parent = nowPlayingFrame
+local updateMusicLayout
+updateMusicLayout = function()
+	if not UI.musicScroll then return end
+	local winH = getViewportHeight()
 
-local progressBg = Instance.new("Frame")
-progressBg.Name = "ProgressBg"
-progressBg.Size = UDim2.new(1, -90, 0, PROGRESS_H)
-progressBg.Position = UDim2.new(0, 0, 0.5, -PROGRESS_H/2)
-progressBg.BackgroundColor3 = Color3.fromHex("#303030")
-progressBg.BackgroundTransparency = 0.3
-progressBg.BorderSizePixel = 0
-progressBg.ClipsDescendants = true
-progressBg.ZIndex = 11
-progressBg.Parent = progressFrame
-addCorner(progressBg, PROGRESS_H/2)
+	local curY = 0
 
-local progressFill = Instance.new("Frame")
-progressFill.Name = "ProgressFill"
-progressFill.Size = UDim2.new(0, 0, 1, 0)
-progressFill.BackgroundColor3 = Color3.fromHex("#FFFFFF")
-progressFill.BorderSizePixel = 0
-progressFill.ClipsDescendants = true
-progressFill.ZIndex = 12
-progressFill.Parent = progressBg
-addCorner(progressFill, PROGRESS_H/2)
+	if UI.nowPlayingFrame then
+		UI.nowPlayingFrame.Position = UDim2.new(0, 0, 0, 0)
+		UI.nowPlayingFrame.Size     = UDim2.new(1, -6, 0, winH)
+		curY = winH + DIM.PAD
+	end
 
-local pg = Instance.new("UIGradient")
-pg.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0,Color3.fromHex("#888888")), ColorSequenceKeypoint.new(0.5,Color3.fromHex("#DDDDDD")), ColorSequenceKeypoint.new(1,Color3.fromHex("#FFFFFF")) })
-pg.Parent = progressFill
+	if UI.queueSection then
+		UI.queueSection.Position = UDim2.new(0, 0, 0, curY)
+		curY = curY + DIM.QUEUE_CARD_H + DIM.PAD
+	end
 
-local progressDot = Instance.new("Frame")
-progressDot.Name = "ProgressDot"
-progressDot.Size = UDim2.new(0, PROGRESS_H+5, 0, PROGRESS_H+5)
-progressDot.Position = UDim2.new(1, -(PROGRESS_H+5)/2, 0.5, -(PROGRESS_H+5)/2)
-progressDot.BackgroundColor3 = Color3.fromRGB(255,255,255)
-progressDot.BorderSizePixel = 0
-progressDot.Visible = false
-progressDot.ZIndex = 13
-progressDot.Parent = progressFill
-addCorner(progressDot, (PROGRESS_H+5)/2)
+	if UI.playlistSection then
+		UI.playlistSection.Position = UDim2.new(0, 0, 0, curY)
+		curY = curY + DIM.PLAYLIST_SECTION_H + DIM.PAD
+	end
 
--- Durasi (digeser sedikit ke kiri dari ujung kanan untuk memberi ruang tombol skip)
-local durationLbl = Instance.new("TextLabel")
-durationLbl.Name = "Duration"
-durationLbl.Text = "0:00 / 0:00"
-durationLbl.Size = UDim2.new(0, 52, 1, 0)
-durationLbl.Position = UDim2.new(1, -84, 0, 0)
-durationLbl.BackgroundTransparency = 1
-durationLbl.TextColor3 = Color3.fromHex("#D1D5DB")
-durationLbl.TextSize = 10
-durationLbl.Font = Enum.Font.GothamSemibold
-durationLbl.TextXAlignment = Enum.TextXAlignment.Right
-durationLbl.Visible = false
-durationLbl.ZIndex = 12
-durationLbl.Parent = progressFrame
-addSC(durationLbl, 10)
+	if UI.searchSection then
+		UI.searchSection.Position = UDim2.new(0, 0, 0, curY)
+		curY = curY + DIM.SEARCH_SECTION_H + DIM.PAD
+	end
 
--- Tombol Skip / Vote Skip (di kanannya durasi)
-local skipBtn = Instance.new("TextButton")
-skipBtn.Name = "SkipBtn"
-skipBtn.Text = "⏭"
-skipBtn.Size = UDim2.new(0, 24, 0, 20)
-skipBtn.Position = UDim2.new(1, -24, 0.5, -10)
-skipBtn.BackgroundColor3 = Color3.fromHex("#1A1A1A")
-skipBtn.BackgroundTransparency = 0.1
-skipBtn.BorderSizePixel = 0
-skipBtn.TextColor3 = Color3.fromHex("#FFFFFF")
-skipBtn.TextSize = 11
-skipBtn.Font = Enum.Font.GothamBold
-skipBtn.AutoButtonColor = false
-skipBtn.Visible = false
-skipBtn.ZIndex = 12
-skipBtn.Parent = progressFrame
-addCorner(skipBtn, 5)
+	if UI.librarySection and UI.songsContainer then
+		UI.librarySection.Position = UDim2.new(0, 0, 0, curY)
+		local libContentH = 32 + UI.songsContainer.Size.Y.Offset + 14
+		UI.librarySection.Size = UDim2.new(1, -6, 0, math.max(160, libContentH))
+		curY = curY + UI.librarySection.Size.Y.Offset + DIM.PAD + 10
+	end
 
-local skipBtnStroke = Instance.new("UIStroke")
-skipBtnStroke.Thickness = 1
-skipBtnStroke.Color = Color3.fromHex("#505050")
-skipBtnStroke.Transparency = 0.25
-skipBtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-skipBtnStroke.Parent = skipBtn
-
--- Panel Floating Vote Skip (muncul elegan di atas progress bar saat vote aktif)
-local voteSkipPanel = Instance.new("Frame")
-voteSkipPanel.Name = "VoteSkipPanel"
-voteSkipPanel.Size = UDim2.new(1, -16, 0, 32)
-voteSkipPanel.Position = UDim2.new(0, 8, 1, -66)
-voteSkipPanel.BackgroundColor3 = Color3.fromHex("#0C0C0C")
-voteSkipPanel.BackgroundTransparency = 0.05
-voteSkipPanel.BorderSizePixel = 0
-voteSkipPanel.Visible = false
-voteSkipPanel.ZIndex = 15
-voteSkipPanel.Parent = nowPlayingFrame
-addCorner(voteSkipPanel, 8)
-
-local votePanelStroke = Instance.new("UIStroke")
-votePanelStroke.Thickness = 1
-votePanelStroke.Color = Color3.fromHex("#3B82F6")
-votePanelStroke.Transparency = 0.3
-votePanelStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-votePanelStroke.Parent = voteSkipPanel
-
-local voteInfoLbl = Instance.new("TextLabel")
-voteInfoLbl.Name = "VoteInfo"
-voteInfoLbl.Size = UDim2.new(1, -112, 1, 0)
-voteInfoLbl.Position = UDim2.new(0, 10, 0, 0)
-voteInfoLbl.BackgroundTransparency = 1
-voteInfoLbl.Text = "Vote Skip: 1/2"
-voteInfoLbl.TextColor3 = Color3.fromHex("#FFFFFF")
-voteInfoLbl.TextSize = 10
-voteInfoLbl.Font = Enum.Font.GothamMedium
-voteInfoLbl.TextXAlignment = Enum.TextXAlignment.Left
-voteInfoLbl.TextTruncate = Enum.TextTruncate.AtEnd
-voteInfoLbl.ZIndex = 16
-voteInfoLbl.Parent = voteSkipPanel
-addSC(voteInfoLbl, 11)
-
-local voteYesBtn = Instance.new("TextButton")
-voteYesBtn.Name = "VoteYesBtn"
-voteYesBtn.Text = "✓ Ya"
-voteYesBtn.Size = UDim2.new(0, 44, 0, 22)
-voteYesBtn.Position = UDim2.new(1, -102, 0.5, -11)
-voteYesBtn.BackgroundColor3 = Color3.fromHex("#15803D")
-voteYesBtn.BackgroundTransparency = 0.1
-voteYesBtn.BorderSizePixel = 0
-voteYesBtn.TextColor3 = Color3.fromHex("#FFFFFF")
-voteYesBtn.TextSize = 10
-voteYesBtn.Font = Enum.Font.GothamBold
-voteYesBtn.AutoButtonColor = false
-voteYesBtn.ZIndex = 16
-voteYesBtn.Parent = voteSkipPanel
-addCorner(voteYesBtn, 5)
-
-local voteNoBtn = Instance.new("TextButton")
-voteNoBtn.Name = "VoteNoBtn"
-voteNoBtn.Text = "✕ Tidak"
-voteNoBtn.Size = UDim2.new(0, 48, 0, 22)
-voteNoBtn.Position = UDim2.new(1, -54, 0.5, -11)
-voteNoBtn.BackgroundColor3 = Color3.fromHex("#262626")
-voteNoBtn.BackgroundTransparency = 0.1
-voteNoBtn.BorderSizePixel = 0
-voteNoBtn.TextColor3 = Color3.fromHex("#E5E7EB")
-voteNoBtn.TextSize = 10
-voteNoBtn.Font = Enum.Font.GothamBold
-voteNoBtn.AutoButtonColor = false
-voteNoBtn.ZIndex = 16
-voteNoBtn.Parent = voteSkipPanel
-addCorner(voteNoBtn, 5)
-
-local voteStatusLbl = Instance.new("TextLabel")
-voteStatusLbl.Name = "VoteStatusLbl"
-voteStatusLbl.Text = "✓ Sudah Vote"
-voteStatusLbl.Size = UDim2.new(0, 96, 1, 0)
-voteStatusLbl.Position = UDim2.new(1, -102, 0, 0)
-voteStatusLbl.BackgroundTransparency = 1
-voteStatusLbl.TextColor3 = Color3.fromHex("#10B981")
-voteStatusLbl.TextSize = 10
-voteStatusLbl.Font = Enum.Font.GothamMedium
-voteStatusLbl.TextXAlignment = Enum.TextXAlignment.Center
-voteStatusLbl.Visible = false
-voteStatusLbl.ZIndex = 16
-voteStatusLbl.Parent = voteSkipPanel
-
--- Stub locals for removed UI (still referenced by logic)
-local muteBtn = nil
-local statusLbl = nil
-
--- ============================
--- BOTTOM SECTION (req input + queue)
--- ============================
-local bottomSection = Instance.new("Frame")
-bottomSection.Name = "BottomSection"
-bottomSection.Size = UDim2.new(1, -6, 0, BOTTOM_H)
-bottomSection.Position = UDim2.new(0, 0, 0, NP_H + PAD)
-bottomSection.BackgroundTransparency = 1
-bottomSection.ClipsDescendants = true
-bottomSection.Visible = true
-bottomSection.Parent = playerScroll
-
--- REQUEST INPUT
-local reqFrame = Instance.new("Frame")
-reqFrame.Name = "RequestFrame"; reqFrame.Size = UDim2.new(1,0,0,REQ_H)
-reqFrame.Position = UDim2.new(0,0,0,0); reqFrame.BackgroundTransparency = 1
-reqFrame.ClipsDescendants = true; reqFrame.Parent = bottomSection
-
-local reqInput = Instance.new("TextBox")
-reqInput.Name = "ReqInput"; reqInput.PlaceholderText = T.SongIDPlaceholder; reqInput.Text = ""
-reqInput.Size = UDim2.new(1,-(REQ_BTN_W+8),1,0); reqInput.BackgroundColor3 = C.InputBg
-reqInput.BorderSizePixel = 0; reqInput.TextColor3 = C.InputText
-reqInput.PlaceholderColor3 = Color3.fromRGB(150,150,150); reqInput.TextSize = 12
-reqInput.Font = Enum.Font.Gotham; reqInput.TextXAlignment = Enum.TextXAlignment.Left
-reqInput.ClearTextOnFocus = false; reqInput.ClipsDescendants = true; reqInput.Parent = reqFrame
-addCorner(reqInput, CORNER_MD)
-local reqPad = Instance.new("UIPadding", reqInput)
-reqPad.PaddingLeft = UDim.new(0,10); reqPad.PaddingRight = UDim.new(0,10)
-
-local reqBtn = Instance.new("TextButton")
-reqBtn.Name = "ReqBtn"; reqBtn.Text = T.AddToQueue
-reqBtn.Size = UDim2.new(0,REQ_BTN_W,1,0); reqBtn.Position = UDim2.new(1,-REQ_BTN_W,0,0)
-reqBtn.BackgroundColor3 = C.AddBtn; reqBtn.BorderSizePixel = 0
-reqBtn.TextColor3 = C.BtnText; reqBtn.TextSize = 12; reqBtn.Font = Enum.Font.GothamBold
-reqBtn.AutoButtonColor = false; reqBtn.Parent = reqFrame
-addCorner(reqBtn, CORNER_MD)
-
--- QUEUE TITLE
-local queueTitleLbl = Instance.new("TextLabel")
-queueTitleLbl.Name = "QueueTitle"; queueTitleLbl.Text = T.QueueTitle
-queueTitleLbl.Size = UDim2.new(1,0,0,QTITLE_H)
-queueTitleLbl.Position = UDim2.new(0,0,0,REQ_H+PAD)
-queueTitleLbl.BackgroundTransparency = 1; queueTitleLbl.TextColor3 = Color3.fromRGB(255,255,255)
-queueTitleLbl.TextSize = 13; queueTitleLbl.TextXAlignment = Enum.TextXAlignment.Left
-queueTitleLbl.Font = Enum.Font.GothamBold; queueTitleLbl.Parent = bottomSection
-addSC(queueTitleLbl, 14); addTextGradient(queueTitleLbl, true)
-
--- QUEUE SCROLL
-local queueScroll = Instance.new("ScrollingFrame")
-queueScroll.Name = "QueueScroll"; queueScroll.Size = UDim2.new(1,0,0,QUEUE_H)
-queueScroll.Position = UDim2.new(0,0,0,REQ_H+PAD+QTITLE_H+4)
-queueScroll.BackgroundColor3 = C.QueueBg
-queueScroll.BorderSizePixel = 0; queueScroll.ScrollBarThickness = 5
-queueScroll.ScrollBarImageColor3 = C.ScrollBar; queueScroll.ClipsDescendants = true; queueScroll.Parent = bottomSection
-addCorner(queueScroll, CORNER_MD); setupAutoScroll(queueScroll)
-Instance.new("UIListLayout", queueScroll).Padding = UDim.new(0,4)
-local queuePad = Instance.new("UIPadding", queueScroll)
-queuePad.PaddingTop = UDim.new(0,SCROLL_PAD); queuePad.PaddingBottom = UDim.new(0,SCROLL_PAD)
-queuePad.PaddingLeft = UDim.new(0,SCROLL_PAD); queuePad.PaddingRight = UDim.new(0,SCROLL_PAD)
-
-local queueEmptyLbl = Instance.new("TextLabel")
-queueEmptyLbl.Name = "QueueEmpty"; queueEmptyLbl.Text = T.QueueEmpty
-queueEmptyLbl.Size = UDim2.new(1,-16,0,30); queueEmptyLbl.Position = UDim2.new(0,8,0.5,-15)
-queueEmptyLbl.BackgroundTransparency = 1; queueEmptyLbl.TextColor3 = C.AutoplayText
-queueEmptyLbl.TextSize = 12; queueEmptyLbl.Font = Enum.Font.GothamSemibold
-queueEmptyLbl.Visible = false; queueEmptyLbl.Parent = queueScroll
-
--- Layout: NowPlaying memenuhi 100% tinggi viewport panel (sampai batas bawah), scroll untuk melihat search & queue
-local function updatePlayerScrollLayout()
-	nowPlayingFrame.Size = UDim2.new(1, -6, 0, NP_H)
-	bottomSection.Position = UDim2.new(0, 0, 0, NP_H + PAD)
-	playerScroll.CanvasSize = UDim2.new(0, 0, 0, NP_H + PAD + BOTTOM_H + 20)
+	UI.musicScroll.CanvasSize = UDim2.new(0, 0, 0, curY)
 end
 
-task.defer(updatePlayerScrollLayout)
+local function scrollToSection(targetY)
+	if not UI.musicScroll then return end
+	local maxScroll = math.max(0, UI.musicScroll.CanvasSize.Y.Offset - UI.musicScroll.AbsoluteWindowSize.Y)
+	local clampedY = math.clamp(targetY, 0, maxScroll)
+	TweenService:Create(UI.musicScroll, TweenInfo.new(0.28, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		CanvasPosition = Vector2.new(0, clampedY),
+	}):Play()
+end
 
-
-
--- SONGS PAGE
-local songsPage = Instance.new("Frame")
-songsPage.Name = "SongsPage"; songsPage.Size = UDim2.new(1,0,1,0)
-songsPage.BackgroundTransparency = 1; songsPage.Visible = false
-songsPage.ClipsDescendants = true; songsPage.Parent = musicContent
-
-local searchContainer = Instance.new("Frame")
-searchContainer.Name = "SearchContainer"; searchContainer.Size = UDim2.new(1,0,0,SEARCH_H)
-searchContainer.BackgroundTransparency = 1; searchContainer.Parent = songsPage
-
-local searchBg = Instance.new("Frame")
-searchBg.Name = "SearchBg"; searchBg.Size = UDim2.new(1,0,1,0)
-searchBg.BackgroundColor3 = C.InputBg; searchBg.BorderSizePixel = 0; searchBg.Parent = searchContainer
-addCorner(searchBg, CORNER_MD)
-
-local searchInput = Instance.new("TextBox")
-searchInput.Name = "SearchInput"; searchInput.PlaceholderText = T.SearchPlaceholder; searchInput.Text = ""
-searchInput.Size = UDim2.new(1,-(CLEAR_BTN_W+4),1,0); searchInput.BackgroundTransparency = 1
-searchInput.BorderSizePixel = 0; searchInput.TextColor3 = C.InputText
-searchInput.PlaceholderColor3 = Color3.fromRGB(120,120,120); searchInput.TextSize = 13
-searchInput.Font = Enum.Font.Gotham; searchInput.TextXAlignment = Enum.TextXAlignment.Left
-searchInput.ClearTextOnFocus = false; searchInput.ClipsDescendants = true; searchInput.Parent = searchContainer
-local sPad = Instance.new("UIPadding", searchInput)
-sPad.PaddingLeft = UDim.new(0,12); sPad.PaddingRight = UDim.new(0,4)
-
-local clearBtn = Instance.new("TextButton")
-clearBtn.Name = "ClearBtn"; clearBtn.Text = "✕"
-clearBtn.Size = UDim2.new(0,CLEAR_BTN_W-4,0,SEARCH_H-6)
-clearBtn.Position = UDim2.new(1,-(CLEAR_BTN_W-2),0.5,-(SEARCH_H-6)/2)
-clearBtn.BackgroundColor3 = C.ClearBtn; clearBtn.BorderSizePixel = 0
-clearBtn.TextColor3 = Color3.fromRGB(255,255,255); clearBtn.TextSize = 14
-clearBtn.Font = Enum.Font.GothamBold; clearBtn.Visible = false
-clearBtn.AutoButtonColor = false; clearBtn.Parent = searchContainer
-addCorner(clearBtn, CORNER_SM)
-
-local songsTitleLbl = Instance.new("TextLabel")
-songsTitleLbl.Name = "SongsTitle"; songsTitleLbl.Text = T.DefaultSongs
-songsTitleLbl.Size = UDim2.new(1,0,0,22); songsTitleLbl.Position = UDim2.new(0,0,0,SEARCH_H+8)
-songsTitleLbl.BackgroundTransparency = 1; songsTitleLbl.TextColor3 = Color3.fromRGB(255,255,255)
-songsTitleLbl.TextSize = 13; songsTitleLbl.TextXAlignment = Enum.TextXAlignment.Left
-songsTitleLbl.Font = Enum.Font.GothamBold; songsTitleLbl.Parent = songsPage
-addSC(songsTitleLbl, 14); addTextGradient(songsTitleLbl, true)
-
-local songsScrollY = SEARCH_H + 8 + 22 + 6
-local songsScroll = Instance.new("ScrollingFrame")
-songsScroll.Name = "SongsScroll"; songsScroll.Size = UDim2.new(1,0,1,-songsScrollY)
-songsScroll.Position = UDim2.new(0,0,0,songsScrollY); songsScroll.BackgroundColor3 = C.SongsBg
-songsScroll.BorderSizePixel = 0; songsScroll.ScrollBarThickness = 6
-songsScroll.ScrollBarImageColor3 = C.ScrollBar; songsScroll.ClipsDescendants = true; songsScroll.Parent = songsPage
-addCorner(songsScroll, CORNER_MD); setupAutoScroll(songsScroll)
-Instance.new("UIListLayout", songsScroll).Padding = UDim.new(0,4)
-local songsPad = Instance.new("UIPadding", songsScroll)
-songsPad.PaddingTop = UDim.new(0,SCROLL_PAD); songsPad.PaddingBottom = UDim.new(0,SCROLL_PAD)
-songsPad.PaddingLeft = UDim.new(0,SCROLL_PAD); songsPad.PaddingRight = UDim.new(0,SCROLL_PAD)
-
-local noResultsLbl = Instance.new("TextLabel")
-noResultsLbl.Name = "NoResults"; noResultsLbl.Text = "Tidak ada hasil ditemukan"
-noResultsLbl.Size = UDim2.new(1,-16,0,40); noResultsLbl.Position = UDim2.new(0,8,0.5,-20)
-noResultsLbl.BackgroundTransparency = 1; noResultsLbl.TextColor3 = Color3.fromRGB(180,180,180)
-noResultsLbl.TextSize = 13; noResultsLbl.Font = Enum.Font.GothamSemibold
-noResultsLbl.Visible = false; noResultsLbl.Parent = songsScroll
-
--- FAVORITES PAGE
-local favPage = Instance.new("Frame")
-favPage.Name = "FavPage"; favPage.Size = UDim2.new(1,0,1,0)
-favPage.BackgroundTransparency = 1; favPage.Visible = false
-favPage.ClipsDescendants = true; favPage.Parent = musicContent
-
-local favTitleLbl = Instance.new("TextLabel")
-favTitleLbl.Name = "FavTitle"; favTitleLbl.Text = T.MyFavorites
-favTitleLbl.Size = UDim2.new(1,0,0,22); favTitleLbl.BackgroundTransparency = 1
-favTitleLbl.TextColor3 = Color3.fromRGB(255,255,255); favTitleLbl.TextSize = 13
-favTitleLbl.TextXAlignment = Enum.TextXAlignment.Left; favTitleLbl.Font = Enum.Font.GothamBold
-favTitleLbl.Parent = favPage; addSC(favTitleLbl, 14); addTextGradient(favTitleLbl, true)
-
-local favScroll = Instance.new("ScrollingFrame")
-favScroll.Name = "FavScroll"; favScroll.Size = UDim2.new(1,0,1,-28)
-favScroll.Position = UDim2.new(0,0,0,26); favScroll.BackgroundColor3 = C.FavBg
-favScroll.BorderSizePixel = 0; favScroll.ScrollBarThickness = 6
-favScroll.ScrollBarImageColor3 = C.ScrollBar; favScroll.ClipsDescendants = true; favScroll.Parent = favPage
-addCorner(favScroll, CORNER_MD); setupAutoScroll(favScroll)
-Instance.new("UIListLayout", favScroll).Padding = UDim.new(0,4)
-local favPad = Instance.new("UIPadding", favScroll)
-favPad.PaddingTop = UDim.new(0,SCROLL_PAD); favPad.PaddingBottom = UDim.new(0,SCROLL_PAD)
-favPad.PaddingLeft = UDim.new(0,SCROLL_PAD); favPad.PaddingRight = UDim.new(0,SCROLL_PAD)
-
-local favLockedLbl = Instance.new("TextLabel")
-favLockedLbl.Name = "FavLocked"; favLockedLbl.Text = T.FavoritesLocked
-favLockedLbl.Size = UDim2.new(1,-16,0,40); favLockedLbl.Position = UDim2.new(0,8,0.5,-20)
-favLockedLbl.BackgroundTransparency = 1; favLockedLbl.TextColor3 = C.FavLocked
-favLockedLbl.TextSize = 12; favLockedLbl.Font = Enum.Font.GothamBold
-favLockedLbl.Visible = false; favLockedLbl.Parent = favScroll
-
-local favEmptyLbl = Instance.new("TextLabel")
-favEmptyLbl.Name = "FavEmpty"; favEmptyLbl.Text = "Belum ada lagu favorit"
-favEmptyLbl.Size = UDim2.new(1,-16,0,40); favEmptyLbl.Position = UDim2.new(0,8,0.5,-20)
-favEmptyLbl.BackgroundTransparency = 1; favEmptyLbl.TextColor3 = Color3.fromRGB(150,150,150)
-favEmptyLbl.TextSize = 12; favEmptyLbl.Font = Enum.Font.GothamSemibold
-favEmptyLbl.Visible = false; favEmptyLbl.Parent = favScroll
-
-if ThemeModule and ThemeModule.GradientSystem then ThemeModule.GradientSystem.Start() end
+-- Nav pills removed (single scrollable page, no tab bar needed)
 
 -- ====================================
 -- HELPER RUNTIME
@@ -1166,16 +644,21 @@ if ThemeModule and ThemeModule.GradientSystem then ThemeModule.GradientSystem.St
 local function updateProgressBar(timePos, timeLen)
 	currentTimePos = timePos or 0
 	currentTimeLen = timeLen or 0
+	if not UI.progressFill then return end
 	if timeLen and timeLen > 0 then
 		local progress = math.clamp(timePos / timeLen, 0, 1)
-		TweenService:Create(progressFill, TweenInfo.new(0.15, Enum.EasingStyle.Linear), { Size = UDim2.new(progress,0,1,0) }):Play()
-		durationLbl.Text    = string.format(T.DurationFormat, fmtTime(timePos), fmtTime(timeLen))
-		durationLbl.Visible = true
-		progressDot.Visible = true
+		TweenService:Create(UI.progressFill, TweenInfo.new(0.15, Enum.EasingStyle.Linear), { Size = UDim2.new(progress,0,1,0) }):Play()
+		if UI.durationLbl then
+			UI.durationLbl.Text    = string.format(T.DurationFormat, fmtTime(timePos), fmtTime(timeLen))
+			UI.durationLbl.Visible = true
+		end
+		if UI.progressDot then
+			UI.progressDot.Visible = true
+		end
 	else
-		progressFill.Size   = UDim2.new(0,0,1,0)
-		durationLbl.Visible = false
-		progressDot.Visible = false
+		UI.progressFill.Size = UDim2.new(0,0,1,0)
+		if UI.durationLbl then UI.durationLbl.Visible = false end
+		if UI.progressDot then UI.progressDot.Visible = false end
 	end
 end
 
@@ -1215,30 +698,67 @@ local function updateBeatAnalysis(dt, now)
 	end
 end
 
+local progressConn = nil
+local function startProgressLoop()
+	if progressConn then return end
+	progressConn = RunService.RenderStepped:Connect(function(dt)
+		local now = os.clock()
+		updateBeatAnalysis(dt, now)
+		if clientState.isPlaying and clientState.serverStartTime > 0 then
+			local syncPos = calculateSyncPosition(clientState.serverStartTime, clientState.duration)
+			updateProgressBar(syncPos, clientState.duration)
+		end
+		local barShapes = { 0.45, 0.75, 1.0, 0.85, 0.65, 0.90, 0.50 }
+		for i, bar in ipairs(UI.visualizerBars) do
+			local mult = barShapes[i] or 0.7
+			local wave = (math.sin(now * 8 + i * 0.9) + 1) * 0.5
+			local h = math.clamp(math.floor(3 + (wave * 8 * mult) + (beatIntensity * 9 * mult)), 2, 16)
+			bar.Size = UDim2.new(0, 5, 0, h)
+		end
+		if UI.npStrokeGrad then
+			UI.npStrokeGrad.Rotation = (now * 60) % 360
+		end
+	end)
+end
+
+local function stopProgressLoop()
+	if progressConn then
+		progressConn:Disconnect()
+		progressConn = nil
+	end
+end
+
 local voteCountdownConn = nil
 
 local function updateVoteSkipUI()
+	if not UI.voteSkipPanel then return end
 	if voteSkipState.active then
-		voteSkipPanel.Visible = true
+		UI.voteSkipPanel.Visible = true
 		local req = math.max(1, voteSkipState.required or 1)
 		local yes = voteSkipState.yesVotes or 0
-		voteInfoLbl.Text = string.format("Vote Skip: %d/%d (%ds)", yes, req, math.max(0, voteSkipState.timeRemaining or 0))
-		skipBtn.Text = string.format("%d/%d", yes, req)
-		skipBtn.TextColor3 = Color3.fromHex("#60A5FA")
+		if UI.voteInfoLbl then
+			UI.voteInfoLbl.Text = string.format("Vote Skip: %d/%d (%ds)", yes, req, math.max(0, voteSkipState.timeRemaining or 0))
+		end
+		if UI.skipBtn then
+			UI.skipBtn.Text = string.format("%d/%d", yes, req)
+			UI.skipBtn.TextColor3 = Color3.fromHex("#60A5FA")
+		end
 
 		if voteSkipState.hasVoted then
-			voteYesBtn.Visible = false
-			voteNoBtn.Visible = false
-			voteStatusLbl.Visible = true
+			if UI.voteYesBtn then UI.voteYesBtn.Visible = false end
+			if UI.voteNoBtn then UI.voteNoBtn.Visible = false end
+			if UI.voteStatusLbl then UI.voteStatusLbl.Visible = true end
 		else
-			voteYesBtn.Visible = true
-			voteNoBtn.Visible = true
-			voteStatusLbl.Visible = false
+			if UI.voteYesBtn then UI.voteYesBtn.Visible = true end
+			if UI.voteNoBtn then UI.voteNoBtn.Visible = true end
+			if UI.voteStatusLbl then UI.voteStatusLbl.Visible = false end
 		end
 	else
-		voteSkipPanel.Visible = false
-		skipBtn.Text = "⏭"
-		skipBtn.TextColor3 = Color3.fromHex("#FFFFFF")
+		UI.voteSkipPanel.Visible = false
+		if UI.skipBtn then
+			UI.skipBtn.Text = "⏭"
+			UI.skipBtn.TextColor3 = Color3.fromHex("#FFFFFF")
+		end
 		if voteCountdownConn then
 			task.cancel(voteCountdownConn)
 			voteCountdownConn = nil
@@ -1248,9 +768,9 @@ end
 
 local function updateSkipButton()
 	local hasSong = (clientState.currentSong ~= nil and clientState.isPlaying)
-	skipBtn.Visible = hasSong
+	if UI.skipBtn then UI.skipBtn.Visible = hasSong end
 	if not hasSong then
-		voteSkipPanel.Visible = false
+		if UI.voteSkipPanel then UI.voteSkipPanel.Visible = false end
 		if voteCountdownConn then
 			task.cancel(voteCountdownConn)
 			voteCountdownConn = nil
@@ -1260,68 +780,143 @@ end
 
 local function updateFavoriteUI()
 	canFavorite = isVIPPlus()
-	if canFavorite then
-		favoritesSubTab.Text       = T.SubTabFavorites
-		favoritesSubTab.TextColor3 = C.SubTabText
-		addFavBtn.BackgroundColor3 = Color3.fromHex("#1C1C1C")
-		addFavBtn.TextColor3       = Color3.fromHex("#FFFFFF")
-	else
-		favoritesSubTab.Text       = T.SubTabFavLocked
-		favoritesSubTab.TextColor3 = C.SubTabTextDisabled
-		addFavBtn.BackgroundColor3 = Color3.fromHex("#141414")
-		addFavBtn.TextColor3       = Color3.fromHex("#555555")
+	if UI.favSubLbl then
+		UI.favSubLbl.Text = canFavorite and string.format("%d Lagu Favorit", #userFavorites) or "Fitur Khusus VIP+"
 	end
-end
-
-local function updateQueue()
-	for _, c in ipairs(queueScroll:GetChildren()) do if c:IsA("Frame") then c:Destroy() end end
-	local queue = clientState.queue or {}
-	queueEmptyLbl.Visible = (#queue == 0 and clientState.isAutoplay)
-	if #queue == 0 then return end
-	for i, song in ipairs(queue) do
-		local songData = song.musicData or song
-		local item = Instance.new("Frame")
-		item.Name = "QI_"..i; item.Size = UDim2.new(1,0,0,QUEUE_ITEM_H)
-		item.BackgroundColor3 = C.QueueItem; item.BorderSizePixel = 0
-		item.LayoutOrder = i; item.ClipsDescendants = true; item.Parent = queueScroll
-		addCorner(item, CORNER_SM)
-		local numLbl = Instance.new("TextLabel")
-		numLbl.Size = UDim2.new(0,28,1,0); numLbl.BackgroundTransparency = 1
-		numLbl.Text = tostring(i); numLbl.TextColor3 = C.QueueRequester
-		numLbl.TextSize = 12; numLbl.Font = Enum.Font.GothamBold
-		numLbl.TextXAlignment = Enum.TextXAlignment.Center
-		numLbl.TextYAlignment = Enum.TextYAlignment.Center; numLbl.Parent = item
-		local nameLbl = Instance.new("TextLabel")
-		nameLbl.Size = UDim2.new(0.65,-28,0,QUEUE_ITEM_H/2); nameLbl.Position = UDim2.new(0,28,0,0)
-		nameLbl.BackgroundTransparency = 1; nameLbl.Text = songData.judul or T.Unknown
-		nameLbl.TextColor3 = C.QueueSongText; nameLbl.TextSize = 12; nameLbl.Font = Enum.Font.GothamSemibold
-		nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
-		nameLbl.TextXAlignment = Enum.TextXAlignment.Left
-		nameLbl.TextYAlignment = Enum.TextYAlignment.Bottom; nameLbl.Parent = item; addSC(nameLbl,13)
-		local reqLbl = Instance.new("TextLabel")
-		reqLbl.Size = UDim2.new(0.65,-28,0,QUEUE_ITEM_H/2); reqLbl.Position = UDim2.new(0,28,0.5,0)
-		reqLbl.BackgroundTransparency = 1; reqLbl.Text = "👤 "..(song.uploader or T.Unknown)
-		reqLbl.TextColor3 = C.QueueRequester; reqLbl.TextSize = 11; reqLbl.Font = Enum.Font.Gotham
-		reqLbl.TextTruncate = Enum.TextTruncate.AtEnd
-		local dur = tonumber(songData.Duration or songData.duration or song.Duration or song.duration or 0) or 0
-		if dur > 0 then
-			local durLbl = Instance.new("TextLabel")
-			durLbl.Size = UDim2.new(0.35,-8,1,0); durLbl.Position = UDim2.new(0.65,0,0,0)
-			durLbl.BackgroundTransparency = 1; durLbl.Text = fmtTime(dur)
-			durLbl.TextColor3 = C.QueueRequester; durLbl.TextSize = 11; durLbl.Font = Enum.Font.GothamSemibold
-			durLbl.TextXAlignment = Enum.TextXAlignment.Right; durLbl.Parent = item; addSC(durLbl,11)
+	if UI.addFavBtn then
+		if canFavorite then
+			UI.addFavBtn.BackgroundColor3 = Color3.fromHex("#1C1C1C")
+			UI.addFavBtn.TextColor3       = Color3.fromHex("#FFFFFF")
+		else
+			UI.addFavBtn.BackgroundColor3 = Color3.fromHex("#141414")
+			UI.addFavBtn.TextColor3       = Color3.fromHex("#555555")
 		end
 	end
 end
 
--- SONGS
+local function updateQueue()
+	if not UI.queueScroll then return end
+	for _, c in ipairs(UI.queueScroll:GetChildren()) do
+		if c:IsA("Frame") and c ~= UI.queueEmptyFrame then c:Destroy() end
+	end
+	local queue = clientState.queue or {}
+	local isEmpty = (#queue == 0)
+	if UI.queueEmptyFrame then UI.queueEmptyFrame.Visible = isEmpty end
+	if UI.queueBadge then
+		UI.queueBadge.Text = isEmpty and "Autoplay" or string.format("%d Lagu", #queue)
+		UI.queueBadge.TextColor3 = isEmpty and Color3.fromHex("#9E9E9E") or Color3.fromHex("#FFFFFF")
+	end
+	if isEmpty then return end
+
+	for i, song in ipairs(queue) do
+		local songData = song.musicData or song
+		local item = Instance.new("Frame")
+		item.Name = "QI_"..i
+		item.Size = UDim2.new(1, 0, 0, DIM.QUEUE_ITEM_H)
+		item.BackgroundColor3 = Color3.fromHex("#151515")
+		item.BorderSizePixel = 0
+		item.LayoutOrder = i
+		item.ClipsDescendants = true
+		item.Parent = UI.queueScroll
+		addCorner(item, DIM.CORNER_MD)
+		local itemStroke = addStroke(item, Color3.fromHex("#242424"), 1, 0)
+
+		local rankFrame = Instance.new("Frame")
+		rankFrame.Name = "Rank"
+		rankFrame.Size = UDim2.new(0, 24, 0, 24)
+		rankFrame.Position = UDim2.new(0, 8, 0.5, -12)
+		rankFrame.BackgroundColor3 = Color3.fromHex("#202020")
+		rankFrame.BorderSizePixel = 0
+		rankFrame.Parent = item
+		addCorner(rankFrame, 6)
+		addStroke(rankFrame, Color3.fromHex("#2E2E2E"), 1, 0)
+
+		local numLbl = Instance.new("TextLabel")
+		numLbl.Size = UDim2.new(1, 0, 1, 0)
+		numLbl.BackgroundTransparency = 1
+		numLbl.Text = tostring(i)
+		numLbl.TextColor3 = Color3.fromHex("#D4D4D4")
+		numLbl.TextSize = 11
+		numLbl.Font = Enum.Font.GothamBold
+		numLbl.TextXAlignment = Enum.TextXAlignment.Center
+		numLbl.TextYAlignment = Enum.TextYAlignment.Center
+		numLbl.Parent = rankFrame
+
+		local dur = tonumber(songData.Duration or songData.duration or song.Duration or song.duration or 0) or 0
+		local rightOffset = (dur > 0) and 70 or 10
+
+		local nameLbl = Instance.new("TextLabel")
+		nameLbl.Size = UDim2.new(1, -(40 + rightOffset), 0, 20)
+		nameLbl.Position = UDim2.new(0, 38, 0, 4)
+		nameLbl.BackgroundTransparency = 1
+		nameLbl.Text = songData.judul or T.Unknown
+		nameLbl.TextColor3 = Color3.fromHex("#FFFFFF")
+		nameLbl.TextSize = 12
+		nameLbl.Font = Enum.Font.GothamBold
+		nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
+		nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+		nameLbl.Parent = item
+		addSC(nameLbl, 13)
+
+		local reqLbl = Instance.new("TextLabel")
+		reqLbl.Size = UDim2.new(1, -(40 + rightOffset), 0, 16)
+		reqLbl.Position = UDim2.new(0, 38, 0, 22)
+		reqLbl.BackgroundTransparency = 1
+		reqLbl.Text = "👤 "..(song.uploader or T.Unknown)
+		reqLbl.TextColor3 = Color3.fromHex("#8E8E93")
+		reqLbl.TextSize = 10
+		reqLbl.Font = Enum.Font.GothamMedium
+		reqLbl.TextTruncate = Enum.TextTruncate.AtEnd
+		reqLbl.TextXAlignment = Enum.TextXAlignment.Left
+		reqLbl.Parent = item
+
+		if dur > 0 then
+			local durBadge = Instance.new("TextLabel")
+			durBadge.Name = "DurBadge"
+			durBadge.Text = fmtTime(dur)
+			durBadge.Size = UDim2.new(0, 52, 0, 22)
+			durBadge.Position = UDim2.new(1, -60, 0.5, -11)
+			durBadge.BackgroundColor3 = Color3.fromHex("#1C1C1C")
+			durBadge.BorderSizePixel = 0
+			durBadge.TextColor3 = Color3.fromHex("#A3A3A3")
+			durBadge.TextSize = 10
+			durBadge.Font = Enum.Font.GothamMedium
+			durBadge.TextXAlignment = Enum.TextXAlignment.Center
+			durBadge.Parent = item
+			addCorner(durBadge, 6)
+			addStroke(durBadge, Color3.fromHex("#282828"), 1, 0)
+		end
+
+		item.MouseEnter:Connect(function()
+			TweenService:Create(item, TweenInfo.new(0.15), {
+				BackgroundColor3 = Color3.fromHex("#202020"),
+			}):Play()
+			TweenService:Create(itemStroke, TweenInfo.new(0.15), {
+				Color = Color3.fromHex("#3E3E3E"),
+			}):Play()
+		end)
+		item.MouseLeave:Connect(function()
+			TweenService:Create(item, TweenInfo.new(0.15), {
+				BackgroundColor3 = Color3.fromHex("#151515"),
+			}):Play()
+			TweenService:Create(itemStroke, TweenInfo.new(0.15), {
+				Color = Color3.fromHex("#242424"),
+			}):Play()
+		end)
+	end
+end
+
 local function norm(s) return string.lower(string.gsub(s or "","  %s+"," ")) end
 local function doSearch(query)
 	currentSearchQuery = query
-	if query == "" then filteredSongs = defaultSongs; return defaultSongs end
+	local sourceList = (activePlaylistType == "favorites") and userFavorites or defaultSongs
+	if query == "" then
+		filteredSongs = sourceList
+		return sourceList
+	end
 	local nq = norm(query)
 	local exact, starts, contains = {},{},{}
-	for _, song in ipairs(defaultSongs) do
+	for _, song in ipairs(sourceList) do
 		local sn = norm(song.judul or song.name or "")
 		if sn == nq then table.insert(exact, song)
 		elseif string.sub(sn,1,#nq) == nq then table.insert(starts, song)
@@ -1332,68 +927,40 @@ local function doSearch(query)
 	for _,s in ipairs(exact)    do table.insert(results,s) end
 	for _,s in ipairs(starts)   do table.insert(results,s) end
 	for _,s in ipairs(contains) do table.insert(results,s) end
-	filteredSongs = results; return results
+	filteredSongs = results
+	return results
 end
 
 local function updateSongsTitle(searching, count, query)
-	removeGradient(songsTitleLbl)
+	if not UI.songsTitleLbl or not UI.songsBadge then return end
+	removeGradient(UI.songsTitleLbl)
 	if searching and query ~= "" then
 		if count > 0 then
-			songsTitleLbl.Text = count..' hasil untuk "'..query..'"'
-			songsTitleLbl.TextColor3 = Color3.fromRGB(150,255,150)
+			UI.songsTitleLbl.Text = 'Hasil Pencarian'
+			UI.songsTitleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+			UI.songsBadge.Text = string.format("%d Hasil", count)
+			UI.songsBadge.TextColor3 = Color3.fromHex("#60A5FA")
 		else
-			songsTitleLbl.Text = 'Tidak ada hasil untuk "'..query..'"'
-			songsTitleLbl.TextColor3 = Color3.fromRGB(255,150,150)
+			UI.songsTitleLbl.Text = 'Tidak Ada Hasil'
+			UI.songsTitleLbl.TextColor3 = Color3.fromHex("#EF4444")
+			UI.songsBadge.Text = "0 Hasil"
+			UI.songsBadge.TextColor3 = Color3.fromHex("#EF4444")
 		end
+	elseif activePlaylistType == "favorites" then
+		UI.songsTitleLbl.Text = T.MyFavorites
+		UI.songsTitleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+		UI.songsBadge.Text = string.format("%d Lagu", count)
+		UI.songsBadge.TextColor3 = Color3.fromHex("#9E9E9E")
+		addTextGradient(UI.songsTitleLbl, true)
 	else
-		songsTitleLbl.Text = T.DefaultSongs.." ("..count..")"
-		songsTitleLbl.TextColor3 = Color3.fromRGB(255,255,255)
-		addTextGradient(songsTitleLbl, true)
+		UI.songsTitleLbl.Text = T.DefaultSongs
+		UI.songsTitleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+		UI.songsBadge.Text = string.format("%d Lagu", count)
+		UI.songsBadge.TextColor3 = Color3.fromHex("#9E9E9E")
+		addTextGradient(UI.songsTitleLbl, true)
 	end
 end
 
-local function updateSongs(list)
-	local display = list or filteredSongs
-	if #display == 0 and currentSearchQuery == "" then display = defaultSongs end
-	for _, c in ipairs(songsScroll:GetChildren()) do if c:IsA("Frame") then c:Destroy() end end
-	updateSongsTitle(currentSearchQuery ~= "", #display, currentSearchQuery)
-	noResultsLbl.Visible = (#display == 0 and currentSearchQuery ~= "")
-	if #display == 0 then
-		if currentSearchQuery ~= "" and tick() - lastNoResults > 3 then
-			lastNoResults = tick()
-			notifyWarning(T.SearchTitle, 'Tidak ada lagu untuk "'..currentSearchQuery..'"')
-		end
-		return
-	end
-	for idx, song in ipairs(display) do
-		local songName = song.judul or song.name or T.Unknown
-		local item = Instance.new("Frame")
-		item.Name = "SI_"..idx; item.Size = UDim2.new(1,0,0,SONG_ITEM_H)
-		item.BackgroundColor3 = C.SongsItem; item.BorderSizePixel = 0
-		item.LayoutOrder = idx; item.ClipsDescendants = true; item.Parent = songsScroll
-		addCorner(item, CORNER_SM)
-		local nameLbl = Instance.new("TextLabel")
-		nameLbl.Text = songName; nameLbl.Size = UDim2.new(1,-80,1,0)
-		nameLbl.Position = UDim2.new(0,10,0,0); nameLbl.BackgroundTransparency = 1
-		nameLbl.TextColor3 = C.SongText; nameLbl.TextSize = 13
-		nameLbl.TextXAlignment = Enum.TextXAlignment.Left
-		nameLbl.TextYAlignment = Enum.TextYAlignment.Center
-		nameLbl.Font = Enum.Font.GothamBold; nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
-		nameLbl.ClipsDescendants = true; nameLbl.Parent = item; addSC(nameLbl,14)
-		local pb = Instance.new("TextButton")
-		pb.Text = T.AddToQueue; pb.Size = UDim2.new(0,64,0,SONG_ITEM_H-12)
-		pb.Position = UDim2.new(1,-70,0.5,-(SONG_ITEM_H-12)/2); pb.BackgroundColor3 = C.AddBtn
-		pb.BorderSizePixel = 0; pb.TextColor3 = C.FavBtnText; pb.Font = Enum.Font.GothamBold
-		pb.TextSize = 11; pb.AutoButtonColor = false; pb.Parent = item; addCorner(pb, CORNER_SM)
-		local capSong = song
-		pb.MouseButton1Click:Connect(function()
-			if not isVIPPlus() then notifyWarning(T.VIPRequired, "Minimum rank VIP untuk menambah lagu!"); return end
-			dispatch("ADD_TO_QUEUE", { musicId = tostring(capSong.id), isFromPlaylist = true })
-		end)
-	end
-end
-
--- FAVORITES
 local FAVORITES_KEY = "MusicFavorites_"..tostring(player.UserId)
 local function saveFavorites()
 	pcall(function()
@@ -1407,231 +974,1420 @@ local function loadFavorites()
 		return {}
 	end)
 	userFavorites = (ok and result) or {}
-end
-
-local function updateFavorites()
-	for _, c in ipairs(favScroll:GetChildren()) do if c:IsA("Frame") then c:Destroy() end end
-	if not canFavorite then favLockedLbl.Visible = true; favEmptyLbl.Visible = false; return end
-	favLockedLbl.Visible = false; favEmptyLbl.Visible = (#userFavorites == 0)
-	if #userFavorites == 0 then return end
-	for idx, song in ipairs(userFavorites) do
-		local item = Instance.new("Frame")
-		item.Name = "FI_"..idx; item.Size = UDim2.new(1,0,0,FAV_ITEM_H)
-		item.BackgroundColor3 = C.FavItem; item.BorderSizePixel = 0
-		item.LayoutOrder = idx; item.ClipsDescendants = true; item.Parent = favScroll
-		addCorner(item, CORNER_SM)
-		local ft = Instance.new("ImageLabel")
-		ft.Size = UDim2.new(0,FAV_THUMB_SZ,0,FAV_THUMB_SZ)
-		ft.Position = UDim2.new(0,6,0.5,-FAV_THUMB_SZ/2); ft.BackgroundColor3 = C.FavThumb
-		ft.BorderSizePixel = 0; ft.ScaleType = Enum.ScaleType.Crop
-		local songId = song.id or song.sound_id or song.SoundId
-		ft.Image = resolveThumbnail(song.sampul or song.thumbnail, songId); ft.Parent = item
-		addCorner(ft, CORNER_SM)
-		local ix = FAV_THUMB_SZ + 12
-		local nameLbl = Instance.new("TextLabel")
-		nameLbl.Text = song.judul or song.name or T.Unknown
-		nameLbl.Size = UDim2.new(1,-(ix+76),1,0); nameLbl.Position = UDim2.new(0,ix,0,0)
-		nameLbl.BackgroundTransparency = 1; nameLbl.TextColor3 = C.FavSongText; nameLbl.TextSize = 13
-		nameLbl.TextXAlignment = Enum.TextXAlignment.Left; nameLbl.TextYAlignment = Enum.TextYAlignment.Center
-		nameLbl.Font = Enum.Font.GothamBold; nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
-		nameLbl.ClipsDescendants = true; nameLbl.Parent = item; addSC(nameLbl,14)
-		local bSz = 30
-		local pb = Instance.new("TextButton")
-		pb.Text = T.AddToQueue; pb.Size = UDim2.new(0,bSz+14,0,bSz)
-		pb.Position = UDim2.new(1,-(bSz+14)*2-10,0.5,-bSz/2); pb.BackgroundColor3 = C.FavPlayBtn
-		pb.BorderSizePixel = 0; pb.TextColor3 = C.FavBtnText; pb.Font = Enum.Font.GothamBold
-		pb.TextSize = 11; pb.AutoButtonColor = false; pb.Parent = item; addCorner(pb, CORNER_SM)
-		local rb = Instance.new("TextButton")
-		rb.Text = T.Remove; rb.Size = UDim2.new(0,bSz,0,bSz)
-		rb.Position = UDim2.new(1,-bSz-4,0.5,-bSz/2); rb.BackgroundColor3 = C.FavRemoveBtn
-		rb.BorderSizePixel = 0; rb.TextColor3 = C.FavBtnText; rb.Font = Enum.Font.GothamBold
-		rb.TextSize = 14; rb.AutoButtonColor = false; rb.Parent = item; addCorner(rb, CORNER_SM)
-		local capSong = song
-		pb.MouseButton1Click:Connect(function()
-			dispatch("ADD_TO_QUEUE", { musicId = tostring(capSong.id), isFromPlaylist = true })
-		end)
-		rb.MouseButton1Click:Connect(function()
-			table.remove(userFavorites, idx); saveFavorites(); updateFavorites()
-			notifySuccess(T.SuccessTitle, '"'..(capSong.judul or capSong.name or "")..'" dihapus dari favorit')
-		end)
+	if UI.favSubLbl then
+		UI.favSubLbl.Text = canFavorite and string.format("%d Lagu Favorit", #userFavorites) or "Fitur Khusus VIP+"
 	end
 end
 
--- SUB-TAB SWITCH
-local subPages = { player = playerPage, songs = songsPage, favorites = favPage }
-local subBtns  = { player = playerSubTab, songs = songsSubTab, favorites = favoritesSubTab }
+local function updateSongs(list)
+	if not UI.songsContainer then return end
+	local isFavView = (activePlaylistType == "favorites")
+	local sourceList = isFavView and userFavorites or defaultSongs
+	local display = list or filteredSongs
+	if #display == 0 and currentSearchQuery == "" then display = sourceList end
 
-local function switchSubTab(tab)
-	currentSubTab = tab
-	for name, btn in pairs(subBtns) do
-		local isActive   = (name == tab)
-		local isDisabled = (name == "favorites" and not canFavorite)
-		removeGradient(btn)
-		if isActive then
-			btn.BackgroundColor3 = C.SubTabActive; btn.TextColor3 = C.SubTabTextActive
-			addGradient(btn, 90, false)
-		elseif isDisabled then
-			btn.BackgroundColor3 = C.SubTabDisabled; btn.TextColor3 = C.SubTabTextDisabled
-		else
-			btn.BackgroundColor3 = C.SubTabInactive; btn.TextColor3 = C.SubTabText
+	for _, c in ipairs(UI.songsContainer:GetChildren()) do
+		if c:IsA("Frame") and c ~= UI.noResultsFrame and c ~= UI.favEmptyFrame and c ~= UI.favLockedFrame then
+			c:Destroy()
 		end
 	end
-	for name, page in pairs(subPages) do page.Visible = (name == tab) end
-	if tab == "player" then
-		task.defer(updatePlayerScrollLayout)
-	elseif tab == "songs" then
-		defaultSongs = MusicModule:GetAllMusic(); filteredSongs = defaultSongs
-		currentSearchQuery = ""; searchInput.Text = ""; clearBtn.Visible = false
-		updateSongsTitle(false, #defaultSongs, ""); updateSongs(defaultSongs)
-	elseif tab == "favorites" then
-		loadFavorites(); updateFavorites()
-	end
-end
 
--- ====================================
--- PROGRESS LOOP (DIPERBAIKI — SMOOTH)
--- ====================================
--- PERBAIKAN UTAMA: Gunakan HANYA shared-clock interpolation
--- untuk progress bar. Ini memberikan smooth progress tanpa
--- lompatan yang disebabkan oleh pertarungan antara TimePosition
--- replicated dan koreksi client.
-local progressConnection
-local function startProgressLoop()
-	if progressConnection then progressConnection:Disconnect(); progressConnection = nil end
-	progressConnection = RunService.Heartbeat:Connect(function(dt)
-		if not MenuConfig.State.isMenuOpen or MenuConfig.State.currentMainTab ~= "Music" then return end
+	updateSongsTitle(currentSearchQuery ~= "", #display, currentSearchQuery)
 
-		local now = workspace:GetServerTimeNow()
-		updateBeatAnalysis(dt, now)
-
-		-- Animated Beat-Reactive Monochrome Gradient on NowPlaying frame
-		if npStrokeGrad then
-			npStrokeGrad.Rotation = (npStrokeGrad.Rotation + dt * (30 + beatIntensity * 50)) % 360
-		end
-
-		-- Dynamic Audio Visualizer Bars
-		for i, bar in ipairs(visualizerBars) do
-			local shape = barShapes[i] or 0.7
-			local targetH = 4 + (beatIntensity * 16 * shape)
-			local curH = bar.Size.Y.Offset
-			bar.Size = UDim2.new(bar.Size.X.Scale, bar.Size.X.Offset, 0, curH + (targetH - curH) * math.clamp(dt * 18, 0, 1))
-		end
-
-		if clientState.isPlaying and clientState.serverStartTime > 0 then
-			local elapsed = workspace:GetServerTimeNow() - clientState.serverStartTime
-			elapsed = math.clamp(elapsed, 0, clientState.duration or 9999)
-			updateProgressBar(elapsed, clientState.duration)
-		elseif clientState.currentSong then
-			updateProgressBar(currentTimePos, currentTimeLen)
-		else
-			updateProgressBar(0, 0)
-		end
-	end)
-end
-local function stopProgressLoop()
-	if progressConnection then progressConnection:Disconnect(); progressConnection = nil end
-	-- Collapse visualizer bars to idle
-	for _, bar in ipairs(visualizerBars) do
-		bar.Size = UDim2.new(bar.Size.X.Scale, bar.Size.X.Offset, 0, 4)
-	end
-end
-
--- BUTTON CONNECTIONS
-playerSubTab.MouseButton1Click:Connect(function() switchSubTab("player") end)
-songsSubTab.MouseButton1Click:Connect(function() switchSubTab("songs") end)
-favoritesSubTab.MouseButton1Click:Connect(function()
-	switchSubTab("favorites")
-	if not canFavorite then notifyWarning(T.VIPRequired, "Fitur Favorit hanya untuk VIP+") end
-end)
-
-reqBtn.MouseButton1Click:Connect(function()
-	if not isVIPPlus() then notifyWarning(T.VIPRequired, "Minimum rank VIP untuk menambah lagu!"); return end
-	local id = reqInput.Text:gsub("%s+","")
-	if id ~= "" and id:match("^%d+$") then
-		dispatch("ADD_TO_QUEUE", { musicId = id, isFromPlaylist = false })
-		reqInput.Text = ""
-	else
-		notifyWarning(T.ErrorTitle, "Masukkan ID lagu yang valid!")
-	end
-end)
-
-if muteBtn then
-	muteBtn.MouseButton1Click:Connect(function()
-		isMuted = not isMuted
-		applyVolume()
-		if MenuConfig.UserSettings then
-			MenuConfig.UserSettings.muteMusic = isMuted
-		end
-		updateControlsUI()
-	end)
-end
-
-skipBtn.MouseEnter:Connect(function()
-	TweenService:Create(skipBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromHex("#2C2C2C"),
-	}):Play()
-end)
-skipBtn.MouseLeave:Connect(function()
-	TweenService:Create(skipBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromHex("#1A1A1A"),
-	}):Play()
-end)
-
-skipBtn.MouseButton1Click:Connect(function()
-	if not clientState.currentSong then
-		notifyWarning(T.WarningTitle, T.NoSongToSkip)
+	if isFavView and not canFavorite then
+		if UI.favLockedFrame then UI.favLockedFrame.Visible = true end
+		if UI.favEmptyFrame then UI.favEmptyFrame.Visible = false end
+		if UI.noResultsFrame then UI.noResultsFrame.Visible = false end
+		UI.songsContainer.Size = UDim2.new(1, 0, 0, 150)
+		task.defer(updateMusicLayout)
 		return
 	end
-	if voteSkipState.active then
-		if not voteSkipState.hasVoted then
-			voteSkipState.hasVoted = true
-			dispatch("SKIP_VOTE_YES", {})
-			updateVoteSkipUI()
-		else
-			notifyInfo(T.MusicTitle, "Kamu sudah melakukan voting!")
+	if UI.favLockedFrame then UI.favLockedFrame.Visible = false end
+
+	if isFavView and #userFavorites == 0 then
+		if UI.favEmptyFrame then UI.favEmptyFrame.Visible = true end
+		if UI.noResultsFrame then UI.noResultsFrame.Visible = false end
+		UI.songsContainer.Size = UDim2.new(1, 0, 0, 140)
+		task.defer(updateMusicLayout)
+		return
+	end
+	if UI.favEmptyFrame then UI.favEmptyFrame.Visible = false end
+
+	local isNoSearch = (#display == 0 and currentSearchQuery ~= "")
+	if UI.noResultsFrame then UI.noResultsFrame.Visible = isNoSearch end
+	if isNoSearch then
+		UI.songsContainer.Size = UDim2.new(1, 0, 0, 130)
+		if tick() - lastNoResults > 3 then
+			lastNoResults = tick()
+			notifyWarning(T.SearchTitle, 'Tidak ada lagu untuk "'..currentSearchQuery..'"')
 		end
+		task.defer(updateMusicLayout)
+		return
+	end
+
+	local totalSongsH = #display * (DIM.SONG_ITEM_H + 4)
+	UI.songsContainer.Size = UDim2.new(1, 0, 0, totalSongsH)
+
+	for idx, song in ipairs(display) do
+		local songName = song.judul or song.name or T.Unknown
+		local songId = tostring(song.id or song.sound_id or song.SoundId or "")
+		local isCurrentPlaying = (clientState.isPlaying and clientState.currentSong and tostring(clientState.currentSong.id) == songId)
+
+		local item = Instance.new("Frame")
+		item.Name = "SI_"..idx
+		item.Size = UDim2.new(1, 0, 0, DIM.SONG_ITEM_H)
+		item.BackgroundColor3 = isCurrentPlaying and Color3.fromHex("#1A1A1A") or Color3.fromHex("#151515")
+		item.BorderSizePixel = 0
+		item.LayoutOrder = idx
+		item.ClipsDescendants = true
+		item.Parent = UI.songsContainer
+		addCorner(item, DIM.CORNER_MD)
+		local itemStroke = addStroke(item, isCurrentPlaying and Color3.fromHex("#4A4A4A") or Color3.fromHex("#242424"), 1, 0)
+
+		local thumb = Instance.new("ImageLabel")
+		thumb.Size = UDim2.new(0, 36, 0, 36)
+		thumb.Position = UDim2.new(0, 6, 0.5, -18)
+		thumb.BackgroundColor3 = Color3.fromHex("#080808")
+		thumb.BorderSizePixel = 0
+		thumb.ScaleType = Enum.ScaleType.Crop
+		thumb.Image = resolveThumbnail(song.sampul or song.thumbnail, songId)
+		thumb.Parent = item
+		addCorner(thumb, DIM.CORNER_SM)
+		addStroke(thumb, Color3.fromHex("#282828"), 1, 0)
+
+		local infoLeft = 48
+		local rightSpace = isFavView and 115 or 85
+
+		local nameLbl = Instance.new("TextLabel")
+		nameLbl.Text = songName
+		nameLbl.Size = UDim2.new(1, -(infoLeft + rightSpace), 0, 20)
+		nameLbl.Position = UDim2.new(0, infoLeft, 0, 4)
+		nameLbl.BackgroundTransparency = 1
+		nameLbl.TextColor3 = Color3.fromHex("#FFFFFF")
+		nameLbl.TextSize = 12
+		nameLbl.TextXAlignment = Enum.TextXAlignment.Left
+		nameLbl.Font = Enum.Font.GothamBold
+		nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
+		nameLbl.Parent = item
+		addSC(nameLbl, 13)
+
+		local subLbl = Instance.new("TextLabel")
+		if isCurrentPlaying then
+			subLbl.Text = "▶  Sedang Diputar"
+			subLbl.TextColor3 = Color3.fromHex("#10B981")
+		elseif isFavView then
+			subLbl.Text = "⭐  Tersimpan di Favorit"
+			subLbl.TextColor3 = Color3.fromHex("#8E8E93")
+		else
+			subLbl.Text = "Lagu Pilihan Server"
+			subLbl.TextColor3 = Color3.fromHex("#737373")
+		end
+		subLbl.Size = UDim2.new(1, -(infoLeft + rightSpace), 0, 16)
+		subLbl.Position = UDim2.new(0, infoLeft, 0, 23)
+		subLbl.BackgroundTransparency = 1
+		subLbl.TextSize = 10
+		subLbl.TextXAlignment = Enum.TextXAlignment.Left
+		subLbl.Font = Enum.Font.GothamMedium
+		subLbl.Parent = item
+
+		local btnH = 28
+		local pb = Instance.new("TextButton")
+		pb.Text = T.AddToQueue
+		pb.Size = UDim2.new(0, 64, 0, btnH)
+		local pbRight = isFavView and -(64 + btnH + 10) or -72
+		pb.Position = UDim2.new(1, pbRight, 0.5, -btnH/2)
+		pb.BackgroundColor3 = Color3.fromHex("#222222")
+		pb.BorderSizePixel = 0
+		pb.TextColor3 = Color3.fromHex("#FFFFFF")
+		pb.Font = Enum.Font.GothamBold
+		pb.TextSize = 11
+		pb.AutoButtonColor = false
+		pb.Parent = item
+		addCorner(pb, DIM.CORNER_SM)
+		local pbStroke = addStroke(pb, Color3.fromHex("#3E3E3E"), 1, 0)
+
+		pb.MouseEnter:Connect(function()
+			TweenService:Create(pb, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#333333") }):Play()
+			TweenService:Create(pbStroke, TweenInfo.new(0.15), { Color = Color3.fromHex("#666666") }):Play()
+		end)
+		pb.MouseLeave:Connect(function()
+			TweenService:Create(pb, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#222222") }):Play()
+			TweenService:Create(pbStroke, TweenInfo.new(0.15), { Color = Color3.fromHex("#3E3E3E") }):Play()
+		end)
+
+		local capSong = song
+		pb.MouseButton1Click:Connect(function()
+			if not isVIPPlus() then notifyWarning(T.VIPRequired, "Minimum rank VIP untuk menambah lagu!"); return end
+			dispatch("ADD_TO_QUEUE", { musicId = tostring(capSong.id or capSong.sound_id), isFromPlaylist = true })
+		end)
+
+		if isFavView then
+			local rb = Instance.new("TextButton")
+			rb.Text = T.Remove
+			rb.Size = UDim2.new(0, btnH, 0, btnH)
+			rb.Position = UDim2.new(1, -(btnH + 6), 0.5, -btnH/2)
+			rb.BackgroundColor3 = Color3.fromHex("#202020")
+			rb.BorderSizePixel = 0
+			rb.TextColor3 = Color3.fromHex("#9E9E9E")
+			rb.Font = Enum.Font.GothamBold
+			rb.TextSize = 12
+			rb.AutoButtonColor = false
+			rb.Parent = item
+			addCorner(rb, DIM.CORNER_SM)
+			local rbStroke = addStroke(rb, Color3.fromHex("#333333"), 1, 0)
+
+			rb.MouseEnter:Connect(function()
+				TweenService:Create(rb, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#3A1A1A"), TextColor3 = Color3.fromHex("#EF4444") }):Play()
+				TweenService:Create(rbStroke, TweenInfo.new(0.15), { Color = Color3.fromHex("#DC2626") }):Play()
+			end)
+			rb.MouseLeave:Connect(function()
+				TweenService:Create(rb, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#202020"), TextColor3 = Color3.fromHex("#9E9E9E") }):Play()
+				TweenService:Create(rbStroke, TweenInfo.new(0.15), { Color = Color3.fromHex("#333333") }):Play()
+			end)
+
+			rb.MouseButton1Click:Connect(function()
+				table.remove(userFavorites, idx)
+				saveFavorites()
+				updateFavoriteUI()
+				updateSongs(userFavorites)
+				notifySuccess(T.SuccessTitle, '"'..(capSong.judul or capSong.name or "")..'" dihapus dari favorit')
+			end)
+		end
+
+		item.MouseEnter:Connect(function()
+			TweenService:Create(item, TweenInfo.new(0.15), {
+				BackgroundColor3 = isCurrentPlaying and Color3.fromHex("#222222") or Color3.fromHex("#1F1F1F"),
+			}):Play()
+		end)
+		item.MouseLeave:Connect(function()
+			TweenService:Create(item, TweenInfo.new(0.15), {
+				BackgroundColor3 = isCurrentPlaying and Color3.fromHex("#1A1A1A") or Color3.fromHex("#151515"),
+			}):Play()
+		end)
+	end
+
+	task.defer(updateMusicLayout)
+end
+
+local function selectPlaylist(pType)
+	activePlaylistType = pType
+	currentSearchQuery = ""
+	if UI.searchInput then UI.searchInput.Text = "" end
+	if UI.clearBtn then UI.clearBtn.Visible = false end
+
+	if UI.djStroke then UI.djStroke.Color = (pType == "dj") and Color3.fromHex("#FFFFFF") or Color3.fromHex("#262626") end
+	if UI.djActiveInd then UI.djActiveInd.Visible = (pType == "dj") end
+
+	if UI.favStroke then UI.favStroke.Color = (pType == "favorites") and Color3.fromHex("#FFFFFF") or Color3.fromHex("#262626") end
+	if UI.favActiveInd then UI.favActiveInd.Visible = (pType == "favorites") end
+
+	for fType, chipData in pairs(UI.filterButtons) do
+		local isSel = (fType == pType)
+		chipData.btn.BackgroundColor3 = isSel and Color3.fromHex("#FFFFFF") or Color3.fromHex("#151515")
+		chipData.btn.TextColor3 = isSel and Color3.fromHex("#111111") or Color3.fromHex("#8E8E93")
+		chipData.btn.Font = isSel and Enum.Font.GothamBold or Enum.Font.GothamMedium
+		chipData.stroke.Color = isSel and Color3.fromHex("#FFFFFF") or Color3.fromHex("#262626")
+	end
+
+	if pType == "favorites" then
+		loadFavorites()
+		filteredSongs = userFavorites
+		updateSongs(userFavorites)
 	else
-		dispatch("CONTROL_NEXT", {})
+		if #defaultSongs == 0 then
+			defaultSongs = MusicModule:GetAllMusic()
+		end
+		filteredSongs = defaultSongs
+		updateSongs(defaultSongs)
 	end
-end)
-
-if voteYesBtn then
-	voteYesBtn.MouseButton1Click:Connect(function()
-		if voteSkipState.hasVoted then return end
-		voteSkipState.hasVoted = true
-		dispatch("SKIP_VOTE_YES", {})
-		updateVoteSkipUI()
-	end)
-end
-if voteNoBtn then
-	voteNoBtn.MouseButton1Click:Connect(function()
-		if voteSkipState.hasVoted then return end
-		voteSkipState.hasVoted = true
-		dispatch("SKIP_VOTE_NO", {})
-		updateVoteSkipUI()
-	end)
 end
 
-addFavBtn.MouseButton1Click:Connect(function()
-	if not canFavorite then notifyWarning(T.VIPRequired, "Fitur Favorit hanya untuk VIP+"); return end
-	if not clientState.currentSong then return end
-	for _, s in ipairs(userFavorites) do
-		if s.id == clientState.currentSong.id then notifyWarning(T.MusicTitle, "Lagu sudah ada di favorit!"); return end
-	end
-	table.insert(userFavorites, clientState.currentSong); saveFavorites()
-	notifySuccess(T.SuccessTitle, '"'..(clientState.currentSong.judul or "")..'" ditambahkan ke favorit!')
-end)
+-- ====================================
+-- UI BUILDERS (MODULAR SCOPES - NO TOP-LEVEL REGISTER OVERFLOW)
+-- ====================================
 
-local searchDebounce
-searchInput:GetPropertyChangedSignal("Text"):Connect(function()
-	local q = searchInput.Text; clearBtn.Visible = (q ~= "")
-	if searchDebounce then task.cancel(searchDebounce) end
-	searchDebounce = task.delay(0.2, function() searchDebounce = nil; updateSongs(doSearch(q)) end)
-end)
-clearBtn.MouseButton1Click:Connect(function()
-	searchInput.Text = ""; currentSearchQuery = ""; clearBtn.Visible = false
-	filteredSongs = defaultSongs; updateSongsTitle(false, #defaultSongs, ""); updateSongs(defaultSongs)
-end)
+-- buildQuickNav removed: tab bar not needed on a single scrollable page
+
+local function buildNowPlaying()
+	-- NowPlaying berada di dalam MusicScroll agar scroll berfungsi normal.
+	-- Tingginya diatur dinamis oleh updateMusicLayout agar menutup 100% viewport,
+	-- sehingga Antrean Lagu tersembunyi di bawah sampai di-scroll ke bawah.
+	local np = Instance.new("Frame")
+	np.Name = "NowPlaying"
+	np.Size = UDim2.new(1, -6, 0, DIM.NP_H)  -- resized by updateMusicLayout
+	np.Position = UDim2.new(0, 0, 0, 0)
+	np.ZIndex = 1
+	np.BackgroundColor3 = Color3.fromHex("#080808")
+	np.BorderSizePixel = 0
+	np.ClipsDescendants = true
+	np.Parent = UI.musicScroll  -- inside MusicScroll so scrolling works
+	addCorner(np, 12)
+
+	local npStroke = Instance.new("UIStroke")
+	npStroke.Name = "NPStroke"; npStroke.Thickness = 1.2; npStroke.Color = Color3.fromRGB(255,255,255)
+	npStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; npStroke.Parent = np
+
+	local strokeGrad = Instance.new("UIGradient")
+	strokeGrad.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#151515")),
+		ColorSequenceKeypoint.new(0.5, Color3.fromHex("#FFFFFF")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#353535")),
+	})
+	strokeGrad.Rotation = 45; strokeGrad.Parent = npStroke
+	UI.npStrokeGrad = strokeGrad
+
+	local thumb = Instance.new("ImageLabel")
+	thumb.Name = "Thumbnail"
+	thumb.Size = UDim2.new(1, 0, 1, 0)
+	thumb.Position = UDim2.new(0, 0, 0, 0)
+	thumb.BackgroundTransparency = 1
+	thumb.BorderSizePixel = 0
+	thumb.ScaleType = Enum.ScaleType.Crop
+	thumb.ImageTransparency = 0
+	thumb.Image = DEFAULT_THUMBNAIL
+	thumb.ZIndex = 1
+	thumb.Parent = np
+	UI.thumbImg = thumb
+
+	local darkOverlay = Instance.new("Frame")
+	darkOverlay.Name = "DarkOverlay"
+	darkOverlay.Size = UDim2.new(1, 0, 0, 160)
+	darkOverlay.Position = UDim2.new(0, 0, 1, -160)
+	darkOverlay.BackgroundColor3 = Color3.fromHex("#000000")
+	darkOverlay.BackgroundTransparency = 0
+	darkOverlay.BorderSizePixel = 0
+	darkOverlay.ZIndex = 2
+	darkOverlay.Parent = np
+	addCorner(darkOverlay, 12)
+
+	local overlayGrad = Instance.new("UIGradient")
+	overlayGrad.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#000000")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#000000")),
+	})
+	overlayGrad.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1.0),
+		NumberSequenceKeypoint.new(0.40, 0.75),
+		NumberSequenceKeypoint.new(0.70, 0.35),
+		NumberSequenceKeypoint.new(1.0, 0.05),
+	})
+	overlayGrad.Rotation = 90
+	overlayGrad.Parent = darkOverlay
+
+	local npBadge = Instance.new("Frame")
+	npBadge.Name = "Badge"
+	npBadge.Size = UDim2.new(0, 90, 0, 18)
+	npBadge.Position = UDim2.new(0, 8, 0, 8)
+	npBadge.BackgroundColor3 = Color3.fromHex("#080808")
+	npBadge.BackgroundTransparency = 0.15
+	npBadge.BorderSizePixel = 0
+	npBadge.ZIndex = 4
+	npBadge.Parent = np
+	addCorner(npBadge, 9)
+
+	local badgeStroke = Instance.new("UIStroke")
+	badgeStroke.Thickness = 1
+	badgeStroke.Color = Color3.fromHex("#505050")
+	badgeStroke.Transparency = 0.2
+	badgeStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	badgeStroke.Parent = npBadge
+
+	local badgeDot = Instance.new("Frame")
+	badgeDot.Name = "Dot"
+	badgeDot.Size = UDim2.new(0, 5, 0, 5)
+	badgeDot.Position = UDim2.new(0, 8, 0.5, -2)
+	badgeDot.BackgroundColor3 = Color3.fromHex("#FFFFFF")
+	badgeDot.BorderSizePixel = 0
+	badgeDot.ZIndex = 5
+	badgeDot.Parent = npBadge
+	addCorner(badgeDot, 3)
+
+	local badgeText = Instance.new("TextLabel")
+	badgeText.Name = "Text"
+	badgeText.Size = UDim2.new(1, -20, 1, 0)
+	badgeText.Position = UDim2.new(0, 18, 0, 0)
+	badgeText.BackgroundTransparency = 1
+	badgeText.Text = "NOW PLAYING"
+	badgeText.TextColor3 = Color3.fromHex("#FFFFFF")
+	badgeText.TextSize = 9
+	badgeText.Font = Enum.Font.GothamBold
+	badgeText.TextXAlignment = Enum.TextXAlignment.Left
+	badgeText.ZIndex = 5
+	badgeText.Parent = npBadge
+
+	local favBtn = Instance.new("TextButton")
+	favBtn.Name = "AddFavBtn"
+	favBtn.Text = T.AddFavorite
+	favBtn.Size = UDim2.new(0, 28, 0, 28)
+	favBtn.Position = UDim2.new(1, -36, 0, 8)
+	favBtn.BackgroundColor3 = Color3.fromHex("#1A1A1A")
+	favBtn.BackgroundTransparency = 0.1
+	favBtn.BorderSizePixel = 0
+	favBtn.TextColor3 = Color3.fromHex("#FFFFFF")
+	favBtn.TextSize = 15
+	favBtn.Font = Enum.Font.GothamBold
+	favBtn.Visible = false
+	favBtn.AutoButtonColor = false
+	favBtn.ZIndex = 5
+	favBtn.Parent = np
+	addCorner(favBtn, 14)
+
+	local favBtnStroke = Instance.new("UIStroke")
+	favBtnStroke.Thickness = 1
+	favBtnStroke.Color = Color3.fromHex("#505050")
+	favBtnStroke.Transparency = 0.2
+	favBtnStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	favBtnStroke.Parent = favBtn
+
+	favBtn.MouseEnter:Connect(function()
+		if canFavorite then
+			TweenService:Create(favBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#333333") }):Play()
+		end
+	end)
+	favBtn.MouseLeave:Connect(function()
+		if canFavorite then
+			TweenService:Create(favBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#1A1A1A") }):Play()
+		end
+	end)
+
+	favBtn.MouseButton1Click:Connect(function()
+		if not isVIPPlus() then
+			notifyWarning(T.VIPRequired, "Minimum rank VIP untuk menambah favorit!")
+			return
+		end
+		if not clientState.currentSong then
+			notifyWarning(T.MusicTitle, "Tidak ada lagu yang sedang diputar!")
+			return
+		end
+		local curId = tostring(clientState.currentSong.id)
+		for _, s in ipairs(userFavorites) do
+			if tostring(s.id or s.sound_id) == curId then
+				notifyInfo(T.MusicTitle, "Lagu sudah ada di daftar favoritmu!")
+				return
+			end
+		end
+		table.insert(userFavorites, clientState.currentSong)
+		saveFavorites()
+		updateFavoriteUI()
+		if activePlaylistType == "favorites" then
+			updateSongs(userFavorites)
+		end
+		notifySuccess(T.SuccessTitle, '"'..(clientState.currentSong.judul or T.Unknown)..'" ditambahkan ke favorit!')
+	end)
+	UI.addFavBtn = favBtn
+
+	local npContent = Instance.new("Frame")
+	npContent.Name = "NPContent"
+	npContent.Size = UDim2.new(1, -16, 0, 72)
+	npContent.Position = UDim2.new(0, 8, 1, -(72 + 30))
+	npContent.BackgroundTransparency = 1
+	npContent.ZIndex = 10
+	npContent.Parent = np
+
+	local songName = Instance.new("TextLabel")
+	songName.Name = "SongName"
+	songName.Text = T.NoSongPlaying
+	songName.Size = UDim2.new(1, 0, 0, 24)
+	songName.Position = UDim2.new(0, 0, 0, 0)
+	songName.BackgroundTransparency = 1
+	songName.TextColor3 = Color3.fromHex("#FFFFFF")
+	songName.TextSize = 14
+	songName.Font = Enum.Font.GothamBold
+	songName.TextTruncate = Enum.TextTruncate.AtEnd
+	songName.TextXAlignment = Enum.TextXAlignment.Left
+	songName.TextStrokeTransparency = 0.75
+	songName.TextStrokeColor3 = Color3.new(0, 0, 0)
+	songName.ZIndex = 12
+	songName.Parent = npContent
+	addSC(songName, 15)
+	UI.songNameLbl = songName
+
+	local reqLbl = Instance.new("TextLabel")
+	reqLbl.Name = "Requester"
+	reqLbl.Text = ""
+	reqLbl.Size = UDim2.new(1, 0, 0, 18)
+	reqLbl.Position = UDim2.new(0, 0, 0, 25)
+	reqLbl.BackgroundTransparency = 1
+	reqLbl.TextColor3 = C.RequesterText
+	reqLbl.TextSize = 12
+	reqLbl.Font = Enum.Font.GothamMedium
+	reqLbl.TextTruncate = Enum.TextTruncate.AtEnd
+	reqLbl.TextXAlignment = Enum.TextXAlignment.Left
+	reqLbl.TextStrokeTransparency = 0.75
+	reqLbl.TextStrokeColor3 = Color3.new(0, 0, 0)
+	reqLbl.ZIndex = 12
+	reqLbl.Parent = npContent
+	addSC(reqLbl, 13, 10)
+	UI.requesterLbl = reqLbl
+
+	local vizContainer = Instance.new("Frame")
+	vizContainer.Name = "VizContainer"
+	vizContainer.Size = UDim2.new(0, 56, 0, 16)
+	vizContainer.Position = UDim2.new(0, 0, 1, -16)
+	vizContainer.BackgroundTransparency = 1
+	vizContainer.ZIndex = 12
+	vizContainer.Parent = npContent
+
+	UI.visualizerBars = {}
+	for i = 1, 7 do
+		local bar = Instance.new("Frame")
+		bar.Name = "Bar"..i
+		bar.AnchorPoint = Vector2.new(0, 1)
+		bar.Size = UDim2.new(0, 5, 0, 3)
+		bar.Position = UDim2.new(0, (i-1)*8, 1, 0)
+		bar.BackgroundColor3 = Color3.fromHex("#FFFFFF")
+		bar.BorderSizePixel = 0
+		bar.ZIndex = 13
+		addCorner(bar, 2)
+		bar.Parent = vizContainer
+		table.insert(UI.visualizerBars, bar)
+	end
+
+	local progressFrame = Instance.new("Frame")
+	progressFrame.Name = "ProgressFrame"
+	progressFrame.Size = UDim2.new(1, -16, 0, 22)
+	progressFrame.Position = UDim2.new(0, 8, 1, -28)
+	progressFrame.BackgroundTransparency = 1
+	progressFrame.ZIndex = 10
+	progressFrame.Parent = np
+
+	local progressBg = Instance.new("Frame")
+	progressBg.Name = "ProgressBg"
+	progressBg.Size = UDim2.new(1, -90, 0, DIM.PROGRESS_H)
+	progressBg.Position = UDim2.new(0, 0, 0.5, -DIM.PROGRESS_H/2)
+	progressBg.BackgroundColor3 = Color3.fromHex("#303030")
+	progressBg.BackgroundTransparency = 0.3
+	progressBg.BorderSizePixel = 0
+	progressBg.ClipsDescendants = true
+	progressBg.ZIndex = 11
+	progressBg.Parent = progressFrame
+	addCorner(progressBg, DIM.PROGRESS_H/2)
+
+	local progressFill = Instance.new("Frame")
+	progressFill.Name = "ProgressFill"
+	progressFill.Size = UDim2.new(0, 0, 1, 0)
+	progressFill.BackgroundColor3 = Color3.fromHex("#FFFFFF")
+	progressFill.BorderSizePixel = 0
+	progressFill.ClipsDescendants = true
+	progressFill.ZIndex = 12
+	progressFill.Parent = progressBg
+	addCorner(progressFill, DIM.PROGRESS_H/2)
+
+	local pg = Instance.new("UIGradient")
+	pg.Color = ColorSequence.new({ ColorSequenceKeypoint.new(0,Color3.fromHex("#888888")), ColorSequenceKeypoint.new(0.5,Color3.fromHex("#DDDDDD")), ColorSequenceKeypoint.new(1,Color3.fromHex("#FFFFFF")) })
+	pg.Parent = progressFill
+	UI.progressFill = progressFill
+
+	local progressDot = Instance.new("Frame")
+	progressDot.Name = "ProgressDot"
+	progressDot.Size = UDim2.new(0, DIM.PROGRESS_H+5, 0, DIM.PROGRESS_H+5)
+	progressDot.Position = UDim2.new(1, -(DIM.PROGRESS_H+5)/2, 0.5, -(DIM.PROGRESS_H+5)/2)
+	progressDot.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	progressDot.BorderSizePixel = 0
+	progressDot.Visible = false
+	progressDot.ZIndex = 13
+	progressDot.Parent = progressFill
+	addCorner(progressDot, (DIM.PROGRESS_H+5)/2)
+	UI.progressDot = progressDot
+
+	local durLbl = Instance.new("TextLabel")
+	durLbl.Name = "Duration"
+	durLbl.Text = "0:00 / 0:00"
+	durLbl.Size = UDim2.new(0, 52, 1, 0)
+	durLbl.Position = UDim2.new(1, -84, 0, 0)
+	durLbl.BackgroundTransparency = 1
+	durLbl.TextColor3 = Color3.fromHex("#D1D5DB")
+	durLbl.TextSize = 10
+	durLbl.Font = Enum.Font.GothamSemibold
+	durLbl.TextXAlignment = Enum.TextXAlignment.Right
+	durLbl.Visible = false
+	durLbl.ZIndex = 12
+	durLbl.Parent = progressFrame
+	addSC(durLbl, 10)
+	UI.durationLbl = durLbl
+
+	local skip = Instance.new("TextButton")
+	skip.Name = "SkipBtn"
+	skip.Text = "⏭"
+	skip.Size = UDim2.new(0, 24, 0, 20)
+	skip.Position = UDim2.new(1, -24, 0.5, -10)
+	skip.BackgroundColor3 = Color3.fromHex("#1A1A1A")
+	skip.BackgroundTransparency = 0.1
+	skip.BorderSizePixel = 0
+	skip.TextColor3 = Color3.fromHex("#FFFFFF")
+	skip.TextSize = 11
+	skip.Font = Enum.Font.GothamBold
+	skip.AutoButtonColor = false
+	skip.Visible = false
+	skip.ZIndex = 12
+	skip.Parent = progressFrame
+	addCorner(skip, 5)
+
+	local skipStroke = Instance.new("UIStroke")
+	skipStroke.Thickness = 1
+	skipStroke.Color = Color3.fromHex("#505050")
+	skipStroke.Transparency = 0.25
+	skipStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	skipStroke.Parent = skip
+
+	skip.MouseButton1Click:Connect(function()
+		if not clientState.currentSong or not clientState.isPlaying then
+			notifyWarning(T.MusicTitle, T.NoSongToSkip)
+			return
+		end
+		dispatch("CONTROL_NEXT")
+	end)
+	UI.skipBtn = skip
+
+	local votePanel = Instance.new("Frame")
+	votePanel.Name = "VoteSkipPanel"
+	votePanel.Size = UDim2.new(1, -16, 0, 32)
+	votePanel.Position = UDim2.new(0, 8, 1, -66)
+	votePanel.BackgroundColor3 = Color3.fromHex("#0C0C0C")
+	votePanel.BackgroundTransparency = 0.05
+	votePanel.BorderSizePixel = 0
+	votePanel.Visible = false
+	votePanel.ZIndex = 15
+	votePanel.Parent = np
+	addCorner(votePanel, 8)
+
+	local vStroke = Instance.new("UIStroke")
+	vStroke.Thickness = 1
+	vStroke.Color = Color3.fromHex("#3B82F6")
+	vStroke.Transparency = 0.3
+	vStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	vStroke.Parent = votePanel
+
+	local voteInfo = Instance.new("TextLabel")
+	voteInfo.Name = "VoteInfo"
+	voteInfo.Size = UDim2.new(1, -112, 1, 0)
+	voteInfo.Position = UDim2.new(0, 10, 0, 0)
+	voteInfo.BackgroundTransparency = 1
+	voteInfo.Text = "Vote Skip: 1/2"
+	voteInfo.TextColor3 = Color3.fromHex("#FFFFFF")
+	voteInfo.TextSize = 10
+	voteInfo.Font = Enum.Font.GothamMedium
+	voteInfo.TextXAlignment = Enum.TextXAlignment.Left
+	voteInfo.TextTruncate = Enum.TextTruncate.AtEnd
+	voteInfo.ZIndex = 16
+	voteInfo.Parent = votePanel
+	addSC(voteInfo, 11)
+	UI.voteInfoLbl = voteInfo
+
+	local voteYes = Instance.new("TextButton")
+	voteYes.Name = "VoteYesBtn"
+	voteYes.Text = "✓ Ya"
+	voteYes.Size = UDim2.new(0, 44, 0, 22)
+	voteYes.Position = UDim2.new(1, -102, 0.5, -11)
+	voteYes.BackgroundColor3 = Color3.fromHex("#15803D")
+	voteYes.BackgroundTransparency = 0.1
+	voteYes.BorderSizePixel = 0
+	voteYes.TextColor3 = Color3.fromHex("#FFFFFF")
+	voteYes.TextSize = 10
+	voteYes.Font = Enum.Font.GothamBold
+	voteYes.AutoButtonColor = false
+	voteYes.ZIndex = 16
+	voteYes.Parent = votePanel
+	addCorner(voteYes, 5)
+
+	voteYes.MouseButton1Click:Connect(function()
+		dispatch("SKIP_VOTE_YES")
+		voteSkipState.hasVoted = true
+		updateVoteSkipUI()
+	end)
+	UI.voteYesBtn = voteYes
+
+	local voteNo = Instance.new("TextButton")
+	voteNo.Name = "VoteNoBtn"
+	voteNo.Text = "✕ Tidak"
+	voteNo.Size = UDim2.new(0, 48, 0, 22)
+	voteNo.Position = UDim2.new(1, -54, 0.5, -11)
+	voteNo.BackgroundColor3 = Color3.fromHex("#262626")
+	voteNo.BackgroundTransparency = 0.1
+	voteNo.BorderSizePixel = 0
+	voteNo.TextColor3 = Color3.fromHex("#E5E7EB")
+	voteNo.TextSize = 10
+	voteNo.Font = Enum.Font.GothamBold
+	voteNo.AutoButtonColor = false
+	voteNo.ZIndex = 16
+	voteNo.Parent = votePanel
+	addCorner(voteNo, 5)
+
+	voteNo.MouseButton1Click:Connect(function()
+		dispatch("SKIP_VOTE_NO")
+		voteSkipState.hasVoted = true
+		updateVoteSkipUI()
+	end)
+	UI.voteNoBtn = voteNo
+
+	local voteStatus = Instance.new("TextLabel")
+	voteStatus.Name = "VoteStatusLbl"
+	voteStatus.Text = "✓ Sudah Vote"
+	voteStatus.Size = UDim2.new(0, 96, 1, 0)
+	voteStatus.Position = UDim2.new(1, -102, 0, 0)
+	voteStatus.BackgroundTransparency = 1
+	voteStatus.TextColor3 = Color3.fromHex("#10B981")
+	voteStatus.TextSize = 10
+	voteStatus.Font = Enum.Font.GothamMedium
+	voteStatus.TextXAlignment = Enum.TextXAlignment.Center
+	voteStatus.Visible = false
+	voteStatus.ZIndex = 16
+	voteStatus.Parent = votePanel
+	UI.voteStatusLbl = voteStatus
+
+	UI.voteSkipPanel = votePanel
+	UI.nowPlayingFrame = np
+end
+
+local function buildQueueSection()
+	local qs = Instance.new("Frame")
+	qs.Name = "QueueSection"
+	qs.Size = UDim2.new(1, -6, 0, DIM.QUEUE_CARD_H)
+	qs.Position = UDim2.new(0, 0, 0, DIM.NP_H + DIM.PAD)
+	qs.BackgroundColor3 = Color3.fromHex("#0F0F0F")
+	qs.BorderSizePixel = 0
+	qs.ClipsDescendants = true
+	qs.Parent = UI.musicScroll
+	addCorner(qs, DIM.CORNER_LG)
+	addStroke(qs, Color3.fromHex("#222222"), 1, 0)
+
+	local pad = Instance.new("UIPadding", qs)
+	pad.PaddingTop = UDim.new(0, 10)
+	pad.PaddingBottom = UDim.new(0, 10)
+	pad.PaddingLeft = UDim.new(0, 10)
+	pad.PaddingRight = UDim.new(0, 10)
+
+	local qHeader = Instance.new("Frame")
+	qHeader.Name = "QueueHeader"
+	qHeader.Size = UDim2.new(1, 0, 0, DIM.QTITLE_H)
+	qHeader.Position = UDim2.new(0, 0, 0, 0)
+	qHeader.BackgroundTransparency = 1
+	qHeader.Parent = qs
+
+	local qTitle = Instance.new("TextLabel")
+	qTitle.Name = "QueueTitle"
+	qTitle.Text = T.QueueTitle
+	qTitle.Size = UDim2.new(1, -100, 1, 0)
+	qTitle.Position = UDim2.new(0, 0, 0, 0)
+	qTitle.BackgroundTransparency = 1
+	qTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+	qTitle.TextSize = 13
+	qTitle.TextXAlignment = Enum.TextXAlignment.Left
+	qTitle.Font = Enum.Font.GothamBold
+	qTitle.Parent = qHeader
+	addSC(qTitle, 14)
+	addTextGradient(qTitle, true)
+
+	local qBadge = Instance.new("TextLabel")
+	qBadge.Name = "QueueBadge"
+	qBadge.Text = "Autoplay"
+	qBadge.Size = UDim2.new(0, 85, 0, 20)
+	qBadge.Position = UDim2.new(1, -85, 0.5, -10)
+	qBadge.BackgroundColor3 = Color3.fromHex("#181818")
+	qBadge.BorderSizePixel = 0
+	qBadge.TextColor3 = Color3.fromHex("#9E9E9E")
+	qBadge.TextSize = 10
+	qBadge.Font = Enum.Font.GothamBold
+	qBadge.TextXAlignment = Enum.TextXAlignment.Center
+	qBadge.Parent = qHeader
+	addCorner(qBadge, 10)
+	addStroke(qBadge, Color3.fromHex("#2C2C2C"), 1, 0)
+	UI.queueBadge = qBadge
+
+	local reqFrame = Instance.new("Frame")
+	reqFrame.Name = "RequestFrame"
+	reqFrame.Size = UDim2.new(1, 0, 0, DIM.REQ_H)
+	reqFrame.Position = UDim2.new(0, 0, 0, DIM.QTITLE_H + 8)
+	reqFrame.BackgroundTransparency = 1
+	reqFrame.Parent = qs
+
+	local reqInput = Instance.new("TextBox")
+	reqInput.Name = "ReqInput"
+	reqInput.PlaceholderText = T.SongIDPlaceholder
+	reqInput.Text = ""
+	reqInput.Size = UDim2.new(1, -(DIM.REQ_BTN_W + 8), 1, 0)
+	reqInput.BackgroundColor3 = C.InputBg
+	reqInput.BorderSizePixel = 0
+	reqInput.TextColor3 = C.InputText
+	reqInput.PlaceholderColor3 = Color3.fromHex("#737373")
+	reqInput.TextSize = 12
+	reqInput.Font = Enum.Font.GothamMedium
+	reqInput.TextXAlignment = Enum.TextXAlignment.Left
+	reqInput.ClearTextOnFocus = false
+	reqInput.ClipsDescendants = true
+	reqInput.Parent = reqFrame
+	addCorner(reqInput, DIM.CORNER_MD)
+	local reqStroke = addStroke(reqInput, Color3.fromHex("#262626"), 1, 0)
+
+	local reqPad = Instance.new("UIPadding", reqInput)
+	reqPad.PaddingLeft = UDim.new(0, 12)
+	reqPad.PaddingRight = UDim.new(0, 12)
+
+	local function submitSongReq()
+		local id = reqInput.Text:gsub("%s+", "")
+		if id ~= "" and id:match("^%d+$") then
+			if not isVIPPlus() then
+				notifyWarning(T.VIPRequired, "Minimum rank VIP untuk menambah lagu!")
+				return
+			end
+			dispatch("ADD_TO_QUEUE", { musicId = id, isFromPlaylist = false })
+			reqInput.Text = ""
+		end
+	end
+
+	reqInput.Focused:Connect(function()
+		TweenService:Create(reqStroke, TweenInfo.new(0.18), { Color = Color3.fromHex("#FFFFFF"), Transparency = 0.3 }):Play()
+		TweenService:Create(reqInput, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromHex("#171717") }):Play()
+	end)
+	reqInput.FocusLost:Connect(function(enterPressed)
+		TweenService:Create(reqStroke, TweenInfo.new(0.18), { Color = Color3.fromHex("#262626"), Transparency = 0 }):Play()
+		TweenService:Create(reqInput, TweenInfo.new(0.18), { BackgroundColor3 = C.InputBg }):Play()
+		if enterPressed then submitSongReq() end
+	end)
+	UI.reqInput = reqInput
+
+	local reqBtn = Instance.new("TextButton")
+	reqBtn.Name = "ReqBtn"
+	reqBtn.Text = T.AddToQueue
+	reqBtn.Size = UDim2.new(0, DIM.REQ_BTN_W, 1, 0)
+	reqBtn.Position = UDim2.new(1, -DIM.REQ_BTN_W, 0, 0)
+	reqBtn.BackgroundColor3 = Color3.fromHex("#FFFFFF")
+	reqBtn.BorderSizePixel = 0
+	reqBtn.TextColor3 = Color3.fromHex("#111111")
+	reqBtn.TextSize = 12
+	reqBtn.Font = Enum.Font.GothamBold
+	reqBtn.AutoButtonColor = false
+	reqBtn.Parent = reqFrame
+	addCorner(reqBtn, DIM.CORNER_MD)
+
+	reqBtn.MouseEnter:Connect(function()
+		TweenService:Create(reqBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#E2E2E2") }):Play()
+	end)
+	reqBtn.MouseLeave:Connect(function()
+		TweenService:Create(reqBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#FFFFFF") }):Play()
+	end)
+	reqBtn.MouseButton1Click:Connect(submitSongReq)
+	UI.reqBtn = reqBtn
+
+	local qScroll = Instance.new("ScrollingFrame")
+	qScroll.Name = "QueueScroll"
+	qScroll.Size = UDim2.new(1, 0, 0, DIM.QUEUE_H)
+	qScroll.Position = UDim2.new(0, 0, 0, DIM.QTITLE_H + 8 + DIM.REQ_H + 8)
+	qScroll.BackgroundColor3 = Color3.fromHex("#141414")
+	qScroll.BorderSizePixel = 0
+	qScroll.ScrollBarThickness = 4
+	qScroll.ScrollBarImageColor3 = Color3.fromHex("#3E3E3E")
+	qScroll.ClipsDescendants = true
+	qScroll.Parent = qs
+	addCorner(qScroll, DIM.CORNER_MD)
+	addStroke(qScroll, Color3.fromHex("#202020"), 1, 0)
+	setupAutoScroll(qScroll)
+
+	local qLayout = Instance.new("UIListLayout", qScroll)
+	qLayout.Padding = UDim.new(0, 4)
+
+	local qScrollPad = Instance.new("UIPadding", qScroll)
+	qScrollPad.PaddingTop = UDim.new(0, DIM.SCROLL_PAD)
+	qScrollPad.PaddingBottom = UDim.new(0, DIM.SCROLL_PAD)
+	qScrollPad.PaddingLeft = UDim.new(0, DIM.SCROLL_PAD)
+	qScrollPad.PaddingRight = UDim.new(0, DIM.SCROLL_PAD)
+
+	local qEmpty = Instance.new("Frame")
+	qEmpty.Name = "QueueEmptyFrame"
+	qEmpty.Size = UDim2.new(1, 0, 0, 110)
+	qEmpty.BackgroundTransparency = 1
+	qEmpty.Visible = false
+	qEmpty.Parent = qScroll
+
+	local qeIcon = Instance.new("TextLabel")
+	qeIcon.Size = UDim2.new(0, 34, 0, 34)
+	qeIcon.Position = UDim2.new(0.5, -17, 0, 10)
+	qeIcon.BackgroundColor3 = Color3.fromHex("#181818")
+	qeIcon.Text = "🎵"
+	qeIcon.TextSize = 16
+	qeIcon.TextColor3 = Color3.fromHex("#FFFFFF")
+	qeIcon.BorderSizePixel = 0
+	qeIcon.Parent = qEmpty
+	addCorner(qeIcon, 17)
+	addStroke(qeIcon, Color3.fromHex("#2A2A2A"), 1, 0)
+
+	local qeLbl = Instance.new("TextLabel")
+	qeLbl.Name = "QueueEmpty"
+	qeLbl.Text = T.QueueEmpty
+	qeLbl.Size = UDim2.new(1, -16, 0, 20)
+	qeLbl.Position = UDim2.new(0, 8, 0, 50)
+	qeLbl.BackgroundTransparency = 1
+	qeLbl.TextColor3 = Color3.fromHex("#D4D4D4")
+	qeLbl.TextSize = 12
+	qeLbl.Font = Enum.Font.GothamBold
+	qeLbl.TextXAlignment = Enum.TextXAlignment.Center
+	qeLbl.Parent = qEmpty
+
+	local qeSub = Instance.new("TextLabel")
+	qeSub.Name = "QueueEmptySub"
+	qeSub.Text = T.QueueEmptySub
+	qeSub.Size = UDim2.new(1, -20, 0, 18)
+	qeSub.Position = UDim2.new(0, 10, 0, 70)
+	qeSub.BackgroundTransparency = 1
+	qeSub.TextColor3 = Color3.fromHex("#737373")
+	qeSub.TextSize = 10
+	qeSub.Font = Enum.Font.GothamMedium
+	qeSub.TextXAlignment = Enum.TextXAlignment.Center
+	qeSub.Parent = qEmpty
+
+	UI.queueEmptyFrame = qEmpty
+	UI.queueScroll = qScroll
+	UI.queueSection = qs
+end
+
+local function buildPlaylistSection()
+	local ps = Instance.new("Frame")
+	ps.Name = "PlaylistSection"
+	ps.Size = UDim2.new(1, -6, 0, DIM.PLAYLIST_SECTION_H)
+	ps.BackgroundColor3 = Color3.fromHex("#0F0F0F")
+	ps.BorderSizePixel = 0
+	ps.ClipsDescendants = true
+	ps.Parent = UI.musicScroll
+	addCorner(ps, DIM.CORNER_LG)
+	addStroke(ps, Color3.fromHex("#222222"), 1, 0)
+
+	local pad = Instance.new("UIPadding", ps)
+	pad.PaddingTop = UDim.new(0, 10)
+	pad.PaddingBottom = UDim.new(0, 10)
+	pad.PaddingLeft = UDim.new(0, 10)
+	pad.PaddingRight = UDim.new(0, 10)
+
+	local header = Instance.new("Frame")
+	header.Name = "PlaylistHeader"
+	header.Size = UDim2.new(1, 0, 0, DIM.QTITLE_H)
+	header.Position = UDim2.new(0, 0, 0, 0)
+	header.BackgroundTransparency = 1
+	header.Parent = ps
+
+	local titleLbl = Instance.new("TextLabel")
+	titleLbl.Name = "PlaylistTitle"
+	titleLbl.Text = "📂  Koleksi Playlist"
+	titleLbl.Size = UDim2.new(1, -100, 1, 0)
+	titleLbl.Position = UDim2.new(0, 0, 0, 0)
+	titleLbl.BackgroundTransparency = 1
+	titleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+	titleLbl.TextSize = 13
+	titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+	titleLbl.Font = Enum.Font.GothamBold
+	titleLbl.Parent = header
+	addSC(titleLbl, 14)
+	addTextGradient(titleLbl, true)
+
+	local badge = Instance.new("TextLabel")
+	badge.Name = "PlaylistBadge"
+	badge.Text = "2 Playlist"
+	badge.Size = UDim2.new(0, 85, 0, 20)
+	badge.Position = UDim2.new(1, -85, 0.5, -10)
+	badge.BackgroundColor3 = Color3.fromHex("#181818")
+	badge.BorderSizePixel = 0
+	badge.TextColor3 = Color3.fromHex("#9E9E9E")
+	badge.TextSize = 10
+	badge.Font = Enum.Font.GothamBold
+	badge.TextXAlignment = Enum.TextXAlignment.Center
+	badge.Parent = header
+	addCorner(badge, 10)
+	addStroke(badge, Color3.fromHex("#2C2C2C"), 1, 0)
+
+	local cardsFrame = Instance.new("Frame")
+	cardsFrame.Name = "PlaylistCardsFrame"
+	cardsFrame.Size = UDim2.new(1, 0, 0, DIM.PLAYLIST_CARD_H)
+	cardsFrame.Position = UDim2.new(0, 0, 0, DIM.QTITLE_H + 8)
+	cardsFrame.BackgroundTransparency = 1
+	cardsFrame.Parent = ps
+
+	local function makeCard(name, titleText, countText, iconText, posScaleX)
+		local card = Instance.new("TextButton")
+		card.Name = name
+		card.Size = UDim2.new(0.5, -5, 1, 0)
+		card.Position = UDim2.new(posScaleX, posScaleX == 0 and 0 or 5, 0, 0)
+		card.BackgroundColor3 = Color3.fromHex("#151515")
+		card.BorderSizePixel = 0
+		card.AutoButtonColor = false
+		card.Text = ""
+		card.Parent = cardsFrame
+		addCorner(card, DIM.CORNER_MD)
+		local cardStroke = addStroke(card, Color3.fromHex("#262626"), 1, 0)
+
+		local iconFrame = Instance.new("Frame")
+		iconFrame.Size = UDim2.new(0, 48, 0, 48)
+		iconFrame.Position = UDim2.new(0, 10, 0.5, -24)
+		iconFrame.BackgroundColor3 = Color3.fromHex("#202020")
+		iconFrame.BorderSizePixel = 0
+		iconFrame.Parent = card
+		addCorner(iconFrame, 8)
+		addStroke(iconFrame, Color3.fromHex("#2C2C2C"), 1, 0)
+
+		local iconLbl = Instance.new("TextLabel")
+		iconLbl.Size = UDim2.new(1, 0, 1, 0)
+		iconLbl.BackgroundTransparency = 1
+		iconLbl.Text = iconText
+		iconLbl.TextSize = 20
+		iconLbl.Parent = iconFrame
+
+		local infoX = 66
+		local tLbl = Instance.new("TextLabel")
+		tLbl.Name = "CardTitle"
+		tLbl.Text = titleText
+		tLbl.Size = UDim2.new(1, -(infoX + 8), 0, 20)
+		tLbl.Position = UDim2.new(0, infoX, 0, 12)
+		tLbl.BackgroundTransparency = 1
+		tLbl.TextColor3 = Color3.fromHex("#FFFFFF")
+		tLbl.TextSize = 12
+		tLbl.Font = Enum.Font.GothamBold
+		tLbl.TextXAlignment = Enum.TextXAlignment.Left
+		tLbl.TextTruncate = Enum.TextTruncate.AtEnd
+		tLbl.Parent = card
+		addSC(tLbl, 13)
+
+		local sLbl = Instance.new("TextLabel")
+		sLbl.Name = "CardSub"
+		sLbl.Text = countText
+		sLbl.Size = UDim2.new(1, -(infoX + 8), 0, 16)
+		sLbl.Position = UDim2.new(0, infoX, 0, 32)
+		sLbl.BackgroundTransparency = 1
+		sLbl.TextColor3 = Color3.fromHex("#8E8E93")
+		sLbl.TextSize = 10
+		sLbl.Font = Enum.Font.GothamMedium
+		sLbl.TextXAlignment = Enum.TextXAlignment.Left
+		sLbl.TextTruncate = Enum.TextTruncate.AtEnd
+		sLbl.Parent = card
+
+		local activeInd = Instance.new("TextLabel")
+		activeInd.Name = "ActiveIndicator"
+		activeInd.Size = UDim2.new(0, 52, 0, 16)
+		activeInd.Position = UDim2.new(0, infoX, 0, 50)
+		activeInd.BackgroundColor3 = Color3.fromHex("#1F1F1F")
+		activeInd.Text = "● Dipilih"
+		activeInd.TextColor3 = Color3.fromHex("#FFFFFF")
+		activeInd.TextSize = 9
+		activeInd.Font = Enum.Font.GothamBold
+		activeInd.Visible = false
+		activeInd.BorderSizePixel = 0
+		activeInd.Parent = card
+		addCorner(activeInd, 4)
+		addStroke(activeInd, Color3.fromHex("#3E3E3E"), 1, 0)
+
+		card.MouseEnter:Connect(function()
+			TweenService:Create(card, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#1C1C1C") }):Play()
+		end)
+		card.MouseLeave:Connect(function()
+			TweenService:Create(card, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#151515") }):Play()
+		end)
+
+		return card, cardStroke, sLbl, activeInd
+	end
+
+	local djCard, djStroke, djSubLbl, djActiveInd = makeCard("DJPlaylistCard", "DJ Dangdut Viral", "Memuat lagu...", "🎧", 0)
+	local favCard, favStroke, favSubLbl, favActiveInd = makeCard("FavPlaylistCard", "Favorit Saya", "0 Lagu Favorit", "⭐", 0.5)
+
+	djCard.MouseButton1Click:Connect(function() selectPlaylist("dj") end)
+	favCard.MouseButton1Click:Connect(function() selectPlaylist("favorites") end)
+
+	UI.djCard = djCard
+	UI.djStroke = djStroke
+	UI.djSubLbl = djSubLbl
+	UI.djActiveInd = djActiveInd
+	UI.favCard = favCard
+	UI.favStroke = favStroke
+	UI.favSubLbl = favSubLbl
+	UI.favActiveInd = favActiveInd
+	UI.playlistSection = ps
+end
+
+local function buildSearchSection()
+	local ss = Instance.new("Frame")
+	ss.Name = "SearchSection"
+	ss.Size = UDim2.new(1, -6, 0, DIM.SEARCH_SECTION_H)
+	ss.BackgroundColor3 = Color3.fromHex("#0F0F0F")
+	ss.BorderSizePixel = 0
+	ss.ClipsDescendants = true
+	ss.Parent = UI.musicScroll
+	addCorner(ss, DIM.CORNER_LG)
+	addStroke(ss, Color3.fromHex("#222222"), 1, 0)
+
+	local pad = Instance.new("UIPadding", ss)
+	pad.PaddingTop = UDim.new(0, 8)
+	pad.PaddingBottom = UDim.new(0, 8)
+	pad.PaddingLeft = UDim.new(0, 10)
+	pad.PaddingRight = UDim.new(0, 10)
+
+	local searchContainer = Instance.new("Frame")
+	searchContainer.Name = "SearchContainer"
+	searchContainer.Size = UDim2.new(1, 0, 0, DIM.SEARCH_H)
+	searchContainer.Position = UDim2.new(0, 0, 0, 0)
+	searchContainer.BackgroundColor3 = C.InputBg
+	searchContainer.BorderSizePixel = 0
+	searchContainer.Parent = ss
+	addCorner(searchContainer, DIM.CORNER_MD)
+	local searchStroke = addStroke(searchContainer, Color3.fromHex("#262626"), 1, 0)
+
+	local searchIcon = Instance.new("TextLabel")
+	searchIcon.Name = "SearchIcon"
+	searchIcon.Text = "🔍"
+	searchIcon.Size = UDim2.new(0, 24, 0, 24)
+	searchIcon.Position = UDim2.new(0, 8, 0.5, -12)
+	searchIcon.BackgroundTransparency = 1
+	searchIcon.TextColor3 = Color3.fromHex("#888888")
+	searchIcon.TextSize = 13
+	searchIcon.Font = Enum.Font.Gotham
+	searchIcon.Parent = searchContainer
+
+	local searchInput = Instance.new("TextBox")
+	searchInput.Name = "SearchInput"
+	searchInput.PlaceholderText = T.SearchPlaceholder
+	searchInput.Text = ""
+	searchInput.Size = UDim2.new(1, -(36 + DIM.CLEAR_BTN_W + 6), 1, 0)
+	searchInput.Position = UDim2.new(0, 36, 0, 0)
+	searchInput.BackgroundTransparency = 1
+	searchInput.BorderSizePixel = 0
+	searchInput.TextColor3 = C.InputText
+	searchInput.PlaceholderColor3 = Color3.fromHex("#737373")
+	searchInput.TextSize = 12
+	searchInput.Font = Enum.Font.GothamMedium
+	searchInput.TextXAlignment = Enum.TextXAlignment.Left
+	searchInput.ClearTextOnFocus = false
+	searchInput.ClipsDescendants = true
+	searchInput.Parent = searchContainer
+
+	searchInput.Focused:Connect(function()
+		TweenService:Create(searchStroke, TweenInfo.new(0.18), { Color = Color3.fromHex("#FFFFFF"), Transparency = 0.3 }):Play()
+		TweenService:Create(searchContainer, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromHex("#171717") }):Play()
+	end)
+	searchInput.FocusLost:Connect(function()
+		TweenService:Create(searchStroke, TweenInfo.new(0.18), { Color = Color3.fromHex("#262626"), Transparency = 0 }):Play()
+		TweenService:Create(searchContainer, TweenInfo.new(0.18), { BackgroundColor3 = C.InputBg }):Play()
+	end)
+
+	local clearBtn = Instance.new("TextButton")
+	clearBtn.Name = "ClearBtn"
+	clearBtn.Text = "✕"
+	clearBtn.Size = UDim2.new(0, DIM.CLEAR_BTN_W - 6, 0, DIM.SEARCH_H - 12)
+	clearBtn.Position = UDim2.new(1, -(DIM.CLEAR_BTN_W - 2), 0.5, -(DIM.SEARCH_H - 12) / 2)
+	clearBtn.BackgroundColor3 = C.ClearBtn
+	clearBtn.BorderSizePixel = 0
+	clearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	clearBtn.TextSize = 12
+	clearBtn.Font = Enum.Font.GothamBold
+	clearBtn.Visible = false
+	clearBtn.AutoButtonColor = false
+	clearBtn.Parent = searchContainer
+	addCorner(clearBtn, DIM.CORNER_SM)
+
+	clearBtn.MouseEnter:Connect(function()
+		TweenService:Create(clearBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#333333") }):Play()
+	end)
+	clearBtn.MouseLeave:Connect(function()
+		TweenService:Create(clearBtn, TweenInfo.new(0.15), { BackgroundColor3 = C.ClearBtn }):Play()
+	end)
+
+	local chipsFrame = Instance.new("Frame")
+	chipsFrame.Name = "FilterChips"
+	chipsFrame.Size = UDim2.new(1, 0, 0, 28)
+	chipsFrame.Position = UDim2.new(0, 0, 0, DIM.SEARCH_H + 6)
+	chipsFrame.BackgroundTransparency = 1
+	chipsFrame.Parent = ss
+
+	local chipsLayout = Instance.new("UIListLayout", chipsFrame)
+	chipsLayout.FillDirection = Enum.FillDirection.Horizontal
+	chipsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	chipsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	chipsLayout.Padding = UDim.new(0, 6)
+
+	local function makeChip(name, labelText, filterType)
+		local chip = Instance.new("TextButton")
+		chip.Name = name
+		chip.Text = labelText
+		chip.Size = UDim2.new(0, 0, 1, 0)
+		chip.AutomaticSize = Enum.AutomaticSize.X
+		chip.BackgroundColor3 = Color3.fromHex("#151515")
+		chip.BackgroundTransparency = 0
+		chip.BorderSizePixel = 0
+		chip.TextColor3 = Color3.fromHex("#8E8E93")
+		chip.TextSize = 11
+		chip.Font = Enum.Font.GothamMedium
+		chip.AutoButtonColor = false
+		chip.Parent = chipsFrame
+		addCorner(chip, 14)
+		local stroke = addStroke(chip, Color3.fromHex("#262626"), 1, 0)
+
+		local chipPad = Instance.new("UIPadding", chip)
+		chipPad.PaddingLeft = UDim.new(0, 12)
+		chipPad.PaddingRight = UDim.new(0, 12)
+
+		chip.MouseButton1Click:Connect(function()
+			selectPlaylist(filterType)
+		end)
+
+		UI.filterButtons[filterType] = { btn = chip, stroke = stroke }
+		return chip
+	end
+
+	makeChip("ChipAll", "🎵  Semua Lagu", "all")
+	makeChip("ChipDJ",  "🎧  DJ Playlist", "dj")
+	makeChip("ChipFav", "⭐  Favorit Saya", "favorites")
+
+	local searchDebounce
+	searchInput:GetPropertyChangedSignal("Text"):Connect(function()
+		local q = searchInput.Text
+		clearBtn.Visible = (q ~= "")
+		if searchDebounce then task.cancel(searchDebounce) end
+		searchDebounce = task.delay(0.2, function()
+			searchDebounce = nil
+			updateSongs(doSearch(q))
+		end)
+	end)
+
+	clearBtn.MouseButton1Click:Connect(function()
+		searchInput.Text = ""
+		currentSearchQuery = ""
+		clearBtn.Visible = false
+		local sourceList = (activePlaylistType == "favorites") and userFavorites or defaultSongs
+		filteredSongs = sourceList
+		updateSongsTitle(false, #sourceList, "")
+		updateSongs(sourceList)
+	end)
+
+	UI.searchInput = searchInput
+	UI.clearBtn = clearBtn
+	UI.searchSection = ss
+end
+
+local function buildLibrarySection()
+	local ls = Instance.new("Frame")
+	ls.Name = "LibrarySection"
+	ls.Size = UDim2.new(1, -6, 0, 300)
+	ls.BackgroundColor3 = Color3.fromHex("#0F0F0F")
+	ls.BorderSizePixel = 0
+	ls.ClipsDescendants = true
+	ls.Parent = UI.musicScroll
+	addCorner(ls, DIM.CORNER_LG)
+	addStroke(ls, Color3.fromHex("#222222"), 1, 0)
+
+	local pad = Instance.new("UIPadding", ls)
+	pad.PaddingTop = UDim.new(0, 10)
+	pad.PaddingBottom = UDim.new(0, 10)
+	pad.PaddingLeft = UDim.new(0, 10)
+	pad.PaddingRight = UDim.new(0, 10)
+
+	local header = Instance.new("Frame")
+	header.Name = "SongsHeader"
+	header.Size = UDim2.new(1, 0, 0, 24)
+	header.Position = UDim2.new(0, 0, 0, 0)
+	header.BackgroundTransparency = 1
+	header.Parent = ls
+
+	local titleLbl = Instance.new("TextLabel")
+	titleLbl.Name = "SongsTitle"
+	titleLbl.Text = T.DefaultSongs
+	titleLbl.Size = UDim2.new(1, -95, 1, 0)
+	titleLbl.Position = UDim2.new(0, 0, 0, 0)
+	titleLbl.BackgroundTransparency = 1
+	titleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+	titleLbl.TextSize = 13
+	titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+	titleLbl.Font = Enum.Font.GothamBold
+	titleLbl.Parent = header
+	addSC(titleLbl, 14)
+	addTextGradient(titleLbl, true)
+	UI.songsTitleLbl = titleLbl
+
+	local badge = Instance.new("TextLabel")
+	badge.Name = "SongsBadge"
+	badge.Text = "0 Lagu"
+	badge.Size = UDim2.new(0, 85, 0, 20)
+	badge.Position = UDim2.new(1, -85, 0.5, -10)
+	badge.BackgroundColor3 = Color3.fromHex("#181818")
+	badge.BorderSizePixel = 0
+	badge.TextColor3 = Color3.fromHex("#9E9E9E")
+	badge.TextSize = 10
+	badge.Font = Enum.Font.GothamBold
+	badge.TextXAlignment = Enum.TextXAlignment.Center
+	badge.Parent = header
+	addCorner(badge, 10)
+	addStroke(badge, Color3.fromHex("#2C2C2C"), 1, 0)
+	UI.songsBadge = badge
+
+	local songsCont = Instance.new("Frame")
+	songsCont.Name = "SongsContainer"
+	songsCont.Size = UDim2.new(1, 0, 0, 200)
+	songsCont.Position = UDim2.new(0, 0, 0, 32)
+	songsCont.BackgroundTransparency = 1
+	songsCont.Parent = ls
+
+	local layout = Instance.new("UIListLayout", songsCont)
+	layout.Padding = UDim.new(0, 4)
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+	local noRes = Instance.new("Frame")
+	noRes.Name = "NoResultsFrame"
+	noRes.Size = UDim2.new(1, 0, 0, 120)
+	noRes.BackgroundTransparency = 1
+	noRes.Visible = false
+	noRes.Parent = songsCont
+
+	local nrIcon = Instance.new("TextLabel")
+	nrIcon.Size = UDim2.new(0, 36, 0, 36)
+	nrIcon.Position = UDim2.new(0.5, -18, 0, 12)
+	nrIcon.BackgroundColor3 = Color3.fromHex("#181818")
+	nrIcon.Text = "🔍"
+	nrIcon.TextSize = 16
+	nrIcon.TextColor3 = Color3.fromHex("#FFFFFF")
+	nrIcon.BorderSizePixel = 0
+	nrIcon.Parent = noRes
+	addCorner(nrIcon, 18)
+	addStroke(nrIcon, Color3.fromHex("#2A2A2A"), 1, 0)
+
+	local nrLbl = Instance.new("TextLabel")
+	nrLbl.Name = "NoResults"
+	nrLbl.Text = "Tidak ada lagu ditemukan"
+	nrLbl.Size = UDim2.new(1, -16, 0, 20)
+	nrLbl.Position = UDim2.new(0, 8, 0, 54)
+	nrLbl.BackgroundTransparency = 1
+	nrLbl.TextColor3 = Color3.fromHex("#D4D4D4")
+	nrLbl.TextSize = 12
+	nrLbl.Font = Enum.Font.GothamBold
+	nrLbl.TextXAlignment = Enum.TextXAlignment.Center
+	nrLbl.Parent = noRes
+
+	local nrSub = Instance.new("TextLabel")
+	nrSub.Text = "Coba gunakan kata kunci pencarian yang lain."
+	nrSub.Size = UDim2.new(1, -20, 0, 18)
+	nrSub.Position = UDim2.new(0, 10, 0, 74)
+	nrSub.BackgroundTransparency = 1
+	nrSub.TextColor3 = Color3.fromHex("#737373")
+	nrSub.TextSize = 10
+	nrSub.Font = Enum.Font.GothamMedium
+	nrSub.TextXAlignment = Enum.TextXAlignment.Center
+	nrSub.Parent = noRes
+	UI.noResultsFrame = noRes
+
+	local favEmp = Instance.new("Frame")
+	favEmp.Name = "FavEmptyFrame"
+	favEmp.Size = UDim2.new(1, 0, 0, 130)
+	favEmp.BackgroundTransparency = 1
+	favEmp.Visible = false
+	favEmp.Parent = songsCont
+
+	local feIcon = Instance.new("TextLabel")
+	feIcon.Size = UDim2.new(0, 38, 0, 38)
+	feIcon.Position = UDim2.new(0.5, -19, 0, 12)
+	feIcon.BackgroundColor3 = Color3.fromHex("#1E1E1E")
+	feIcon.Text = "⭐"
+	feIcon.TextSize = 18
+	feIcon.TextColor3 = Color3.fromHex("#FFFFFF")
+	feIcon.BorderSizePixel = 0
+	feIcon.Parent = favEmp
+	addCorner(feIcon, 19)
+	addStroke(feIcon, Color3.fromHex("#353535"), 1, 0)
+
+	local feLbl = Instance.new("TextLabel")
+	feLbl.Name = "FavEmpty"
+	feLbl.Text = T.FavEmpty
+	feLbl.Size = UDim2.new(1, -20, 0, 22)
+	feLbl.Position = UDim2.new(0, 10, 0, 56)
+	feLbl.BackgroundTransparency = 1
+	feLbl.TextColor3 = Color3.fromHex("#D4D4D4")
+	feLbl.TextSize = 13
+	feLbl.Font = Enum.Font.GothamBold
+	feLbl.TextXAlignment = Enum.TextXAlignment.Center
+	feLbl.Parent = favEmp
+
+	local feSub = Instance.new("TextLabel")
+	feSub.Text = T.FavEmptySub
+	feSub.Size = UDim2.new(1, -24, 0, 32)
+	feSub.Position = UDim2.new(0, 12, 0, 78)
+	feSub.BackgroundTransparency = 1
+	feSub.TextColor3 = Color3.fromHex("#737373")
+	feSub.TextSize = 10
+	feSub.Font = Enum.Font.GothamMedium
+	feSub.TextWrapped = true
+	feSub.TextXAlignment = Enum.TextXAlignment.Center
+	feSub.Parent = favEmp
+	UI.favEmptyFrame = favEmp
+
+	local favLock = Instance.new("Frame")
+	favLock.Name = "FavLockedFrame"
+	favLock.Size = UDim2.new(1, 0, 0, 140)
+	favLock.BackgroundTransparency = 1
+	favLock.Visible = false
+	favLock.Parent = songsCont
+
+	local flIcon = Instance.new("TextLabel")
+	flIcon.Size = UDim2.new(0, 38, 0, 38)
+	flIcon.Position = UDim2.new(0.5, -19, 0, 12)
+	flIcon.BackgroundColor3 = Color3.fromHex("#1E1E1E")
+	flIcon.Text = "🔒"
+	flIcon.TextSize = 18
+	flIcon.TextColor3 = Color3.fromHex("#FFFFFF")
+	flIcon.BorderSizePixel = 0
+	flIcon.Parent = favLock
+	addCorner(flIcon, 19)
+	addStroke(flIcon, Color3.fromHex("#353535"), 1, 0)
+
+	local flLbl = Instance.new("TextLabel")
+	flLbl.Name = "FavLocked"
+	flLbl.Text = T.FavoritesLocked
+	flLbl.Size = UDim2.new(1, -20, 0, 22)
+	flLbl.Position = UDim2.new(0, 10, 0, 58)
+	flLbl.BackgroundTransparency = 1
+	flLbl.TextColor3 = Color3.fromHex("#FFFFFF")
+	flLbl.TextSize = 13
+	flLbl.Font = Enum.Font.GothamBold
+	flLbl.TextXAlignment = Enum.TextXAlignment.Center
+	flLbl.Parent = favLock
+
+	local flSub = Instance.new("TextLabel")
+	flSub.Text = T.FavoritesLockedSub
+	flSub.Size = UDim2.new(1, -24, 0, 32)
+	flSub.Position = UDim2.new(0, 12, 0, 80)
+	flSub.BackgroundTransparency = 1
+	flSub.TextColor3 = Color3.fromHex("#888888")
+	flSub.TextSize = 11
+	flSub.Font = Enum.Font.GothamMedium
+	flSub.TextWrapped = true
+	flSub.TextXAlignment = Enum.TextXAlignment.Center
+	flSub.Parent = favLock
+	UI.favLockedFrame = favLock
+
+	UI.songsContainer = songsCont
+	UI.librarySection = ls
+end
+
+local function buildMusicUI()
+	local mScroll = Instance.new("ScrollingFrame")
+	mScroll.Name = "MusicScroll"
+	mScroll.Size = UDim2.new(1, 0, 1, 0)
+	mScroll.Position = UDim2.new(0, 0, 0, 0)
+	mScroll.BackgroundTransparency = 1
+	mScroll.BorderSizePixel = 0
+	mScroll.ScrollBarThickness = 5
+	mScroll.ScrollBarImageColor3 = C.ScrollBar
+	mScroll.ClipsDescendants = true
+	mScroll.Parent = musicPage
+	setupFixedScroll(mScroll)
+	UI.musicScroll = mScroll
+
+	buildNowPlaying()
+	buildQueueSection()
+	buildPlaylistSection()
+	buildSearchSection()
+	buildLibrarySection()
+
+	updateMusicLayout()
+	if MenuConfig.GUI and MenuConfig.GUI.MainPanel then
+		MenuConfig.GUI.MainPanel:GetPropertyChangedSignal("Size"):Connect(function()
+			task.defer(updateMusicLayout)
+		end)
+	end
+
+	if ThemeModule and ThemeModule.GradientSystem then ThemeModule.GradientSystem.Start() end
+end
+buildMusicUI()
 
 -- ====================================
 -- NOTIFIKASI FILTER (BARU)
@@ -1679,16 +2435,17 @@ dispatchEvent.OnClientEvent:Connect(function(event)
 		if clientState.currentSong then
 			local songId = clientState.currentSong.id
 			clientState.currentSong.sampul = resolveThumbnail(clientState.currentSong.sampul or clientState.currentSong.thumbnail, songId)
-			songNameLbl.Text = clientState.currentSong.judul or T.Unknown
+			if UI.songNameLbl then UI.songNameLbl.Text = clientState.currentSong.judul or T.Unknown end
 			if payload.isAutoplay then
-				requesterLbl.Text = T.AutoplayLabel; requesterLbl.TextColor3 = C.AutoplayText
+				if UI.requesterLbl then UI.requesterLbl.Text = T.AutoplayLabel; UI.requesterLbl.TextColor3 = C.AutoplayText end
 				clientState.isAutoplay = true
 			else
-				requesterLbl.Text = T.RequestedBy..(clientState.currentUploader or T.Unknown)
-				requesterLbl.TextColor3 = C.RequesterText; clientState.isAutoplay = false
+				if UI.requesterLbl then UI.requesterLbl.Text = T.RequestedBy..(clientState.currentUploader or T.Unknown); UI.requesterLbl.TextColor3 = C.RequesterText end
+				clientState.isAutoplay = false
 			end
 			setThumb(clientState.currentSong.sampul, songId)
-			addFavBtn.Visible = true; currentTimeLen = clientState.duration
+			if UI.addFavBtn then UI.addFavBtn.Visible = true end
+			currentTimeLen = clientState.duration
 
 			local syncPos = calculateSyncPosition(clientState.serverStartTime, clientState.duration)
 			updateProgressBar(syncPos, clientState.duration)
@@ -1698,11 +2455,14 @@ dispatchEvent.OnClientEvent:Connect(function(event)
 				syncServerSoundPosition(clientState.currentSong.id, clientState.serverStartTime, clientState.duration)
 			end
 		else
-			songNameLbl.Text = T.NoSongPlaying; requesterLbl.Text = ""
-			setThumb(nil); addFavBtn.Visible = false
+			if UI.songNameLbl then UI.songNameLbl.Text = T.NoSongPlaying end
+			if UI.requesterLbl then UI.requesterLbl.Text = "" end
+			setThumb(nil)
+			if UI.addFavBtn then UI.addFavBtn.Visible = false end
 			updateProgressBar(0, 0)
 		end
 		updateSkipButton()
+		task.defer(updateSongs)
 
 	elseif event.type == "QUEUE_UPDATE" then
 		clientState.queue = payload.queue or {}; updateQueue()
@@ -1738,7 +2498,7 @@ dispatchEvent.OnClientEvent:Connect(function(event)
 				voteSkipState.timeRemaining = voteSkipState.timeRemaining - 1
 				local req = math.max(1, voteSkipState.required or 1)
 				local yes = voteSkipState.yesVotes or 0
-				voteInfoLbl.Text = string.format("Vote Skip: %d/%d (%ds)", yes, req, math.max(0, voteSkipState.timeRemaining))
+				if UI.voteInfoLbl then UI.voteInfoLbl.Text = string.format("Vote Skip: %d/%d (%ds)", yes, req, math.max(0, voteSkipState.timeRemaining)) end
 			end
 		end)
 
@@ -1785,15 +2545,18 @@ musicBroadcast.OnClientEvent:Connect(function(broadcastType, payload)
 		clientState.serverStartTime = payload.ServerStartTime or 0
 		currentTimeLen = clientState.duration
 
-		songNameLbl.Text = payload.Title or T.Unknown
+		if UI.songNameLbl then UI.songNameLbl.Text = payload.Title or T.Unknown end
 		if payload.AddedBy == "Auto-Playlist" then
-			requesterLbl.Text = T.AutoplayLabel; requesterLbl.TextColor3 = C.AutoplayText; clientState.isAutoplay = true
+			if UI.requesterLbl then UI.requesterLbl.Text = T.AutoplayLabel; UI.requesterLbl.TextColor3 = C.AutoplayText end
+			clientState.isAutoplay = true
 		else
-			requesterLbl.Text = T.RequestedBy..(payload.AddedBy or T.Unknown)
-			requesterLbl.TextColor3 = C.RequesterText; clientState.isAutoplay = false
+			if UI.requesterLbl then UI.requesterLbl.Text = T.RequestedBy..(payload.AddedBy or T.Unknown); UI.requesterLbl.TextColor3 = C.RequesterText end
+			clientState.isAutoplay = false
 		end
-		setThumb(clientState.currentSong.sampul, clientState.currentSong.id); addFavBtn.Visible = true
+		setThumb(clientState.currentSong.sampul, clientState.currentSong.id)
+		if UI.addFavBtn then UI.addFavBtn.Visible = true end
 		updateProgressBar(0, clientState.duration); updateSkipButton()
+		task.defer(updateSongs)
 
 		-- PERBAIKAN: Sync posisi SEKALI via syncServerSoundPosition (mute→seek→fade-in)
 		-- Tidak perlu applyVolume() + clientFadeIn() terpisah lagi
@@ -1809,9 +2572,12 @@ musicBroadcast.OnClientEvent:Connect(function(broadcastType, payload)
 		clientState.isPlaying       = false
 		clientState.isAutoplay      = false
 		clientState.serverStartTime = 0
-		songNameLbl.Text = T.NoSongPlaying; requesterLbl.Text = ""
-		setThumb(nil); addFavBtn.Visible = false
+		if UI.songNameLbl then UI.songNameLbl.Text = T.NoSongPlaying end
+		if UI.requesterLbl then UI.requesterLbl.Text = "" end
+		setThumb(nil)
+		if UI.addFavBtn then UI.addFavBtn.Visible = false end
 		updateProgressBar(0, 0); updateSkipButton()
+		task.defer(updateSongs)
 
 	elseif broadcastType == "Progress" then
 		currentTimePos = payload.Current or 0
@@ -1850,20 +2616,19 @@ musicUpdate.OnClientEvent:Connect(function(syncType, data)
 		currentTimePos = syncPos
 		currentTimeLen = data.Duration or 0
 
-		songNameLbl.Text = data.Title or T.NoSongPlaying
+		if UI.songNameLbl then UI.songNameLbl.Text = data.Title or T.NoSongPlaying end
 		if data.AddedBy == "Auto-Playlist" then
-			requesterLbl.Text = T.AutoplayLabel
-			requesterLbl.TextColor3 = C.AutoplayText
+			if UI.requesterLbl then UI.requesterLbl.Text = T.AutoplayLabel; UI.requesterLbl.TextColor3 = C.AutoplayText end
 			clientState.isAutoplay = true
 		else
-			requesterLbl.Text = data.AddedBy and (T.RequestedBy..data.AddedBy) or ""
-			requesterLbl.TextColor3 = C.RequesterText
+			if UI.requesterLbl then UI.requesterLbl.Text = data.AddedBy and (T.RequestedBy..data.AddedBy) or ""; UI.requesterLbl.TextColor3 = C.RequesterText end
 			clientState.isAutoplay = false
 		end
 		setThumb(clientState.currentSong.sampul, clientState.currentSong.id)
-		addFavBtn.Visible = clientState.currentSong ~= nil
+		if UI.addFavBtn then UI.addFavBtn.Visible = clientState.currentSong ~= nil end
 		updateProgressBar(syncPos, currentTimeLen)
 		updateSkipButton()
+		task.defer(updateSongs)
 
 		-- PERBAIKAN: Sync audio SEKALI via syncServerSoundPosition (mute→seek→fade-in)
 		if data.SoundId then
@@ -1888,9 +2653,9 @@ MenuConfig.Events.OnMenuToggled.Event:Connect(function(isOpen)
 		if MenuConfig.State.currentMainTab == "Music" then
 			startProgressLoop()
 		end
-		task.defer(updatePlayerScrollLayout)
-		task.delay(0.1, updatePlayerScrollLayout)
-		task.delay(0.36, updatePlayerScrollLayout)
+		task.defer(updateMusicLayout)
+		task.delay(0.1, updateMusicLayout)
+		task.delay(0.36, updateMusicLayout)
 	else
 		stopProgressLoop()
 	end
@@ -1898,8 +2663,8 @@ end)
 MenuConfig.Events.OnTabChanged.Event:Connect(function(tab)
 	if tab == "Music" then
 		startProgressLoop()
-		task.defer(updatePlayerScrollLayout)
-		task.delay(0.1, updatePlayerScrollLayout)
+		task.defer(updateMusicLayout)
+		task.delay(0.1, updateMusicLayout)
 	else
 		stopProgressLoop()
 	end
@@ -1931,11 +2696,17 @@ task.spawn(function()
 	userVolume = (MenuConfig.UserSettings and MenuConfig.UserSettings.musicVolume or 100) / 100
 	refreshRoleUI()
 	requestSync:FireServer()
+	defaultSongs = MusicModule:GetAllMusic()
+	filteredSongs = defaultSongs
+	if UI.djSubLbl then
+		UI.djSubLbl.Text = string.format("%d Lagu • Server Auto", #defaultSongs)
+	end
 	task.wait(0.5)
 	if MenuConfig.State.isMenuOpen and MenuConfig.State.currentMainTab == "Music" then
 		startProgressLoop()
 	end
-	switchSubTab("player")
+	selectPlaylist("all")
+	updateMusicLayout()
 end)
 
 local ssConn
