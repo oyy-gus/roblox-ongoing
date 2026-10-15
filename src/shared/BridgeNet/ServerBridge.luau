@@ -66,13 +66,6 @@ function ServerBridge._start(): nil
 		debug.profilebegin("ServerBridge")
 		local currentTime = os.clock()
 
-		--[[if (time() - lastClear) > 60 then
-			lastClear = time()
-
-			for _, v in BridgeObjects do
-				v._rateInThisMinute = 0
-			end
-		end]]
 
 		for _, v in ReceiveQueue do
 			for i = 1, #v.args do
@@ -307,22 +300,6 @@ function ServerBridge._returnQueue()
 	return SendQueue, ReceiveQueue
 end
 
---[[function ServerBridge._log(duration)
-	if activeLogger ~= nil then
-		return warn("[BridgeNet] active logger already exists")
-	else
-		local returnValue = {}
-		activeLogger = {}
-		task.delay(duration, function()
-			for _, v in activeLogger do
-				table.insert(returnValue, {
-					Name = v.Name,
-				})
-			end
-			activeLogger = nil
-		end)
-	end
-end]]
 
 function ServerBridge._destroy()
 	RemoteEvent:Destroy()
@@ -731,17 +708,7 @@ function ServerBridge:Connect(func: (...any) -> nil)
 	return connection
 end
 
---[[
-	Gets the ServerBridge's name.
-	
-	```lua
-	local Bridge = BridgeNet.CreateBridge("Remote")
-	
-	print(Bridge:GetName()) -- Prints "Remote"
-	```
-	
-	@return string
-]]
+
 function ServerBridge:GetName()
 	return self._name
 end

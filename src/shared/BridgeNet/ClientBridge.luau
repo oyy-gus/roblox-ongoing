@@ -358,17 +358,7 @@ function ClientBridge:Connect(func: (...any) -> nil)
 	return connection
 end
 
---[[
-	Gets the ClientBridge's name.
-	
-	```lua
-	local Bridge = BridgeNet.CreateBridge("Remote")
-	
-	print(Bridge:GetName()) -- Prints "Remote"
-	```
-	
-	@return string
-]]
+
 function ClientBridge:GetName()
 	return self._name
 end

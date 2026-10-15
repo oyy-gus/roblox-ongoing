@@ -2,12 +2,6 @@
 -- MUSIC PLAYBACK MANAGER (FIXED)
 -- Place in: ServerScriptService > MusicServer(Folder) > MusicSystem(Script) > MusicPlaybackManager(ModuleScript)
 -- ====================================
--- Perbaikan:
---   ✅ Progress broadcast interval diperbesar (3 detik) — client interpolasi sendiri
---   ✅ Transisi lagu tanpa fade yang menyebabkan timing offset
---   ✅ songStartTime diset SETELAH Play() berhasil (lebih akurat)
---   ✅ Broadcast SongUpdate dikirim segera setelah Play berhasil
---   ✅ Tidak ada delay antara lagu berakhir dan lagu berikutnya
 
 local RunService = game:GetService("RunService")
 local ServerMusicAudioHandler = require(script.Parent.ServerMusicAudioHandler)
@@ -117,7 +111,6 @@ end
 function MusicPlaybackManager:StartProgressBroadcast(remotes)
 	if self.progressConnection then self.progressConnection:Disconnect() end
 
-	-- PERBAIKAN: Gunakan interval dari config (sekarang 3 detik)
 	local progressInterval = self.config.PROGRESS_UPDATE_INTERVAL or 3
 
 	self.progressConnection = RunService.Heartbeat:Connect(function()
@@ -188,7 +181,6 @@ function MusicPlaybackManager:Play(remotes, songData, uploaderName, isFromPlayli
 
 	self.isTransitioning = true
 
-	-- PERBAIKAN: Fade-out lebih cepat untuk mengurangi gap
 	if self.audioHandler:IsPlaying() and not self.isFadingOut then
 		self.audioHandler:FadeOut(FADE_OUT_DURATION)
 		task.wait(FADE_OUT_DURATION + 0.02)
@@ -213,14 +205,12 @@ function MusicPlaybackManager:Play(remotes, songData, uploaderName, isFromPlayli
 		return false
 	end
 
-	-- PERBAIKAN: Set songStartTime SETELAH play berhasil (lebih akurat)
 	self.songStartTime = workspace:GetServerTimeNow()
 
 	self.isTransitioning = false
 	self:ConnectEndedEvent()
 	self:StartProgressBroadcast(remotes)
 
-	-- PERBAIKAN: Broadcast segera setelah play (tanpa delay)
 	self:BroadcastSongUpdate(remotes, musicData, uploaderName, duration)
 	return true
 end

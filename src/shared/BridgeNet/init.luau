@@ -152,13 +152,6 @@ return {
 
 	DictionaryToTable = SerdesLayer.DictionaryToTable,
 
-	--[[LogNetTraffic = function(duration: number)
-		if isServer then
-			return ServerBridge._log(duration)
-		else
-			return ClientBridge._log(duration)
-		end
-	end,]]
 
 	ReplicationStep = function(rate: number, func: () -> nil)
 		if isServer then

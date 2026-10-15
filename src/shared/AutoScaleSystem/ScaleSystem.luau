@@ -43,11 +43,9 @@ local function applyScale(uiScale: UIScale)
 
 	local viewportSize = camera.ViewportSize
 
-	-- ★ PERBAIKAN: Validasi viewport dengan timeout
 	if viewportSize.X == 0 or viewportSize.Y == 0 then
 		warn("[ScaleSystem] ViewportSize 0, menunggu...")
 
-		-- Tunggu hingga viewport valid (max 2 detik)
 		local startTime = tick()
 		while viewportSize.X == 0 or viewportSize.Y == 0 do
 			if tick() - startTime > 2 then
@@ -67,10 +65,8 @@ local function applyScale(uiScale: UIScale)
 
 	local finalScale = ScaleUtils.applyBoostCurve(rawScale)
 
-	-- ★ PERBAIKAN: Clamp dengan batas yang lebih ketat
 	finalScale = math.clamp(finalScale, Config.MIN_SCALE, Config.MAX_SCALE)
 
-	-- ★ PERBAIKAN: Validasi final scale
 	if finalScale ~= finalScale then -- NaN check
 		warn("[ScaleSystem] Scale NaN detected, reset ke 1")
 		finalScale = 1

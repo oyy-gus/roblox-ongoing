@@ -2,16 +2,6 @@
 -- MUSIC CLIENT (FIXED)
 -- Place in: StarterGui > MenuGUI(ScreenGui) > MusicClient(LocalScript)
 -- ====================================
--- Perbaikan SINKRONISASI:
---   ✅ DESYNC_THRESHOLD diperkecil dari 2.0s ke 0.5s (koreksi lebih cepat)
---   ✅ syncServerSoundPosition: mute→tunggu load→seek→VERIFIKASI→fade-in
---   ✅ Progress bar menggunakan shared-clock interpolation (smooth, tanpa lompatan)
---   ✅ Post-seek verifikasi: cek posisi setelah engine update, koreksi ulang jika drift > 0.3s
---   ✅ Gentle drift correction: koreksi lembut via Progress broadcast jika drift > 1.5s (cooldown 5s)
---   ✅ Client fade lebih cepat untuk mengurangi celah
--- Perbaikan NOTIFIKASI:
---   ✅ Filter notifikasi server: blokir pesan sistem yang mengganggu
-
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService      = game:GetService("SoundService")
@@ -529,8 +519,6 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 		local actualPos = serverSound.TimePosition
 		local drift = math.abs(correctPosition - actualPos)
 
-		-- PERBAIKAN TOTAL: Hanya seek SEKALI dan hanya jika selisih > 1.2 detik
-		-- Jeda 0.35s selagi volume masih 0 agar buffer audio internal Roblox tenang sebelum unmuting/fade-in
 		if serverSound.IsPlaying and drift > 1.2 and correctPosition > 0 and (maxLen <= 0 or correctPosition < maxLen - 0.5) then
 			pcall(function()
 				serverSound.TimePosition = correctPosition
@@ -2475,7 +2463,7 @@ dispatchEvent.OnClientEvent:Connect(function(event)
 
 	elseif event.type == "NOTIFY" then
 		local msg = payload.message or ""
-		-- PERBAIKAN: Filter notifikasi yang mengganggu
+
 		if isNotifyBlocked(msg) then return end
 		if msg:find("berhasil") or msg:find("added") or msg:find("Sukses") then notifySuccess(T.MusicTitle, msg)
 		elseif msg:find("Error") or msg:find("gagal") or msg:find("Invalid") then notifyError(T.MusicTitle, msg)
@@ -2564,8 +2552,6 @@ musicBroadcast.OnClientEvent:Connect(function(broadcastType, payload)
 		updateProgressBar(0, clientState.duration); updateSkipButton()
 		task.defer(updateSongs)
 
-		-- PERBAIKAN: Sync posisi SEKALI via syncServerSoundPosition (mute→seek→fade-in)
-		-- Tidak perlu applyVolume() + clientFadeIn() terpisah lagi
 		if payload.SoundId then
 			syncServerSoundPosition(payload.SoundId, clientState.serverStartTime, clientState.duration)
 		end
@@ -2636,7 +2622,6 @@ musicUpdate.OnClientEvent:Connect(function(syncType, data)
 		updateSkipButton()
 		task.defer(updateSongs)
 
-		-- PERBAIKAN: Sync audio SEKALI via syncServerSoundPosition (mute→seek→fade-in)
 		if data.SoundId then
 			syncServerSoundPosition(data.SoundId, data.ServerStartTime, data.Duration)
 		end

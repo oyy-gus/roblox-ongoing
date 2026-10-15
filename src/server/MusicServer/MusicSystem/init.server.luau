@@ -2,12 +2,6 @@
 -- MUSIC SYSTEM (FIXED) — SERVER SCRIPT
 -- Place in: ServerScriptService > MusicServer(Folder) > MusicSystem(Script)
 -- ====================================
--- Perbaikan:
---   ✅ SEMUA notifikasi sistem dihilangkan (init, welcome, sync status)
---   ✅ Hanya notifikasi aksi user yang dipertahankan (queue, cooldown, error)
---   ✅ Sync lebih cepat dan tanpa delay yang tidak perlu
---   ✅ Progress broadcast interval diperbesar (3 detik) — client interpolasi sendiri
---   ✅ Transisi lagu lebih halus dengan timing yang lebih baik
 
 local ServerStorage     = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -678,8 +672,6 @@ end)
 Players.PlayerRemoving:Connect(function(player)
 	local userId = player.UserId
 	validationService:CleanupPlayer(userId)
-	-- PERBAIKAN: Pertahankan lagu di antrean saat player disconnect/rejoin
-	-- queueManager:RemoveUserSongs(userId)
 	skipVoteManager:UpdateVoteOnPlayerLeave(userId, Dispatcher)
 	RateLimiter:Cleanup(userId)
 	RetryTracker:Cleanup(userId)
