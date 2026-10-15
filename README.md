@@ -18,6 +18,7 @@
 
 </div>
 
+> [!WARNING]
 > 🚨 **PERINGATAN — PROYEK MASIH DALAM TAHAP PENGEMBANGAN**
 >
 > 🔴 Proyek ini masih aktif dikembangkan (*Work in Progress*). Beberapa fitur mungkin belum selesai, belum stabil, atau masih mengalami perubahan. Bug, error, masalah performa, maupun perilaku yang tidak terduga dapat terjadi sewaktu-waktu.
