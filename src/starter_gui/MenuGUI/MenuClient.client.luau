@@ -183,6 +183,7 @@ mainPanel.Position          = UDim2.new(0.5, 0, 0.5, 0)
 mainPanel.AnchorPoint       = Vector2.new(0.5, 0.5)
 mainPanel.BackgroundColor3  = ThemeModule.Colors.BackgroundDark
 mainPanel.BorderSizePixel   = 0
+mainPanel.Active            = true
 mainPanel.GroupTransparency = 0
 mainPanel.Parent            = panelContainer
 
@@ -203,6 +204,7 @@ header.Name             = "Header"
 header.Size             = UDim2.new(1, 0, 0, HEADER_HEIGHT)
 header.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 header.BorderSizePixel  = 0
+header.Active           = true
 header.Parent           = mainPanel
 
 ThemeModule.CreateCorner(header, 12)
@@ -213,6 +215,7 @@ headerCover.Size             = UDim2.new(1, 0, 0, 15)
 headerCover.Position         = UDim2.new(0, 0, 1, -15)
 headerCover.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 headerCover.BorderSizePixel  = 0
+headerCover.Active           = true
 headerCover.Parent           = header
 
 local headerContent = Instance.new("Frame")
@@ -221,6 +224,7 @@ headerContent.Size                   = UDim2.new(1, -16, 1, -10)
 headerContent.Position               = UDim2.new(0, 8, 0, 5)
 headerContent.BackgroundTransparency = 1
 headerContent.BorderSizePixel        = 0
+headerContent.Active                 = true
 headerContent.Parent                 = header
 
 local tabContainer = Instance.new("Frame")
@@ -229,6 +233,7 @@ tabContainer.Size                   = UDim2.new(1, -44, 1, 0)
 tabContainer.Position               = UDim2.new(0, 0, 0, 0)
 tabContainer.BackgroundTransparency = 1
 tabContainer.BorderSizePixel        = 0
+tabContainer.Active                 = true
 tabContainer.ClipsDescendants       = true
 tabContainer.Parent                 = headerContent
 
@@ -241,6 +246,7 @@ tabBar.BorderSizePixel        = 0
 tabBar.ScrollBarThickness     = 0
 tabBar.ScrollBarImageTransparency = 1
 tabBar.ScrollingEnabled       = true
+tabBar.Active                 = true
 tabBar.HorizontalScrollBarInset = Enum.ScrollBarInset.None
 tabBar.VerticalScrollBarInset = Enum.ScrollBarInset.None
 tabBar.ScrollingDirection     = Enum.ScrollingDirection.X
@@ -291,6 +297,7 @@ contentContainer.Position               = UDim2.new(0, 8, 0, HEADER_HEIGHT + 8)
 contentContainer.BackgroundColor3       = ThemeModule.Colors.BackgroundMedium
 contentContainer.BackgroundTransparency = 0
 contentContainer.BorderSizePixel        = 0
+contentContainer.Active                 = true
 contentContainer.ClipsDescendants       = true
 contentContainer.Parent                 = mainPanel
 
@@ -396,6 +403,7 @@ local function createTabPage(def)
 	page.Size                   = UDim2.new(1, 0, 1, 0)
 	page.BackgroundTransparency = 1
 	page.BorderSizePixel        = 0
+	page.Active                 = true
 	page.Visible                = false
 	page.Parent                 = contentContainer
 	return page

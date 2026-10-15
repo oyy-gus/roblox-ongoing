@@ -483,6 +483,7 @@ local function openSheet(player)
 	canvasGroup.BackgroundColor3 = C.SheetBg
 	canvasGroup.BackgroundTransparency = 0
 	canvasGroup.BorderSizePixel = 0
+	canvasGroup.Active = true
 	canvasGroup.GroupTransparency = 1
 	canvasGroup.ZIndex = 50
 	canvasGroup.Parent = screenGui
@@ -546,6 +547,7 @@ local function openSheet(player)
 	avatarSection.Position = UDim2.new(0, 0, 0, 0)
 	avatarSection.BackgroundColor3 = C.AvatarBg
 	avatarSection.BorderSizePixel = 0
+	avatarSection.Active = true
 	avatarSection.Parent = scroll
 
 	local gradientFrame = Instance.new("Frame")

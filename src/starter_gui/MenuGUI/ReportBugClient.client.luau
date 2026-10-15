@@ -110,6 +110,9 @@ local COLORS = {
 local function mk(cls, props, parent)
 	local inst = Instance.new(cls)
 	for k, v in pairs(props) do inst[k] = v end
+	if inst:IsA("GuiObject") and not inst:IsA("UIComponent") and props.Active == nil then
+		inst.Active = true
+	end
 	if parent then inst.Parent = parent end
 	return inst
 end

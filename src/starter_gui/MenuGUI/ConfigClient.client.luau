@@ -572,6 +572,9 @@ end)
 local function mk(cls, props, parent)
 	local inst = Instance.new(cls)
 	for k, v in pairs(props) do inst[k] = v end
+	if inst:IsA("GuiObject") and not inst:IsA("UIComponent") and props.Active == nil then
+		inst.Active = true
+	end
 	if parent then inst.Parent = parent end
 	return inst
 end
@@ -590,6 +593,7 @@ local configScroll = mk("ScrollingFrame", {
 	ScrollBarThickness = 0,
 	ScrollBarImageTransparency = 1,
 	ScrollingEnabled = true,
+	Active = true,
 	CanvasSize = UDim2.new(0, 0, 0, 0),
 	AutomaticCanvasSize = Enum.AutomaticSize.Y,
 	ClipsDescendants = true,

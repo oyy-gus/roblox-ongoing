@@ -164,6 +164,7 @@ leftPanel.Name = "LeftPanel"
 leftPanel.Size = UDim2.new(0.5, -8, 1, 0)
 leftPanel.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
 leftPanel.BorderSizePixel = 0
+leftPanel.Active = true
 leftPanel.ClipsDescendants = true
 leftPanel.Parent = contentArea
 
@@ -177,6 +178,7 @@ leftHeader.Size = UDim2.new(1, -4, 0, 34)
 leftHeader.Position = UDim2.new(0, 2, 0, 2)
 leftHeader.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 leftHeader.BorderSizePixel = 0
+leftHeader.Active = true
 leftHeader.Parent = leftPanel
 
 AdminConfig.CreateCorner(leftHeader, 6)
@@ -214,6 +216,7 @@ playerListScroll.Size = UDim2.new(1, -8, 1, -44)
 playerListScroll.Position = UDim2.new(0, 4, 0, 40)
 playerListScroll.BackgroundTransparency = 1
 playerListScroll.BorderSizePixel = 0
+playerListScroll.Active = true
 playerListScroll.ScrollBarThickness = 4
 playerListScroll.ScrollBarImageColor3 = ThemeModule.Colors.Primary1
 playerListScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -244,6 +247,7 @@ rightPanel.Size = UDim2.new(0.5, -8, 1, 0)
 rightPanel.Position = UDim2.new(0.5, 8, 0, 0)
 rightPanel.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
 rightPanel.BorderSizePixel = 0
+rightPanel.Active = true
 rightPanel.ClipsDescendants = true
 rightPanel.Parent = contentArea
 
@@ -257,6 +261,7 @@ rightHeader.Size = UDim2.new(1, -8, 0, 34)
 rightHeader.Position = UDim2.new(0, 4, 0, 4)
 rightHeader.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 rightHeader.BorderSizePixel = 0
+rightHeader.Active = true
 rightHeader.Parent = rightPanel
 
 AdminConfig.CreateCorner(rightHeader, 6)
@@ -358,6 +363,7 @@ roleButtonsContainer.Size = UDim2.new(1, -8, 1, -200)
 roleButtonsContainer.Position = UDim2.new(0, 4, 0, 146)
 roleButtonsContainer.BackgroundTransparency = 1
 roleButtonsContainer.BorderSizePixel = 0
+roleButtonsContainer.Active = true
 roleButtonsContainer.ScrollBarThickness = 0
 roleButtonsContainer.ScrollBarImageTransparency = 1
 roleButtonsContainer.ScrollingEnabled = true

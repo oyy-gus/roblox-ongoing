@@ -110,6 +110,7 @@ local function buildBroadcastGUI()
 	headerSection.Size = UDim2.new(1, 0, 0, 50)
 	headerSection.Position = UDim2.new(0, 0, 0, 0)
 	headerSection.BackgroundTransparency = 1
+	headerSection.Active = true
 	headerSection.Parent = broadcastPage
 
 	local headerIcon = Instance.new("TextLabel")
@@ -162,6 +163,7 @@ local function buildBroadcastGUI()
 	inputSection.Size = UDim2.new(1, 0, 0, 140)
 	inputSection.Position = UDim2.new(0, 0, 0, 75)
 	inputSection.BackgroundTransparency = 1
+	inputSection.Active = true
 	inputSection.Parent = broadcastPage
 
 	local inputLabel = Instance.new("TextLabel")

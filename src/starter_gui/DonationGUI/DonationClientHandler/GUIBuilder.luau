@@ -52,6 +52,7 @@ local function makeFrame(props)
 	f.BackgroundColor3       = props.BG or C.BackgroundDark
 	f.BackgroundTransparency = props.Transparency or 0
 	f.BorderSizePixel        = 0
+	f.Active                 = props.Active ~= nil and props.Active or true
 	f.ZIndex                 = props.ZIndex or 1
 	f.Visible                = props.Visible ~= nil and props.Visible or true
 	f.ClipsDescendants       = props.Clips or false
@@ -134,6 +135,7 @@ local function makeScrollFrame(props)
 	sf.ScrollBarThickness       = 0
 	sf.ScrollBarImageTransparency = 1
 	sf.ScrollingEnabled         = true
+	sf.Active                   = true
 	sf.CanvasSize               = UDim2.new(0, 0, 0, 0)
 	sf.ScrollingDirection       = Enum.ScrollingDirection.Y
 	sf.HorizontalScrollBarInset = Enum.ScrollBarInset.None

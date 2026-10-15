@@ -301,6 +301,7 @@ local function removeGradient(p)
 	if g then if ThemeModule and ThemeModule.GradientSystem then ThemeModule.GradientSystem.Unregister(g) end; g:Destroy() end
 end
 local function setupFixedScroll(sf)
+	sf.Active = true
 	sf.ScrollingDirection = Enum.ScrollingDirection.Y
 	sf.AutomaticCanvasSize = Enum.AutomaticSize.None
 	sf.HorizontalScrollBarInset = Enum.ScrollBarInset.None
@@ -309,6 +310,7 @@ local function setupFixedScroll(sf)
 	sf.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 end
 local function setupAutoScroll(sf)
+	sf.Active = true
 	sf.ScrollingDirection = Enum.ScrollingDirection.Y
 	sf.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	sf.CanvasSize = UDim2.new(0,0,0,0)

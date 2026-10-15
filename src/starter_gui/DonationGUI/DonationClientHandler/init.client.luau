@@ -19,6 +19,9 @@ local BroadcastListenerModule = require(script.BroadcastListenerModule)
 -- 🏗️ BUILD GUI OTOMATIS
 -- ============================================
 local gui      = script.Parent
+if gui:IsA("ScreenGui") then
+	gui.DisplayOrder = 100
+end
 local elements = GUIBuilder.build(gui)
 
 -- ============================================

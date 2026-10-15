@@ -77,11 +77,15 @@ local BTN_HEIGHT  = 48
 local BTN_SPACING = 8
 
 -- ====================================
+local ContextActionService = game:GetService("ContextActionService")
+
+-- ====================================
 -- GUI SETUP
 -- ====================================
 local gui = playerGui:WaitForChild("EmoteGui")
 if gui:IsA("ScreenGui") then
 	gui.IgnoreGuiInset = true
+	gui.DisplayOrder   = 100
 end
 
 local scaler = ScaleSystem.new(gui)
@@ -109,6 +113,13 @@ ThemeModule.CreateAnimatedStroke(mainframe, 2, "Primary", 1.2)
 -- DRAG FUNCTIONALITY
 do
 	local dragging, dragStart, startPos = false, nil, nil
+	local function endDrag()
+		if dragging then
+			dragging = false
+			ContextActionService:UnbindAction("EmoteDragCameraSink")
+		end
+	end
+
 	mainframe.InputBegan:Connect(function(input)
 		if (input.UserInputType == Enum.UserInputType.MouseButton1
 			or input.UserInputType == Enum.UserInputType.Touch)
@@ -116,12 +127,26 @@ do
 			dragging = true
 			dragStart = input.Position
 			startPos = mainframe.Position
+			ContextActionService:BindActionAtPriority(
+				"EmoteDragCameraSink",
+				function() return Enum.ContextActionResult.Sink end,
+				false,
+				Enum.ContextActionPriority.High.Value + 2000,
+				Enum.UserInputType.MouseMovement,
+				Enum.UserInputType.Touch
+			)
 		end
 	end)
 	mainframe.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseButton1
 			or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = false
+			endDrag()
+		end
+	end)
+	UserInputService.InputEnded:Connect(function(input)
+		if (input.UserInputType == Enum.UserInputType.MouseButton1
+			or input.UserInputType == Enum.UserInputType.Touch) and dragging then
+			endDrag()
 		end
 	end)
 	UserInputService.InputChanged:Connect(function(input)
@@ -144,6 +169,7 @@ headerFrame.Name             = "HeaderFrame"
 headerFrame.Size             = UDim2.new(1, 0, 0, HDR_H)
 headerFrame.BackgroundColor3 = C.BackgroundMedium
 headerFrame.BorderSizePixel  = 0
+headerFrame.Active           = true
 headerFrame.ZIndex           = 2
 headerFrame.Parent           = mainframe
 corner(headerFrame, 12)
@@ -214,6 +240,7 @@ searchWrapper.Size             = UDim2.new(1, -(PAD*2), 0, SRCH_H)
 searchWrapper.Position         = UDim2.new(0, PAD, 0, HDR_H + GAP)
 searchWrapper.BackgroundColor3 = C.BackgroundLight
 searchWrapper.BorderSizePixel  = 0
+searchWrapper.Active           = true
 searchWrapper.ClipsDescendants = false
 searchWrapper.Parent           = mainframe
 corner(searchWrapper, 8)
@@ -279,6 +306,7 @@ tabBar.Size             = UDim2.new(1, -(PAD*2), 0, TAB_H)
 tabBar.Position         = UDim2.new(0, PAD, 0, HDR_H + GAP + SRCH_H + GAP)
 tabBar.BackgroundColor3 = C.BackgroundMedium
 tabBar.BorderSizePixel  = 0
+tabBar.Active           = true
 tabBar.Parent           = mainframe
 corner(tabBar, 8)
 
@@ -346,6 +374,7 @@ containerframe.Size             = UDim2.new(1, -(PAD*2), 0, CONT_H)
 containerframe.Position         = UDim2.new(0, PAD, 0, CONT_TOP)
 containerframe.BackgroundColor3 = C.BackgroundMedium
 containerframe.BorderSizePixel  = 0
+containerframe.Active           = true
 containerframe.ClipsDescendants = true
 containerframe.Parent           = mainframe
 corner(containerframe, 8)
@@ -426,6 +455,7 @@ speedFrame.Size             = UDim2.new(1, -(PAD*2), 0, SPEED_H)
 speedFrame.Position         = UDim2.new(0, PAD, 0, SPEED_Y)
 speedFrame.BackgroundColor3 = C.BackgroundMedium
 speedFrame.BorderSizePixel  = 0
+speedFrame.Active           = true
 speedFrame.Parent           = mainframe
 corner(speedFrame, 8)
 
@@ -499,6 +529,7 @@ unsyncframe.Position         = containerframe.Position
 unsyncframe.BackgroundColor3 = C.BackgroundMedium
 unsyncframe.BackgroundTransparency = 0.3
 unsyncframe.BorderSizePixel  = 0
+unsyncframe.Active           = true
 unsyncframe.Visible          = false
 unsyncframe.ZIndex           = 5
 unsyncframe.Parent           = mainframe

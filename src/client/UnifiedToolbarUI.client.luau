@@ -108,6 +108,7 @@ screenGui.Name           = "UnifiedToolGui"
 screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn   = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.DisplayOrder   = 100
 screenGui.Enabled        = true
 screenGui.Parent         = playerGui
 
@@ -119,6 +120,9 @@ local guiScaler = ScalingSystem.new(screenGui)
 local function make(cls, props, parent)
 	local o = Instance.new(cls)
 	for k, v in pairs(props) do o[k] = v end
+	if o:IsA("GuiObject") and not o:IsA("UIComponent") and props.Active == nil then
+		o.Active = true
+	end
 	if parent then o.Parent = parent end
 	return o
 end
@@ -162,6 +166,7 @@ local panel = make("Frame", {
 	BackgroundTransparency = 1,
 	BorderSizePixel        = 0,
 	Visible                = false,
+	Active                 = true,
 	ClipsDescendants       = true,
 }, screenGui)
 crn(14, panel)
@@ -172,6 +177,7 @@ local header = make("Frame", {
 	Size             = UDim2.new(1, 0, 0, HEADER_H),
 	BackgroundColor3 = T.Card,
 	BorderSizePixel  = 0,
+	Active           = true,
 }, panel)
 crn(14, header)
 

@@ -118,6 +118,7 @@ playersScroll.BorderSizePixel = 0
 playersScroll.ScrollBarThickness = 0
 playersScroll.ScrollBarImageTransparency = 1
 playersScroll.ScrollingEnabled = true
+playersScroll.Active = true
 playersScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 playersScroll.ScrollingDirection = Enum.ScrollingDirection.Y
 playersScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y  -- Auto resize canvas
