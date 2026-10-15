@@ -81,15 +81,6 @@ local function getTextSize(textType)
 	return math.floor(MenuConfig.GetScaledValue(sizeConfig.base * scaleFactor, sizeConfig.min, sizeConfig.max))
 end
 
-local function getScrollBarThickness()
-	local screenInfo = MenuConfig.GetScreenInfo()
-	if screenInfo.isMobile then
-		return CONFIG.Layout.ScrollBarThicknessMobile or 6
-	else
-		return CONFIG.Layout.ScrollBarThickness or 4
-	end
-end
-
 -- ========================================
 -- WARNA
 -- ========================================
@@ -124,11 +115,14 @@ playersScroll.Size = UDim2.new(1, 0, 1, 0)
 playersScroll.Position = UDim2.new(0, 0, 0, 0)
 playersScroll.BackgroundColor3 = CONFIG.Colors.PlayerList.Background
 playersScroll.BorderSizePixel = 0
-playersScroll.ScrollBarThickness = getScrollBarThickness()
-playersScroll.ScrollBarImageColor3 = CONFIG.Colors.PlayerList.ScrollBar
+playersScroll.ScrollBarThickness = 0
+playersScroll.ScrollBarImageTransparency = 1
+playersScroll.ScrollingEnabled = true
 playersScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 playersScroll.ScrollingDirection = Enum.ScrollingDirection.Y
 playersScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y  -- Auto resize canvas
+playersScroll.VerticalScrollBarInset = Enum.ScrollBarInset.None
+playersScroll.HorizontalScrollBarInset = Enum.ScrollBarInset.None
 playersScroll.Parent = playersPage
 
 Instance.new("UICorner", playersScroll).CornerRadius = UDim.new(0, CONFIG.Layout.ButtonCorner)
@@ -493,7 +487,6 @@ end
 -- FUNGSI UPDATE TATA LETAK
 -- ========================================
 local function updatePlayersLayout()
-	playersScroll.ScrollBarThickness = getScrollBarThickness()
 	if MenuConfig.State.isMenuOpen and MenuConfig.State.currentMainTab == "Pemain" then
 		updatePlayerList()
 	end

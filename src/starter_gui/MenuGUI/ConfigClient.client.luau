@@ -587,16 +587,15 @@ local configScroll = mk("ScrollingFrame", {
 	Position = UDim2.new(0, 0, 0, 0),
 	BackgroundColor3 = Color3.fromRGB(30, 30, 40),
 	BorderSizePixel = 0,
-	ScrollBarThickness = 5,
-	ScrollBarImageColor3 = ThemeModule.Colors.Primary1,
-	ScrollBarImageTransparency = 0.4,
+	ScrollBarThickness = 0,
+	ScrollBarImageTransparency = 1,
+	ScrollingEnabled = true,
 	CanvasSize = UDim2.new(0, 0, 0, 0),
 	AutomaticCanvasSize = Enum.AutomaticSize.Y,
 	ClipsDescendants = true,
 	ScrollingDirection = Enum.ScrollingDirection.Y,
 	HorizontalScrollBarInset = Enum.ScrollBarInset.None,
-	VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar,
-	VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
+	VerticalScrollBarInset = Enum.ScrollBarInset.None,
 	ElasticBehavior = Enum.ElasticBehavior.Always,
 }, configPage)
 
@@ -611,7 +610,7 @@ mk("UIPadding", {
 	PaddingTop = UDim.new(0, SIZES.SCROLL_PAD),
 	PaddingBottom = UDim.new(0, SIZES.SCROLL_PAD),
 	PaddingLeft = UDim.new(0, SIZES.SCROLL_PAD),
-	PaddingRight = UDim.new(0, SIZES.SCROLL_PAD + 4),
+	PaddingRight = UDim.new(0, SIZES.SCROLL_PAD),
 }, configScroll)
 
 UIElements.scrollFrame = configScroll

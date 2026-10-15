@@ -625,21 +625,21 @@ local function createBroadcastNotification(messageData)
 	local closeBtn = Instance.new("TextButton")
 	closeBtn.Size = UDim2.new(0, 18, 0, 18)
 	closeBtn.Position = UDim2.new(1, -22, 0, 5)
-	closeBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundLight
+	closeBtn.BackgroundColor3 = ThemeModule.Colors.CloseRed
 	closeBtn.BorderSizePixel = 0
-	closeBtn.Text = "×"
-	closeBtn.TextColor3 = ThemeModule.Colors.TextGray
+	closeBtn.Text = "x"
+	closeBtn.TextColor3 = ThemeModule.Colors.TextWhite
 	closeBtn.TextSize = 12
 	closeBtn.Font = Enum.Font.GothamBold
 	closeBtn.AutoButtonColor = false
 	closeBtn.Parent = notif
-	ThemeModule.CreateCorner(closeBtn, 9)
+	ThemeModule.CreateCorner(closeBtn, 6)
 
 	closeBtn.MouseEnter:Connect(function()
-		TS:Create(closeBtn, TweenInfo.new(0.1), {BackgroundColor3 = ThemeModule.Colors.CloseRed, TextColor3 = ThemeModule.Colors.TextWhite}):Play()
+		TS:Create(closeBtn, TweenInfo.new(0.1), {BackgroundColor3 = ThemeModule.Colors.CloseRedHover}):Play()
 	end)
 	closeBtn.MouseLeave:Connect(function()
-		TS:Create(closeBtn, TweenInfo.new(0.1), {BackgroundColor3 = ThemeModule.Colors.BackgroundLight, TextColor3 = ThemeModule.Colors.TextGray}):Play()
+		TS:Create(closeBtn, TweenInfo.new(0.1), {BackgroundColor3 = ThemeModule.Colors.CloseRed}):Play()
 	end)
 
 	-- Message Container (with background)

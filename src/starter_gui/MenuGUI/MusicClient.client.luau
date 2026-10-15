@@ -304,7 +304,8 @@ local function setupFixedScroll(sf)
 	sf.ScrollingDirection = Enum.ScrollingDirection.Y
 	sf.AutomaticCanvasSize = Enum.AutomaticSize.None
 	sf.HorizontalScrollBarInset = Enum.ScrollBarInset.None
-	sf.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+	-- Overlay: jangan inset konten, scrollbar tidak boleh makan lebar frame
+	sf.VerticalScrollBarInset = Enum.ScrollBarInset.None
 	sf.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 end
 local function setupAutoScroll(sf)
@@ -312,7 +313,7 @@ local function setupAutoScroll(sf)
 	sf.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	sf.CanvasSize = UDim2.new(0,0,0,0)
 	sf.HorizontalScrollBarInset = Enum.ScrollBarInset.None
-	sf.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+	sf.VerticalScrollBarInset = Enum.ScrollBarInset.None
 	sf.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 end
 local function fmtTime(sec)
@@ -593,34 +594,36 @@ local updateMusicLayout
 updateMusicLayout = function()
 	if not UI.musicScroll then return end
 	local winH = getViewportHeight()
-
 	local curY = 0
 
 	if UI.nowPlayingFrame then
 		UI.nowPlayingFrame.Position = UDim2.new(0, 0, 0, 0)
-		UI.nowPlayingFrame.Size     = UDim2.new(1, -6, 0, winH)
+		UI.nowPlayingFrame.Size     = UDim2.new(1, 0, 0, winH)
 		curY = winH + DIM.PAD
 	end
 
 	if UI.queueSection then
 		UI.queueSection.Position = UDim2.new(0, 0, 0, curY)
+		UI.queueSection.Size     = UDim2.new(1, 0, 0, DIM.QUEUE_CARD_H)
 		curY = curY + DIM.QUEUE_CARD_H + DIM.PAD
 	end
 
 	if UI.playlistSection then
 		UI.playlistSection.Position = UDim2.new(0, 0, 0, curY)
+		UI.playlistSection.Size     = UDim2.new(1, 0, 0, DIM.PLAYLIST_SECTION_H)
 		curY = curY + DIM.PLAYLIST_SECTION_H + DIM.PAD
 	end
 
 	if UI.searchSection then
 		UI.searchSection.Position = UDim2.new(0, 0, 0, curY)
+		UI.searchSection.Size     = UDim2.new(1, 0, 0, DIM.SEARCH_SECTION_H)
 		curY = curY + DIM.SEARCH_SECTION_H + DIM.PAD
 	end
 
 	if UI.librarySection and UI.songsContainer then
 		UI.librarySection.Position = UDim2.new(0, 0, 0, curY)
 		local libContentH = 32 + UI.songsContainer.Size.Y.Offset + 14
-		UI.librarySection.Size = UDim2.new(1, -6, 0, math.max(160, libContentH))
+		UI.librarySection.Size = UDim2.new(1, 0, 0, math.max(160, libContentH))
 		curY = curY + UI.librarySection.Size.Y.Offset + DIM.PAD + 10
 	end
 
@@ -1214,7 +1217,7 @@ local function buildNowPlaying()
 	-- sehingga Antrean Lagu tersembunyi di bawah sampai di-scroll ke bawah.
 	local np = Instance.new("Frame")
 	np.Name = "NowPlaying"
-	np.Size = UDim2.new(1, -6, 0, DIM.NP_H)  -- resized by updateMusicLayout
+	np.Size = UDim2.new(1, 0, 0, DIM.NP_H)  -- resized by updateMusicLayout
 	np.Position = UDim2.new(0, 0, 0, 0)
 	np.ZIndex = 1
 	np.BackgroundColor3 = Color3.fromHex("#080808")
@@ -1642,7 +1645,7 @@ end
 local function buildQueueSection()
 	local qs = Instance.new("Frame")
 	qs.Name = "QueueSection"
-	qs.Size = UDim2.new(1, -6, 0, DIM.QUEUE_CARD_H)
+	qs.Size = UDim2.new(1, 0, 0, DIM.QUEUE_CARD_H)
 	qs.Position = UDim2.new(0, 0, 0, DIM.NP_H + DIM.PAD)
 	qs.BackgroundColor3 = Color3.fromHex("#0F0F0F")
 	qs.BorderSizePixel = 0
@@ -1843,7 +1846,7 @@ end
 local function buildPlaylistSection()
 	local ps = Instance.new("Frame")
 	ps.Name = "PlaylistSection"
-	ps.Size = UDim2.new(1, -6, 0, DIM.PLAYLIST_SECTION_H)
+	ps.Size = UDim2.new(1, 0, 0, DIM.PLAYLIST_SECTION_H)
 	ps.BackgroundColor3 = Color3.fromHex("#0F0F0F")
 	ps.BorderSizePixel = 0
 	ps.ClipsDescendants = true
@@ -2002,7 +2005,7 @@ end
 local function buildSearchSection()
 	local ss = Instance.new("Frame")
 	ss.Name = "SearchSection"
-	ss.Size = UDim2.new(1, -6, 0, DIM.SEARCH_SECTION_H)
+	ss.Size = UDim2.new(1, 0, 0, DIM.SEARCH_SECTION_H)
 	ss.BackgroundColor3 = Color3.fromHex("#0F0F0F")
 	ss.BorderSizePixel = 0
 	ss.ClipsDescendants = true
@@ -2160,7 +2163,7 @@ end
 local function buildLibrarySection()
 	local ls = Instance.new("Frame")
 	ls.Name = "LibrarySection"
-	ls.Size = UDim2.new(1, -6, 0, 300)
+	ls.Size = UDim2.new(1, 0, 0, 300)
 	ls.BackgroundColor3 = Color3.fromHex("#0F0F0F")
 	ls.BorderSizePixel = 0
 	ls.ClipsDescendants = true
@@ -2365,9 +2368,10 @@ local function buildMusicUI()
 	mScroll.Position = UDim2.new(0, 0, 0, 0)
 	mScroll.BackgroundTransparency = 1
 	mScroll.BorderSizePixel = 0
-	mScroll.ScrollBarThickness = 5
-	mScroll.ScrollBarImageColor3 = C.ScrollBar
+	mScroll.ScrollBarThickness = 0
+	mScroll.ScrollBarImageTransparency = 1
 	mScroll.ClipsDescendants = true
+	mScroll.ScrollingEnabled = true
 	mScroll.Parent = musicPage
 	setupFixedScroll(mScroll)
 	UI.musicScroll = mScroll

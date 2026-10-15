@@ -182,23 +182,26 @@ closeBtn.Name                   = "CloseBtn"
 closeBtn.Size                   = UDim2.new(0, 28, 0, 28)
 closeBtn.AnchorPoint            = Vector2.new(1, 0.5)
 closeBtn.Position               = UDim2.new(1, -6, 0.5, 0)
-closeBtn.BackgroundTransparency = 1
-closeBtn.Text                   = "✕"
-closeBtn.TextColor3             = C.TextGray or Color3.fromHex("#A0A0A0")
+closeBtn.BackgroundColor3       = C.CloseRed
+closeBtn.BackgroundTransparency = 0
+closeBtn.Text                   = "x"
+closeBtn.TextColor3             = C.TextWhite or Color3.fromHex("#FFFFFF")
 closeBtn.TextSize               = 14
 closeBtn.Font                   = Enum.Font.GothamBold
 closeBtn.BorderSizePixel        = 0
+closeBtn.AutoButtonColor        = false
 closeBtn.ZIndex                 = 5
 closeBtn.Parent                 = headerFrame
+corner(closeBtn, 6)
 
 closeBtn.MouseEnter:Connect(function()
 	TweenService:Create(closeBtn, TweenInfo.new(0.12), {
-		TextColor3 = C.TextWhite or Color3.fromHex("#FFFFFF")
+		BackgroundColor3 = C.CloseRedHover,
 	}):Play()
 end)
 closeBtn.MouseLeave:Connect(function()
 	TweenService:Create(closeBtn, TweenInfo.new(0.12), {
-		TextColor3 = C.TextGray or Color3.fromHex("#A0A0A0")
+		BackgroundColor3 = C.CloseRed,
 	}):Play()
 end)
 
@@ -352,8 +355,10 @@ containerlist.Name                   = "ContainerList"
 containerlist.Size                   = UDim2.new(1, 0, 1, 0)
 containerlist.BackgroundTransparency = 1
 containerlist.BorderSizePixel        = 0
-containerlist.ScrollBarThickness     = 4
-containerlist.ScrollBarImageColor3   = C.Primary1
+containerlist.ScrollBarThickness     = 0
+containerlist.ScrollBarImageTransparency = 1
+containerlist.ScrollingEnabled       = true
+containerlist.VerticalScrollBarInset = Enum.ScrollBarInset.None
 containerlist.CanvasSize             = UDim2.new(0, 0, 0, 0)
 containerlist.AutomaticCanvasSize    = Enum.AutomaticSize.Y
 containerlist.ScrollingDirection     = Enum.ScrollingDirection.Y

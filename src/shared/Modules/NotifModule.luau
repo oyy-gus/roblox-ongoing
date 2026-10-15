@@ -281,58 +281,33 @@ local function createNotifFrame(options)
 	-- ========================================
 	local closeBtn = Instance.new("TextButton")
 	closeBtn.Name = "CloseButton"
-	closeBtn.Size = UDim2.new(0, 12, 0, 12)
-	closeBtn.Position = UDim2.new(1, -15, 0, 5)
-	closeBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
-	closeBtn.BackgroundTransparency = 0.6
-	closeBtn.Text = ""
+	closeBtn.Size = UDim2.new(0, 16, 0, 16)
+	closeBtn.Position = UDim2.new(1, -19, 0, 4)
+	closeBtn.BackgroundColor3 = Color3.fromHex("#2A2A2A")
+	closeBtn.BackgroundTransparency = 0
+	closeBtn.Text = "x"
+	closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	closeBtn.TextSize = 11
+	closeBtn.Font = Enum.Font.GothamBold
+	closeBtn.AutoButtonColor = false
 	closeBtn.BorderSizePixel = 0
 	closeBtn.ZIndex = 999999 + 3
 	closeBtn.Parent = mainFrame
 
 	local closeBtnCorner = Instance.new("UICorner")
-	closeBtnCorner.CornerRadius = UDim.new(0, 3)
+	closeBtnCorner.CornerRadius = UDim.new(0, 4)
 	closeBtnCorner.Parent = closeBtn
 
-	-- X line 1
-	local line1 = Instance.new("Frame")
-	line1.Size = UDim2.new(0, 6, 0, 1)
-	line1.Position = UDim2.new(0.5, 0, 0.5, 0)
-	line1.AnchorPoint = Vector2.new(0.5, 0.5)
-	line1.Rotation = 45
-	line1.BackgroundColor3 = Color3.fromRGB(160, 160, 170)
-	line1.BorderSizePixel = 0
-	line1.ZIndex = 999999 + 4
-	line1.Parent = closeBtn
-
-	-- X line 2
-	local line2 = Instance.new("Frame")
-	line2.Size = UDim2.new(0, 6, 0, 1)
-	line2.Position = UDim2.new(0.5, 0, 0.5, 0)
-	line2.AnchorPoint = Vector2.new(0.5, 0.5)
-	line2.Rotation = -45
-	line2.BackgroundColor3 = Color3.fromRGB(160, 160, 170)
-	line2.BorderSizePixel = 0
-	line2.ZIndex = 999999 + 4
-	line2.Parent = closeBtn
-
-	-- Hover effect
 	closeBtn.MouseEnter:Connect(function()
 		TweenService:Create(closeBtn, TweenInfo.new(0.1), {
-			BackgroundTransparency = 0.2,
-			BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+			BackgroundColor3 = Color3.fromHex("#404040"),
 		}):Play()
-		TweenService:Create(line1, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
-		TweenService:Create(line2, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(255, 255, 255)}):Play()
 	end)
 
 	closeBtn.MouseLeave:Connect(function()
 		TweenService:Create(closeBtn, TweenInfo.new(0.1), {
-			BackgroundTransparency = 0.6,
-			BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+			BackgroundColor3 = Color3.fromHex("#2A2A2A"),
 		}):Play()
-		TweenService:Create(line1, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(160, 160, 170)}):Play()
-		TweenService:Create(line2, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(160, 160, 170)}):Play()
 	end)
 
 	return {

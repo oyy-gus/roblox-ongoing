@@ -47,6 +47,8 @@ local T = {
 	TextDim   = getThemeColor("TextGray",  Color3.fromHex("#A0A0A0")),
 	Sub       = getThemeColor("TextMuted", Color3.fromHex("#666666")),
 	Border    = getThemeColor("Border", Color3.fromHex("#353535")),
+	Close     = getThemeColor("CloseRed", Color3.fromHex("#2A2A2A")),
+	CloseHov  = getThemeColor("CloseRedHover", Color3.fromHex("#404040")),
 }
 
 -- ════════════════════════════════════════════
@@ -197,11 +199,13 @@ local titleLabel = make("TextLabel", {
 local closeBtn = make("TextButton", {
 	Size             = UDim2.new(0, 26, 0, 26),
 	Position         = UDim2.new(1, -34, 0.5, -13),
-	BackgroundColor3 = Color3.fromRGB(170, 0, 0),
-	Text             = "✖️",
-	TextColor3       = Color3.fromRGB(255, 100, 100),
+	BackgroundColor3 = T.Close,
+	Text             = "x",
+	TextColor3       = T.Text,
 	Font             = Enum.Font.GothamBold,
-	TextSize         = 13,
+	TextSize         = 14,
+	AutoButtonColor  = false,
+	BorderSizePixel  = 0,
 }, header)
 crn(6, closeBtn)
 
@@ -226,14 +230,14 @@ local vipContent = make("Frame", {
 local vipScroll = make("ScrollingFrame", {
 	Size                       = UDim2.new(1, 0, 1, 0),
 	BackgroundTransparency     = 1,
-	ScrollBarThickness         = 4,
-	ScrollBarImageColor3       = T.Accent,
-	ScrollBarImageTransparency = 0.3,
+	ScrollBarThickness         = 0,
+	ScrollBarImageTransparency = 1,
+	ScrollingEnabled           = true,
 	CanvasSize                 = UDim2.new(0, 0, 0, 0),
 	AutomaticCanvasSize        = Enum.AutomaticSize.Y,
 	BorderSizePixel            = 0,
 	ScrollingDirection         = Enum.ScrollingDirection.Y,
-	VerticalScrollBarInset     = Enum.ScrollBarInset.ScrollBar,
+	VerticalScrollBarInset     = Enum.ScrollBarInset.None,
 	ElasticBehavior            = Enum.ElasticBehavior.Always,
 }, vipContent)
 
@@ -247,7 +251,7 @@ make("UIPadding", {
 	PaddingTop    = UDim.new(0, 8),
 	PaddingBottom = UDim.new(0, 8),
 	PaddingLeft   = UDim.new(0, 8),
-	PaddingRight  = UDim.new(0, 12),
+	PaddingRight  = UDim.new(0, 8),
 }, vipScroll)
 
 -- ════════════════════════════════════════════
@@ -756,10 +760,10 @@ toolIcon.deselected:Connect(function() hidePanel() end)
 
 closeBtn.MouseButton1Click:Connect(function() hidePanel(); toolIcon:deselect() end)
 closeBtn.MouseEnter:Connect(function()
-	tw(closeBtn, 0.1, { BackgroundColor3=Color3.fromRGB(255,60,60), TextColor3=Color3.fromRGB(255,255,255) })
+	tw(closeBtn, 0.1, { BackgroundColor3 = T.CloseHov, TextColor3 = T.Text })
 end)
 closeBtn.MouseLeave:Connect(function()
-	tw(closeBtn, 0.1, { BackgroundColor3=Color3.fromRGB(50,28,28), TextColor3=Color3.fromRGB(255,100,100) })
+	tw(closeBtn, 0.1, { BackgroundColor3 = T.Close, TextColor3 = T.Text })
 end)
 
 -- ════════════════════════════════════════════

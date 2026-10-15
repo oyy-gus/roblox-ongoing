@@ -394,22 +394,22 @@ closeBtn.Size = UDim2.new(0, 22, 0, 18)
 closeBtn.Position = UDim2.new(1, -28, 0.5, 0)
 closeBtn.AnchorPoint = Vector2.new(0, 0.5)
 closeBtn.BackgroundColor3 = Color3.fromHex("#2A2A2A")
-closeBtn.BackgroundTransparency = 0.5
-closeBtn.Text = "X"
-closeBtn.TextColor3 = Color3.fromHex("#A0A0A0")
-closeBtn.TextSize = 10
+closeBtn.BackgroundTransparency = 0
+closeBtn.Text = "x"
+closeBtn.TextColor3 = Color3.fromHex("#FFFFFF")
+closeBtn.TextSize = 12
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.AutoButtonColor = false
 closeBtn.ZIndex = 4
 closeBtn.Parent = invHeader
 
-addCorner(closeBtn, 4)
+addCorner(closeBtn, 6)
 
 closeBtn.MouseEnter:Connect(function()
-	tweenProperty(closeBtn, {BackgroundTransparency = 0.2, TextColor3 = Color3.fromHex("#FFFFFF")}, 0.1)
+	tweenProperty(closeBtn, {BackgroundColor3 = Color3.fromHex("#404040")}, 0.1)
 end)
 closeBtn.MouseLeave:Connect(function()
-	tweenProperty(closeBtn, {BackgroundTransparency = 0.5, TextColor3 = Color3.fromHex("#A0A0A0")}, 0.1)
+	tweenProperty(closeBtn, {BackgroundColor3 = Color3.fromHex("#2A2A2A")}, 0.1)
 end)
 
 -- Content container

@@ -79,7 +79,6 @@ local BASE = {
 	DIVIDER_MARGIN_TOP = 10,
 	BUTTONS_MARGIN_TOP = 22,
 
-	SCROLLBAR_THICKNESS = 5,
 	BORDER_THICKNESS    = 2,
 	SLIDE_OFFSET_Y      = 30,
 
@@ -139,7 +138,6 @@ local C = {
 	Divider         = Color3.fromRGB(76, 76, 113),
 	SyncActive      = Color3.fromRGB(30, 100, 55),
 	SyncDisabled    = Color3.fromRGB(55, 55, 60),
-	ScrollBar       = Color3.fromRGB(76, 76, 113),
 	GradientColor   = Color3.fromRGB(76, 76, 113),
 	GiveOverlayBg   = Color3.fromRGB(20, 12, 16),
 	GiveBtnActive   = Color3.fromRGB(85, 170, 255),
@@ -527,10 +525,11 @@ local function openSheet(player)
 	scroll.Position = UDim2.new(0, 0, 0, 0)
 	scroll.BackgroundTransparency = 1
 	scroll.BorderSizePixel = 0
-	scroll.ScrollBarThickness = B.SCROLLBAR_THICKNESS
-	scroll.ScrollBarImageColor3 = C.ScrollBar
-	scroll.ScrollBarImageTransparency = 0.5
-	scroll.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+	scroll.ScrollBarThickness = 0
+	scroll.ScrollBarImageTransparency = 1
+	scroll.ScrollingEnabled = true
+	scroll.VerticalScrollBarInset = Enum.ScrollBarInset.None
+	scroll.HorizontalScrollBarInset = Enum.ScrollBarInset.None
 	scroll.ScrollingDirection = Enum.ScrollingDirection.Y
 	scroll.ElasticBehavior = Enum.ElasticBehavior.Always
 	scroll.CanvasSize = UDim2.new(0, 0, 0, totalCanvas)

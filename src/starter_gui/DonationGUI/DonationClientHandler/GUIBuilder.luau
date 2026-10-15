@@ -131,11 +131,13 @@ local function makeScrollFrame(props)
 	sf.Position                 = props.Position or UDim2.new(0, 0, 0, 0)
 	sf.BackgroundTransparency   = 1
 	sf.BorderSizePixel          = 0
-	sf.ScrollBarThickness       = 4
-	sf.ScrollBarImageColor3     = C.Primary1
+	sf.ScrollBarThickness       = 0
+	sf.ScrollBarImageTransparency = 1
+	sf.ScrollingEnabled         = true
 	sf.CanvasSize               = UDim2.new(0, 0, 0, 0)
 	sf.ScrollingDirection       = Enum.ScrollingDirection.Y
-	sf.HorizontalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+	sf.HorizontalScrollBarInset = Enum.ScrollBarInset.None
+	sf.VerticalScrollBarInset   = Enum.ScrollBarInset.None
 	sf.ZIndex                   = props.ZIndex or 1
 	sf.Parent                   = props.Parent
 	return sf

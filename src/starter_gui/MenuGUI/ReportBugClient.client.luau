@@ -283,14 +283,14 @@ local rootScroll = mk("ScrollingFrame", {
 	Position                   = UDim2.new(0, 0, 0, 0),
 	BackgroundColor3           = COLORS.BG,
 	BorderSizePixel            = 0,
-	ScrollBarThickness         = 4,
-	ScrollBarImageColor3       = COLORS.ACCENT,
-	ScrollBarImageTransparency = 0.4,
+	ScrollBarThickness         = 0,
+	ScrollBarImageTransparency = 1,
+	ScrollingEnabled           = true,
 	CanvasSize                 = UDim2.new(0, 0, 0, 0),
 	AutomaticCanvasSize        = Enum.AutomaticSize.Y,
 	ClipsDescendants           = true,
 	ScrollingDirection         = Enum.ScrollingDirection.Y,
-	VerticalScrollBarInset     = Enum.ScrollBarInset.ScrollBar,
+	VerticalScrollBarInset     = Enum.ScrollBarInset.None,
 	ElasticBehavior            = Enum.ElasticBehavior.WhenScrollable,
 	ZIndex                     = 5,
 }, reportPage)
@@ -306,7 +306,7 @@ mk("UIPadding", {
 	PaddingTop    = UDim.new(0, 10),
 	PaddingBottom = UDim.new(0, 14),
 	PaddingLeft   = UDim.new(0, 10),
-	PaddingRight  = UDim.new(0, 14),
+	PaddingRight  = UDim.new(0, 10),
 }, rootScroll)
 
 -- ========================================

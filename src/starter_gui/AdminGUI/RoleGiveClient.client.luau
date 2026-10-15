@@ -358,8 +358,10 @@ roleButtonsContainer.Size = UDim2.new(1, -8, 1, -200)
 roleButtonsContainer.Position = UDim2.new(0, 4, 0, 146)
 roleButtonsContainer.BackgroundTransparency = 1
 roleButtonsContainer.BorderSizePixel = 0
-roleButtonsContainer.ScrollBarThickness = 4
-roleButtonsContainer.ScrollBarImageColor3 = ThemeModule.Colors.Primary1
+roleButtonsContainer.ScrollBarThickness = 0
+roleButtonsContainer.ScrollBarImageTransparency = 1
+roleButtonsContainer.ScrollingEnabled = true
+roleButtonsContainer.VerticalScrollBarInset = Enum.ScrollBarInset.None
 roleButtonsContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
 roleButtonsContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
 roleButtonsContainer.ScrollingDirection = Enum.ScrollingDirection.Y  -- VERTICAL ONLY
@@ -378,7 +380,7 @@ local roleButtonsPadding = Instance.new("UIPadding")
 roleButtonsPadding.PaddingTop = UDim.new(0, 2)
 roleButtonsPadding.PaddingBottom = UDim.new(0, 4)
 roleButtonsPadding.PaddingLeft = UDim.new(0, 2)
-roleButtonsPadding.PaddingRight = UDim.new(0, 4)
+roleButtonsPadding.PaddingRight = UDim.new(0, 2)
 roleButtonsPadding.Parent = roleButtonsContainer
 
 -- Create Role Buttons
