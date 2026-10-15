@@ -1,6 +1,6 @@
-# 🎮 Roblox Ongoing — Map Dangdut
+# 🎮 Roblox Ongoing
 
-Proyek Roblox berbasis **Rojo** untuk map dangdut dengan berbagai sistem terintegrasi.  
+Proyek Roblox berbasis **Rojo** untuk map lagu dengan berbagai sistem terintegrasi.  
 Semua skrip dikelola via Rojo, ditulis dalam **Luau**, dan dipetakan ke Roblox Studio secara langsung.
 
 ---
