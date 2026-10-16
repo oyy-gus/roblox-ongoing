@@ -1,0 +1,3588 @@
+{
+  "ClassName": "BillboardGui",
+  "Properties": {
+    "Active": false,
+    "AlwaysOnTop": true,
+    "ClipsDescendants": false,
+    "Enabled": true,
+    "LightInfluence": 0.0,
+    "MaxDistance": 50.0,
+    "ResetOnSpawn": true,
+    "Size": {
+      "UDim2": [
+        [
+          15,
+          0
+        ],
+        [
+          15,
+          0
+        ]
+      ]
+    },
+    "SizeOffset": [
+      0,
+      0
+    ],
+    "StudsOffset": [
+      0,
+      10,
+      0
+    ],
+    "StudsOffsetWorldSpace": [
+      0,
+      0,
+      0
+    ],
+    "ZIndexBehavior": "Sibling"
+  },
+  "Children": [
+    {
+      "Name": "Canvas",
+      "ClassName": "Frame",
+      "Properties": {
+        "AnchorPoint": [
+          0,
+          0
+        ],
+        "AutomaticSize": "None",
+        "BackgroundColor3": [
+          0,
+          0,
+          0
+        ],
+        "BackgroundTransparency": 1.0,
+        "BorderColor3": [
+          0,
+          0,
+          0
+        ],
+        "BorderSizePixel": 0,
+        "ClipsDescendants": false,
+        "LayoutOrder": 2,
+        "Position": {
+          "UDim2": [
+            [
+              0,
+              0
+            ],
+            [
+              0,
+              0
+            ]
+          ]
+        },
+        "Rotation": 0.0,
+        "Size": {
+          "UDim2": [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ]
+        },
+        "Visible": true,
+        "ZIndex": 1
+      },
+      "Children": [
+        {
+          "Name": "UIListLayout",
+          "ClassName": "UIListLayout",
+          "Properties": {
+            "FillDirection": "Vertical",
+            "HorizontalAlignment": "Center",
+            "Padding": {
+              "UDim": [
+                0.009,
+                0
+              ]
+            },
+            "SortOrder": "LayoutOrder",
+            "VerticalAlignment": "Bottom"
+          }
+        },
+        {
+          "Name": "StaffLabel",
+          "ClassName": "TextLabel",
+          "Properties": {
+            "AnchorPoint": [
+              0,
+              0
+            ],
+            "AutomaticSize": "None",
+            "BackgroundColor3": [
+              1,
+              1,
+              1
+            ],
+            "BackgroundTransparency": 1.0,
+            "BorderColor3": [
+              0,
+              0,
+              0
+            ],
+            "BorderSizePixel": 0,
+            "ClipsDescendants": false,
+            "FontFace": {
+              "family": "rbxasset://fonts/families/FredokaOne.json",
+              "weight": "Bold",
+              "style": "Normal"
+            },
+            "LayoutOrder": 1,
+            "LineHeight": 1.0,
+            "Position": {
+              "UDim2": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "RichText": false,
+            "Rotation": 0.0,
+            "Size": {
+              "UDim2": [
+                [
+                  1,
+                  0
+                ],
+                [
+                  0.041,
+                  0
+                ]
+              ]
+            },
+            "Text": "",
+            "TextColor3": [
+              0.4705882,
+              0.7843137,
+              0.5490196
+            ],
+            "TextScaled": true,
+            "TextSize": 28,
+            "TextStrokeColor3": [
+              0,
+              0,
+              0
+            ],
+            "TextStrokeTransparency": 1.0,
+            "TextTransparency": 0.0,
+            "TextWrapped": true,
+            "TextXAlignment": "Center",
+            "TextYAlignment": "Center",
+            "Visible": false,
+            "ZIndex": 1
+          },
+          "Children": [
+            {
+              "Name": "VIPGradient",
+              "ClassName": "UIGradient",
+              "Properties": {
+                "Enabled": false,
+                "Rotation": 0.0,
+                "Offset": [
+                  0,
+                  0
+                ],
+                "Color": {
+                  "ColorSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "color": [
+                          1,
+                          1,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 0.462867,
+                        "color": [
+                          0.6666667,
+                          0,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 1.0,
+                        "color": [
+                          0,
+                          1,
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "Transparency": {
+                  "NumberSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      },
+                      {
+                        "time": 1.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Name": "UITextSizeConstraint",
+              "ClassName": "UITextSizeConstraint",
+              "Properties": {
+                "MaxTextSize": 28,
+                "MinTextSize": 1
+              }
+            }
+          ]
+        },
+        {
+          "Name": "StreamerLabel",
+          "ClassName": "TextLabel",
+          "Properties": {
+            "AnchorPoint": [
+              0,
+              0
+            ],
+            "AutomaticSize": "None",
+            "BackgroundColor3": [
+              1,
+              1,
+              1
+            ],
+            "BackgroundTransparency": 1.0,
+            "BorderColor3": [
+              0,
+              0,
+              0
+            ],
+            "BorderSizePixel": 0,
+            "ClipsDescendants": false,
+            "FontFace": {
+              "family": "rbxasset://fonts/families/FredokaOne.json",
+              "weight": "Bold",
+              "style": "Normal"
+            },
+            "LayoutOrder": 2,
+            "LineHeight": 1.0,
+            "Position": {
+              "UDim2": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "RichText": false,
+            "Rotation": 0.0,
+            "Size": {
+              "UDim2": [
+                [
+                  1,
+                  0
+                ],
+                [
+                  0.041,
+                  0
+                ]
+              ]
+            },
+            "Text": "STREAMER",
+            "TextColor3": [
+              0.6666667,
+              0.5490196,
+              1.0
+            ],
+            "TextScaled": true,
+            "TextSize": 28,
+            "TextStrokeColor3": [
+              0,
+              0,
+              0
+            ],
+            "TextStrokeTransparency": 1.0,
+            "TextTransparency": 0.0,
+            "TextWrapped": true,
+            "TextXAlignment": "Center",
+            "TextYAlignment": "Center",
+            "Visible": false,
+            "ZIndex": 1
+          },
+          "Children": [
+            {
+              "Name": "VIPGradient",
+              "ClassName": "UIGradient",
+              "Properties": {
+                "Enabled": false,
+                "Rotation": 0.0,
+                "Offset": [
+                  0,
+                  0
+                ],
+                "Color": {
+                  "ColorSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "color": [
+                          1,
+                          1,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 0.462867,
+                        "color": [
+                          0.6666667,
+                          0,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 1.0,
+                        "color": [
+                          0,
+                          1,
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "Transparency": {
+                  "NumberSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      },
+                      {
+                        "time": 1.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Name": "UITextSizeConstraint",
+              "ClassName": "UITextSizeConstraint",
+              "Properties": {
+                "MaxTextSize": 28,
+                "MinTextSize": 1
+              }
+            }
+          ]
+        },
+        {
+          "Name": "CreatorLabel",
+          "ClassName": "TextLabel",
+          "Properties": {
+            "AnchorPoint": [
+              0,
+              0
+            ],
+            "AutomaticSize": "None",
+            "BackgroundColor3": [
+              1,
+              1,
+              1
+            ],
+            "BackgroundTransparency": 1.0,
+            "BorderColor3": [
+              0,
+              0,
+              0
+            ],
+            "BorderSizePixel": 0,
+            "ClipsDescendants": false,
+            "FontFace": {
+              "family": "rbxasset://fonts/families/FredokaOne.json",
+              "weight": "Bold",
+              "style": "Normal"
+            },
+            "LayoutOrder": 3,
+            "LineHeight": 1.0,
+            "Position": {
+              "UDim2": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "RichText": false,
+            "Rotation": 0.0,
+            "Size": {
+              "UDim2": [
+                [
+                  1,
+                  0
+                ],
+                [
+                  0.041,
+                  0
+                ]
+              ]
+            },
+            "Text": "CREATOR",
+            "TextColor3": [
+              0.4705882,
+              0.8627451,
+              0.8627451
+            ],
+            "TextScaled": true,
+            "TextSize": 28,
+            "TextStrokeColor3": [
+              0,
+              0,
+              0
+            ],
+            "TextStrokeTransparency": 1.0,
+            "TextTransparency": 0.0,
+            "TextWrapped": true,
+            "TextXAlignment": "Center",
+            "TextYAlignment": "Center",
+            "Visible": false,
+            "ZIndex": 1
+          },
+          "Children": [
+            {
+              "Name": "VIPGradient",
+              "ClassName": "UIGradient",
+              "Properties": {
+                "Enabled": false,
+                "Rotation": 0.0,
+                "Offset": [
+                  0,
+                  0
+                ],
+                "Color": {
+                  "ColorSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "color": [
+                          1,
+                          1,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 0.462867,
+                        "color": [
+                          0.6666667,
+                          0,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 1.0,
+                        "color": [
+                          0,
+                          1,
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "Transparency": {
+                  "NumberSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      },
+                      {
+                        "time": 1.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Name": "UITextSizeConstraint",
+              "ClassName": "UITextSizeConstraint",
+              "Properties": {
+                "MaxTextSize": 28,
+                "MinTextSize": 1
+              }
+            }
+          ]
+        },
+        {
+          "Name": "VIPLabel",
+          "ClassName": "TextLabel",
+          "Properties": {
+            "AnchorPoint": [
+              0,
+              0
+            ],
+            "AutomaticSize": "None",
+            "BackgroundColor3": [
+              1,
+              1,
+              1
+            ],
+            "BackgroundTransparency": 1.0,
+            "BorderColor3": [
+              0,
+              0,
+              0
+            ],
+            "BorderSizePixel": 0,
+            "ClipsDescendants": false,
+            "FontFace": {
+              "family": "rbxasset://fonts/families/FredokaOne.json",
+              "weight": "Bold",
+              "style": "Normal"
+            },
+            "LayoutOrder": 4,
+            "LineHeight": 1.0,
+            "Position": {
+              "UDim2": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "RichText": false,
+            "Rotation": 0.0,
+            "Size": {
+              "UDim2": [
+                [
+                  1,
+                  0
+                ],
+                [
+                  0.041,
+                  0
+                ]
+              ]
+            },
+            "Text": "VIP",
+            "TextColor3": [
+              1.0,
+              0.8235294,
+              0.4705882
+            ],
+            "TextScaled": true,
+            "TextSize": 28,
+            "TextStrokeColor3": [
+              0,
+              0,
+              0
+            ],
+            "TextStrokeTransparency": 1.0,
+            "TextTransparency": 0.0,
+            "TextWrapped": true,
+            "TextXAlignment": "Center",
+            "TextYAlignment": "Center",
+            "Visible": false,
+            "ZIndex": 1
+          },
+          "Children": [
+            {
+              "Name": "VIPGradient",
+              "ClassName": "UIGradient",
+              "Properties": {
+                "Enabled": false,
+                "Rotation": 0.0,
+                "Offset": [
+                  0,
+                  0
+                ],
+                "Color": {
+                  "ColorSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "color": [
+                          1,
+                          1,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 0.462867,
+                        "color": [
+                          0.6666667,
+                          0,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 1.0,
+                        "color": [
+                          0,
+                          1,
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "Transparency": {
+                  "NumberSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      },
+                      {
+                        "time": 1.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Name": "UITextSizeConstraint",
+              "ClassName": "UITextSizeConstraint",
+              "Properties": {
+                "MaxTextSize": 28,
+                "MinTextSize": 1
+              }
+            }
+          ]
+        },
+        {
+          "Name": "PlayerName",
+          "ClassName": "TextLabel",
+          "Properties": {
+            "AnchorPoint": [
+              0,
+              0
+            ],
+            "AutomaticSize": "None",
+            "BackgroundColor3": [
+              1,
+              1,
+              1
+            ],
+            "BackgroundTransparency": 1.0,
+            "BorderColor3": [
+              0,
+              0,
+              0
+            ],
+            "BorderSizePixel": 0,
+            "ClipsDescendants": false,
+            "FontFace": {
+              "family": "rbxasset://fonts/families/FredokaOne.json",
+              "weight": "Bold",
+              "style": "Normal"
+            },
+            "LayoutOrder": 5,
+            "LineHeight": 1.0,
+            "Position": {
+              "UDim2": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "RichText": false,
+            "Rotation": 0.0,
+            "Size": {
+              "UDim2": [
+                [
+                  1,
+                  0
+                ],
+                [
+                  0.041,
+                  0
+                ]
+              ]
+            },
+            "Text": "",
+            "TextColor3": [
+              0.8627451,
+              0.9215686,
+              1.0
+            ],
+            "TextScaled": true,
+            "TextSize": 28,
+            "TextStrokeColor3": [
+              0,
+              0,
+              0
+            ],
+            "TextStrokeTransparency": 1.0,
+            "TextTransparency": 0.0,
+            "TextWrapped": true,
+            "TextXAlignment": "Center",
+            "TextYAlignment": "Center",
+            "Visible": false,
+            "ZIndex": 1
+          },
+          "Children": [
+            {
+              "Name": "VIPGradient",
+              "ClassName": "UIGradient",
+              "Properties": {
+                "Enabled": false,
+                "Rotation": 0.0,
+                "Offset": [
+                  0,
+                  0
+                ],
+                "Color": {
+                  "ColorSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "color": [
+                          1,
+                          1,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 0.462867,
+                        "color": [
+                          0.6666667,
+                          0,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 1.0,
+                        "color": [
+                          0,
+                          1,
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "Transparency": {
+                  "NumberSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      },
+                      {
+                        "time": 1.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Name": "UITextSizeConstraint",
+              "ClassName": "UITextSizeConstraint",
+              "Properties": {
+                "MaxTextSize": 28,
+                "MinTextSize": 1
+              }
+            }
+          ]
+        },
+        {
+          "Name": "GuestLabel",
+          "ClassName": "TextLabel",
+          "Properties": {
+            "AnchorPoint": [
+              0,
+              0
+            ],
+            "AutomaticSize": "None",
+            "BackgroundColor3": [
+              1,
+              1,
+              1
+            ],
+            "BackgroundTransparency": 1.0,
+            "BorderColor3": [
+              0,
+              0,
+              0
+            ],
+            "BorderSizePixel": 0,
+            "ClipsDescendants": false,
+            "FontFace": {
+              "family": "rbxasset://fonts/families/FredokaOne.json",
+              "weight": "Bold",
+              "style": "Normal"
+            },
+            "LayoutOrder": 6,
+            "LineHeight": 1.0,
+            "Position": {
+              "UDim2": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "RichText": false,
+            "Rotation": 0.0,
+            "Size": {
+              "UDim2": [
+                [
+                  1,
+                  0
+                ],
+                [
+                  0.041,
+                  0
+                ]
+              ]
+            },
+            "Text": "Guest",
+            "TextColor3": [
+              0.5490196,
+              0.5490196,
+              0.5490196
+            ],
+            "TextScaled": true,
+            "TextSize": 28,
+            "TextStrokeColor3": [
+              0,
+              0,
+              0
+            ],
+            "TextStrokeTransparency": 1.0,
+            "TextTransparency": 0.0,
+            "TextWrapped": true,
+            "TextXAlignment": "Center",
+            "TextYAlignment": "Center",
+            "Visible": false,
+            "ZIndex": 1
+          },
+          "Children": [
+            {
+              "Name": "VIPGradient",
+              "ClassName": "UIGradient",
+              "Properties": {
+                "Enabled": false,
+                "Rotation": 0.0,
+                "Offset": [
+                  0,
+                  0
+                ],
+                "Color": {
+                  "ColorSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "color": [
+                          1,
+                          1,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 0.462867,
+                        "color": [
+                          0.6666667,
+                          0,
+                          0
+                        ]
+                      },
+                      {
+                        "time": 1.0,
+                        "color": [
+                          0,
+                          1,
+                          1
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "Transparency": {
+                  "NumberSequence": {
+                    "keypoints": [
+                      {
+                        "time": 0.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      },
+                      {
+                        "time": 1.0,
+                        "value": 0.0,
+                        "envelope": 0.0
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "Name": "UITextSizeConstraint",
+              "ClassName": "UITextSizeConstraint",
+              "Properties": {
+                "MaxTextSize": 28,
+                "MinTextSize": 1
+              }
+            }
+          ]
+        },
+        {
+          "Name": "Icons",
+          "ClassName": "Frame",
+          "Properties": {
+            "AnchorPoint": [
+              0,
+              0
+            ],
+            "AutomaticSize": "None",
+            "BackgroundColor3": [
+              1,
+              1,
+              1
+            ],
+            "BackgroundTransparency": 1.0,
+            "BorderColor3": [
+              1,
+              1,
+              1
+            ],
+            "BorderSizePixel": 0,
+            "ClipsDescendants": false,
+            "LayoutOrder": 7,
+            "Position": {
+              "UDim2": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "Rotation": 0.0,
+            "Size": {
+              "UDim2": [
+                [
+                  1,
+                  0
+                ],
+                [
+                  0.05,
+                  0
+                ]
+              ]
+            },
+            "Visible": true,
+            "ZIndex": 1
+          },
+          "Children": [
+            {
+              "Name": "UIListLayout",
+              "ClassName": "UIListLayout",
+              "Properties": {
+                "FillDirection": "Horizontal",
+                "HorizontalAlignment": "Center",
+                "Padding": {
+                  "UDim": [
+                    0.02,
+                    0
+                  ]
+                },
+                "SortOrder": "LayoutOrder",
+                "VerticalAlignment": "Center"
+              }
+            },
+            {
+              "Name": "Country",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/SourceSansPro.json",
+                  "weight": "Regular",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 0,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.2,
+                      0
+                    ],
+                    [
+                      0.6,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "🇮🇩",
+                "TextColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextScaled": true,
+                "TextSize": 14,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "UIAspectRatioConstraint",
+                  "ClassName": "UIAspectRatioConstraint",
+                  "Properties": {
+                    "AspectRatio": 1.0,
+                    "DominantAxis": "Width"
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "Computer",
+              "ClassName": "ImageLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "Image": "rbxassetid://12684119225",
+                "ImageColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "ImageTransparency": 0.0,
+                "LayoutOrder": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "Rotation": 0.0,
+                "ScaleType": "Stretch",
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.2,
+                      0
+                    ],
+                    [
+                      0.6,
+                      0
+                    ]
+                  ]
+                },
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "UIAspectRatioConstraint",
+                  "ClassName": "UIAspectRatioConstraint",
+                  "Properties": {
+                    "AspectRatio": 1.0,
+                    "DominantAxis": "Width"
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "Phone",
+              "ClassName": "ImageLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "Image": "rbxassetid://13021320268",
+                "ImageColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "ImageTransparency": 0.0,
+                "LayoutOrder": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "Rotation": 0.0,
+                "ScaleType": "Stretch",
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.2,
+                      0
+                    ],
+                    [
+                      0.6,
+                      0
+                    ]
+                  ]
+                },
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "UIAspectRatioConstraint",
+                  "ClassName": "UIAspectRatioConstraint",
+                  "Properties": {
+                    "AspectRatio": 1.0,
+                    "DominantAxis": "Width"
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "VIP",
+              "ClassName": "ImageLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "Image": "rbxassetid://5483261889",
+                "ImageColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "ImageTransparency": 0.0,
+                "LayoutOrder": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "Rotation": 0.0,
+                "ScaleType": "Stretch",
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.2,
+                      0
+                    ],
+                    [
+                      0.6,
+                      0
+                    ]
+                  ]
+                },
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "UIAspectRatioConstraint",
+                  "ClassName": "UIAspectRatioConstraint",
+                  "Properties": {
+                    "AspectRatio": 1.0,
+                    "DominantAxis": "Width"
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "Premium",
+              "ClassName": "ImageLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "Image": "rbxassetid://10885647358",
+                "ImageColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "ImageTransparency": 0.0,
+                "LayoutOrder": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "Rotation": 0.0,
+                "ScaleType": "Stretch",
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.2,
+                      0
+                    ],
+                    [
+                      0.6,
+                      0
+                    ]
+                  ]
+                },
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "UIAspectRatioConstraint",
+                  "ClassName": "UIAspectRatioConstraint",
+                  "Properties": {
+                    "AspectRatio": 1.0,
+                    "DominantAxis": "Width"
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "Verified",
+              "ClassName": "ImageLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "Image": "rbxassetid://11478378840",
+                "ImageColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "ImageTransparency": 0.0,
+                "LayoutOrder": 0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "Rotation": 0.0,
+                "ScaleType": "Stretch",
+                "Size": {
+                  "UDim2": [
+                    [
+                      0.2,
+                      0
+                    ],
+                    [
+                      0.6,
+                      0
+                    ]
+                  ]
+                },
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "UIAspectRatioConstraint",
+                  "ClassName": "UIAspectRatioConstraint",
+                  "Properties": {
+                    "AspectRatio": 1.0,
+                    "DominantAxis": "Width"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "Name": "Custom",
+          "ClassName": "Frame",
+          "Properties": {
+            "AnchorPoint": [
+              0,
+              0
+            ],
+            "AutomaticSize": "None",
+            "BackgroundColor3": [
+              1,
+              1,
+              1
+            ],
+            "BackgroundTransparency": 1.0,
+            "BorderColor3": [
+              1,
+              1,
+              1
+            ],
+            "BorderSizePixel": 0,
+            "ClipsDescendants": false,
+            "LayoutOrder": 0,
+            "Position": {
+              "UDim2": [
+                [
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  0
+                ]
+              ]
+            },
+            "Rotation": 0.0,
+            "Size": {
+              "UDim2": [
+                [
+                  1,
+                  0
+                ],
+                [
+                  0.7,
+                  0
+                ]
+              ]
+            },
+            "Visible": true,
+            "ZIndex": 1
+          },
+          "Children": [
+            {
+              "Name": "UIListLayout",
+              "ClassName": "UIListLayout",
+              "Properties": {
+                "FillDirection": "Vertical",
+                "HorizontalAlignment": "Center",
+                "Padding": {
+                  "UDim": [
+                    0.01,
+                    0
+                  ]
+                },
+                "SortOrder": "LayoutOrder",
+                "VerticalAlignment": "Bottom"
+              }
+            },
+            {
+              "Name": "TitleLabel1",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 1,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 1",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel2",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 2,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 2",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel3",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 3,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 3",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel4",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 4,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 4",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel5",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 5,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 5",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel6",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 6,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 6",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel7",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 7,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 7",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel8",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 8,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 8",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel9",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 9,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 9",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel10",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 10,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 10",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel11",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 11,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 11",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel12",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 12,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 12",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel13",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 13,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 13",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            },
+            {
+              "Name": "TitleLabel14",
+              "ClassName": "TextLabel",
+              "Properties": {
+                "AnchorPoint": [
+                  0,
+                  0
+                ],
+                "AutomaticSize": "None",
+                "BackgroundColor3": [
+                  1,
+                  1,
+                  1
+                ],
+                "BackgroundTransparency": 1.0,
+                "BorderColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "BorderSizePixel": 0,
+                "ClipsDescendants": false,
+                "FontFace": {
+                  "family": "rbxasset://fonts/families/FredokaOne.json",
+                  "weight": "Bold",
+                  "style": "Normal"
+                },
+                "LayoutOrder": 14,
+                "LineHeight": 1.0,
+                "Position": {
+                  "UDim2": [
+                    [
+                      0,
+                      0
+                    ],
+                    [
+                      0,
+                      0
+                    ]
+                  ]
+                },
+                "RichText": false,
+                "Rotation": 0.0,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      0.06,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "CUSTOM 14",
+                "TextColor3": [
+                  1.0,
+                  1.0,
+                  1.0
+                ],
+                "TextScaled": true,
+                "TextSize": 28,
+                "TextStrokeColor3": [
+                  0,
+                  0,
+                  0
+                ],
+                "TextStrokeTransparency": 1.0,
+                "TextTransparency": 0.0,
+                "TextWrapped": true,
+                "TextXAlignment": "Center",
+                "TextYAlignment": "Center",
+                "Visible": false,
+                "ZIndex": 1
+              },
+              "Children": [
+                {
+                  "Name": "VIPGradient",
+                  "ClassName": "UIGradient",
+                  "Properties": {
+                    "Enabled": false,
+                    "Rotation": 0.0,
+                    "Offset": [
+                      0,
+                      0
+                    ],
+                    "Color": {
+                      "ColorSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "color": [
+                              1,
+                              1,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 0.462867,
+                            "color": [
+                              0.6666667,
+                              0,
+                              0
+                            ]
+                          },
+                          {
+                            "time": 1.0,
+                            "color": [
+                              0,
+                              1,
+                              1
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "Transparency": {
+                      "NumberSequence": {
+                        "keypoints": [
+                          {
+                            "time": 0.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          },
+                          {
+                            "time": 1.0,
+                            "value": 0.0,
+                            "envelope": 0.0
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "Name": "UITextSizeConstraint",
+                  "ClassName": "UITextSizeConstraint",
+                  "Properties": {
+                    "MaxTextSize": 28,
+                    "MinTextSize": 1
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

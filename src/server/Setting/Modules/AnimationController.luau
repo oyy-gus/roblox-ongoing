@@ -102,6 +102,13 @@ function module.executeAnimation(player, animation, shouldPlay, speed, loadedAni
 
 	startProcessing(player)
 
+	-- Resolve animation if passed as string or table name
+	if typeof(animation) == "string" and loadedAnimations then
+		animation = loadedAnimations[animation]
+	elseif typeof(animation) == "table" and animation.Name and loadedAnimations then
+		animation = loadedAnimations[animation.Name]
+	end
+
 	-- Validate animator
 	local animator = AnimatorUtils.getAnimator(player)
 	if not animator or not animator.Parent or not animator.Parent.Parent then

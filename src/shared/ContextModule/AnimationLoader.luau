@@ -1,4 +1,4 @@
--- AnimationLoader.lua — SIMPLIFIED: Direct access tanpa duplikasi
+-- AnimationLoader.lua — SIMPLIFIED: Direct access tanpa duplikasi + Config Loader
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ContentProvider = game:GetService("ContentProvider")
 
@@ -23,26 +23,83 @@ function module.loadAnimations()
 	local animations = {}
 	local animCount = 0
 
-	debug("📂 Loading animations from Emotes folder...")
+	debug("📂 Loading animations from DanceConfig, PoseConfig, and Emotes folder...")
 
-	-- Load Dance animations (root level)
-	for _, anim in ipairs(emotesFolder:GetChildren()) do
-		if anim:IsA("Animation") then
-			animations[anim.Name] = anim -- DIRECT reference!
-			animCount = animCount + 1
-			debug("✅ Dance:", anim.Name)
+	-- Ensure Pose folder exists in Emotes
+	local poseFolder = emotesFolder:FindFirstChild("Pose")
+	if not poseFolder then
+		poseFolder = Instance.new("Folder")
+		poseFolder.Name = "Pose"
+		poseFolder.Parent = emotesFolder
+	end
+
+	-- 1) Load from DanceConfig if available
+	local danceConfigModule = emotesFolder:FindFirstChild("DanceConfig")
+	if danceConfigModule and danceConfigModule:IsA("ModuleScript") then
+		local ok, danceList = pcall(require, danceConfigModule)
+		if ok and typeof(danceList) == "table" then
+			for _, item in ipairs(danceList) do
+				local name = item.name or item.Name
+				local animId = item.animationId or item.AnimationId or item.id or item.Id
+				if name and animId then
+					local anim = emotesFolder:FindFirstChild(name)
+					if not anim or not anim:IsA("Animation") then
+						anim = Instance.new("Animation")
+						anim.Name = name
+						anim.AnimationId = animId
+						anim.Parent = emotesFolder
+					else
+						anim.AnimationId = animId
+					end
+					animations[name] = anim
+					animCount = animCount + 1
+					debug("✅ Dance (Config):", name)
+				end
+			end
 		end
 	end
 
-	-- Load Pose animations (Pose subfolder)
-	local poseFolder = emotesFolder:FindFirstChild("Pose")
-	if poseFolder then
-		for _, anim in ipairs(poseFolder:GetChildren()) do
-			if anim:IsA("Animation") then
-				animations[anim.Name] = anim -- DIRECT reference!
-				animCount = animCount + 1
-				debug("✅ Pose:", anim.Name)
+	-- 2) Load from PoseConfig if available
+	local poseConfigModule = emotesFolder:FindFirstChild("PoseConfig")
+	if poseConfigModule and poseConfigModule:IsA("ModuleScript") then
+		local ok, poseList = pcall(require, poseConfigModule)
+		if ok and typeof(poseList) == "table" then
+			for _, item in ipairs(poseList) do
+				local name = item.name or item.Name
+				local animId = item.animationId or item.AnimationId or item.id or item.Id
+				if name and animId then
+					local anim = poseFolder:FindFirstChild(name)
+					if not anim or not anim:IsA("Animation") then
+						anim = Instance.new("Animation")
+						anim.Name = name
+						anim.AnimationId = animId
+						anim.Parent = poseFolder
+					else
+						anim.AnimationId = animId
+					end
+					animations[name] = anim
+					animCount = animCount + 1
+					debug("✅ Pose (Config):", name)
+				end
 			end
+		end
+	end
+
+	-- 3) Load any additional Dance animations directly placed in Emotes root
+	for _, anim in ipairs(emotesFolder:GetChildren()) do
+		if anim:IsA("Animation") and not animations[anim.Name] then
+			animations[anim.Name] = anim
+			animCount = animCount + 1
+			debug("✅ Dance (Folder):", anim.Name)
+		end
+	end
+
+	-- 4) Load any additional Pose animations directly placed in Pose folder
+	for _, anim in ipairs(poseFolder:GetChildren()) do
+		if anim:IsA("Animation") and not animations[anim.Name] then
+			animations[anim.Name] = anim
+			animCount = animCount + 1
+			debug("✅ Pose (Folder):", anim.Name)
 		end
 	end
 

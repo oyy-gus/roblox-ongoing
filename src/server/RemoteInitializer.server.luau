@@ -91,4 +91,25 @@ ensureRemoteEvent(MusicRemotes,    "MusicBroadcast")
 ensureRemoteEvent(MusicRemotes,    "MusicUpdate")
 ensureRemoteFunction(MusicRemotes, "GetPlaylist")
 
-print("✅ [RemoteInitializer] Semua Remote berhasil dibuat.")
+-- ============================================================
+-- 5) Emotes & Animations Init
+-- ============================================================
+local EmotesFolder = getOrCreateFolder(ReplicatedStorage, "Emotes")
+getOrCreateFolder(EmotesFolder, "Pose")
+
+pcall(function()
+	local ContextModule = ReplicatedStorage:FindFirstChild("ContextModule")
+	if ContextModule then
+		local AnimationLoader = ContextModule:FindFirstChild("AnimationLoader")
+		if AnimationLoader then
+			require(AnimationLoader).loadAnimations()
+		end
+	end
+end)
+
+-- ============================================================
+-- 6) UI Folder Init
+-- ============================================================
+getOrCreateFolder(ReplicatedStorage, "UI")
+
+print("✅ [RemoteInitializer] Semua Remote & Folder berhasil dibuat.")

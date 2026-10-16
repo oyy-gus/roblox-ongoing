@@ -25,6 +25,27 @@ local changeSpeedRE                    = remotes:WaitForChild("changeSpeed")
 local syncNotificationRE               = remotes:WaitForChild("SyncNotification")
 
 local emotesFolder       = ReplicatedStorage:WaitForChild("Emotes")
+local DanceConfig        = require(emotesFolder:WaitForChild("DanceConfig"))
+local PoseConfig         = require(emotesFolder:WaitForChild("PoseConfig"))
+
+local animIdToName = {}
+local function registerAnimId(name, animId)
+	if not animId then return end
+	animIdToName[tostring(animId)] = name
+	local num = tostring(animId):match("%d+")
+	if num then
+		animIdToName[num] = name
+		animIdToName["rbxassetid://" .. num] = name
+	end
+end
+
+for _, item in ipairs(DanceConfig) do
+	registerAnimId(item.name, item.animationId)
+end
+for _, item in ipairs(PoseConfig) do
+	registerAnimId(item.name, item.animationId)
+end
+
 local SyncModule         = ReplicatedStorage:WaitForChild("ContextModule")
 local Modules            = ReplicatedStorage:WaitForChild("Modules")
 local AutoScaleSystem    = ReplicatedStorage:WaitForChild("AutoScaleSystem")
@@ -825,6 +846,16 @@ local function getLeaderCurrentAnimation()
 		if track.IsPlaying and track.Animation then
 			local id = track.Animation.AnimationId
 
+			local name = animIdToName[id]
+			if not name then
+				local num = tostring(id):match("%d+")
+				if num then name = animIdToName[num] end
+			end
+
+			if name then
+				return name
+			end
+
 			-- Check Dance
 			for _, a in ipairs(emotesFolder:GetChildren()) do
 				if a:IsA("Animation") and a.AnimationId == id then 
@@ -938,6 +969,17 @@ local function setupSyncMonitoring()
 							if not (isSyncing and track and track.Animation) then return end
 
 							local id = track.Animation.AnimationId
+
+							local name = animIdToName[id]
+							if not name then
+								local num = tostring(id):match("%d+")
+								if num then name = animIdToName[num] end
+							end
+
+							if name then
+								dancelabel.Text = "♪ " .. name
+								return
+							end
 
 							for _, an in ipairs(emotesFolder:GetChildren()) do
 								if an:IsA("Animation") and an.AnimationId == id then
@@ -1325,15 +1367,13 @@ end
 -- PRELOAD ANIMATIONS
 -- ====================================
 task.spawn(function()
-	repeat task.wait() until #emotesFolder:GetChildren() > 0
-
 	preloadLabel.Visible = true
 
 	if not player.Character then 
 		player.CharacterAdded:Wait() 
 	end
 
-	task.wait(2)
+	task.wait(1.5)
 
 	local ok = AnimationPreloader.preloadAnimations(emotesFolder)
 
@@ -1345,20 +1385,48 @@ end)
 -- ====================================
 -- LOAD ANIMATIONS
 -- ====================================
-repeat task.wait() until #emotesFolder:GetChildren() > 0
+local poseFolder = emotesFolder:FindFirstChild("Pose")
+if not poseFolder then
+	poseFolder = Instance.new("Folder")
+	poseFolder.Name = "Pose"
+	poseFolder.Parent = emotesFolder
+end
 
+local function getOrCreateAnim(folder, name, animId)
+	local anim = folder:FindFirstChild(name)
+	if not anim or not anim:IsA("Animation") then
+		anim = Instance.new("Animation")
+		anim.Name = name
+		anim.AnimationId = animId
+		anim.Parent = folder
+	else
+		anim.AnimationId = animId
+	end
+	return anim
+end
+
+-- 1) Load Dance animations from DanceConfig
+for _, item in ipairs(DanceConfig) do
+	local anim = getOrCreateAnim(emotesFolder, item.name, item.animationId)
+	createEmoteButton(anim, "Dance")
+end
+
+-- 2) Load Pose animations from PoseConfig
+for _, item in ipairs(PoseConfig) do
+	local anim = getOrCreateAnim(poseFolder, item.name, item.animationId)
+	createEmoteButton(anim, "Pose")
+end
+
+-- 3) Fallback for any extra animations placed directly in folders
 for _, anim in ipairs(emotesFolder:GetChildren()) do
-	if anim:IsA("Animation") then
+	if anim:IsA("Animation") and not buttonsByName[anim.Name] then
 		createEmoteButton(anim, "Dance")
 	end
 end
 
-local poseFolder = emotesFolder:FindFirstChild("Pose")
-if poseFolder then
-	for _, anim in ipairs(poseFolder:GetChildren()) do
-		if anim:IsA("Animation") then
-			createEmoteButton(anim, "Pose")
-		end
+for _, anim in ipairs(poseFolder:GetChildren()) do
+	if anim:IsA("Animation") and not buttonsByName[anim.Name] then
+		createEmoteButton(anim, "Pose")
 	end
 end
 

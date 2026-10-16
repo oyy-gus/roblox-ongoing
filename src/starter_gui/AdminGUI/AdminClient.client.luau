@@ -469,21 +469,38 @@ end
 -- ========================================
 local function calculateDragBoundaries()
 	local currentScale = getCurrentScale()
-	local viewportSize = workspace.CurrentCamera.ViewportSize
+	if not currentScale or currentScale <= 0 then
+		currentScale = 1
+	end
+
+	local camera = workspace.CurrentCamera
+	local viewportSize = camera and camera.ViewportSize or Vector2.new(1920, 1080)
 	local halfX = viewportSize.X * 0.5
 	local halfY = viewportSize.Y * 0.5
-	return
-		(DRAG_PADDING - halfX) / currentScale + PANEL_WIDTH / 2,
-	(halfX - DRAG_PADDING) / currentScale - PANEL_WIDTH / 2,
-	(DRAG_PADDING - halfY) / currentScale + PANEL_HEIGHT / 2,
-	(halfY - DRAG_PADDING) / currentScale - PANEL_HEIGHT / 2
+
+	local minX = (DRAG_PADDING - halfX) / currentScale + PANEL_WIDTH / 2
+	local maxX = (halfX - DRAG_PADDING) / currentScale - PANEL_WIDTH / 2
+	local minY = (DRAG_PADDING - halfY) / currentScale + PANEL_HEIGHT / 2
+	local maxY = (halfY - DRAG_PADDING) / currentScale - PANEL_HEIGHT / 2
+
+	if minX > maxX then
+		minX = 0
+		maxX = 0
+	end
+
+	if minY > maxY then
+		minY = 0
+		maxY = 0
+	end
+
+	return minX, maxX, minY, maxY
 end
 
 local function clampPanelPosition()
 	local pos = mainPanel.Position
 	local minX, maxX, minY, maxY = calculateDragBoundaries()
-	local cx = math.clamp(pos.X.Offset, minX, maxX)
-	local cy = math.clamp(pos.Y.Offset, minY, maxY)
+	local cx = if minX <= maxX then math.clamp(pos.X.Offset, minX, maxX) else 0
+	local cy = if minY <= maxY then math.clamp(pos.Y.Offset, minY, maxY) else 0
 	if cx ~= pos.X.Offset or cy ~= pos.Y.Offset then
 		mainPanel.Position = UDim2.new(0.5, cx, 0.5, cy)
 	end
@@ -632,12 +649,16 @@ local startPos  = nil
 local function updateDrag(input)
 	local delta        = input.Position - dragStart
 	local currentScale = getCurrentScale()
+	if not currentScale or currentScale <= 0 then
+		currentScale = 1
+	end
 	local adjusted     = delta / currentScale
 	local minX, maxX, minY, maxY = calculateDragBoundaries()
-	mainPanel.Position = UDim2.new(0.5,
-		math.clamp(startPos.X.Offset + adjusted.X, minX, maxX),
-		0.5,
-		math.clamp(startPos.Y.Offset + adjusted.Y, minY, maxY))
+	local targetX = startPos.X.Offset + adjusted.X
+	local targetY = startPos.Y.Offset + adjusted.Y
+	local cx = if minX <= maxX then math.clamp(targetX, minX, maxX) else 0
+	local cy = if minY <= maxY then math.clamp(targetY, minY, maxY) else 0
+	mainPanel.Position = UDim2.new(0.5, cx, 0.5, cy)
 end
 
 header.InputBegan:Connect(function(input)
