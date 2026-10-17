@@ -3,13 +3,15 @@ local MusicModule = {}
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService        = game:GetService("RunService")
 
-local cachedList     = {}
-local lastFetchTime  = 0
-local CACHE_DURATION = 300
+local cachedList      = {}
+local cachedPlaylists = {}
+local lastFetchTime   = 0
+local CACHE_DURATION  = 300
 
-function MusicModule:SetPlaylist(list)
-	cachedList    = list or {}
-	lastFetchTime = workspace:GetServerTimeNow()
+function MusicModule:SetPlaylist(list, playlists)
+	cachedList      = list or {}
+	cachedPlaylists = playlists or {}
+	lastFetchTime   = workspace:GetServerTimeNow()
 end
 
 local function fetchFromServer()
@@ -25,8 +27,13 @@ local function fetchFromServer()
 		return {}
 	end
 	local ok, result = pcall(function() return getPlaylist:InvokeServer() end)
-	if ok and result and #result > 0 then
-		cachedList    = result
+	if ok and result then
+		if type(result) == "table" and result.songs and result.playlists then
+			cachedList      = result.songs
+			cachedPlaylists = result.playlists
+		elseif type(result) == "table" and #result > 0 then
+			cachedList = result
+		end
 		lastFetchTime = workspace:GetServerTimeNow()
 		return cachedList
 	else
@@ -54,6 +61,54 @@ function MusicModule:GetAllMusic()
 	for _, song in ipairs(cachedList) do table.insert(sorted, song) end
 	table.sort(sorted, function(a, b) return string.lower(a.judul) < string.lower(b.judul) end)
 	return sorted
+end
+
+function MusicModule:GetPlaylists()
+	if RunService:IsClient() then
+		if #cachedList == 0 or (workspace:GetServerTimeNow() - lastFetchTime) >= CACHE_DURATION then
+			fetchFromServer()
+		end
+	end
+
+	if #cachedPlaylists > 0 then
+		return cachedPlaylists
+	end
+
+	local groups = {}
+	local order = {}
+	for _, song in ipairs(cachedList) do
+		local pName = song.playlistName or "Default"
+		if not groups[pName] then
+			local pl = {
+				name      = pName,
+				thumbnail = song.playlistThumbnail or song.sampul or "rbxassetid://118306547253139",
+				tracks    = {},
+			}
+			groups[pName] = pl
+			table.insert(order, pl)
+		end
+		table.insert(groups[pName].tracks, song)
+	end
+	return order
+end
+
+function MusicModule:GetSongsByPlaylist(playlistName)
+	if not playlistName or playlistName == "" or playlistName == "all" then
+		return self:GetAllMusic()
+	end
+	local playlists = self:GetPlaylists()
+	for _, pl in ipairs(playlists) do
+		if pl.name and string.lower(pl.name) == string.lower(playlistName) then
+			return pl.tracks or {}
+		end
+	end
+	local songs = {}
+	for _, s in ipairs(self:GetAllMusic()) do
+		if s.playlistName and string.lower(s.playlistName) == string.lower(playlistName) then
+			table.insert(songs, s)
+		end
+	end
+	return songs
 end
 
 function MusicModule:GetMusicById(musicId)

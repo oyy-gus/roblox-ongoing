@@ -3,6 +3,7 @@ local Modules = ReplicatedStorage:WaitForChild("Modules")
 local SoundService = game:GetService("SoundService")
 local MenuConfig  = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
+local NotifModule = require(Modules:WaitForChild("NotifModule"))
 
 repeat task.wait() until MenuConfig.GUI.PengaturanPage or MenuConfig.GUI.ConfigPage
 
@@ -53,58 +54,28 @@ local SIZES = {
 	ITEM_PAD = 12,
 }
 
-local NotifModule = nil
-local useCustomNotif = false
-
 local function showNotification(notifType, title, text, duration)
 	duration = duration or 2
 
-	if useCustomNotif and NotifModule then
-		local success = pcall(function()
-			if notifType == "Success" then
-				NotifModule.Success(title, text, duration)
-			elseif notifType == "Error" then
-				NotifModule.Error(title, text, duration)
-			elseif notifType == "Warning" then
-				NotifModule.Warning(title, text, duration)
-			elseif notifType == "Info" then
-				NotifModule.Info(title, text, duration)
-			elseif notifType == "Settings" then
-				NotifModule.Settings(title, text, duration)
-			else
-				NotifModule.Notify({
-					Type = notifType,
-					Title = title,
-					Text = text,
-					Duration = duration
-				})
-			end
-		end)
-		if success then return end
-	end
-
-	pcall(function()
-		game.StarterGui:SetCore("SendNotification", {
+	if notifType == "Success" then
+		NotifModule.Success(title, text, duration)
+	elseif notifType == "Error" then
+		NotifModule.Error(title, text, duration)
+	elseif notifType == "Warning" then
+		NotifModule.Warning(title, text, duration)
+	elseif notifType == "Info" then
+		NotifModule.Info(title, text, duration)
+	elseif notifType == "Settings" then
+		NotifModule.Settings(title, text, duration)
+	else
+		NotifModule.Notify({
+			Type = notifType or "Notification",
 			Title = title,
 			Text = text,
-			Duration = duration
+			Duration = duration,
 		})
-	end)
-end
-
-task.spawn(function()
-	task.wait(0.5)
-	local notifModuleScript = Modules:FindFirstChild("NotifModule")
-	if notifModuleScript then
-		local success, result = pcall(function()
-			return require(notifModuleScript)
-		end)
-		if success and result then
-			NotifModule = result
-			useCustomNotif = true
-		end
 	end
-end)
+end
 
 local SoundSystem = {
 	ClickSound = nil,

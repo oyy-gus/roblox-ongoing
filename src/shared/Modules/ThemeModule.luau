@@ -116,6 +116,18 @@ ThemeModule.Animation = {
 	CloseEasingDirection = Enum.EasingDirection.In,
 }
 
+ThemeModule.Fonts = {
+	Title = Enum.Font.GothamBold,
+	Header = Enum.Font.GothamBold,
+	Body = Enum.Font.GothamMedium,
+	BodyBold = Enum.Font.GothamBold,
+	Regular = Enum.Font.Gotham,
+	Medium = Enum.Font.GothamMedium,
+	Bold = Enum.Font.GothamBold,
+	SemiBold = Enum.Font.GothamBold,
+	Caption = Enum.Font.Gotham,
+}
+
 ThemeModule.Typography = {
 	Font = Enum.Font.GothamMedium,
 	FontBold = Enum.Font.GothamBold,

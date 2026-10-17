@@ -143,50 +143,27 @@ local T = {
 local DEFAULT_THUMBNAIL = "rbxassetid://118306547253139"
 
 local function resolveThumbnail(thumb, soundId)
-	local sId = soundId and tostring(soundId):match("%d+")
-	local rbxThumbUrl = sId and string.format("rbxthumb://type=Asset&id=%s&w=420&h=420", sId) or nil
-
 	if not thumb or type(thumb) ~= "string" then
-		return rbxThumbUrl or DEFAULT_THUMBNAIL
+		return DEFAULT_THUMBNAIL
 	end
 
 	local t = thumb:gsub("%s", "")
 	if t == "" or t == "0" or t == "rbxassetid://0" or t:find("YOUR_LOGO_ASSET_ID") then
-		return rbxThumbUrl or DEFAULT_THUMBNAIL
+		return DEFAULT_THUMBNAIL
 	end
 
-	if t:find("^rbxthumb://") then
-		return t
-	end
-
-	if t == DEFAULT_THUMBNAIL or t:find("118306547253139") then
-		return rbxThumbUrl or DEFAULT_THUMBNAIL
-	end
-
-	if sId and (t == sId or t == "rbxassetid://" .. sId) then
-		return rbxThumbUrl or DEFAULT_THUMBNAIL
-	end
-
-	if t:find("rbxassetid://") then
-		local num = t:match("rbxassetid://(%d+)")
-		if not num or num == "0" or tonumber(num) == 0 then
-			return rbxThumbUrl or DEFAULT_THUMBNAIL
-		end
+	if t:find("^rbxassetid://") or t:find("^rbxthumb://") or t:find("^http") or t:find("^rbxasset://") then
 		return t
 	end
 
 	if t:match("^%d+$") then
 		if t == "0" or tonumber(t) == 0 then
-			return rbxThumbUrl or DEFAULT_THUMBNAIL
+			return DEFAULT_THUMBNAIL
 		end
 		return "rbxassetid://" .. t
 	end
 
-	if t:find("^http") or t:find("^rbxasset://") then
-		return t
-	end
-
-	return rbxThumbUrl or DEFAULT_THUMBNAIL
+	return DEFAULT_THUMBNAIL
 end
 
 local DIM = {
@@ -212,16 +189,69 @@ local DIM = {
 	CORNER_LG          = 10,
 	SCROLL_PAD         = 6,
 	QUEUE_CARD_H       = 40 + 8 + 26 + 6 + 150 + 16,
-	PLAYLIST_CARD_H    = 78,
-	PLAYLIST_SECTION_H = 26 + 8 + 78 + 20,
-	SEARCH_SECTION_H   = 38 + 8 + 32 + 16,
+	PLAYLIST_CARD_H    = 140,
+	PLAYLIST_SECTION_H = 26 + 8 + 156 + 20,
+	SEARCH_SECTION_H   = 38 + 16,
 }
 
 local UI = {
 	navButtons     = {},
 	visualizerBars = {},
 	filterButtons  = {},
+	playlistCards  = {},
 }
+
+local function getPlaylistThumbnailByName(playlistName)
+	if not playlistName or playlistName == "" then return nil end
+	local lower = string.lower(playlistName)
+	if lower == "favorites" or lower == "favorit saya" then
+		return "81579105803685"
+	end
+	local playlists = MusicModule:GetPlaylists()
+	for _, pl in ipairs(playlists) do
+		if pl.name and string.lower(pl.name) == lower then
+			if pl.thumbnail and pl.thumbnail ~= "" then
+				return pl.thumbnail
+			end
+		end
+	end
+	return nil
+end
+
+local function getSongThumbnail(song)
+	if not song then return DEFAULT_THUMBNAIL end
+	local pName = song.playlistName or song.PlaylistName
+	local sId = tostring(song.id or song.SoundId or song.sound_id or "")
+
+	if (not pName or pName == "") and sId ~= "" then
+		for _, pl in ipairs(MusicModule:GetPlaylists()) do
+			if pl.tracks then
+				for _, trk in ipairs(pl.tracks) do
+					local trkId = tostring(trk.id or trk.sound_id or trk.SoundId or "")
+					if trkId == sId then
+						pName = pl.name
+						break
+					end
+				end
+			end
+			if pName then break end
+		end
+	end
+
+	if pName and pName ~= "" then
+		local plThumb = getPlaylistThumbnailByName(pName)
+		if plThumb and plThumb ~= "" then
+			return resolveThumbnail(plThumb)
+		end
+	end
+
+	local direct = song.sampul or song.thumbnail or song.Thumbnail or song.Sampul
+	if direct and direct ~= "" then
+		return resolveThumbnail(direct)
+	end
+
+	return DEFAULT_THUMBNAIL
+end
 
 local function setThumb(url, soundId)
 	if not UI.thumbImg then return end
@@ -235,7 +265,7 @@ local function setThumb(url, soundId)
 	local currentTarget = resolved
 	UI.thumbImg.Image = resolved
 	task.spawn(function()
-		task.wait(4)
+		task.wait(8)
 		if UI.thumbImg and UI.thumbImg.Image == currentTarget and not UI.thumbImg.IsLoaded then
 			UI.thumbImg.Image = DEFAULT_THUMBNAIL
 		end
@@ -326,7 +356,26 @@ local filteredSongs      = {}
 local currentSearchQuery = ""
 local lastNoResults      = 0
 local canFavorite        = false
-local activePlaylistType = "all"
+local activePlaylistType = ""
+
+local updatePlaylistCardsState
+local rebuildPlaylistCards
+
+local function getActiveSongList()
+	if activePlaylistType == "favorites" then
+		return userFavorites
+	elseif activePlaylistType and activePlaylistType ~= "" then
+		local songs = MusicModule:GetSongsByPlaylist(activePlaylistType)
+		return songs or {}
+	else
+		local playlists = MusicModule:GetPlaylists()
+		if #playlists > 0 and playlists[1].name then
+			activePlaylistType = playlists[1].name
+			return playlists[1].tracks or {}
+		end
+		return {}
+	end
+end
 
 local voteSkipState = {
 	active        = false,
@@ -862,7 +911,7 @@ end
 local function norm(s) return string.lower(string.gsub(s or "","  %s+"," ")) end
 local function doSearch(query)
 	currentSearchQuery = query
-	local sourceList = (activePlaylistType == "favorites") and userFavorites or defaultSongs
+	local sourceList = getActiveSongList() or {}
 	if query == "" then
 		filteredSongs = sourceList
 		return sourceList
@@ -870,7 +919,7 @@ local function doSearch(query)
 	local nq = norm(query)
 	local exact, starts, contains = {},{},{}
 	for _, song in ipairs(sourceList) do
-		local sn = norm(song.judul or song.name or "")
+		local sn = norm(song.judul or song.title or song.name or "")
 		if sn == nq then table.insert(exact, song)
 		elseif string.sub(sn,1,#nq) == nq then table.insert(starts, song)
 		elseif string.find(sn,nq,1,true) then table.insert(contains, song)
@@ -900,13 +949,13 @@ local function updateSongsTitle(searching, count, query)
 			UI.songsBadge.TextColor3 = Color3.fromHex("#EF4444")
 		end
 	elseif activePlaylistType == "favorites" then
-		UI.songsTitleLbl.Text = T.MyFavorites
+		UI.songsTitleLbl.Text = T.MyFavorites or "Favorit Saya"
 		UI.songsTitleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
 		UI.songsBadge.Text = string.format("%d Lagu", count)
 		UI.songsBadge.TextColor3 = Color3.fromHex("#9E9E9E")
 		addTextGradient(UI.songsTitleLbl, true)
 	else
-		UI.songsTitleLbl.Text = T.DefaultSongs
+		UI.songsTitleLbl.Text = "📁  " .. tostring(activePlaylistType)
 		UI.songsTitleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
 		UI.songsBadge.Text = string.format("%d Lagu", count)
 		UI.songsBadge.TextColor3 = Color3.fromHex("#9E9E9E")
@@ -935,7 +984,7 @@ end
 local function updateSongs(list)
 	if not UI.songsContainer then return end
 	local isFavView = (activePlaylistType == "favorites")
-	local sourceList = isFavView and userFavorites or defaultSongs
+	local sourceList = getActiveSongList() or {}
 	local display = list or filteredSongs
 	if #display == 0 and currentSearchQuery == "" then display = sourceList end
 
@@ -1003,7 +1052,7 @@ local function updateSongs(list)
 		thumb.BackgroundColor3 = Color3.fromHex("#080808")
 		thumb.BorderSizePixel = 0
 		thumb.ScaleType = Enum.ScaleType.Crop
-		thumb.Image = resolveThumbnail(song.sampul or song.thumbnail, songId)
+		thumb.Image = getSongThumbnail(song)
 		thumb.Parent = item
 		addCorner(thumb, DIM.CORNER_SM)
 		addStroke(thumb, Color3.fromHex("#282828"), 1, 0)
@@ -1032,7 +1081,7 @@ local function updateSongs(list)
 			subLbl.Text = "⭐  Tersimpan di Favorit"
 			subLbl.TextColor3 = Color3.fromHex("#8E8E93")
 		else
-			subLbl.Text = "Lagu Pilihan Server"
+			subLbl.Text = song.playlistName and ("📁  " .. song.playlistName) or "Lagu Pilihan Server"
 			subLbl.TextColor3 = Color3.fromHex("#737373")
 		end
 		subLbl.Size = UDim2.new(1, -(infoLeft + rightSpace), 0, 16)
@@ -1128,31 +1177,17 @@ local function selectPlaylist(pType)
 	if UI.searchInput then UI.searchInput.Text = "" end
 	if UI.clearBtn then UI.clearBtn.Visible = false end
 
-	if UI.djStroke then UI.djStroke.Color = (pType == "dj") and Color3.fromHex("#FFFFFF") or Color3.fromHex("#262626") end
-	if UI.djActiveInd then UI.djActiveInd.Visible = (pType == "dj") end
-
-	if UI.favStroke then UI.favStroke.Color = (pType == "favorites") and Color3.fromHex("#FFFFFF") or Color3.fromHex("#262626") end
-	if UI.favActiveInd then UI.favActiveInd.Visible = (pType == "favorites") end
-
-	for fType, chipData in pairs(UI.filterButtons) do
-		local isSel = (fType == pType)
-		chipData.btn.BackgroundColor3 = isSel and Color3.fromHex("#FFFFFF") or Color3.fromHex("#151515")
-		chipData.btn.TextColor3 = isSel and Color3.fromHex("#111111") or Color3.fromHex("#8E8E93")
-		chipData.btn.Font = isSel and Enum.Font.GothamBold or Enum.Font.GothamMedium
-		chipData.stroke.Color = isSel and Color3.fromHex("#FFFFFF") or Color3.fromHex("#262626")
+	if updatePlaylistCardsState then
+		updatePlaylistCardsState()
 	end
 
 	if pType == "favorites" then
 		loadFavorites()
-		filteredSongs = userFavorites
-		updateSongs(userFavorites)
-	else
-		if #defaultSongs == 0 then
-			defaultSongs = MusicModule:GetAllMusic()
-		end
-		filteredSongs = defaultSongs
-		updateSongs(defaultSongs)
 	end
+
+	local songs = getActiveSongList() or {}
+	filteredSongs = songs
+	updateSongs(songs)
 end
 
 local function buildNowPlaying()
@@ -1646,27 +1681,40 @@ local function buildQueueSection()
 	reqFrame.BackgroundTransparency = 1
 	reqFrame.Parent = qs
 
+	local reqContainer = Instance.new("Frame")
+	reqContainer.Name = "ReqInputContainer"
+	reqContainer.Size = UDim2.new(1, -(DIM.REQ_BTN_W + 8), 1, 0)
+	reqContainer.Position = UDim2.new(0, 0, 0, 0)
+	reqContainer.BackgroundColor3 = C.InputBg
+	reqContainer.BorderSizePixel = 0
+	reqContainer.ClipsDescendants = true
+	reqContainer.Parent = reqFrame
+	addCorner(reqContainer, DIM.CORNER_MD)
+	local reqStroke = addStroke(reqContainer, Color3.fromHex("#262626"), 1, 0)
+
 	local reqInput = Instance.new("TextBox")
 	reqInput.Name = "ReqInput"
 	reqInput.PlaceholderText = T.SongIDPlaceholder
 	reqInput.Text = ""
-	reqInput.Size = UDim2.new(1, -(DIM.REQ_BTN_W + 8), 1, 0)
-	reqInput.BackgroundColor3 = C.InputBg
+	reqInput.Size = UDim2.new(1, -24, 1, 0)
+	reqInput.Position = UDim2.new(0, 12, 0, 0)
+	reqInput.BackgroundTransparency = 1
 	reqInput.BorderSizePixel = 0
 	reqInput.TextColor3 = C.InputText
 	reqInput.PlaceholderColor3 = Color3.fromHex("#737373")
 	reqInput.TextSize = 12
 	reqInput.Font = Enum.Font.GothamMedium
 	reqInput.TextXAlignment = Enum.TextXAlignment.Left
+	reqInput.TextYAlignment = Enum.TextYAlignment.Center
 	reqInput.ClearTextOnFocus = false
 	reqInput.ClipsDescendants = true
-	reqInput.Parent = reqFrame
-	addCorner(reqInput, DIM.CORNER_MD)
-	local reqStroke = addStroke(reqInput, Color3.fromHex("#262626"), 1, 0)
+	reqInput.Parent = reqContainer
 
-	local reqPad = Instance.new("UIPadding", reqInput)
-	reqPad.PaddingLeft = UDim.new(0, 12)
-	reqPad.PaddingRight = UDim.new(0, 12)
+	reqContainer.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			reqInput:CaptureFocus()
+		end
+	end)
 
 	local function submitSongReq()
 		local id = reqInput.Text:gsub("%s+", "")
@@ -1682,11 +1730,11 @@ local function buildQueueSection()
 
 	reqInput.Focused:Connect(function()
 		TweenService:Create(reqStroke, TweenInfo.new(0.18), { Color = Color3.fromHex("#FFFFFF"), Transparency = 0.3 }):Play()
-		TweenService:Create(reqInput, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromHex("#171717") }):Play()
+		TweenService:Create(reqContainer, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromHex("#171717") }):Play()
 	end)
 	reqInput.FocusLost:Connect(function(enterPressed)
 		TweenService:Create(reqStroke, TweenInfo.new(0.18), { Color = Color3.fromHex("#262626"), Transparency = 0 }):Play()
-		TweenService:Create(reqInput, TweenInfo.new(0.18), { BackgroundColor3 = C.InputBg }):Play()
+		TweenService:Create(reqContainer, TweenInfo.new(0.18), { BackgroundColor3 = C.InputBg }):Play()
 		if enterPressed then submitSongReq() end
 	end)
 	UI.reqInput = reqInput
@@ -1711,7 +1759,7 @@ local function buildQueueSection()
 	reqBtn.MouseLeave:Connect(function()
 		TweenService:Create(reqBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#FFFFFF") }):Play()
 	end)
-	reqBtn.MouseButton1Click:Connect(submitSongReq)
+	reqBtn.Activated:Connect(submitSongReq)
 	UI.reqBtn = reqBtn
 
 	local qScroll = Instance.new("ScrollingFrame")
@@ -1785,6 +1833,220 @@ local function buildQueueSection()
 	UI.queueSection = qs
 end
 
+local function makePlaylistCard(name, titleText, countText, thumbUrlOrIcon, layoutOrder, playlistKey)
+	local FOLDER_RADIUS = 12
+	local card = Instance.new("TextButton")
+	card.Name = name
+	card.Size = UDim2.new(0, DIM.PLAYLIST_CARD_H, 0, DIM.PLAYLIST_CARD_H)
+	local isSelected = (activePlaylistType == playlistKey)
+	card.BackgroundColor3 = Color3.fromHex("#151515")
+	card.BorderSizePixel = 0
+	card.AutoButtonColor = false
+	card.Text = ""
+	card.LayoutOrder = layoutOrder or 1
+	card.ClipsDescendants = false
+	card.ZIndex = isSelected and 5 or 1
+	card.Parent = UI.cardsScroll
+	addCorner(card, FOLDER_RADIUS)
+	local cardStroke = addStroke(card, isSelected and Color3.fromHex("#FFFFFF") or Color3.fromHex("#262626"), isSelected and 2 or 1, 0)
+
+	local isImage = thumbUrlOrIcon and type(thumbUrlOrIcon) == "string" and (
+		thumbUrlOrIcon:find("rbxassetid://") or
+		thumbUrlOrIcon:match("^%d+$") or
+		thumbUrlOrIcon:find("^rbxthumb://") or
+		thumbUrlOrIcon:find("^http") or
+		thumbUrlOrIcon:find("^rbxasset://")
+	)
+
+	if isImage then
+		local thumbImg = Instance.new("ImageLabel")
+		thumbImg.Name = "Thumbnail"
+		thumbImg.Size = UDim2.new(1, 0, 1, 0)
+		thumbImg.Position = UDim2.new(0, 0, 0, 0)
+		thumbImg.BackgroundTransparency = 1
+		thumbImg.BorderSizePixel = 0
+		thumbImg.ScaleType = Enum.ScaleType.Crop
+		thumbImg.Image = resolveThumbnail(thumbUrlOrIcon)
+		thumbImg.ZIndex = 1
+		thumbImg.Parent = card
+		addCorner(thumbImg, FOLDER_RADIUS)
+	else
+		local bgFrame = Instance.new("Frame")
+		bgFrame.Name = "BgFrame"
+		bgFrame.Size = UDim2.new(1, 0, 1, 0)
+		bgFrame.Position = UDim2.new(0, 0, 0, 0)
+		bgFrame.BackgroundColor3 = Color3.fromHex("#181818")
+		bgFrame.BorderSizePixel = 0
+		bgFrame.ZIndex = 1
+		bgFrame.Parent = card
+		addCorner(bgFrame, FOLDER_RADIUS)
+
+		local centerIcon = Instance.new("TextLabel")
+		centerIcon.Name = "CenterIcon"
+		centerIcon.Size = UDim2.new(0, 48, 0, 48)
+		centerIcon.Position = UDim2.new(0.5, -24, 0.35, -24)
+		centerIcon.BackgroundTransparency = 1
+		centerIcon.Text = thumbUrlOrIcon or "📁"
+		centerIcon.TextSize = 30
+		centerIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+		centerIcon.ZIndex = 1
+		centerIcon.Parent = bgFrame
+	end
+
+	local bottomOverlay = Instance.new("Frame")
+	bottomOverlay.Name = "BottomOverlay"
+	bottomOverlay.Size = UDim2.new(1, 0, 1, 0)
+	bottomOverlay.Position = UDim2.new(0, 0, 0, 0)
+	bottomOverlay.BackgroundColor3 = Color3.fromHex("#000000")
+	bottomOverlay.BorderSizePixel = 0
+	bottomOverlay.ZIndex = 2
+	bottomOverlay.Parent = card
+	addCorner(bottomOverlay, FOLDER_RADIUS)
+
+	local grad = Instance.new("UIGradient")
+	grad.Rotation = 90
+	grad.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0.0, 1.0),
+		NumberSequenceKeypoint.new(0.40, 1.0),
+		NumberSequenceKeypoint.new(0.70, 0.45),
+		NumberSequenceKeypoint.new(1.0, 0.05),
+	})
+	grad.Parent = bottomOverlay
+
+	local tLbl = Instance.new("TextLabel")
+	tLbl.Name = "CardTitle"
+	tLbl.Text = titleText
+	tLbl.Size = UDim2.new(1, -16, 0, 20)
+	tLbl.Position = UDim2.new(0, 8, 1, -44)
+	tLbl.BackgroundTransparency = 1
+	tLbl.TextColor3 = Color3.fromHex("#FFFFFF")
+	tLbl.TextSize = 13
+	tLbl.Font = Enum.Font.GothamBold
+	tLbl.TextXAlignment = Enum.TextXAlignment.Left
+	tLbl.TextTruncate = Enum.TextTruncate.AtEnd
+	tLbl.ZIndex = 3
+	tLbl.Parent = card
+	addSC(tLbl, 14)
+
+	local sLbl = Instance.new("TextLabel")
+	sLbl.Name = "CardSub"
+	sLbl.Text = countText
+	sLbl.Size = UDim2.new(1, -16, 0, 16)
+	sLbl.Position = UDim2.new(0, 8, 1, -22)
+	sLbl.BackgroundTransparency = 1
+	sLbl.TextColor3 = Color3.fromHex("#D1D5DB")
+	sLbl.TextSize = 11
+	sLbl.Font = Enum.Font.GothamMedium
+	sLbl.TextXAlignment = Enum.TextXAlignment.Left
+	sLbl.TextTruncate = Enum.TextTruncate.AtEnd
+	sLbl.ZIndex = 3
+	sLbl.Parent = card
+
+	local activeInd = Instance.new("TextLabel")
+	activeInd.Name = "ActiveIndicator"
+	activeInd.Size = UDim2.new(0, 50, 0, 18)
+	activeInd.Position = UDim2.new(1, -56, 0, 6)
+	activeInd.BackgroundColor3 = Color3.fromHex("#0F0F0F")
+	activeInd.BackgroundTransparency = 0.2
+	activeInd.Text = "● Aktif"
+	activeInd.TextColor3 = Color3.fromHex("#FFFFFF")
+	activeInd.TextSize = 9
+	activeInd.Font = Enum.Font.GothamBold
+	activeInd.Visible = isSelected
+	activeInd.BorderSizePixel = 0
+	activeInd.ZIndex = 4
+	activeInd.Parent = card
+	addCorner(activeInd, 4)
+	addStroke(activeInd, Color3.fromHex("#FFFFFF"), 1, 0.4)
+
+	card.MouseEnter:Connect(function()
+		local isSel = (activePlaylistType == playlistKey)
+		if not isSel then
+			card.ZIndex = 3
+		end
+		TweenService:Create(cardStroke, TweenInfo.new(0.15), {
+			Color = Color3.fromHex("#FFFFFF"),
+			Thickness = 2,
+		}):Play()
+	end)
+	card.MouseLeave:Connect(function()
+		local isSel = (activePlaylistType == playlistKey)
+		card.ZIndex = isSel and 5 or 1
+		TweenService:Create(cardStroke, TweenInfo.new(0.15), {
+			Color = isSel and Color3.fromHex("#FFFFFF") or Color3.fromHex("#262626"),
+			Thickness = isSel and 2 or 1,
+		}):Play()
+	end)
+
+	card.MouseButton1Click:Connect(function()
+		selectPlaylist(playlistKey)
+	end)
+
+	UI.playlistCards[playlistKey] = {
+		card      = card,
+		stroke    = cardStroke,
+		subLbl    = sLbl,
+		activeInd = activeInd,
+	}
+
+	return card
+end
+
+updatePlaylistCardsState = function()
+	for key, data in pairs(UI.playlistCards) do
+		local isSel = (key == activePlaylistType)
+		if data.card then
+			data.card.ZIndex = isSel and 5 or 1
+		end
+		if data.stroke then
+			data.stroke.Color = isSel and Color3.fromHex("#FFFFFF") or Color3.fromHex("#262626")
+			data.stroke.Thickness = isSel and 2 or 1
+		end
+		if data.activeInd then
+			data.activeInd.Visible = isSel
+		end
+		if key == "favorites" and data.subLbl then
+			data.subLbl.Text = canFavorite and string.format("%d Lagu", #userFavorites) or "Khusus VIP+"
+		end
+	end
+end
+
+rebuildPlaylistCards = function()
+	if not UI.cardsScroll then return end
+	UI.playlistCards = {}
+	for _, child in ipairs(UI.cardsScroll:GetChildren()) do
+		if child:IsA("TextButton") or child:IsA("Frame") then
+			child:Destroy()
+		end
+	end
+
+	local playlists = MusicModule:GetPlaylists() or {}
+	local order = 1
+
+	local favCountStr = canFavorite and string.format("%d Lagu", #userFavorites) or "Khusus VIP+"
+	local favThumb = getPlaylistThumbnailByName("favorites") or "81579105803685"
+	makePlaylistCard("Card_Favorites", "Favorit Saya", favCountStr, favThumb, order, "favorites")
+	order = order + 1
+
+	for _, pl in ipairs(playlists) do
+		local plName = pl.name or "Playlist"
+		local tracks = pl.tracks or {}
+		local countStr = string.format("%d Lagu", #tracks)
+		local thumb = (pl.thumbnail and pl.thumbnail ~= "") and pl.thumbnail or nil
+		makePlaylistCard("Card_PL_"..order, plName, countStr, thumb, order, plName)
+		order = order + 1
+	end
+
+	if UI.playlistBadge then
+		local totalPlaylists = #playlists + 1
+		UI.playlistBadge.Text = string.format("%d Playlist", totalPlaylists)
+	end
+
+	if updatePlaylistCardsState then
+		updatePlaylistCardsState()
+	end
+end
+
 local function buildPlaylistSection()
 	local ps = Instance.new("Frame")
 	ps.Name = "PlaylistSection"
@@ -1812,7 +2074,7 @@ local function buildPlaylistSection()
 	local titleLbl = Instance.new("TextLabel")
 	titleLbl.Name = "PlaylistTitle"
 	titleLbl.Text = "📂  Koleksi Playlist"
-	titleLbl.Size = UDim2.new(1, -100, 1, 0)
+	titleLbl.Size = UDim2.new(1, -110, 1, 0)
 	titleLbl.Position = UDim2.new(0, 0, 0, 0)
 	titleLbl.BackgroundTransparency = 1
 	titleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -1825,9 +2087,9 @@ local function buildPlaylistSection()
 
 	local badge = Instance.new("TextLabel")
 	badge.Name = "PlaylistBadge"
-	badge.Text = "2 Playlist"
-	badge.Size = UDim2.new(0, 85, 0, 20)
-	badge.Position = UDim2.new(1, -85, 0.5, -10)
+	badge.Text = "0 Playlist"
+	badge.Size = UDim2.new(0, 95, 0, 20)
+	badge.Position = UDim2.new(1, -95, 0.5, -10)
 	badge.BackgroundColor3 = Color3.fromHex("#181818")
 	badge.BorderSizePixel = 0
 	badge.TextColor3 = Color3.fromHex("#9E9E9E")
@@ -1837,111 +2099,39 @@ local function buildPlaylistSection()
 	badge.Parent = header
 	addCorner(badge, 10)
 	addStroke(badge, Color3.fromHex("#2C2C2C"), 1, 0)
+	UI.playlistBadge = badge
 
-	local cardsFrame = Instance.new("Frame")
-	cardsFrame.Name = "PlaylistCardsFrame"
-	cardsFrame.Size = UDim2.new(1, 0, 0, DIM.PLAYLIST_CARD_H)
-	cardsFrame.Position = UDim2.new(0, 0, 0, DIM.QTITLE_H + 8)
-	cardsFrame.BackgroundTransparency = 1
-	cardsFrame.Parent = ps
+	local cardsScroll = Instance.new("ScrollingFrame")
+	cardsScroll.Name = "PlaylistCardsScroll"
+	cardsScroll.Size = UDim2.new(1, 0, 0, DIM.PLAYLIST_CARD_H + 16)
+	cardsScroll.Position = UDim2.new(0, 0, 0, DIM.QTITLE_H + 8)
+	cardsScroll.BackgroundTransparency = 1
+	cardsScroll.BorderSizePixel = 0
+	cardsScroll.ScrollBarThickness = 0
+	cardsScroll.ScrollBarImageTransparency = 1
+	cardsScroll.ScrollingDirection = Enum.ScrollingDirection.X
+	cardsScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
+	cardsScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	cardsScroll.ClipsDescendants = true
+	cardsScroll.Parent = ps
 
-	local function makeCard(name, titleText, countText, iconText, posScaleX)
-		local card = Instance.new("TextButton")
-		card.Name = name
-		card.Size = UDim2.new(0.5, -5, 1, 0)
-		card.Position = UDim2.new(posScaleX, posScaleX == 0 and 0 or 5, 0, 0)
-		card.BackgroundColor3 = Color3.fromHex("#151515")
-		card.BorderSizePixel = 0
-		card.AutoButtonColor = false
-		card.Text = ""
-		card.Parent = cardsFrame
-		addCorner(card, DIM.CORNER_MD)
-		local cardStroke = addStroke(card, Color3.fromHex("#262626"), 1, 0)
+	local scrollPad = Instance.new("UIPadding", cardsScroll)
+	scrollPad.PaddingLeft = UDim.new(0, 10)
+	scrollPad.PaddingRight = UDim.new(0, 10)
+	scrollPad.PaddingTop = UDim.new(0, 8)
+	scrollPad.PaddingBottom = UDim.new(0, 8)
 
-		local iconFrame = Instance.new("Frame")
-		iconFrame.Size = UDim2.new(0, 48, 0, 48)
-		iconFrame.Position = UDim2.new(0, 10, 0.5, -24)
-		iconFrame.BackgroundColor3 = Color3.fromHex("#202020")
-		iconFrame.BorderSizePixel = 0
-		iconFrame.Parent = card
-		addCorner(iconFrame, 8)
-		addStroke(iconFrame, Color3.fromHex("#2C2C2C"), 1, 0)
+	local cardsLayout = Instance.new("UIListLayout", cardsScroll)
+	cardsLayout.FillDirection = Enum.FillDirection.Horizontal
+	cardsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	cardsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	cardsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	cardsLayout.Padding = UDim.new(0, 10)
 
-		local iconLbl = Instance.new("TextLabel")
-		iconLbl.Size = UDim2.new(1, 0, 1, 0)
-		iconLbl.BackgroundTransparency = 1
-		iconLbl.Text = iconText
-		iconLbl.TextSize = 20
-		iconLbl.Parent = iconFrame
-
-		local infoX = 66
-		local tLbl = Instance.new("TextLabel")
-		tLbl.Name = "CardTitle"
-		tLbl.Text = titleText
-		tLbl.Size = UDim2.new(1, -(infoX + 8), 0, 20)
-		tLbl.Position = UDim2.new(0, infoX, 0, 12)
-		tLbl.BackgroundTransparency = 1
-		tLbl.TextColor3 = Color3.fromHex("#FFFFFF")
-		tLbl.TextSize = 12
-		tLbl.Font = Enum.Font.GothamBold
-		tLbl.TextXAlignment = Enum.TextXAlignment.Left
-		tLbl.TextTruncate = Enum.TextTruncate.AtEnd
-		tLbl.Parent = card
-		addSC(tLbl, 13)
-
-		local sLbl = Instance.new("TextLabel")
-		sLbl.Name = "CardSub"
-		sLbl.Text = countText
-		sLbl.Size = UDim2.new(1, -(infoX + 8), 0, 16)
-		sLbl.Position = UDim2.new(0, infoX, 0, 32)
-		sLbl.BackgroundTransparency = 1
-		sLbl.TextColor3 = Color3.fromHex("#8E8E93")
-		sLbl.TextSize = 10
-		sLbl.Font = Enum.Font.GothamMedium
-		sLbl.TextXAlignment = Enum.TextXAlignment.Left
-		sLbl.TextTruncate = Enum.TextTruncate.AtEnd
-		sLbl.Parent = card
-
-		local activeInd = Instance.new("TextLabel")
-		activeInd.Name = "ActiveIndicator"
-		activeInd.Size = UDim2.new(0, 52, 0, 16)
-		activeInd.Position = UDim2.new(0, infoX, 0, 50)
-		activeInd.BackgroundColor3 = Color3.fromHex("#1F1F1F")
-		activeInd.Text = "● Dipilih"
-		activeInd.TextColor3 = Color3.fromHex("#FFFFFF")
-		activeInd.TextSize = 9
-		activeInd.Font = Enum.Font.GothamBold
-		activeInd.Visible = false
-		activeInd.BorderSizePixel = 0
-		activeInd.Parent = card
-		addCorner(activeInd, 4)
-		addStroke(activeInd, Color3.fromHex("#3E3E3E"), 1, 0)
-
-		card.MouseEnter:Connect(function()
-			TweenService:Create(card, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#1C1C1C") }):Play()
-		end)
-		card.MouseLeave:Connect(function()
-			TweenService:Create(card, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#151515") }):Play()
-		end)
-
-		return card, cardStroke, sLbl, activeInd
-	end
-
-	local djCard, djStroke, djSubLbl, djActiveInd = makeCard("DJPlaylistCard", "DJ Dangdut Viral", "Memuat lagu...", "🎧", 0)
-	local favCard, favStroke, favSubLbl, favActiveInd = makeCard("FavPlaylistCard", "Favorit Saya", "0 Lagu Favorit", "⭐", 0.5)
-
-	djCard.MouseButton1Click:Connect(function() selectPlaylist("dj") end)
-	favCard.MouseButton1Click:Connect(function() selectPlaylist("favorites") end)
-
-	UI.djCard = djCard
-	UI.djStroke = djStroke
-	UI.djSubLbl = djSubLbl
-	UI.djActiveInd = djActiveInd
-	UI.favCard = favCard
-	UI.favStroke = favStroke
-	UI.favSubLbl = favSubLbl
-	UI.favActiveInd = favActiveInd
+	UI.cardsScroll = cardsScroll
 	UI.playlistSection = ps
+
+	rebuildPlaylistCards()
 end
 
 local function buildSearchSection()
@@ -1995,6 +2185,7 @@ local function buildSearchSection()
 	searchInput.TextSize = 12
 	searchInput.Font = Enum.Font.GothamMedium
 	searchInput.TextXAlignment = Enum.TextXAlignment.Left
+	searchInput.TextYAlignment = Enum.TextYAlignment.Center
 	searchInput.ClearTextOnFocus = false
 	searchInput.ClipsDescendants = true
 	searchInput.Parent = searchContainer
@@ -2030,52 +2221,6 @@ local function buildSearchSection()
 		TweenService:Create(clearBtn, TweenInfo.new(0.15), { BackgroundColor3 = C.ClearBtn }):Play()
 	end)
 
-	local chipsFrame = Instance.new("Frame")
-	chipsFrame.Name = "FilterChips"
-	chipsFrame.Size = UDim2.new(1, 0, 0, 28)
-	chipsFrame.Position = UDim2.new(0, 0, 0, DIM.SEARCH_H + 6)
-	chipsFrame.BackgroundTransparency = 1
-	chipsFrame.Parent = ss
-
-	local chipsLayout = Instance.new("UIListLayout", chipsFrame)
-	chipsLayout.FillDirection = Enum.FillDirection.Horizontal
-	chipsLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-	chipsLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	chipsLayout.Padding = UDim.new(0, 6)
-
-	local function makeChip(name, labelText, filterType)
-		local chip = Instance.new("TextButton")
-		chip.Name = name
-		chip.Text = labelText
-		chip.Size = UDim2.new(0, 0, 1, 0)
-		chip.AutomaticSize = Enum.AutomaticSize.X
-		chip.BackgroundColor3 = Color3.fromHex("#151515")
-		chip.BackgroundTransparency = 0
-		chip.BorderSizePixel = 0
-		chip.TextColor3 = Color3.fromHex("#8E8E93")
-		chip.TextSize = 11
-		chip.Font = Enum.Font.GothamMedium
-		chip.AutoButtonColor = false
-		chip.Parent = chipsFrame
-		addCorner(chip, 14)
-		local stroke = addStroke(chip, Color3.fromHex("#262626"), 1, 0)
-
-		local chipPad = Instance.new("UIPadding", chip)
-		chipPad.PaddingLeft = UDim.new(0, 12)
-		chipPad.PaddingRight = UDim.new(0, 12)
-
-		chip.MouseButton1Click:Connect(function()
-			selectPlaylist(filterType)
-		end)
-
-		UI.filterButtons[filterType] = { btn = chip, stroke = stroke }
-		return chip
-	end
-
-	makeChip("ChipAll", "🎵  Semua Lagu", "all")
-	makeChip("ChipDJ",  "🎧  DJ Playlist", "dj")
-	makeChip("ChipFav", "⭐  Favorit Saya", "favorites")
-
 	local searchDebounce
 	searchInput:GetPropertyChangedSignal("Text"):Connect(function()
 		local q = searchInput.Text
@@ -2091,7 +2236,7 @@ local function buildSearchSection()
 		searchInput.Text = ""
 		currentSearchQuery = ""
 		clearBtn.Visible = false
-		local sourceList = (activePlaylistType == "favorites") and userFavorites or defaultSongs
+		local sourceList = getActiveSongList() or {}
 		filteredSongs = sourceList
 		updateSongsTitle(false, #sourceList, "")
 		updateSongs(sourceList)
@@ -2372,7 +2517,7 @@ dispatchEvent.OnClientEvent:Connect(function(event)
 		updateQueue()
 		if clientState.currentSong then
 			local songId = clientState.currentSong.id
-			clientState.currentSong.sampul = resolveThumbnail(clientState.currentSong.sampul or clientState.currentSong.thumbnail, songId)
+			clientState.currentSong.sampul = getSongThumbnail(clientState.currentSong)
 			if UI.songNameLbl then UI.songNameLbl.Text = clientState.currentSong.judul or T.Unknown end
 			if payload.isAutoplay then
 				if UI.requesterLbl then UI.requesterLbl.Text = T.AutoplayLabel; UI.requesterLbl.TextColor3 = C.AutoplayText end
@@ -2466,12 +2611,13 @@ musicBroadcast.OnClientEvent:Connect(function(broadcastType, payload)
 	payload = payload or {}
 
 	if broadcastType == "SongUpdate" then
-		local customThumb = payload.Thumbnail or payload.thumbnail or payload.Sampul or payload.sampul
 		clientState.currentSong = {
-			id     = payload.SoundId,
-			judul  = payload.Title,
-			sampul = resolveThumbnail(customThumb, payload.SoundId),
+			id           = payload.SoundId,
+			judul        = payload.Title,
+			playlistName = payload.PlaylistName,
+			sampul       = nil,
 		}
+		clientState.currentSong.sampul = getSongThumbnail(clientState.currentSong)
 		clientState.currentUploader = payload.AddedBy
 		clientState.duration        = payload.Duration or 0
 		clientState.isPlaying       = true
@@ -2526,12 +2672,13 @@ end)
 
 musicUpdate.OnClientEvent:Connect(function(syncType, data)
 	if syncType == "SyncMusic" and data then
-		local customThumb = data.Thumbnail or data.thumbnail or data.Sampul or data.sampul
 		clientState.currentSong = {
-			id     = data.SoundId,
-			judul  = data.Title,
-			sampul = resolveThumbnail(customThumb, data.SoundId),
+			id           = data.SoundId,
+			judul        = data.Title,
+			playlistName = data.PlaylistName,
+			sampul       = nil,
 		}
+		clientState.currentSong.sampul = getSongThumbnail(clientState.currentSong)
 		clientState.currentUploader = data.AddedBy
 		clientState.duration        = data.Duration or 0
 		clientState.isPlaying       = data.IsPlaying or false
@@ -2615,14 +2762,22 @@ task.spawn(function()
 	requestSync:FireServer()
 	defaultSongs = MusicModule:GetAllMusic()
 	filteredSongs = defaultSongs
-	if UI.djSubLbl then
-		UI.djSubLbl.Text = string.format("%d Lagu • Server Auto", #defaultSongs)
+
+	if rebuildPlaylistCards then
+		rebuildPlaylistCards()
 	end
+
 	task.wait(0.5)
 	if MenuConfig.State.isMenuOpen and MenuConfig.State.currentMainTab == "Music" then
 		startProgressLoop()
 	end
-	selectPlaylist("all")
+
+	local playlists = MusicModule:GetPlaylists()
+	if #playlists > 0 and playlists[1].name then
+		selectPlaylist(playlists[1].name)
+	else
+		selectPlaylist("favorites")
+	end
 	updateMusicLayout()
 end)
 

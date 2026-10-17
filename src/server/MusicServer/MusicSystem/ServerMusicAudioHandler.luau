@@ -10,9 +10,9 @@ local CONFIG = {
 		FadeInDuration  = 1.2,
 		FadeOutDuration = 1.0,
 
-		EQ_LowGain      = 3.6,
+		EQ_LowGain      = 2.8,
 		EQ_MidGain      = 1.0,
-		EQ_HighGain     = 2.0,
+		EQ_HighGain     = 1.5,
 
 		Reverb_DecayTime = 1.05,
 		Reverb_Density   = 0.72,

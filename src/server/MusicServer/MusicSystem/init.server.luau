@@ -87,7 +87,10 @@ local Remotes = {
 }
 
 getPlaylist.OnServerInvoke = function(player)
-	return MusicModule:GetAllMusic()
+	return {
+		songs     = MusicModule:GetAllMusic(),
+		playlists = MusicModule:GetPlaylists(),
+	}
 end
 
 local queueManager      = MusicQueueManager.new(CONFIG)

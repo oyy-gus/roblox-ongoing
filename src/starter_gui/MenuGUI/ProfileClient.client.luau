@@ -443,7 +443,7 @@ local function openSheet(player)
 	canvasGroup.BackgroundColor3 = C.SheetBg
 	canvasGroup.BackgroundTransparency = 0
 	canvasGroup.BorderSizePixel = 0
-	canvasGroup.Active = true
+	canvasGroup.Active = false
 	canvasGroup.GroupTransparency = 1
 	canvasGroup.ZIndex = 50
 	canvasGroup.Parent = screenGui
@@ -501,7 +501,7 @@ local function openSheet(player)
 	avatarSection.Position = UDim2.new(0, 0, 0, 0)
 	avatarSection.BackgroundColor3 = C.AvatarBg
 	avatarSection.BorderSizePixel = 0
-	avatarSection.Active = true
+	avatarSection.Active = false
 	avatarSection.Parent = scroll
 
 	local gradientFrame = Instance.new("Frame")
@@ -620,6 +620,19 @@ local function openSheet(player)
 	hintArrow.ZIndex = 3
 	hintArrow.Parent = scrollHint
 
+	local hintBtn = Instance.new("TextButton")
+	hintBtn.Name = "HintBtn"
+	hintBtn.Size = UDim2.new(1, 0, 1, 0)
+	hintBtn.BackgroundTransparency = 1
+	hintBtn.Text = ""
+	hintBtn.ZIndex = 4
+	hintBtn.Parent = scrollHint
+	hintBtn.Activated:Connect(function()
+		TweenService:Create(scroll, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			CanvasPosition = Vector2.new(0, sheetH)
+		}):Play()
+	end)
+
 	task.spawn(function()
 		while hintPill and hintPill.Parent and isSheetOpen do
 			TweenService:Create(hintPill, TweenInfo.new(0.5, Enum.EasingStyle.Sine), {BackgroundTransparency = 0.2}):Play()
@@ -695,7 +708,7 @@ local function openSheet(player)
 			btn.MouseLeave:Connect(function()
 				TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = bgColor}):Play()
 			end)
-			btn.MouseButton1Click:Connect(function()
+			btn.Activated:Connect(function()
 				playClick()
 				onClick()
 			end)
@@ -736,7 +749,7 @@ local function openSheet(player)
 				local normalConfig = FriendConfig.GetStatusConfig(FriendConfig.GetFriendStatus(targetPlayer))
 				TweenService:Create(btn, TweenInfo.new(0.15), {BackgroundColor3 = normalConfig.color}):Play()
 			end)
-			btn.MouseButton1Click:Connect(function()
+			btn.Activated:Connect(function()
 				if btn.Active and friendTracker then
 					playClick()
 					friendTracker:HandleAction(targetPlayer, btn:GetAttribute("FriendAction"))
@@ -841,7 +854,7 @@ local function openSheet(player)
 			)
 
 			if currentGiveCloseBtn then
-				currentGiveCloseBtn.MouseButton1Click:Connect(function()
+				currentGiveCloseBtn.Activated:Connect(function()
 					playClick()
 					GiveRoleClient:Reset()
 				end)
@@ -894,7 +907,7 @@ local function openSheet(player)
 								{BackgroundColor3 = C.ItemBg}):Play()
 						end
 					end)
-					hadiahBtn.MouseButton1Click:Connect(function()
+					hadiahBtn.Activated:Connect(function()
 						if not hadiahBtn.Active then return end
 						playClick()
 						GiveRoleClient:ShowOverlayForPlayer(targetRef)
@@ -956,7 +969,7 @@ local function openSheet(player)
 	closeBtn.Parent = canvasGroup
 	ThemeModule.CreateCorner(closeBtn, B.CLOSE_CORNER)
 
-	closeBtn.MouseButton1Click:Connect(function()
+	closeBtn.Activated:Connect(function()
 		playClick()
 		closeSheet()
 	end)

@@ -375,24 +375,39 @@ local function buildVIP()
 	crn(8, inCard)
 	sk(T.Border, 1.5, 0.3, inCard)
 
-	local inBox = make("TextBox", {
-		Size              = UDim2.new(1, -90, 0, 30),
-		Position          = UDim2.new(0, 8, 0.5, 0),
-		AnchorPoint       = Vector2.new(0, 0.5),
-		BackgroundColor3  = T.Bg,
-		Text              = "",
-		PlaceholderText   = "/re  /hat id1 id2  /size 0.5",
-		Font              = Enum.Font.Code,
-		TextSize          = 12,
-		TextColor3        = T.Text,
-		PlaceholderColor3 = T.Sub,
-		ClearTextOnFocus  = false,
-		TextXAlignment    = Enum.TextXAlignment.Left,
+	local inBoxContainer = make("Frame", {
+		Size             = UDim2.new(1, -90, 0, 30),
+		Position         = UDim2.new(0, 8, 0.5, 0),
+		AnchorPoint      = Vector2.new(0, 0.5),
+		BackgroundColor3 = T.Bg,
+		ClipsDescendants = true,
+		Active           = false,
 	}, inCard)
-	crn(6, inBox)
-	make("UIPadding", {
-		PaddingLeft = UDim.new(0,8), PaddingRight = UDim.new(0,8),
-	}, inBox)
+	crn(6, inBoxContainer)
+
+	local inBox = make("TextBox", {
+		Size                   = UDim2.new(1, -16, 1, 0),
+		Position               = UDim2.new(0, 8, 0, 0),
+		BackgroundTransparency = 1,
+		BorderSizePixel        = 0,
+		Text                   = "",
+		PlaceholderText        = "/re  /hat id1 id2  /size 0.5",
+		Font                   = Enum.Font.Code,
+		TextSize               = 12,
+		TextColor3             = T.Text,
+		PlaceholderColor3      = T.Sub,
+		ClearTextOnFocus       = false,
+		TextXAlignment         = Enum.TextXAlignment.Left,
+		TextYAlignment         = Enum.TextYAlignment.Center,
+		ClipsDescendants       = true,
+		Active                 = true,
+	}, inBoxContainer)
+
+	inBoxContainer.InputBegan:Connect(function(inp)
+		if inp.UserInputType == Enum.UserInputType.MouseButton1 or inp.UserInputType == Enum.UserInputType.Touch then
+			inBox:CaptureFocus()
+		end
+	end)
 
 	local runBtn = make("TextButton", {
 		Size             = UDim2.new(0, 72, 0, 30),

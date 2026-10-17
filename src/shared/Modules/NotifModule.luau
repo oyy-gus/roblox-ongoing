@@ -208,7 +208,7 @@ local function createNotifFrame(options)
 	iconLabel.Text = options.Icon or notifType.Icon
 	iconLabel.TextColor3 = primaryColor
 	iconLabel.TextScaled = true
-	iconLabel.Font = ThemeModule.Fonts.BodyBold
+	iconLabel.Font = (ThemeModule.Fonts and ThemeModule.Fonts.BodyBold) or Enum.Font.GothamBold
 	iconLabel.ZIndex = 999999 + 1
 	iconLabel.Parent = mainFrame
 
@@ -225,7 +225,7 @@ local function createNotifFrame(options)
 	title.TextScaled = true
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextTruncate = Enum.TextTruncate.AtEnd
-	title.Font = ThemeModule.Fonts.Title
+	title.Font = (ThemeModule.Fonts and ThemeModule.Fonts.Title) or Enum.Font.GothamBold
 	title.ZIndex = 999999 + 1
 	title.Parent = mainFrame
 
@@ -243,7 +243,7 @@ local function createNotifFrame(options)
 	message.TextScaled = true
 	message.TextXAlignment = Enum.TextXAlignment.Left
 	message.TextTruncate = Enum.TextTruncate.AtEnd
-	message.Font = ThemeModule.Fonts.Body
+	message.Font = (ThemeModule.Fonts and ThemeModule.Fonts.Body) or Enum.Font.Gotham
 	message.ZIndex = 999999 + 1
 	message.Parent = mainFrame
 
@@ -281,7 +281,7 @@ local function createNotifFrame(options)
 	closeBtn.Text = "x"
 	closeBtn.TextColor3 = ThemeModule.Colors.TextWhite
 	closeBtn.TextSize = 11
-	closeBtn.Font = ThemeModule.Fonts.BodyBold
+	closeBtn.Font = (ThemeModule.Fonts and ThemeModule.Fonts.BodyBold) or Enum.Font.GothamBold
 	closeBtn.AutoButtonColor = false
 	closeBtn.BorderSizePixel = 0
 	closeBtn.ZIndex = 999999 + 3
