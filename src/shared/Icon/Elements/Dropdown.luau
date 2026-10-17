@@ -1,10 +1,10 @@
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local Themes = require(script.Parent.Parent.Features.Themes)
-local PADDING = 0 -- used to be 8
+local PADDING = 0
 return function(icon)
-	
-	local dropdown = Instance.new("Frame") -- Instance.new("CanvasGroup")
+
+	local dropdown = Instance.new("Frame")
 	dropdown.Name = "Dropdown"
 	dropdown.AutomaticSize = Enum.AutomaticSize.X
 	dropdown.BackgroundTransparency = 1
@@ -15,7 +15,6 @@ return function(icon)
 	dropdown.ClipsDescendants = true
 	dropdown.Parent = icon.widget
 
-	-- Account for PreferredTransparency which can be set by every player
 	local GuiService = game:GetService("GuiService")
 	icon:setBehaviour("Dropdown", "BackgroundTransparency", function(value)
 		local preference = GuiService.PreferredTransparency
@@ -44,7 +43,7 @@ return function(icon)
 	dropdownScroller.ZIndex = -1
 	dropdownScroller.ClipsDescendants = true
 	dropdownScroller.Visible = true
-	dropdownScroller.VerticalScrollBarInset = Enum.ScrollBarInset.None --ScrollBar
+	dropdownScroller.VerticalScrollBarInset = Enum.ScrollBarInset.None
 	dropdownScroller.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 	dropdownScroller.Active = false
 	dropdownScroller.ScrollingEnabled = true
@@ -57,7 +56,7 @@ return function(icon)
 	dropdownScroller.Active = true
 	dropdownScroller.Parent = dropdown
 
-	local TweenDuration = Instance.new("NumberValue") -- this helps to change the speed to open / close in modifyTheme()
+	local TweenDuration = Instance.new("NumberValue")
 	TweenDuration.Name = "DropdownSpeed"
 	TweenDuration.Value = 0.07
 	TweenDuration.Parent = dropdown
@@ -111,7 +110,7 @@ return function(icon)
 	end)
 
 	local function updateMaxIcons()
-		--icon:modifyTheme({"Dropdown", "Visible", icon.isSelected})
+
 		local maxIcons = dropdown:GetAttribute("MaxIcons")
 		if not maxIcons then return 0 end
 		local children = {}
@@ -137,7 +136,7 @@ return function(icon)
 		totalHeight += dropdownPadding.PaddingTop.Offset + dropdownPadding.PaddingBottom.Offset
 		return totalHeight
 	end
-	
+
 	local openTween = nil
 	local closeTween = nil
 	local currentSpeedMultiplier = nil
@@ -157,9 +156,9 @@ return function(icon)
 		return newTweenInfo
 	end
 	local function updateVisibility()
-		-- Update visibiliy of dropdown using tween transition
+
 		local tweenInfo = getTweenInfo()
-		
+
 		if openTween then
 			openTween:Cancel()
 			openTween = nil
@@ -172,8 +171,8 @@ return function(icon)
 		if icon.isSelected then
 			local height = updateMaxIcons()
 			dropdown.Visible = true
-			dropdown.BackgroundTransparency = 0 -- no transparency so it looks solid
-			dropdown.Size = UDim2.new(0, dropdown.Size.X.Offset, 0, 0) -- reset height to 0 before tween
+			dropdown.BackgroundTransparency = 0
+			dropdown.Size = UDim2.new(0, dropdown.Size.X.Offset, 0, 0)
 
 			openTween = TweenService:Create(dropdown, tweenInfo, {Size = UDim2.new(0, dropdown.Size.X.Offset, 0, height)})
 			openTween:Play()
@@ -192,7 +191,6 @@ return function(icon)
 
 	dropdownJanitor:add(icon.toggled:Connect(updateVisibility))
 	updateVisibility()
-	--task.delay(0.2, updateVisibility)
 
 	local function updateChildSize()
 		local tweenInfo = getTweenInfo()
@@ -205,26 +203,23 @@ return function(icon)
 			closeTween:Cancel()
 			closeTween = nil
 		end
-		
+
 		RunService.Heartbeat:Wait()
-		
+
 		local height = updateMaxIcons()
 
 		openTween = TweenService:Create(dropdown, tweenInfo, {Size = UDim2.new(0, dropdown.Size.X.Offset, 0, height)})
 		openTween:Play()
-		openTween.Completed:Connect(function()	
+		openTween.Completed:Connect(function()
 			openTween = nil
 		end)
 	end
 
 	dropdownJanitor:add(icon.toggled:Connect(updateVisibility))
 
-	-- Ensures canvas and size stay synced (original updateMaxIcons logic)
 	local updateCount = 0
 	local isUpdating = false
 
-	-- This updates the scrolling frame to only display a scroll
-	-- length equal to the distance produced by its MaxIcons
 	local function updateMaxIconsListener()
 		updateCount += 1
 		if isUpdating then return end
@@ -282,33 +277,30 @@ return function(icon)
 
 	dropdownJanitor:add(dropdownScroller:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(updateMaxIconsListener))
 	dropdownJanitor:add(dropdownScroller.ChildAdded:Connect(updateMaxIconsListener))
-	dropdownJanitor:add(dropdownScroller.ChildRemoved:Connect(updateChildSize)) -- rezise the dropdown when icon delects or adds
+	dropdownJanitor:add(dropdownScroller.ChildRemoved:Connect(updateChildSize))
 	dropdownJanitor:add(dropdownScroller.ChildRemoved:Connect(updateMaxIconsListener))
 	dropdownJanitor:add(dropdown:GetAttributeChangedSignal("MaxIcons"):Connect(updateMaxIconsListener))
 	dropdownJanitor:add(dropdown:GetAttributeChangedSignal("MaxIcons"):Connect(updateChildSize))
 	dropdownJanitor:add(icon.childThemeModified:Connect(updateMaxIconsListener))
 	updateMaxIconsListener()
 
-	-- Ensures each child listens to visibility changes
 	local function connectVisibilityListeners(child)
 		if child:IsA("GuiObject") then
 			child:GetPropertyChangedSignal("Visible"):Connect(updateChildSize)
-			child:GetPropertyChangedSignal("Size"):Connect(updateChildSize) -- -- update max icons when child size changes
+			child:GetPropertyChangedSignal("Size"):Connect(updateChildSize)
 		end
 	end
-	
-	-- For existing children
+
 	for _, child in pairs(dropdownScroller:GetChildren()) do
 		connectVisibilityListeners(child)
 	end
-	-- For new children
+
 	dropdownScroller.ChildAdded:Connect(function(child)
 		RunService.Heartbeat:Wait()
 		connectVisibilityListeners(child)
 		updateChildSize()
 	end)
 
-	-- On start, hide dropdown (prevent it showing as opened)
 	dropdown.Visible = false
 
 	return dropdown

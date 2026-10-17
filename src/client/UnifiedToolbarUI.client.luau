@@ -1,6 +1,3 @@
--- UnifiedToolbarUI.lua (Combined + Center + AutoScale) — Sign Removed
--- LocalScript → StarterPlayerScripts
-
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService      = game:GetService("TweenService")
@@ -9,13 +6,12 @@ local UIS               = game:GetService("UserInputService")
 local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- ════════════════════════════════════════════
---  MODULES
--- ════════════════════════════════════════════
 local Modules     = ReplicatedStorage:WaitForChild("Modules")
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
 local MenuConfig  = require(Modules:WaitForChild("MenuConfig"))
 local Icon        = require(ReplicatedStorage:WaitForChild("Icon"))
+local UIStrings   = require(Modules:WaitForChild("UIStrings"))
+local PanelAnimationController = require(Modules:WaitForChild("PanelAnimationController"))
 
 local ScalingSystem = require(
 	ReplicatedStorage
@@ -26,9 +22,6 @@ local ScalingSystem = require(
 local GS = ThemeModule.GradientSystem
 GS.Start()
 
--- ════════════════════════════════════════════
---  THEME
--- ════════════════════════════════════════════
 local function getThemeColor(name, fallback)
 	if ThemeModule and ThemeModule.Colors and ThemeModule.Colors[name] then
 		return ThemeModule.Colors[name]
@@ -51,9 +44,6 @@ local T = {
 	CloseHov  = getThemeColor("CloseRedHover", Color3.fromHex("#404040")),
 }
 
--- ════════════════════════════════════════════
---  CONSTANTS
--- ════════════════════════════════════════════
 local MAX_HAT_CLIENT = 5
 local PANEL_W        = 320
 local HEADER_H       = 44
@@ -64,9 +54,6 @@ local PANEL_H = {
 	glowstick = HEADER_H + 160,
 }
 
--- ════════════════════════════════════════════
---  STATE
--- ════════════════════════════════════════════
 local currentMode    = nil
 local currentRemote  = nil
 local menuOpen       = false
@@ -79,30 +66,23 @@ local activeToolMode = nil
 local VIPState   = { equipped = {}, currentSize = 1.0 }
 local StatusSize, StatusHats
 
--- ════════════════════════════════════════════
---  VIP REMOTES
--- ════════════════════════════════════════════
-local VIPFolder = ReplicatedStorage:FindFirstChild("VIPRemotes")
+local VIPFolder = ReplicatedStorage:WaitForChild("VIPRemotes", 10)
 local RE = {}
 if VIPFolder then
 	for _, n in ipairs({
 		"ShowIcon","RequestIcon","ResetAvatar",
 		"HatTryOn","HatInfo","SetSize","Result","SyncData"
-		}) do RE[n] = VIPFolder:FindFirstChild(n) end
+	}) do
+		RE[n] = VIPFolder:WaitForChild(n, 5)
+	end
 end
 
--- ════════════════════════════════════════════
---  TOPBARPLUS ICON
--- ════════════════════════════════════════════
 local toolIcon = Icon.new()
 toolIcon:setOrder(5)
 toolIcon:setRight()
 toolIcon:setLabel("/")
 toolIcon:setEnabled(false)
 
--- ════════════════════════════════════════════
---  SCREEN GUI + AUTO SCALE
--- ════════════════════════════════════════════
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name           = "UnifiedToolGui"
 screenGui.IgnoreGuiInset = true
@@ -114,9 +94,6 @@ screenGui.Parent         = playerGui
 
 local guiScaler = ScalingSystem.new(screenGui)
 
--- ════════════════════════════════════════════
---  HELPERS
--- ════════════════════════════════════════════
 local function make(cls, props, parent)
 	local o = Instance.new(cls)
 	for k, v in pairs(props) do o[k] = v end
@@ -154,9 +131,6 @@ local function addGrad(parent, rot, animated)
 	}, parent)
 end
 
--- ════════════════════════════════════════════
---  PANEL  (tengah layar)
--- ════════════════════════════════════════════
 local panel = make("Frame", {
 	Name                   = "ToolPanel",
 	AnchorPoint            = Vector2.new(0.5, 0.5),
@@ -171,8 +145,8 @@ local panel = make("Frame", {
 }, screenGui)
 crn(14, panel)
 ThemeModule.CreateAnimatedStroke(panel, 1.5, "Primary", 1.2)
+local panelAnim = PanelAnimationController.new(panel, { CollapsedHeight = HEADER_H })
 
--- ── HEADER ──────────────────────────────────
 local header = make("Frame", {
 	Size             = UDim2.new(1, 0, 0, HEADER_H),
 	BackgroundColor3 = T.Card,
@@ -215,7 +189,6 @@ local closeBtn = make("TextButton", {
 }, header)
 crn(6, closeBtn)
 
--- ── BODY ────────────────────────────────────
 local body = make("Frame", {
 	Size                   = UDim2.new(1, 0, 1, -HEADER_H),
 	Position               = UDim2.new(0, 0, 0, HEADER_H),
@@ -223,9 +196,6 @@ local body = make("Frame", {
 	ClipsDescendants       = true,
 }, panel)
 
--- ════════════════════════════════════════════
---  VIP CONTENT  (scrollable)
--- ════════════════════════════════════════════
 local vipContent = make("Frame", {
 	Name                   = "VIPContent",
 	Size                   = UDim2.new(1, 0, 1, 0),
@@ -260,9 +230,6 @@ make("UIPadding", {
 	PaddingRight  = UDim.new(0, 8),
 }, vipScroll)
 
--- ════════════════════════════════════════════
---  GLOWSTICK CONTENT
--- ════════════════════════════════════════════
 local glowContent = make("Frame", {
 	Name                   = "GlowContent",
 	Size                   = UDim2.new(1, 0, 1, 0),
@@ -320,7 +287,6 @@ make("TextLabel", {
 	TextXAlignment         = Enum.TextXAlignment.Center,
 }, glowContent)
 
--- ── PALET WARNA ─────────────────────────────
 local palette = {
 	{ Color3.fromRGB(255,255,255), "Putih"     },
 	{ Color3.fromRGB(255,0,  0  ), "Merah"     },
@@ -368,35 +334,17 @@ for i, data in ipairs(palette) do
 	end)
 end
 
--- ════════════════════════════════════════════
---  ANIMASI PANEL
--- ════════════════════════════════════════════
 local function showPanel()
 	local h = PANEL_H[currentMode] or PANEL_H.vip
-	panel.Size                   = UDim2.new(0, PANEL_W, 0, HEADER_H)
-	panel.BackgroundTransparency = 1
-	panel.Visible                = true
-	menuOpen                     = true
-	TweenService:Create(panel,
-		TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-		{ BackgroundTransparency = 0, Size = UDim2.new(0, PANEL_W, 0, h) }
-	):Play()
+	menuOpen = true
+	panelAnim:Open(h)
 end
 
 local function hidePanel()
 	menuOpen = false
-	TweenService:Create(panel,
-		TweenInfo.new(0.18, Enum.EasingStyle.Quart, Enum.EasingDirection.In),
-		{ BackgroundTransparency = 1, Size = UDim2.new(0, PANEL_W, 0, HEADER_H) }
-	):Play()
-	task.delay(0.22, function()
-		if not menuOpen then panel.Visible = false end
-	end)
+	panelAnim:Close()
 end
 
--- ════════════════════════════════════════════
---  BUILD VIP  (sekali saja)
--- ════════════════════════════════════════════
 local function buildVIP()
 	if vipBuilt then return end
 	vipBuilt = true
@@ -419,7 +367,6 @@ local function buildVIP()
 		addGrad(lbl, 0, true)
 	end
 
-	-- ── INPUT CARD ──────────────────────────
 	local inCard = make("Frame", {
 		Size             = UDim2.new(1, 0, 0, 40),
 		BackgroundColor3 = T.Card,
@@ -452,7 +399,7 @@ local function buildVIP()
 		Position         = UDim2.new(1, -52, 0.5, 0),
 		AnchorPoint      = Vector2.new(0, 0.5),
 		BackgroundColor3 = T.Accent,
-		Text             = "▶ Run",
+		Text             = "▶ Jalankan",
 		Font             = Enum.Font.GothamBold,
 		TextSize         = 11,
 		TextColor3       = Color3.fromRGB(30,30,30),
@@ -492,7 +439,6 @@ local function buildVIP()
 	runBtn.MouseButton1Click:Connect(function() run(inBox.Text) end)
 	inBox.FocusLost:Connect(function(enter) if enter then run(inBox.Text) end end)
 
-	-- ── QUICK ACTIONS (2×2) ──────────────────
 	secLabel(2, "⚡  AKSI CEPAT")
 
 	local qGrid = make("Frame", {
@@ -508,10 +454,10 @@ local function buildVIP()
 	}, qGrid)
 
 	local quick = {
-		{ "🔄", "Reset Avatar", resetAvatar },
-		{ "🔬", "Size 0.3×",   function() if RE.SetSize then RE.SetSize:FireServer(0.3) end end },
-		{ "👤", "Size Normal",  function() if RE.SetSize then RE.SetSize:FireServer(1.0) end end },
-		{ "📏", "Size 0.5×",   function() if RE.SetSize then RE.SetSize:FireServer(0.5) end end },
+		{ "🔄", UIStrings.VIP.ResetAvatar, resetAvatar },
+		{ "🔬", "Ukuran 0.3×",   function() if RE.SetSize then RE.SetSize:FireServer(0.3) end end },
+		{ "👤", "Ukuran Normal",  function() if RE.SetSize then RE.SetSize:FireServer(1.0) end end },
+		{ "📏", "Ukuran 0.5×",   function() if RE.SetSize then RE.SetSize:FireServer(0.5) end end },
 	}
 	for i, q in ipairs(quick) do
 		local b = make("TextButton", {
@@ -535,7 +481,6 @@ local function buildVIP()
 		b.MouseLeave:Connect(function() tw(b, 0.12, { BackgroundColor3=T.Card,      TextColor3=T.TextDim }) end)
 	end
 
-	-- ── SIZE PRESETS (1×4) ───────────────────
 	secLabel(4, "📏  PRESET UKURAN")
 
 	local sGrid = make("Frame", {
@@ -572,10 +517,9 @@ local function buildVIP()
 		b.MouseLeave:Connect(function() tw(b, 0.12, { BackgroundColor3=T.Card,      TextColor3=T.TextDim }) end)
 	end
 
-	-- ── HELP CARD ────────────────────────────
 	local helpRows = {
-		{ cmd = "/re",          desc = "→ Reset avatar & aksesoris" },
-		{ cmd = "/hat id1 id2", desc = "→ Pakai hat (maks 5 ID)" },
+		{ cmd = "/re",          desc = "→ Atur ulang avatar & aksesori" },
+		{ cmd = "/hat id1 id2", desc = "→ Pakai aksesori (maks 5 ID)" },
 		{ cmd = "/size [n]",    desc = "→ Ukuran karakter (0.3–1.0)" },
 	}
 	local CMD_H, DESC_H, ROW_GAP = 13, 13, 6
@@ -653,7 +597,6 @@ local function buildVIP()
 		yOff = yOff + DESC_H + ROW_GAP
 	end
 
-	-- ── STATUS CARD ──────────────────────────
 	local stat = make("Frame", {
 		Name             = "StatusCard",
 		Size             = UDim2.new(1, 0, 0, 42),
@@ -702,39 +645,30 @@ local function buildVIP()
 	}, sc)
 end
 
--- ════════════════════════════════════════════
---  UPDATE STATUS
--- ════════════════════════════════════════════
 local function updateStatus()
 	if not StatusSize or not StatusHats then return end
-	StatusSize.Text = string.format("📏 Size: %.2f×", VIPState.currentSize)
+	StatusSize.Text = string.format(UIStrings.VIP.SizeStatus, VIPState.currentSize)
 	local n = 0
 	for _ in pairs(VIPState.equipped) do n += 1 end
-	StatusHats.Text = "🎩 Hats: " .. n
+	StatusHats.Text = string.format(UIStrings.VIP.HatsStatus, n)
 end
 
--- ════════════════════════════════════════════
---  SWITCH MODE
--- ════════════════════════════════════════════
 local function switchMode(mode)
 	currentMode         = mode
 	vipContent.Visible  = (mode == "vip")
 	glowContent.Visible = (mode == "glowstick")
 
 	if mode == "vip" then
-		modeIcon.Text   = "[V]"
-		titleLabel.Text = "VIP Commands"
+		modeIcon.Text   = UIStrings.VIP.PrefixV
+		titleLabel.Text = UIStrings.VIP.Title
 		buildVIP()
 		updateStatus()
 	elseif mode == "glowstick" then
-		modeIcon.Text   = "[G]"
-		titleLabel.Text = "Glowstick – Warna"
+		modeIcon.Text   = UIStrings.VIP.PrefixG
+		titleLabel.Text = UIStrings.VIP.GlowstickTitle
 	end
 end
 
--- ════════════════════════════════════════════
---  ICON STATE
--- ════════════════════════════════════════════
 local function refreshIcon()
 	if activeToolMode then
 		switchMode(activeToolMode)
@@ -755,9 +689,6 @@ local function hideTool()
 	activeToolMode = nil; currentRemote = nil; refreshIcon()
 end
 
--- ════════════════════════════════════════════
---  TOPBARPLUS EVENTS
--- ════════════════════════════════════════════
 toolIcon.selected:Connect(function()
 	if not currentMode then return end
 	showPanel()
@@ -772,9 +703,6 @@ closeBtn.MouseLeave:Connect(function()
 	tw(closeBtn, 0.1, { BackgroundColor3 = T.Close, TextColor3 = T.Text })
 end)
 
--- ════════════════════════════════════════════
---  TOOL BINDING
--- ════════════════════════════════════════════
 local function bindGlow(tool)
 	if boundTools[tool] then return end
 	if not tool.Name:lower():find("glowstick") then return end
@@ -823,9 +751,6 @@ local function scan(parent)
 	end)
 end
 
--- ════════════════════════════════════════════
---  VIP REMOTE LISTENERS
--- ════════════════════════════════════════════
 if RE.ShowIcon then
 	RE.ShowIcon.OnClientEvent:Connect(function(v)
 		isVIP = v
@@ -853,16 +778,10 @@ if RE.SyncData then
 	end)
 end
 
--- ════════════════════════════════════════════
---  CLEANUP
--- ════════════════════════════════════════════
 screenGui.Destroying:Connect(function()
 	if guiScaler then guiScaler:Destroy() end
 end)
 
--- ════════════════════════════════════════════
---  INIT
--- ════════════════════════════════════════════
 task.spawn(function()
 	scan(player:WaitForChild("Backpack", 10))
 	if player.Character then scan(player.Character) end
@@ -880,4 +799,4 @@ task.spawn(function()
 	if RE.RequestIcon then RE.RequestIcon:FireServer() end
 end)
 
-print("✅ UnifiedToolbarUI — AutoScale + Center + Combined (Sign Removed)")
+print("✅ UnifiedToolbarUI — AutoScale + Tengah + Tergabung Siap")

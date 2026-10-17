@@ -1,8 +1,3 @@
--- ============================================================
--- VIP COMMAND SERVER
--- Place in: StarterScriptService > VIPBanefit(Folder) > VIPCommandServer(Script)
--- ============================================================
-
 local ServerStorage      = game:GetService("ServerStorage")
 local Players            = game:GetService("Players")
 local ReplicatedStorage  = game:GetService("ReplicatedStorage")
@@ -11,9 +6,6 @@ local MarketplaceService = game:GetService("MarketplaceService")
 
 local RoleSystem = require(ServerStorage.Modules.RoleSystem)
 
--- ============================================================
--- CONFIG
--- ============================================================
 local Config = {
 	DebugMode          = true,
 	RequiredRole       = "VIP",
@@ -31,9 +23,6 @@ local Config = {
 	ShowIconRetryGap = 0.5,
 }
 
--- ============================================================
--- BINDABLE: RefreshOverhead
--- ============================================================
 local RefreshOverheadEvent = ServerStorage:FindFirstChild("RefreshOverheadEvent")
 if not RefreshOverheadEvent then
 	RefreshOverheadEvent = Instance.new("BindableEvent")
@@ -41,9 +30,6 @@ if not RefreshOverheadEvent then
 	RefreshOverheadEvent.Parent = ServerStorage
 end
 
--- ============================================================
--- REMOTE SETUP
--- ============================================================
 local Folder = ReplicatedStorage:FindFirstChild("VIPRemotes") or Instance.new("Folder")
 Folder.Name   = "VIPRemotes"
 Folder.Parent = ReplicatedStorage
@@ -66,17 +52,11 @@ local RE = {
 	SyncData    = remote("RemoteEvent",    "SyncData"),
 }
 
--- ============================================================
--- DEBUG
--- ============================================================
 local function log(msg, ok)
 	if not Config.DebugMode then return end
 	print((ok and "🟢 [✓]" or "🔴 [✗]") .. " [VIPCmd] " .. msg)
 end
 
--- ============================================================
--- ROLE CHECK
--- ============================================================
 local function hasAccess(player)
 	local role = RoleSystem:GetPlayerRole(player)
 	if Config.IncludeHigherRoles then
@@ -87,9 +67,6 @@ local function hasAccess(player)
 	return role == Config.RequiredRole, role
 end
 
--- ============================================================
--- PLAYER DATA
--- ============================================================
 local PlayerData = {}
 
 local function getData(player)
@@ -102,9 +79,6 @@ local function getData(player)
 	return PlayerData[player.UserId]
 end
 
--- ============================================================
--- MARKETPLACE CACHE
--- ============================================================
 local InfoCache = {}
 
 local function getItemInfo(assetId)
@@ -114,26 +88,23 @@ local function getItemInfo(assetId)
 	end)
 	if ok and info then
 		local typeNames = {
-			[8]="Hat",[41]="Hair Accessory",[42]="Face Accessory",
-			[43]="Neck Accessory",[44]="Shoulder Accessory",[45]="Front Accessory",
-			[46]="Back Accessory",[47]="Waist Accessory",[17]="Head",[18]="Face",
-			[27]="Torso",[11]="Shirt",[12]="Pants",[2]="T-Shirt",
+			[8]="Topi",[41]="Aksesori Rambut",[42]="Aksesori Wajah",
+			[43]="Aksesori Leher",[44]="Aksesori Pundak",[45]="Aksesori Depan",
+			[46]="Aksesori Belakang",[47]="Aksesori Pinggang",[17]="Kepala",[18]="Wajah",
+			[27]="Badan",[11]="Baju",[12]="Celana",[2]="Kaos",
 		}
 		local result = {
 			name     = info.Name or ("Item "..assetId),
 			assetType= info.AssetTypeId or 0,
-			creator  = (info.Creator and info.Creator.Name) or "Unknown",
-			typeName = typeNames[info.AssetTypeId] or ("Type "..tostring(info.AssetTypeId)),
+			creator  = (info.Creator and info.Creator.Name) or "Tidak Diketahui",
+			typeName = typeNames[info.AssetTypeId] or ("Tipe "..tostring(info.AssetTypeId)),
 		}
 		InfoCache[assetId] = result
 		return result
 	end
-	return { name="Unknown Item", assetType=0, creator="Unknown", typeName="Unknown" }
+	return { name="Item Tidak Diketahui", assetType=0, creator="Tidak Diketahui", typeName="Tidak Diketahui" }
 end
 
--- ============================================================
--- SYNC DATA KE CLIENT
--- ============================================================
 local function syncClient(player)
 	local d = getData(player)
 	RE.SyncData:FireClient(player, {
@@ -142,9 +113,6 @@ local function syncClient(player)
 	})
 end
 
--- ============================================================
--- HELPER: terapkan scale ke humanoid
--- ============================================================
 local function applySize(hum, sizeVal)
 	hum.BodyDepthScale.Value  = sizeVal
 	hum.BodyHeightScale.Value = sizeVal
@@ -152,9 +120,6 @@ local function applySize(hum, sizeVal)
 	hum.HeadScale.Value       = sizeVal
 end
 
--- ============================================================
--- SHOW ICON
--- ============================================================
 local function showIconForPlayer(player, shouldShow)
 	RE.ShowIcon:FireClient(player, shouldShow)
 	log(player.Name .. " icon=" .. tostring(shouldShow) .. " (attempt 1)", shouldShow)
@@ -170,9 +135,6 @@ local function showIconForPlayer(player, shouldShow)
 	end
 end
 
--- ============================================================
--- COMMAND: /re — reset avatar + semua hat
--- ============================================================
 local function cmdReset(player)
 	local char = player.Character
 	if not char then return false, "Karakter tidak ditemukan" end
@@ -192,14 +154,13 @@ local function cmdReset(player)
 	end
 
 	root.Anchored = true
-	humanoid:ApplyDescription(desc)  -- otomatis hapus semua aksesori VIP dari karakter
+	humanoid:ApplyDescription(desc)
 	task.wait()
 
 	root.CFrame     = lastCFrame
 	humanoid.Health = lastHealth
 	root.Anchored   = false
 
-	-- Reset data server
 	local d = getData(player)
 	d.equipped    = {}
 	d.currentSize = 1.0
@@ -212,9 +173,6 @@ local function cmdReset(player)
 	return true, "Avatar & aksesoris direset ke tampilan asli!"
 end
 
--- ============================================================
--- COMMAND: /hat [id] — single, dengan TOGGLE
--- ============================================================
 local function cmdHatTryOnSingle(player, assetId)
 	local d    = getData(player)
 	local char = player.Character
@@ -222,7 +180,6 @@ local function cmdHatTryOnSingle(player, assetId)
 
 	local tag = Config.TagPrefix .. tostring(assetId)
 
-	-- TOGGLE: sudah terpasang → lepas
 	if d.equipped[tag] then
 		local item = char:FindFirstChild(tag)
 		if item then pcall(function() item:Destroy() end) end
@@ -232,7 +189,6 @@ local function cmdHatTryOnSingle(player, assetId)
 		return true, "🗑️ Lepas: "..info.name
 	end
 
-	-- Cek batas maks
 	local count = 0
 	for _ in pairs(d.equipped) do count = count + 1 end
 	if count >= Config.MaxEquipped then
@@ -273,9 +229,6 @@ local function cmdHatTryOnSingle(player, assetId)
 	return true, "✅ Pakai: "..info.name.." ["..info.typeName.."]"
 end
 
--- ============================================================
--- COMMAND: /hat [id1] [id2] ... — multi (maks 5), urut dari id pertama
--- ============================================================
 local function cmdHatTryOn(player, ids)
 	if type(ids) == "number" then ids = { ids } end
 
@@ -310,9 +263,6 @@ local function cmdHatTryOn(player, ids)
 	return true, string.format("🎩 %d/%d item diproses", successCount, #results)
 end
 
--- ============================================================
--- COMMAND: /size [0.3-1]
--- ============================================================
 local function cmdSize(player, sizeVal)
 	sizeVal = math.clamp(sizeVal, Config.SizeMin, Config.SizeMax)
 
@@ -333,23 +283,18 @@ local function cmdSize(player, sizeVal)
 	return true, string.format("Ukuran diubah ke %.2fx", sizeVal)
 end
 
--- ============================================================
--- CHAT COMMAND PARSER
--- ============================================================
 local function parseChat(player, message)
 	local ok, _ = hasAccess(player)
 	if not ok then return end
 
 	message = message:lower():match("^%s*(.-)%s*$")
 
-	-- /re
 	if message == "/re" then
 		local success, msg = cmdReset(player)
 		RE.Result:FireClient(player, success, msg)
 		return
 	end
 
-	-- /hat [id1] [id2] ...
 	local hatArgs = message:match("^/hat%s+(.+)$")
 	if hatArgs then
 		local ids = {}
@@ -371,7 +316,6 @@ local function parseChat(player, message)
 		return
 	end
 
-	-- /size [n]
 	local sizeStr = message:match("^/size%s+([%d%.]+)$")
 	if sizeStr then
 		local sizeVal = tonumber(sizeStr)
@@ -385,9 +329,6 @@ local function parseChat(player, message)
 	end
 end
 
--- ============================================================
--- REMOTE EVENT HANDLERS
--- ============================================================
 RE.ResetAvatar.OnServerEvent:Connect(function(player)
 	if not hasAccess(player) then return end
 	local ok, msg = cmdReset(player)
@@ -435,9 +376,6 @@ RE.RequestIcon.OnServerEvent:Connect(function(player)
 	log(player.Name .. " requested icon state → " .. tostring(ok), ok)
 end)
 
--- ============================================================
--- PLAYER LIFECYCLE
--- ============================================================
 local function onCharacterAdded(character, player)
 	local d = getData(player)
 	d.equipped    = {}

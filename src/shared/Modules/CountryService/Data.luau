@@ -255,5 +255,3 @@ local countries: {[string]: Country} = {
 }
 
 return countries
-
--- ========================================

@@ -1,8 +1,3 @@
--- ====================================
--- GIVE ROLE CLIENT - FINAL COMPLETE VERSION
--- Place in: ReplicatedStorage > GiveModule > GiveRoleClient(ModuleScript)
--- ====================================
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -13,7 +8,7 @@ local GiveRoleConfig = require(
 local giveRoleRemote = ReplicatedStorage:WaitForChild("GiveRoleRemote")
 
 if not giveRoleRemote then
-	warn("[GiveRoleClient] GiveRoleRemote not found!")
+	warn("[GiveRoleClient] GiveRoleRemote tidak ditemukan!")
 end
 
 local function debugPrint(...)
@@ -24,9 +19,6 @@ end
 
 local GiveRoleClient = {}
 
--- ==============================
--- STATE
--- ==============================
 GiveRoleClient.currentTargetPlayer = nil
 GiveRoleClient.currentRoleInfo     = nil
 GiveRoleClient.isChecking          = false
@@ -38,9 +30,6 @@ GiveRoleClient._initialized        = false
 GiveRoleClient._callbackMode       = false
 GiveRoleClient._pendingCallback    = nil
 
--- ==============================
--- UI HELPERS
--- ==============================
 local function setLoadingText(text, color)
 	if GiveRoleClient.loadingText then
 		GiveRoleClient.loadingText.Text = text
@@ -59,9 +48,6 @@ local function setButtonState(enabled, text)
 	if text then btn.Text = text end
 end
 
--- ==============================
--- INITIALIZE
--- ==============================
 function GiveRoleClient:Initialize(giveFrame, roleBtn, loadingText, closeCallback)
 	self.giveFrame    = giveFrame
 	self.roleBtn      = roleBtn
@@ -84,10 +70,6 @@ function GiveRoleClient:Initialize(giveFrame, roleBtn, loadingText, closeCallbac
 	debugPrint("Initialized")
 end
 
--- ==============================
--- BACKGROUND CHECK (TANPA BUKA OVERLAY)
--- Dipakai saat profile card dibuka
--- ==============================
 function GiveRoleClient:CheckPlayerRoleAsync(targetPlayer, callback)
 	if not targetPlayer then
 		if callback then callback(nil) end
@@ -112,15 +94,11 @@ function GiveRoleClient:CheckPlayerRoleAsync(targetPlayer, callback)
 	})
 end
 
--- ==============================
--- OPEN OVERLAY & CHECK
--- Dipakai sebagai fallback
--- ==============================
 function GiveRoleClient:CheckPlayerRole(targetPlayer)
 	if not targetPlayer then return end
 	if self.isChecking then return end
 	if not self._initialized then
-		warn("[GiveRoleClient] Not initialized!")
+		warn("[GiveRoleClient] Belum diinisialisasi!")
 		return
 	end
 
@@ -145,10 +123,6 @@ function GiveRoleClient:CheckPlayerRole(targetPlayer)
 	})
 end
 
--- ==============================
--- TAMPILKAN OVERLAY (DATA SUDAH ADA)
--- Dipakai saat tombol Hadiah diklik
--- ==============================
 function GiveRoleClient:ShowOverlayForPlayer(targetPlayer)
 	if not self._initialized then
 		warn("[GiveRoleClient] Not initialized!")
@@ -159,7 +133,7 @@ function GiveRoleClient:ShowOverlayForPlayer(targetPlayer)
 
 	local stillHere = Players:GetPlayerByUserId(targetPlayer.UserId)
 	if not stillHere then
-		warn("[GiveRoleClient] Target player left")
+		warn("[GiveRoleClient] Pemain target telah keluar")
 		return
 	end
 
@@ -179,19 +153,15 @@ function GiveRoleClient:ShowOverlayForPlayer(targetPlayer)
 			"VIP - " .. GiveRoleConfig.Prices.VIP .. " R$"
 		)
 	else
-		-- Fallback: cek ulang
+
 		self:CheckPlayerRole(targetPlayer)
 	end
 end
 
--- ==============================
--- HANDLE HASIL CEK DARI SERVER
--- ==============================
 function GiveRoleClient:HandleCheckResult(roleInfo)
 	self.isChecking    = false
 	self.currentRoleInfo = roleInfo
 
-	-- Mode background -> panggil callback, jangan update overlay
 	if self._callbackMode and self._pendingCallback then
 		local cb              = self._pendingCallback
 		self._pendingCallback = nil
@@ -201,17 +171,16 @@ function GiveRoleClient:HandleCheckResult(roleInfo)
 		return
 	end
 
-	-- Mode overlay -> update UI
 	if not roleInfo.canReceive then
 		if roleInfo.reason == "has_vip" then
 			setLoadingText(
-				"Player sudah memiliki VIP",
+				"Pemain sudah memiliki VIP",
 				Color3.fromRGB(255, 200, 100)
 			)
 			setButtonState(false, "Sudah VIP")
 		elseif roleInfo.reason == "staff" then
 			setLoadingText(
-				"Player adalah " .. (roleInfo.currentRole or "Staff"),
+				"Pemain memiliki role " .. (roleInfo.currentRole or "Staf"),
 				Color3.fromRGB(255, 100, 100)
 			)
 			setButtonState(false, "Tidak Tersedia")
@@ -232,7 +201,7 @@ function GiveRoleClient:HandleCheckResult(roleInfo)
 		end
 	else
 		setLoadingText(
-			"Player belum memiliki VIP\nKlik untuk memberikan hadiah",
+			"Pemain belum memiliki VIP\nKlik untuk memberikan hadiah",
 			Color3.fromRGB(100, 200, 255)
 		)
 		setButtonState(
@@ -242,24 +211,21 @@ function GiveRoleClient:HandleCheckResult(roleInfo)
 	end
 end
 
--- ==============================
--- INITIATE PURCHASE
--- ==============================
 function GiveRoleClient:InitiatePurchase()
 	if not self.currentTargetPlayer then
-		warn("[GiveRoleClient] No target")
+		warn("[GiveRoleClient] Tidak ada target")
 		return
 	end
 
 	if not self.currentRoleInfo or not self.currentRoleInfo.canReceive then
-		warn("[GiveRoleClient] Target cannot receive VIP")
+		warn("[GiveRoleClient] Target tidak dapat menerima VIP")
 		return
 	end
 
 	local targetUserId = self.currentTargetPlayer.UserId
 	local stillHere    = Players:GetPlayerByUserId(targetUserId)
 	if not stillHere then
-		setLoadingText("Player sudah keluar dari game", Color3.fromRGB(255, 100, 100))
+		setLoadingText("Pemain sudah keluar dari game", Color3.fromRGB(255, 100, 100))
 		task.delay(1.5, function()
 			if self.giveFrame then self.giveFrame.Visible = false end
 			if self.closeCallback then self.closeCallback() end
@@ -280,9 +246,6 @@ function GiveRoleClient:InitiatePurchase()
 	})
 end
 
--- ==============================
--- HANDLE PURCHASE RESULT
--- ==============================
 function GiveRoleClient:HandlePurchaseComplete(success, message)
 	if success then
 		setLoadingText("✓ " .. (message or "VIP berhasil dikirim!"), Color3.fromRGB(100, 255, 100))
@@ -302,7 +265,7 @@ function GiveRoleClient:HandlePurchaseComplete(success, message)
 		task.delay(1.5, function()
 			if self.currentRoleInfo and self.currentRoleInfo.canReceive then
 				setLoadingText(
-					"Player belum memiliki VIP\nKlik untuk memberikan hadiah",
+					"Pemain belum memiliki VIP\nKlik untuk memberikan hadiah",
 					Color3.fromRGB(100, 200, 255)
 				)
 				setButtonState(
@@ -314,9 +277,6 @@ function GiveRoleClient:HandlePurchaseComplete(success, message)
 	end
 end
 
--- ==============================
--- RESET SEMUA STATE
--- ==============================
 function GiveRoleClient:Reset()
 	self.isChecking          = false
 	self.currentTargetPlayer = nil
@@ -335,9 +295,6 @@ function GiveRoleClient:Reset()
 	debugPrint("Reset")
 end
 
--- ==============================
--- REMOTE LISTENER
--- ==============================
 giveRoleRemote.OnClientEvent:Connect(function(data)
 	if typeof(data) ~= "table" then return end
 	if data.source ~= "PlayerMenu" then return end
@@ -368,6 +325,3 @@ giveRoleRemote.OnClientEvent:Connect(function(data)
 end)
 
 return GiveRoleClient
-
--- ====================================
--- GIVE ROLE CONFIG

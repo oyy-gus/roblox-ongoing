@@ -1,6 +1,3 @@
--- Place in: StarterGui > EmoteGui(ScreenGui) > EmoteClient(LocalScript)
--- ====================================
-
 local Players           = game:GetService("Players")
 local HttpService       = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -14,9 +11,6 @@ local playerGui = player:WaitForChild("PlayerGui")
 
 local TOPBAR_CONFIG = { Alignment = "left", InitDelay = 2 }
 
--- ============================================
--- REMOTES & MODULES
--- ============================================
 local remotes                          = ReplicatedStorage:WaitForChild("SyncRemotes")
 local updateFavoritedAnimationsEventRE = remotes:WaitForChild("updateFavoritedAnimationsEvent")
 local animationStartRF                 = remotes:WaitForChild("animationStart")
@@ -55,6 +49,8 @@ local AnimatorUtils      = require(SyncModule:WaitForChild("AnimatorUtils"))
 local ThemeModule        = require(Modules:WaitForChild("ThemeModule"))
 local NotifModule        = require(Modules:WaitForChild("NotifModule"))
 local ScaleSystem        = require(AutoScaleSystem:WaitForChild("ScaleSystem"))
+local UIStrings          = require(Modules:WaitForChild("UIStrings"))
+local PanelAnimationController = require(Modules:WaitForChild("PanelAnimationController"))
 
 AnimatorUtils.AnimationPreloader = AnimationPreloader
 
@@ -76,9 +72,6 @@ local function gradient(parent, colorSeq, rot)
 	g.Parent   = parent
 end
 
--- ====================================
--- DIMENSIONS
--- ====================================
 local FRAME_W  = 300
 local FRAME_H  = 440
 local PAD      = 10
@@ -97,12 +90,8 @@ local CONT_H   = FRAME_H - CONT_TOP - CONT_BOT
 local BTN_HEIGHT  = 48
 local BTN_SPACING = 8
 
--- ====================================
 local ContextActionService = game:GetService("ContextActionService")
 
--- ====================================
--- GUI SETUP
--- ====================================
 local gui = playerGui:WaitForChild("EmoteGui")
 if gui:IsA("ScreenGui") then
 	gui.IgnoreGuiInset = true
@@ -110,11 +99,8 @@ if gui:IsA("ScreenGui") then
 end
 
 local scaler = ScaleSystem.new(gui)
-print("[EmoteHandler] AutoScale applied - Current scale:", scaler:GetCurrentScale())
+print("[MenuAnimasi] Skala otomatis diterapkan - Skala saat ini:", scaler:GetCurrentScale())
 
--- ====================================
--- MAINFRAME
--- ====================================
 local mainframe = Instance.new("Frame")
 mainframe.Name             = "MainFrame"
 mainframe.Size             = UDim2.new(0, FRAME_W, 0, FRAME_H)
@@ -130,8 +116,8 @@ mainframe.Parent           = gui
 corner(mainframe, 12)
 gradient(mainframe, G.Background, 135)
 ThemeModule.CreateAnimatedStroke(mainframe, 2, "Primary", 1.2)
+local emoteAnim = PanelAnimationController.new(mainframe, { CollapsedHeight = HDR_H })
 
--- DRAG FUNCTIONALITY
 do
 	local dragging, dragStart, startPos = false, nil, nil
 	local function endDrag()
@@ -182,9 +168,6 @@ do
 	end)
 end
 
--- ====================================
--- HEADER
--- ====================================
 local headerFrame = Instance.new("Frame")
 headerFrame.Name             = "HeaderFrame"
 headerFrame.Size             = UDim2.new(1, 0, 0, HDR_H)
@@ -215,7 +198,7 @@ headerLabel.Name             = "Header"
 headerLabel.Size             = UDim2.new(1, -60, 1, 0)
 headerLabel.Position         = UDim2.new(0, 20, 0, 0)
 headerLabel.BackgroundTransparency = 1
-headerLabel.Text             = "EMOTE"
+headerLabel.Text             = UIStrings.Emote.Title
 headerLabel.TextColor3       = C.Primary1
 headerLabel.TextSize         = 15
 headerLabel.Font             = Enum.Font.GothamBold
@@ -252,9 +235,6 @@ closeBtn.MouseLeave:Connect(function()
 	}):Play()
 end)
 
--- ====================================
--- SEARCH BOX + RESET BUTTON
--- ====================================
 local searchWrapper = Instance.new("Frame")
 searchWrapper.Name             = "SearchWrapper"
 searchWrapper.Size             = UDim2.new(1, -(PAD*2), 0, SRCH_H)
@@ -273,7 +253,7 @@ searchBox.Size              = UDim2.new(1, -30, 1, 0)
 searchBox.Position          = UDim2.new(0, 0, 0, 0)
 searchBox.BackgroundTransparency = 1
 searchBox.TextColor3        = C.TextWhite
-searchBox.PlaceholderText   = "Search emote..."
+searchBox.PlaceholderText   = UIStrings.Emote.SearchPlaceholder
 searchBox.PlaceholderColor3 = C.TextMuted
 searchBox.Text              = ""
 searchBox.TextSize          = 13
@@ -318,9 +298,6 @@ resetBtn.MouseButton1Click:Connect(function()
 	searchBox.Text = ""
 end)
 
--- ====================================
--- TAB BAR
--- ====================================
 local tabBar = Instance.new("Frame")
 tabBar.Name             = "TabBar"
 tabBar.Size             = UDim2.new(1, -(PAD*2), 0, TAB_H)
@@ -366,9 +343,9 @@ local function makeTabBtn(name, text, order)
 	return btn
 end
 
-local danceBtn    = makeTabBtn("Dance",    "Dance", 1)
-local poseBtn     = makeTabBtn("Pose",     "Pose",  2)
-local favoriteBtn = makeTabBtn("Favorite", "Fav",   3)
+local danceBtn    = makeTabBtn("Dance",    UIStrings.Emote.TabDance, 1)
+local poseBtn     = makeTabBtn("Pose",     UIStrings.Emote.TabPose,  2)
+local favoriteBtn = makeTabBtn("Favorite", UIStrings.Emote.TabFavorite,   3)
 
 local function attachTabGradient(btn)
 	local g = Instance.new("UIGradient")
@@ -386,9 +363,6 @@ ThemeModule.GradientSystem.Register(danceGrad, 1)
 ThemeModule.GradientSystem.Register(poseGrad, 1)
 ThemeModule.GradientSystem.Register(favoriteGrad, 1)
 
--- ====================================
--- CONTAINER + SCROLLING LIST
--- ====================================
 local containerframe = Instance.new("Frame")
 containerframe.Name             = "Container"
 containerframe.Size             = UDim2.new(1, -(PAD*2), 0, CONT_H)
@@ -447,10 +421,10 @@ templateBtnInner.Font                   = Enum.Font.GothamMedium
 templateBtnInner.TextXAlignment         = Enum.TextXAlignment.Left
 templateBtnInner.TextTruncate           = Enum.TextTruncate.AtEnd
 templateBtnInner.Parent                 = templateframe
-do 
+do
 	local p = Instance.new("UIPadding")
 	p.PaddingLeft = UDim.new(0, 16)
-	p.Parent = templateBtnInner 
+	p.Parent = templateBtnInner
 end
 
 local templateFavBtn = Instance.new("TextButton")
@@ -465,9 +439,6 @@ templateFavBtn.TextSize               = 20
 templateFavBtn.Font                   = Enum.Font.GothamBold
 templateFavBtn.Parent                 = templateframe
 
--- ====================================
--- SPEED FRAME
--- ====================================
 local SPEED_Y = FRAME_H - GAP - SPEED_H
 
 local speedFrame = Instance.new("Frame")
@@ -540,9 +511,6 @@ speedButton.BackgroundTransparency = 1
 speedButton.Text = ""
 speedButton.Parent = speedSlider
 
--- ====================================
--- UNSYNC FRAME
--- ====================================
 local unsyncframe = Instance.new("Frame")
 unsyncframe.Name             = "UnsyncFrame"
 unsyncframe.Size             = containerframe.Size
@@ -563,7 +531,7 @@ unsyncBtn.Size                   = UDim2.new(1, 0, 1, 0)
 unsyncBtn.Position               = UDim2.new(0, 0, 0, 0)
 unsyncBtn.AnchorPoint            = Vector2.new(0, 0)
 unsyncBtn.BackgroundTransparency = 1
-unsyncBtn.Text                   = "Synced\nTap to Unsync"
+unsyncBtn.Text                   = "Tersinkronisasi\nKetuk untuk Lepas"
 unsyncBtn.TextColor3             = C.Warning
 unsyncBtn.TextSize               = 11
 unsyncBtn.Font                   = Enum.Font.GothamBold
@@ -583,16 +551,13 @@ dancelabel.TextTruncate          = Enum.TextTruncate.AtEnd
 dancelabel.ZIndex                = 6
 dancelabel.Parent                = unsyncframe
 
--- ====================================
--- PRELOAD OVERLAY
--- ====================================
 local preloadLabel = Instance.new("TextLabel")
 preloadLabel.Name = "PreloadStatus"
 preloadLabel.Size = UDim2.new(1, 0, 1, 0)
 preloadLabel.BackgroundColor3 = C.BackgroundDark
 preloadLabel.BackgroundTransparency = 0.05
 preloadLabel.TextColor3 = C.TextWhite
-preloadLabel.Text = "Preloading..."
+preloadLabel.Text = "Memuat data animasi..."
 preloadLabel.TextSize = 14
 preloadLabel.Font = Enum.Font.GothamBold
 preloadLabel.Visible = false
@@ -600,17 +565,14 @@ preloadLabel.ZIndex = 10
 preloadLabel.Parent = mainframe
 corner(preloadLabel, 12)
 
--- ====================================
--- TOPBAR ICON
--- ====================================
 local clickSound = nil
 pcall(function() clickSound = SoundService:WaitForChild("Sound", 3) end)
 local function playTopBarClick()
-	if clickSound then 
+	if clickSound then
 		pcall(function()
 			clickSound.TimePosition = 0
 			clickSound:Play()
-		end) 
+		end)
 	end
 end
 
@@ -634,29 +596,29 @@ emoteIcon = Icon.new()
 emoteIcon:setImage(15290394895)
 emoteIcon:setOrder(1)
 
-if TOPBAR_CONFIG.Alignment == "left" then 
+if TOPBAR_CONFIG.Alignment == "left" then
 	emoteIcon:setLeft()
-elseif TOPBAR_CONFIG.Alignment == "mid" then 
+elseif TOPBAR_CONFIG.Alignment == "mid" then
 	emoteIcon:setMid()
-else 
-	emoteIcon:setRight() 
+else
+	emoteIcon:setRight()
 end
 
 local iconData = { icon = emoteIcon, isOpen = false, lockSync = false }
 
 addTopBarConnection("Emote", emoteIcon:bindEvent("selected", function()
 	playTopBarClick()
-	if not iconData.lockSync then 
-		mainframe.Visible = true
-		iconData.isOpen = true 
+	if not iconData.lockSync then
+		iconData.isOpen = true
+		emoteAnim:Open(FRAME_H)
 	end
 end))
 
 addTopBarConnection("Emote", emoteIcon:bindEvent("deselected", function()
 	playTopBarClick()
-	if not iconData.lockSync then 
-		mainframe.Visible = false
-		iconData.isOpen = false 
+	if not iconData.lockSync then
+		iconData.isOpen = false
+		emoteAnim:Close()
 	end
 end))
 
@@ -676,8 +638,9 @@ addTopBarConnection("Emote_sync", mainframe:GetPropertyChangedSignal("Visible"):
 	end
 end))
 
-closeBtn.MouseButton1Click:Connect(function() 
-	mainframe.Visible = false 
+closeBtn.MouseButton1Click:Connect(function()
+	emoteAnim:Close()
+	iconData.icon:deselect()
 end)
 
 ThemeModule.GradientSystem.Start()
@@ -688,11 +651,8 @@ iconData.isOpen = false
 iconData.icon:deselect()
 task.wait(0.5)
 isTopBarInitialized = true
-print("[TopBar] Initialized")
+print("[BilahAtas] Berhasil diinisialisasi")
 
--- ====================================
--- NOTIFICATIONS
--- ====================================
 syncNotificationRE.OnClientEvent:Connect(function(notifType, leaderName)
 	if notifType == "sync_success" then
 		local lp = Players:FindFirstChild(leaderName)
@@ -709,9 +669,6 @@ syncNotificationRE.OnClientEvent:Connect(function(notifType, leaderName)
 	end
 end)
 
--- ====================================
--- STATE VARIABLES
--- ====================================
 local allButtons          = {}
 local buttonsByName       = {}
 local favoritedAnimations = {}
@@ -726,7 +683,6 @@ local leaderAnimationConnection = nil
 local currentDanceConnection = nil
 local currentlySelectedButton = nil
 
--- Load saved favorites
 do
 	local sd = player:GetAttribute("SavedFavoritedAnimations")
 	if sd and typeof(sd) == "string" then
@@ -742,9 +698,6 @@ local function saveFavoritedAnimations()
 	updateFavoritedAnimationsEventRE:FireServer(HttpService:JSONEncode(favoritedAnimations))
 end
 
--- ====================================
--- VISUAL UPDATE FUNCTIONS
--- ====================================
 local function setButtonActive(buttonData, isActive)
 	if not buttonData or not buttonData.button then return end
 
@@ -805,9 +758,6 @@ local function updateButtonVisuals(currentDanceName)
 	end
 end
 
--- ====================================
--- LISTEN TO SERVER STATE
--- ====================================
 local function setupCurrentDanceListener()
 	if currentDanceConnection and currentDanceConnection.Connected then
 		currentDanceConnection:Disconnect()
@@ -824,9 +774,6 @@ local function setupCurrentDanceListener()
 	end)
 end
 
--- ====================================
--- LEADER ANIMATION CHECK
--- ====================================
 local function getLeaderCurrentAnimation()
 	if not isSyncing or not currentLeaderName then return nil end
 
@@ -856,19 +803,17 @@ local function getLeaderCurrentAnimation()
 				return name
 			end
 
-			-- Check Dance
 			for _, a in ipairs(emotesFolder:GetChildren()) do
-				if a:IsA("Animation") and a.AnimationId == id then 
-					return a.Name 
+				if a:IsA("Animation") and a.AnimationId == id then
+					return a.Name
 				end
 			end
 
-			-- Check Pose
 			local pf = emotesFolder:FindFirstChild("Pose")
 			if pf then
 				for _, a in ipairs(pf:GetChildren()) do
-					if a:IsA("Animation") and a.AnimationId == id then 
-						return a.Name 
+					if a:IsA("Animation") and a.AnimationId == id then
+						return a.Name
 					end
 				end
 			end
@@ -878,13 +823,10 @@ local function getLeaderCurrentAnimation()
 	return nil
 end
 
--- ====================================
--- UNSYNC LOGIC
--- ====================================
 local function updateUnsyncFrame()
-	if not player.Character then 
-		unsyncframe.Visible = false 
-		return 
+	if not player.Character then
+		unsyncframe.Visible = false
+		return
 	end
 
 	local syncTarget = player.Character:GetAttribute("Syncing")
@@ -914,8 +856,8 @@ unsyncBtn.MouseButton1Click:Connect(function()
 
 	local lp = Players:FindFirstChild(currentLeaderName)
 	if not lp then
-		if player.Character then 
-			player.Character:SetAttribute("Syncing", nil) 
+		if player.Character then
+			player.Character:SetAttribute("Syncing", nil)
 		end
 		updateUnsyncFrame()
 		return
@@ -924,7 +866,7 @@ unsyncBtn.MouseButton1Click:Connect(function()
 	startSyncRE:FireServer(lp, false)
 
 	local snd = ReplicatedStorage:FindFirstChild("Sounds")
-	if snd then 
+	if snd then
 		local s = snd:FindFirstChild("minimal-pop-click-ui")
 		if s then s:Play() end
 	end
@@ -944,8 +886,8 @@ local function setupSyncMonitoring()
 	syncUpdateConnection = nil
 	leaderAnimationConnection = nil
 
-	if not player.Character then 
-		player.CharacterAdded:Wait() 
+	if not player.Character then
+		player.CharacterAdded:Wait()
 	end
 
 	updateUnsyncFrame()
@@ -1024,9 +966,6 @@ task.spawn(function()
 	end
 end)
 
--- ====================================
--- ANIMATION START
--- ====================================
 local function animationStarted(animation)
 	selectButtonInstantly(animation.Name)
 
@@ -1042,14 +981,11 @@ local function animationStarted(animation)
 		end)
 
 		if not ok then
-			warn("[EmoteHandler] Server call failed:", result)
+			warn("[EmoteHandler] Panggilan server gagal:", result)
 		end
 	end)
 end
 
--- ====================================
--- UPDATE DISPLAY
--- ====================================
 local function updateDisplay()
 	containerlist.CanvasPosition = Vector2.new(0, 0)
 
@@ -1070,13 +1006,13 @@ local function updateDisplay()
 			show = string.lower(data.name):sub(1, #searchQuery) == string.lower(searchQuery)
 		end
 
-		if show then 
-			table.insert(visibleData, data) 
+		if show then
+			table.insert(visibleData, data)
 		end
 	end
 
-	table.sort(visibleData, function(a, b) 
-		return a.name:lower() < b.name:lower() 
+	table.sort(visibleData, function(a, b)
+		return a.name:lower() < b.name:lower()
 	end)
 
 	for i, data in ipairs(visibleData) do
@@ -1085,9 +1021,6 @@ local function updateDisplay()
 	end
 end
 
--- ====================================
--- TOGGLE FAVORITE
--- ====================================
 local function toggleFavorite(animation, favBtn)
 	favoritedAnimations[animation.Name] = not favoritedAnimations[animation.Name]
 
@@ -1097,14 +1030,11 @@ local function toggleFavorite(animation, favBtn)
 
 	saveFavoritedAnimations()
 
-	if currentCategory == "Favorite" then 
-		updateDisplay() 
+	if currentCategory == "Favorite" then
+		updateDisplay()
 	end
 end
 
--- ====================================
--- CREATE EMOTE BUTTON
--- ====================================
 local function createEmoteButton(animation, category)
 	local nb = templateframe:Clone()
 	nb.Name    = animation.Name
@@ -1113,8 +1043,8 @@ local function createEmoteButton(animation, category)
 	local tBtn = nb:FindFirstChild("TemplateBtn")
 	local fBtn = nb:FindFirstChild("FavoriteBtn")
 
-	if tBtn then 
-		tBtn.Text = animation.Name 
+	if tBtn then
+		tBtn.Text = animation.Name
 	end
 
 	if fBtn then
@@ -1179,19 +1109,16 @@ local function createEmoteButton(animation, category)
 	return nb
 end
 
--- ====================================
--- CATEGORY TAB LOGIC
--- ====================================
-local tabGradients = { 
-	Dance = danceGrad, 
-	Pose = poseGrad, 
-	Favorite = favoriteGrad 
+local tabGradients = {
+	Dance = danceGrad,
+	Pose = poseGrad,
+	Favorite = favoriteGrad
 }
 
-local tabBtns = { 
-	Dance = danceBtn,  
-	Pose = poseBtn,  
-	Favorite = favoriteBtn  
+local tabBtns = {
+	Dance = danceBtn,
+	Pose = poseBtn,
+	Favorite = favoriteBtn
 }
 
 local function setActiveCategory(category)
@@ -1217,30 +1144,24 @@ local function setActiveCategory(category)
 	updateDisplay()
 end
 
-danceBtn.MouseButton1Click:Connect(function()    
-	setActiveCategory("Dance")    
+danceBtn.MouseButton1Click:Connect(function()
+	setActiveCategory("Dance")
 end)
 
-poseBtn.MouseButton1Click:Connect(function()     
-	setActiveCategory("Pose")     
+poseBtn.MouseButton1Click:Connect(function()
+	setActiveCategory("Pose")
 end)
 
-favoriteBtn.MouseButton1Click:Connect(function() 
-	setActiveCategory("Favorite") 
+favoriteBtn.MouseButton1Click:Connect(function()
+	setActiveCategory("Favorite")
 end)
 
--- ====================================
--- SEARCH
--- ====================================
 searchBox:GetPropertyChangedSignal("Text"):Connect(function()
 	searchQuery = searchBox.Text
 	resetBtn.Visible = (searchQuery ~= "")
 	updateDisplay()
 end)
 
--- ====================================
--- SPEED SLIDER
--- ====================================
 do
 	local isDragging = false
 	local activeDragInput = nil
@@ -1297,8 +1218,8 @@ do
 		if ns ~= currentSpeed then
 			currentSpeed = ns
 			speedtext.Text = string.format("%.1fx", currentSpeed)
-			if not isSyncing then 
-				changeSpeedRE:FireServer(currentSpeed) 
+			if not isSyncing then
+				changeSpeedRE:FireServer(currentSpeed)
 			end
 		end
 	end
@@ -1363,14 +1284,11 @@ do
 	speedtext.Text       = "1.0x"
 end
 
--- ====================================
--- PRELOAD ANIMATIONS
--- ====================================
 task.spawn(function()
 	preloadLabel.Visible = true
 
-	if not player.Character then 
-		player.CharacterAdded:Wait() 
+	if not player.Character then
+		player.CharacterAdded:Wait()
 	end
 
 	task.wait(1.5)
@@ -1382,9 +1300,6 @@ task.spawn(function()
 	preloadLabel.Visible = false
 end)
 
--- ====================================
--- LOAD ANIMATIONS
--- ====================================
 local poseFolder = emotesFolder:FindFirstChild("Pose")
 if not poseFolder then
 	poseFolder = Instance.new("Folder")
@@ -1405,19 +1320,16 @@ local function getOrCreateAnim(folder, name, animId)
 	return anim
 end
 
--- 1) Load Dance animations from DanceConfig
 for _, item in ipairs(DanceConfig) do
 	local anim = getOrCreateAnim(emotesFolder, item.name, item.animationId)
 	createEmoteButton(anim, "Dance")
 end
 
--- 2) Load Pose animations from PoseConfig
 for _, item in ipairs(PoseConfig) do
 	local anim = getOrCreateAnim(poseFolder, item.name, item.animationId)
 	createEmoteButton(anim, "Pose")
 end
 
--- 3) Fallback for any extra animations placed directly in folders
 for _, anim in ipairs(emotesFolder:GetChildren()) do
 	if anim:IsA("Animation") and not buttonsByName[anim.Name] then
 		createEmoteButton(anim, "Dance")
@@ -1432,24 +1344,21 @@ end
 
 setActiveCategory("Dance")
 
--- ====================================
--- CLEANUP
--- ====================================
 Players.PlayerRemoving:Connect(function(rp)
 	if rp ~= player then return end
 
-	for name in pairs(topbarConnections) do 
-		cleanupTopBarConnections(name) 
+	for name in pairs(topbarConnections) do
+		cleanupTopBarConnections(name)
 	end
 
-	if emoteIcon then 
-		pcall(function() emoteIcon:destroy() end) 
+	if emoteIcon then
+		pcall(function() emoteIcon:destroy() end)
 	end
 
 	ThemeModule.GradientSystem.Clear()
 
-	if scaler then 
-		scaler:Destroy() 
+	if scaler then
+		scaler:Destroy()
 	end
 
 	emoteIcon = nil
@@ -1471,11 +1380,9 @@ script.Destroying:Connect(function()
 
 	ThemeModule.GradientSystem.Clear()
 
-	if scaler then 
-		scaler:Destroy() 
+	if scaler then
+		scaler:Destroy()
 	end
 end)
 
-print("[EmoteHandler] Ready - AutoScale:", scaler:GetCurrentScale())
-
--- =========================
+print("[EmoteHandler] Siap - AutoScale:", scaler:GetCurrentScale())

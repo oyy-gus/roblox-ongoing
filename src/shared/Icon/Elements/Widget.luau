@@ -1,8 +1,3 @@
--- I named this 'Widget' instead of 'Icon' to make a clear difference between the icon *object* and
--- the icon (aka Widget) instance.
--- This contains the core components of the icon such as the button, image, label and notice. It's
--- also responsible for handling the automatic resizing of the widget (based upon image visibility and text length)
-
 return function(icon, Icon)
 
 	local widget = Instance.new("Frame")
@@ -21,7 +16,7 @@ return function(icon, Icon)
 	button.BorderSizePixel = 0
 	button.Parent = widget
 	button.ClipsDescendants = true
-	button.Active = false -- This is essential for mobile scrollers to work when dragging
+	button.Active = false
 	icon.deselected:Connect(function()
 		button.ClipsDescendants = true
 		task.delay(0.2, function()
@@ -31,7 +26,6 @@ return function(icon, Icon)
 		end)
 	end)
 
-	-- Account for PreferredTransparency which can be set by every player
 	local GuiService = game:GetService("GuiService")
 	icon:setBehaviour("IconButton", "BackgroundTransparency", function(value)
 		local preference = GuiService.PreferredTransparency
@@ -88,7 +82,7 @@ return function(icon, Icon)
 	clickRegion.Selectable = true
 	clickRegion.SelectionGroup = true
 	clickRegion.Parent = iconSpot
-	
+
 	local Gamepad = require(script.Parent.Parent.Features.Gamepad)
 	Gamepad.registerButton(clickRegion)
 
@@ -194,11 +188,6 @@ return function(icon, Icon)
 	local resizingCount = 0
 	local function handleLabelAndImageChangesUnstaggered(forceUpdateString)
 
-		-- We defer changes by a frame to eliminate all but 1 requests which
-		-- could otherwise stack up to 20+ requests in a single frame
-		-- We then repeat again once to account for any final changes
-		-- Deferring is also essential because properties are set immediately
-		-- afterwards (therefore calculations will use the correct values)
 		task.defer(function()
 			local indicator = icon.indicator
 			local usingIndicator = indicator and indicator.Visible
@@ -234,7 +223,7 @@ return function(icon, Icon)
 				return targetWidth
 			end
 			local contentsPadding = contentsList.Padding.Offset
-			local initialWidgetWidth = contentsPadding --0
+			local initialWidgetWidth = contentsPadding
 			local textWidth = iconLabel.TextBounds.X
 			iconLabelContainer.Size = UDim2.new(0, textWidth, iconLabel.Size.Y.Scale, 0)
 			for _, child in pairs(contents:GetChildren()) do
@@ -336,17 +325,7 @@ return function(icon, Icon)
 			return
 		end
 		task.spawn(function()
-			--[[
-			local fontLink = value.Family
-			if string.match(fontLink, "rbxassetid://") then
-				local ContentProvider = game:GetService("ContentProvider")
-				local assets = {fontLink}
-				ContentProvider:PreloadAsync(assets)
-			end--]]
 
-			-- Afaik there's no way to determine when a Font Family has
-			-- loaded (even with ContentProvider), so we just have to try
-			-- a few times and hope it loads within the refresh period
 			handleLabelAndImageChanges()
 			if firstTimeSettingFontFace then
 				firstTimeSettingFontFace = false
@@ -394,7 +373,6 @@ return function(icon, Icon)
 		updateBorderSize()
 	end)
 
-	-- Localization support (refresh icon size whenever player changes language changes in-game)
 	local Players = game:GetService("Players")
 	local localPlayer = Players.LocalPlayer
 	local lastLocaleId = localPlayer.LocaleId
@@ -409,7 +387,7 @@ return function(icon, Icon)
 			end
 		end)
 	end))
-	
+
 	local iconImageScale = Instance.new("NumberValue")
 	iconImageScale.Name = "IconImageScale"
 	iconImageScale.Parent = iconImage

@@ -1,56 +1,13 @@
 --!nonstrict
---[[
-	
-	The majority of this code is an interface designed to make it easy for you to
-	work with TopbarPlus (most methods for instance reference :modifyTheme()).
-	The processing overhead mainly consists of applying themes and calculating 
-	appearance (such as size and width of labels) which is handled in about
-	200 lines of code here and the Widget UI module. This has been achieved
-	in v3 by outsourcing a majority of previous calculations to inbuilt Roblox
-	features like UIListLayouts.
 
-
-	v3 provides inbuilt support for controllers (simply press DPadUp),
-	touch devices (phones, tablets , etc), localization (automatic resizing
-	of widgets, autolocalize for relevant labels), backwards compatability
-	with the old topbar, and more.
-
-
-	My primary goals for the v3 re-write have been to:
-		
-	1. Improve code readability and organisation (reduced lines of code within
-	   Icon+IconController from 3200 to ~950, separated UI elements, etc)
-		
-	2. Improve ease-of-use (themes now actually make sense and can account
-	   for any modifications you want, converted to a package for
-	   quick installation and easy-comparisons of new updates, etc)
-	
-	3. Provide support for all key features of the new Roblox topbar
-	   while improving performance of the module (deferring and collecting
-	   changes then calling as a singular, utilizing inbuilt Roblox features
-	   such as UILIstLayouts, etc)
-
---]]
-
-
-
--- SERVICES
 local UserInputService = game:GetService("UserInputService")
 local ContentProvider = game:GetService("ContentProvider")
 local StarterGui = game:GetService("StarterGui")
 local Players = game:GetService("Players")
 local Types = require(script.Types)
 
-
-
--- TYPES
 export type Icon = Types.Icon
 
-
-
--- REFERENCE HANDLER
--- Multiple Icons packages may exist at runtime (for instance if the developer additionally uses HD Admin)
--- therefore this ensures that the first required package becomes the dominant and only functioning module
 local iconModule = script
 local Reference = require(iconModule.Reference)
 local referenceObject = Reference.getObject()
@@ -62,9 +19,6 @@ if not referenceObject then
 	Reference.addToReplicatedStorage()
 end
 
-
-
--- MODULES
 local Signal = require(iconModule.Packages.GoodSignal)
 local Janitor = require(iconModule.Packages.Janitor)
 local Utility = require(iconModule.Utility)
@@ -74,9 +28,6 @@ local Overflow = require(iconModule.Features.Overflow)
 local Icon = {}
 Icon.__index = Icon
 
-
-
---- LOCAL
 local localPlayer = Players.LocalPlayer
 local themes = iconModule.Features.Themes
 local iconsDict = {}
@@ -89,13 +40,10 @@ local preferredInput = {
 	console = Enum.PreferredInput.Gamepad
 }
 
-
-
--- PUBLIC VARIABLES
 Icon.baseDisplayOrderChanged = Signal.new()
 Icon.baseDisplayOrder = 10
 Icon.baseTheme = require(themes.Default)
-Icon.isOldTopbar = false -- Logic has been moved to Container
+Icon.isOldTopbar = false
 Icon.iconsDictionary = iconsDict
 Icon.insetHeightChanged = Signal.new()
 Icon.container = require(elements.Container)(Icon)
@@ -104,9 +52,6 @@ Icon.iconAdded = Signal.new()
 Icon.iconRemoved = Signal.new()
 Icon.iconChanged = Signal.new()
 
-
-
--- PUBLIC FUNCTIONS
 function Icon.getIcons()
 	return Icon.iconsDictionary
 end
@@ -161,9 +106,6 @@ function Icon.setDisplayOrder(int)
 	Icon.baseDisplayOrderChanged:Fire(int)
 end
 
-
-
--- SETUP
 task.defer(Gamepad.start, Icon)
 task.defer(Overflow.start, Icon)
 task.defer(function()
@@ -174,14 +116,10 @@ task.defer(function()
 	require(iconModule.Attribute)
 end)
 
-
-
--- CONSTRUCTOR
 function Icon.new()
 	local self = {}
 	setmetatable(self, Icon)
 
-	--- Janitors (for cleanup)
 	local janitor = Janitor.new()
 	self.janitor = janitor
 	self.themesJanitor = janitor:add(Janitor.new())
@@ -191,14 +129,12 @@ function Icon.new()
 	self.menuJanitor = janitor:add(Janitor.new())
 	self.dropdownJanitor = janitor:add(Janitor.new())
 
-	-- Register
 	local iconUID = Utility.generateUID()
 	iconsDict[iconUID] = self
 	janitor:add(function()
 		iconsDict[iconUID] = nil
 	end)
 
-	-- Signals (events)
 	self.selected = janitor:add(Signal.new())
 	self.deselected = janitor:add(Signal.new())
 	self.toggled = janitor:add(Signal.new())
@@ -224,11 +160,10 @@ function Icon.new()
 	self.dropdownChildAdded = janitor:add(Signal.new())
 	self.menuChildAdded = janitor:add(Signal.new())
 
-	-- Properties
 	self.iconModule = iconModule
 	self.UID = iconUID
 	self.isEnabled = true
-	self.enabled = self.isEnabled -- Backwards compatability
+	self.enabled = self.isEnabled
 	self.isSelected = false
 	self.isViewing = false
 	self.joinedFrame = false
@@ -253,33 +188,27 @@ function Icon.new()
 	self.childIconsDict = {}
 	self.creationTime = os.clock()
 
-	-- Widget is the new name for an icon
 	local widget = janitor:add(require(elements.Widget)(self, Icon))
 	self.widget = widget
 	self:setAlignment()
-	
-	-- It's important we set an order otherwise icons will not align
-	-- correctly within menus
+
 	totalCreatedIcons += 1
 	local ourOrder = 1+(totalCreatedIcons*0.01)
 	self:setOrder(ourOrder, "deselected")
 	self:setOrder(ourOrder, "selected")
 
-	-- This applies the default them
 	self:setTheme(Icon.baseTheme)
 
-	-- Button Clicked (for states "Selected" and "Deselected")
 	local clickRegion = self:getInstance("ClickRegion")
 	local hasUsedMouseButton1Click = false
 	local lastToggleTime = 0
-	local DEBOUNCE_TIME = 0.1 -- 100ms debounce to prevent rapid toggles
+	local DEBOUNCE_TIME = 0.1
 
 	local function handleToggle()
 		if self.locked then
 			return
 		end
 
-		-- Debounce logic to prevent rapid toggling
 		local currentTime = tick()
 		if currentTime - lastToggleTime < DEBOUNCE_TIME then
 			return
@@ -299,18 +228,12 @@ function Icon.new()
 	end)
 
 	clickRegion.TouchTap:Connect(function()
-		-- This resolves the bug report by @28Pixels:
-		-- https://devforum.roblox.com/t/topbarplus/1017485/1104
-		-- Only use TouchTap if MouseButton1Click has never fired
-		-- This handles edge cases where ONLY TouchTap works
-		-- Also prevents double-toggle bug with multi-touch on mobile
-		-- Credit to @sayer80 for this fix
+
 		if not hasUsedMouseButton1Click then
 			handleToggle()
 		end
 	end)
 
-	-- Keys can be bound to toggle between Selected and Deselected
 	janitor:add(UserInputService.InputBegan:Connect(function(input, touchingAnObject)
 		if self.locked then
 			return
@@ -320,9 +243,6 @@ function Icon.new()
 		end
 	end))
 
-	-- Button Hovering (for state "Viewing")
-	-- Hovering is a state only for devices with keyboards
-	-- and controllers (not touchpads)
 	local function viewingStarted(dontSetState)
 		if self.locked then
 			return
@@ -370,7 +290,6 @@ function Icon.new()
 		touchCount += 1
 	end)
 
-	-- Handle overlay on viewing
 	local iconOverlay = self:getInstance("IconOverlay")
 	self.viewingStarted:Connect(function()
 		iconOverlay.Visible = not self.overlayDisabled
@@ -379,18 +298,12 @@ function Icon.new()
 		iconOverlay.Visible = false
 	end)
 
-	-- Deselect when another icon is selected
 	janitor:add(anyIconSelected:Connect(function(incomingIcon)
 		if incomingIcon ~= self and self.deselectWhenOtherIconSelected and incomingIcon.deselectWhenOtherIconSelected then
 			self:deselect("AutoDeselect", incomingIcon)
 		end
 	end))
 
-	-- This checks if the script calling this module is a descendant of a ScreenGui
-	-- with 'ResetOnSpawn' set to true. If it is, then we destroy the icon the
-	-- client respawns. This solves one of the most asked about questions on the post
-	-- The only caveat this may not work if the player doesn't uniquely name their ScreenGui and the frames
-	-- the LocalScript rests within
 	local source =  debug.info(2, "s")
 	local sourcePath = string.split(source, ".")
 	local origin = game
@@ -411,30 +324,20 @@ function Icon.new()
 		end)
 	end
 
-	-- Additional children behaviour when toggled (mostly notices)
 	self.toggled:Connect(function(isSelected)
 		self.noticeChanged:Fire(self.totalNotices)
 		for childIconUID, _ in pairs(self.childIconsDict) do
 			local childIcon = Icon.getIconByUID(childIconUID)
 			childIcon.noticeChanged:Fire(childIcon.totalNotices)
 			if not isSelected and childIcon.isSelected then
-				-- If an icon within a menu or dropdown is also
-				-- a dropdown or menu, then close it
+
 				for _, _ in pairs(childIcon.childIconsDict) do
 					childIcon:deselect("HideParentFeature", self)
 				end
 			end
 		end
 	end)
-	
-	-- This closes/reopens the chat or playerlist if the icon is a dropdown
-	-- In the future I'd prefer to use the position+size of the chat
-	-- to determine whether to close dropdown (instead of non-right-set)
-	-- but for reasons mentioned here it's unreliable at the time of
-	-- writing this: https://devforum.roblox.com/t/here/2794915
-	-- I could also make this better by accounting for multiple
-	-- dropdowns being open (not just this one) but this will work
-	-- fine for almost every use case for now.
+
 	self.selected:Connect(function()
 		local isDropdown = #self.dropdownIcons > 0
 		if isDropdown then
@@ -458,26 +361,19 @@ function Icon.new()
 			StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, true)
 		end
 	end)
-	
-	-- There's a rare occassion where the appearance is not
-	-- fully set to deselected so this ensures the icons
-	-- appearance is fully as it should be
+
 	task.delay(0.1, function()
 		if self.activeState == "Deselected" then
 			self.stateChanged:Fire("Deselected")
 			self:refresh()
 		end
 	end)
-	
-	-- Call icon added
+
 	Icon.iconAdded:Fire(self)
 
 	return self
 end
 
-
-
--- METHODS
 function Icon:setName(name)
 	self.widget.Name = name
 	self.name = name
@@ -485,9 +381,7 @@ function Icon:setName(name)
 end
 
 function Icon:setState(incomingStateName, fromSource, sourceIcon)
-	-- This is responsible for acknowleding a change in stage (such as from "Deselected" to "Viewing" when
-	-- a users mouse enters the widget), then informing other systems of this state change to then act upon
-	-- (such as the theme handler applying the theme which corresponds to that state).
+
 	if not incomingStateName then
 		incomingStateName = (self.isSelected and "Selected") or "Deselected"
 	end
@@ -518,9 +412,7 @@ function Icon:setState(incomingStateName, fromSource, sourceIcon)
 end
 
 function Icon:getInstance(name)
-	-- This enables us to easily retrieve instances located within the icon simply by passing its name.
-	-- Every important/significant instance is named uniquely therefore this is no worry of overlap.
-	-- We cache the result for more performant retrieval in the future.
+
 	local instance = self.cachedNamesToInstances[name]
 	if instance then
 		return instance
@@ -552,17 +444,15 @@ function Icon:getInstance(name)
 		for _, child in pairs(parentInstance:GetChildren()) do
 			local widgetUID = child:GetAttribute("WidgetUID")
 			if widgetUID and widgetUID ~= self.UID then
-				-- This prevents instances within other icons from being recorded
-				-- (for instance when other icons are added to this icons menu)
+
 				continue
 			end
-			-- If the child is a fake placeholder instance (such as dropdowns, notices, etc)
-			-- then its important we scan the real original instance instead of this clone
+
 			local realChild = Themes.getRealInstance(child)
 			if realChild then
 				child = realChild
 			end
-			-- Finally scan its children
+
 			scanChildren(child)
 			if child:IsA("GuiBase") or child:IsA("UIBase") or child:IsA("ValueBase") then
 				local childName = child.Name
@@ -578,12 +468,7 @@ function Icon:getInstance(name)
 end
 
 function Icon:getCollective(name)
-	-- A collective is an array of instances within the Widget that have been
-	-- grouped together based on a given name. This just makes it easy
-	-- to act on multiple instances at once which share similar behaviours.
-	-- For instance, if we want to change the icons corner size, all corner instances
-	-- with the attribute "Collective" and value "WidgetCorner" could be updated
-	-- instantly by doing Themes.apply(icon, "WidgetCorner", newSize)
+
 	local collective = self.cachedCollectives[name]
 	if collective then
 		return collective
@@ -599,8 +484,7 @@ function Icon:getCollective(name)
 end
 
 function Icon:getInstanceOrCollective(collectiveOrInstanceName)
-	-- Similar to :getInstance but also accounts for 'Collectives', such as UICorners and returns
-	-- an array of instances instead of a single instance
+
 	local instances = {}
 	local instance = self:getInstance(collectiveOrInstanceName)
 	if instance then
@@ -641,8 +525,7 @@ function Icon:updateParent()
 end
 
 function Icon:setBehaviour(collectiveOrInstanceName, property, callback, refreshAppearance)
-	-- You can specify your own custom callback to handle custom logic just before
-	-- an instances property is changed by using :setBehaviour()
+
 	local key = collectiveOrInstanceName.."-"..property
 	self.customBehaviours[key] = callback
 	if refreshAppearance then
@@ -659,8 +542,7 @@ function Icon:modifyTheme(modifications, customModificationUID)
 end
 
 function Icon:modifyChildTheme(modifications, modificationUID)
-	-- Same as modifyTheme except for its children (i.e. icons
-	-- within its dropdown or menu)
+
 	self.childModifications = modifications
 	self.childModificationsUID = modificationUID
 	for childIconUID, _ in pairs(self.childIconsDict) do
@@ -705,10 +587,7 @@ function Icon:deselect(fromSource, sourceIcon)
 end
 
 function Icon:notify(customClearSignal, noticeId)
-	-- Generates a notification which appears in the top right of the icon. Useful for example for prompting
-	-- users of changes/updates within your UI such as a Catalog
-	-- 'customClearSignal' is a signal object (e.g. icon.deselected) or
-	-- Roblox event (e.g. Instance.new("BindableEvent").Event)
+
 	local notice = self.notice
 	if not notice then
 		notice = require(elements.Notice)(self, Icon)
@@ -731,17 +610,16 @@ Icon.disableStateOverlay = Icon.disableOverlay
 
 function Icon:setImage(imageId, iconState)
 	self:modifyTheme({"IconImage", "Image", imageId, iconState})
-	
-	-- This code ensures icon images are preloaded if they haven't been fetched yet
+
 	task.spawn(function()
 		local newIdContent = if tonumber(imageId) then `rbxassetid://{imageId}` else imageId
 		local initialAssetFetchStatus = ContentProvider:GetAssetFetchStatus(newIdContent)
-	
+
 		if initialAssetFetchStatus ~= Enum.AssetFetchStatus.Success then
 			pcall(ContentProvider.PreloadAsync, ContentProvider, { newIdContent })
 		end
 	end)
-		
+
 	return self
 end
 
@@ -751,8 +629,7 @@ function Icon:setLabel(text, iconState)
 end
 
 function Icon:setOrder(int, iconState)
-	-- We multiply by 100 to allow for custom increments inbetween
-	-- (.01, .02, etc) as LayoutOrders only support integers
+
 	local newInt = int*100
 	self:modifyTheme({"IconSpot", "LayoutOrder", newInt, iconState})
 	self:modifyTheme({"Widget", "LayoutOrder", newInt, iconState})
@@ -765,7 +642,7 @@ function Icon:setCornerRadius(udim, iconState)
 end
 
 function Icon:align(leftCenterOrRight, isFromParentIcon)
-	-- Determines the side of the screen the icon will be ordered
+
 	local direction = tostring(leftCenterOrRight):lower()
 	if direction == "mid" or direction == "centre" then
 		direction = "center"
@@ -809,9 +686,7 @@ function Icon:setRight()
 end
 
 function Icon:setWidth(offsetMinimum, iconState)
-	-- This sets a minimum X offset size for the widget, useful
-	-- for example if you're constantly changing the label
-	-- but don't want the icon to resize every time
+
 	self:modifyTheme({"Widget", "DesiredWidth", offsetMinimum, iconState})
 	return self
 end
@@ -880,8 +755,7 @@ function Icon:unbindToggleItem(guiObjectOrLayerCollector)
 end
 
 function Icon:_updateSelectionInstances()
-	-- This is to assist with controller navigation and selection
-	-- It converts the value true to an array
+
 	for guiObjectOrLayerCollector, _ in pairs(self.toggleItems) do
 		local buttonInstancesArray = {}
 		for _, instance in pairs(guiObjectOrLayerCollector:GetDescendants()) do
@@ -952,7 +826,7 @@ function Icon:addToJanitor(callback, methodName, index)
 end
 
 function Icon:lock()
-	-- This disables all user inputs related to the icon (such as clicking buttons, pressing keys, etc)
+
 	local clickRegion = self:getInstance("ClickRegion")
 	clickRegion.Visible = false
 	self.locked = true
@@ -974,8 +848,7 @@ function Icon:debounce(seconds)
 end
 
 function Icon:autoDeselect(bool)
-	-- When set to true the icon will deselect itself automatically whenever
-	-- another icon is selected
+
 	if bool == nil then
 		bool = true
 	end
@@ -984,8 +857,7 @@ function Icon:autoDeselect(bool)
 end
 
 function Icon:oneClick(bool)
-	-- When set to true the icon will automatically deselect when selected, this creates
-	-- the effect of a single click button
+
 	local singleClickJanitor = self.singleClickJanitor
 	singleClickJanitor:clean()
 	if bool or bool == nil then
@@ -1047,8 +919,7 @@ end
 Icon.setFrozenMenu = Icon.setFixedMenu
 
 function Icon:freezeMenu()
-	-- A frozen menu is a menu which is permanently locked in the
-	-- the selected state (with its toggle hidden)
+
 	self:select("FrozenMenu", self)
 	self:bindEvent("deselected", function(icon)
 		icon:select("FrozenMenu", self)
@@ -1080,20 +951,14 @@ function Icon:setDropdown(arrayOfIcons)
 end
 
 function Icon:clipOutside(instance)
-	-- This is essential for items such as notices and dropdowns which will exceed the bounds of the widget. This is an issue
-	-- because the widget must have ClipsDescendents enabled to hide items for instance when the menu is closing or opening.
-	-- This creates an invisible frame which matches the size and position of the instance, then the instance is parented outside of
-	-- the widget and tracks the clone to match its size and position. In order for themes, etc to work the applying system checks
-	-- to see if an instance is a clone, then if it is, it applies it to the original instance instead of the clone.
+
 	local instanceClone = Utility.clipOutside(self, instance)
 	self:refreshAppearance(instance)
 	return self, instanceClone
 end
 
 function Icon:setIndicator(keyCode)
-	-- An indicator is a direction button prompt with an image of the given keycode. This is useful for instance
-	-- with controllers to show the user what button to press to highlight the topbar. You don't need
-	-- to set an indicator for controllers as this is handled internally within the Gamepad module
+
 	local indicator = self.indicator
 	if not indicator then
 		indicator = self.janitor:add(require(elements.Indicator)(self, Icon))
@@ -1104,7 +969,7 @@ end
 
 function Icon:convertLabelToNumberSpinner(numberSpinner, callback)
 	task.defer(function()
-		
+
 		local label = self:getInstance("IconLabel")
 		label.Transparency = 1
 		numberSpinner.Parent = label.Parent
@@ -1150,7 +1015,7 @@ function Icon:convertLabelToNumberSpinner(numberSpinner, callback)
 			end
 			return TotalSize, numOfDigits
 		end
-		
+
 		local function getLabelParentContainerXSize()
 			local firstParent = label.Parent
 			local nextParent = firstParent and firstParent.Parent
@@ -1212,7 +1077,6 @@ function Icon:convertLabelToNumberSpinner(numberSpinner, callback)
 
 		self:updateParent()
 
-		-- This corrects text to the size of a normal label
 		numberSpinner.Name = "LabelSpinner"
 		numberSpinner.Prefix = "$"
 		numberSpinner.Commas = true
@@ -1220,18 +1084,15 @@ function Icon:convertLabelToNumberSpinner(numberSpinner, callback)
 		numberSpinner.Duration = 0.25
 		numberSpinner.Value = 10
 		task.wait(0.2)
-		
+
 		if typeof(callback) == "function" then
 			callback()
 		end
-		
+
 	end)
 	return self
 end
 
-
-
--- DESTROY/CLEANUP
 function Icon:destroy()
 	if self.isDestroyed then
 		return

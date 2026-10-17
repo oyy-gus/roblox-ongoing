@@ -1,6 +1,3 @@
--- Letakkan di ScreenGui (DonationDisplayGUI)
--- ========================================
-
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -8,7 +5,6 @@ local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local gui = script.Parent
 
--- Build GUI otomatis
 local DisplayGUIBuilder = require(script.DisplayGUIBuilder)
 local elements = DisplayGUIBuilder.build(gui)
 
@@ -22,7 +18,6 @@ local showDonationGUI = RS:WaitForChild("Remotes"):WaitForChild("ShowDonationGUI
 
 local GUI_DISPLAY_DURATION = 5
 
--- Posisi kanan bawah
 local visiblePosition = UDim2.new(1, -15, 1, -15)
 local hiddenPosition = UDim2.new(1.3, 0, 1, -15)
 
@@ -130,5 +125,3 @@ showDonationGUI.OnClientEvent:Connect(function(donorName, amount, donationType)
 end)
 
 print("✅ [DonationDisplayClient] Initialized!")
-
--- ========================================

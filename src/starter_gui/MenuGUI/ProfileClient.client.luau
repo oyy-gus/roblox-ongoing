@@ -1,8 +1,3 @@
--- ========================================
--- PROFILE CLIENT (FINAL COMPLETE VERSION)
--- Place in: StarterGui > MenuGUI(ScreenGui) > ProfileClient(LocalScript)
--- ========================================
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
@@ -15,7 +10,7 @@ local Modules     = ReplicatedStorage:WaitForChild("Modules")
 local CarryModule = ReplicatedStorage:WaitForChild("ContextModule")
 local MenuConfig  = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
-local CarryConfig = require(CarryModule:WaitForChild("CarryConfig"))
+local CarryConfig = require(Modules:WaitForChild("CarryConfig"))
 local FriendConfig = require(Modules:WaitForChild("FriendConfig"))
 
 local AutoScaleSystem = ReplicatedStorage:WaitForChild("AutoScaleSystem")
@@ -34,17 +29,11 @@ local localPlayer = Players.LocalPlayer
 local camera      = workspace.CurrentCamera
 local mainScaler  = (screenGui and screenGui:IsA("ScreenGui")) and ScaleSystem.new(screenGui) or nil
 
--- ========================================
--- CONSTANTS
--- ========================================
 local RAYCAST_DISTANCE  = 500
 local CLICK_ACTION_NAME = "PlayerMenuClick"
 local MAX_DISTANCE      = 30
 local CLICK_COOLDOWN    = 0.3
 
--- ========================================
--- BASE DIMENSIONS
--- ========================================
 local BASE = {
 	SHEET_WIDTH     = 350,
 	SHEET_HEIGHT    = 400,
@@ -91,9 +80,6 @@ local BASE = {
 	GIVE_LABEL_SIZE   = 14,
 }
 
--- ========================================
--- ANIMATION SETTINGS
--- ========================================
 local ANIMATION_CONFIG = {
 	OpenDuration  = 0.35,
 	CloseDuration = 0.25,
@@ -105,9 +91,6 @@ local ANIMATION_CONFIG = {
 	CloseEaseDirection = Enum.EasingDirection.In,
 }
 
--- ========================================
--- HIGHLIGHT SETTINGS
--- ========================================
 local HIGHLIGHT_CONFIG = {
 	OutlineColor        = Color3.fromRGB(255, 180, 80),
 	OutlineTransparency = 0.2,
@@ -120,9 +103,6 @@ local HIGHLIGHT_CONFIG = {
 	PulseMax            = 0.6,
 }
 
--- ========================================
--- WARNA
--- ========================================
 local C = {
 	SheetBg         = Color3.fromRGB(26, 16, 20),
 	AvatarBg        = Color3.fromRGB(17, 13, 16),
@@ -145,9 +125,6 @@ local C = {
 	GiveCloseBg     = Color3.fromRGB(60, 30, 40),
 }
 
--- ========================================
--- STATE VARIABLES
--- ========================================
 local currentSheet     = nil
 local isSheetOpen      = false
 local isAnimating      = false
@@ -163,9 +140,6 @@ local currentGiveBtn      = nil
 local currentGiveLabel    = nil
 local currentGiveCloseBtn = nil
 
--- ========================================
--- HELPER FUNCTIONS
--- ========================================
 local function playClick()
 	local s = ReplicatedStorage:FindFirstChild("Sounds")
 	if s then
@@ -190,9 +164,6 @@ local function isInRange(target, dist)
 	return (mh.Position - th.Position).Magnitude <= dist
 end
 
--- ========================================
--- HIGHLIGHT FUNCTIONS
--- ========================================
 local function stopHighlightPulse()
 	if highlightPulseThread then
 		task.cancel(highlightPulseThread)
@@ -274,9 +245,6 @@ local function removeCharacterHighlight(instant)
 	currentHighlight = nil
 end
 
--- ========================================
--- CREATE GIVE ROLE OVERLAY
--- ========================================
 local function createGiveRoleOverlay(parentCanvasGroup)
 	local B = BASE
 
@@ -325,7 +293,7 @@ local function createGiveRoleOverlay(parentCanvasGroup)
 
 	local loadingText = Instance.new("TextLabel")
 	loadingText.Name = "LoadingText"
-	loadingText.Text = "Loading..."
+	loadingText.Text = "Memuat..."
 	loadingText.Size = UDim2.new(1, -30, 0, 50)
 	loadingText.Position = UDim2.new(0, 15, 0, 50)
 	loadingText.BackgroundTransparency = 1
@@ -340,7 +308,7 @@ local function createGiveRoleOverlay(parentCanvasGroup)
 
 	local roleBtn = Instance.new("TextButton")
 	roleBtn.Name = "VIPButton"
-	roleBtn.Text = "VIP - Loading..."
+	roleBtn.Text = "VIP - Memuat..."
 	roleBtn.Size = UDim2.new(1, -30, 0, B.GIVE_BTN_HEIGHT)
 	roleBtn.Position = UDim2.new(0, 15, 0, 110)
 	roleBtn.BackgroundColor3 = C.GiveBtnDisabled
@@ -383,9 +351,6 @@ local function createGiveRoleOverlay(parentCanvasGroup)
 	return giveFrame, roleBtn, loadingText, closeOverlayBtn
 end
 
--- ========================================
--- CLOSE SHEET
--- ========================================
 local function closeSheet(instant)
 	if not currentSheet or not isSheetOpen then return end
 	if isAnimating and not instant then return end
@@ -440,9 +405,6 @@ local function closeSheet(instant)
 	end
 end
 
--- ========================================
--- OPEN SHEET
--- ========================================
 local function openSheet(player)
 	if isSheetOpen then
 		closeSheet(true)
@@ -472,9 +434,6 @@ local function openSheet(player)
 	local sheetH      = B.SHEET_HEIGHT
 	local buttonsAreaH = isSelf and B.BUTTONS_AREA_H_SELF or B.BUTTONS_AREA_H
 
-	-- =====================
-	-- CANVAS GROUP
-	-- =====================
 	local canvasGroup = Instance.new("CanvasGroup")
 	canvasGroup.Name = "ProfileSheet"
 	canvasGroup.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -515,9 +474,6 @@ local function openSheet(player)
 		isAnimating = false
 	end)
 
-	-- =====================
-	-- SCROLL FRAME
-	-- =====================
 	local totalCanvas = sheetH + buttonsAreaH
 
 	local scroll = Instance.new("ScrollingFrame")
@@ -538,9 +494,6 @@ local function openSheet(player)
 	scroll.Active = true
 	scroll.Parent = canvasGroup
 
-	-- =====================
-	-- AVATAR SECTION
-	-- =====================
 	local avatarSection = Instance.new("Frame")
 	avatarSection.Name = "AvatarSection"
 	avatarSection.Size = UDim2.new(1, 0, 0, sheetH)
@@ -581,9 +534,6 @@ local function openSheet(player)
 	avatarImg.ZIndex = 2
 	avatarImg.Parent = avatarSection
 
-	-- =====================
-	-- NAME CONTAINER
-	-- =====================
 	local nameContainer = Instance.new("Frame")
 	nameContainer.Name = "NameContainer"
 	nameContainer.Size = UDim2.new(1, -B.PADDING * 2, 0, B.NAME_CONTAINER_H)
@@ -638,9 +588,6 @@ local function openSheet(player)
 		end
 	end)
 
-	-- =====================
-	-- SCROLL HINT
-	-- =====================
 	local scrollHint = Instance.new("Frame")
 	scrollHint.Name = "ScrollHint"
 	scrollHint.Size = UDim2.new(1, 0, 0, B.SCROLL_HINT_H)
@@ -693,9 +640,6 @@ local function openSheet(player)
 		end
 	end)
 
-	-- =====================
-	-- BUTTON SECTION
-	-- =====================
 	local buttonSection = Instance.new("Frame")
 	buttonSection.Name = "ButtonSection"
 	buttonSection.Size = UDim2.new(1, 0, 0, buttonsAreaH)
@@ -725,9 +669,6 @@ local function openSheet(player)
 	buttonLayout.Padding = UDim.new(0, B.BUTTON_SPACING)
 	buttonLayout.Parent = buttonContainer
 
-	-- =====================
-	-- CREATE BUTTON HELPER
-	-- =====================
 	local function createButton(label, bgColor, order, onClick, isEnabled)
 		if isEnabled == nil then isEnabled = true end
 		local btn = Instance.new("TextButton")
@@ -761,9 +702,6 @@ local function openSheet(player)
 		return btn
 	end
 
-	-- =====================
-	-- FRIEND BUTTON
-	-- =====================
 	local function createFriendButton(order, targetPlayer, isEnabled)
 		if isEnabled == nil then isEnabled = true end
 		local initialStatus = FriendConfig.GetFriendStatus(targetPlayer)
@@ -809,7 +747,6 @@ local function openSheet(player)
 
 	local buttonOrder = 1
 
-	-- FRIEND BUTTON
 	local friendBtn = createFriendButton(buttonOrder, player, not isSelf)
 	buttonOrder += 1
 
@@ -829,7 +766,6 @@ local function openSheet(player)
 		end)
 	end
 
-	-- SYNC BUTTON
 	local syncBtn = createButton(
 		isSyncingNow() and "✓ Sudah Sinkron" or "🎭 Tarian Koordinat",
 		isSyncingNow() and C.SyncDisabled or C.SyncActive,
@@ -860,7 +796,6 @@ local function openSheet(player)
 	end
 	buttonOrder += 1
 
-	-- GENDONG BUTTON
 	createButton("🤗 Gendong", C.ItemBg, buttonOrder, function()
 		if not currentTarget then return end
 		if not isInRange(currentTarget, CarryConfig.MAX_DISTANCE) then
@@ -884,12 +819,8 @@ local function openSheet(player)
 	end, not isSelf)
 	buttonOrder += 1
 
-	-- =====================
-	-- ✅ HADIAH GAMEPASS BUTTON (FINAL FIX)
-	-- =====================
 	if not isSelf then
 
-		-- Buat overlay sekali saat sheet dibuka
 		if not currentGiveFrame or not currentGiveFrame.Parent then
 			local gFrame, gBtn, gLabel, gClose = createGiveRoleOverlay(canvasGroup)
 			currentGiveFrame    = gFrame
@@ -916,7 +847,6 @@ local function openSheet(player)
 			end
 		end
 
-		-- Buat tombol disabled dulu, sambil cek status VIP di background
 		local hadiahBtn = Instance.new("TextButton")
 		hadiahBtn.Name = "Btn_Hadiah"
 		hadiahBtn.Text = "🎁 Memeriksa..."
@@ -935,18 +865,16 @@ local function openSheet(player)
 
 		buttonOrder += 1
 
-		-- Background check
 		task.spawn(function()
 			local targetRef = player
 
 			GiveRoleClient:CheckPlayerRoleAsync(targetRef, function(roleInfo)
 
-				-- Pastikan sheet masih terbuka dan tombol masih ada
 				if not hadiahBtn or not hadiahBtn.Parent then return end
 				if not isSheetOpen then return end
 
 				if roleInfo and roleInfo.canReceive then
-					-- ✅ BELUM VIP: aktifkan tombol
+
 					hadiahBtn.Text = "🎁 Hadiah Gamepass"
 					hadiahBtn.BackgroundColor3 = C.ItemBg
 					hadiahBtn.TextColor3 = C.TextPrimary
@@ -972,7 +900,7 @@ local function openSheet(player)
 					end)
 
 				else
-					-- ✅ SUDAH VIP: tetap disabled
+
 					hadiahBtn.Text = "🎁 Sudah Memiliki VIP ✓"
 					hadiahBtn.BackgroundColor3 = C.ItemBgDisabled
 					hadiahBtn.TextColor3 = C.TextDisabled
@@ -983,7 +911,6 @@ local function openSheet(player)
 		end)
 	end
 
-	-- OBROLAN BUTTON
 	createButton("💬 Obrolan Pribadi", C.ItemBg, buttonOrder, function()
 		if not currentTarget then return end
 		local targetUserId = currentTarget.UserId
@@ -1006,16 +933,12 @@ local function openSheet(player)
 	end, not isSelf)
 	buttonOrder += 1
 
-	-- INSPEKSI BUTTON
 	createButton("👀 Inspeksi Avatar", C.ItemBg, buttonOrder, function()
 		if not currentTarget then return end
 		pcall(function() GuiService:InspectPlayerFromUserId(currentTarget.UserId) end)
 		closeSheet()
 	end, true)
 
-	-- =====================
-	-- CLOSE BUTTON
-	-- =====================
 	local closeBtn = Instance.new("TextButton")
 	closeBtn.Name = "CloseButton"
 	closeBtn.Text = "x"
@@ -1043,9 +966,6 @@ local function openSheet(player)
 		TweenService:Create(closeBtn, TweenInfo.new(0.12), {BackgroundColor3 = C.CloseBtn}):Play()
 	end)
 
-	-- =====================
-	-- SCROLL HINT HIDE
-	-- =====================
 	scroll:GetPropertyChangedSignal("CanvasPosition"):Connect(function()
 		local scrollY = scroll.CanvasPosition.Y
 		if scrollY > 20 then
@@ -1066,9 +986,6 @@ local function openSheet(player)
 	end)
 end
 
--- ========================================
--- RAYCAST
--- ========================================
 local function raycast(screenPos)
 	local ray = camera:ViewportPointToRay(screenPos.X, screenPos.Y)
 	local params = RaycastParams.new()
@@ -1086,9 +1003,6 @@ local function raycast(screenPos)
 	return nil
 end
 
--- ========================================
--- INPUT HANDLER
--- ========================================
 local function handleClick(_, inputState, inputObject)
 	if inputState ~= Enum.UserInputState.Begin then
 		return Enum.ContextActionResult.Pass
@@ -1118,9 +1032,6 @@ ContextActionService:BindAction(
 	Enum.UserInputType.Touch
 )
 
--- ========================================
--- REGISTER KE MENUCONFIG
--- ========================================
 MenuConfig.OpenProfileCard   = openSheet
 MenuConfig.CloseProfileCard  = closeSheet
 MenuConfig.IsProfileCardOpen = function() return isSheetOpen end
@@ -1170,4 +1081,4 @@ script.Destroying:Connect(function()
 	ContextActionService:UnbindAction(CLICK_ACTION_NAME)
 end)
 
-print("✅ [ProfileClient] Loaded!")
+print("✅ [ProfileClient] Siap!")

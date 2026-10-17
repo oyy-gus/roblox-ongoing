@@ -1,37 +1,34 @@
--- Place in: ReplicatedStorage > Modules(Folder) > ThemeModule(ModuleScript)
--- ====================================
-
 local ThemeModule = {}
 
 local RunService = game:GetService("RunService")
 
--- ========================================
--- WARNA UTAMA
--- ========================================
 ThemeModule.Colors = {
-	-- Primary Colors (Monochrome Black & White Theme)
-	Primary1 = Color3.fromHex("#FFFFFF"),      -- Pure White Accent
-	Primary2 = Color3.fromHex("#888888"),      -- Smooth Gray Transition
+	Primary1 = Color3.fromHex("#FFFFFF"),
+	Primary2 = Color3.fromHex("#888888"),
 
-	-- Background Colors (Monochrome)
-	BackgroundDark = Color3.fromHex("#080808"),   -- Hitam pekat
-	BackgroundMedium = Color3.fromHex("#151515"), -- Secondary background
-	BackgroundLight = Color3.fromHex("#1C1C1C"),  -- Panel background
-	BackgroundLighter = Color3.fromHex("#262626"),-- Surface / Card background
+	BackgroundDark = Color3.fromHex("#080808"),
+	BackgroundMedium = Color3.fromHex("#151515"),
+	BackgroundLight = Color3.fromHex("#1C1C1C"),
+	BackgroundLighter = Color3.fromHex("#262626"),
 
-	-- Text Colors
 	TextWhite = Color3.fromHex("#FFFFFF"),
 	TextGray = Color3.fromHex("#A0A0A0"),
 	TextSecondary = Color3.fromHex("#A0A0A0"),
 	TextDark = Color3.fromHex("#111111"),
 	TextMuted = Color3.fromHex("#666666"),
-	
-	TextOnGradient = Color3.fromHex("#111111"),  -- Dark text untuk di atas gradient putih
 
-	-- Accent Colors (Monokromatis)
-	CloseRed = Color3.fromHex("#2A2A2A"),        -- Sleek dark close button
-	CloseRedHover = Color3.fromHex("#404040"),   -- Hover state
-	Success = Color3.fromHex("#FFFFFF"),         -- White indicator
+	TextOnGradient = Color3.fromHex("#111111"),
+
+	ButtonPrimaryBg = Color3.fromHex("#FFFFFF"),
+	ButtonPrimaryText = Color3.fromHex("#111111"),
+	ButtonSecondaryBg = Color3.fromHex("#1C1C1C"),
+	ButtonSecondaryText = Color3.fromHex("#FFFFFF"),
+	ButtonHoverBg = Color3.fromHex("#2A2A2A"),
+	ButtonPressedBg = Color3.fromHex("#333333"),
+
+	CloseRed = Color3.fromHex("#2A2A2A"),
+	CloseRedHover = Color3.fromHex("#404040"),
+	Success = Color3.fromHex("#FFFFFF"),
 	SuccessDark = Color3.fromHex("#888888"),
 	Warning = Color3.fromHex("#D0D0D0"),
 	WarningDark = Color3.fromHex("#707070"),
@@ -40,95 +37,116 @@ ThemeModule.Colors = {
 	Info = Color3.fromHex("#FFFFFF"),
 	InfoDark = Color3.fromHex("#888888"),
 
-	-- VIP Colors (Monochrome Silver/White)
 	VIPGold = Color3.fromHex("#FFFFFF"),
 	VIPOrange = Color3.fromHex("#888888"),
 
-	-- Disabled State
 	Disabled = Color3.fromHex("#353535"),
 	DisabledText = Color3.fromHex("#666666"),
 
-	-- Stroke Base Color & Borders
 	StrokeBase = Color3.fromHex("#353535"),
 	Border = Color3.fromHex("#353535"),
 }
 
--- ========================================
--- GRADIENT SEQUENCES
--- ========================================
 ThemeModule.Gradients = {
-	-- Primary gradient (Black & White with Gray transition)
 	Primary = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromHex("#151515")),
 		ColorSequenceKeypoint.new(0.5, Color3.fromHex("#FFFFFF")),
 		ColorSequenceKeypoint.new(1, Color3.fromHex("#353535"))
 	}),
 
-	-- Primary reversed
 	PrimaryReversed = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromHex("#353535")),
 		ColorSequenceKeypoint.new(0.5, Color3.fromHex("#FFFFFF")),
 		ColorSequenceKeypoint.new(1, Color3.fromHex("#151515"))
 	}),
 
-	-- Background gradient (Hitam pekat ke Panel dark)
 	Background = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromHex("#1C1C1C")),
 		ColorSequenceKeypoint.new(1, Color3.fromHex("#080808"))
 	}),
 
-	-- Success gradient
+	ButtonPrimary = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#FFFFFF")),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#D0D0D0"))
+	}),
+
 	Success = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromHex("#FFFFFF")),
 		ColorSequenceKeypoint.new(1, Color3.fromHex("#888888"))
 	}),
 
-	-- Warning gradient
 	Warning = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromHex("#D0D0D0")),
 		ColorSequenceKeypoint.new(1, Color3.fromHex("#707070"))
 	}),
 
-	-- Error gradient
 	Error = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromHex("#B0B0B0")),
 		ColorSequenceKeypoint.new(1, Color3.fromHex("#505050"))
 	}),
 
-	-- Info gradient
 	Info = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromHex("#FFFFFF")),
 		ColorSequenceKeypoint.new(1, Color3.fromHex("#888888"))
 	}),
 
-	-- VIP gradient (Monochrome Silver/White)
 	VIP = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromHex("#FFFFFF")),
 		ColorSequenceKeypoint.new(1, Color3.fromHex("#666666"))
 	}),
 
-	-- Dark to light
 	DarkToLight = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromHex("#080808")),
 		ColorSequenceKeypoint.new(1, Color3.fromHex("#1C1C1C"))
 	}),
 }
 
--- ========================================
--- GRADIENT ANIMATION SYSTEM
--- ========================================
+ThemeModule.Animation = {
+	OpenDuration = 0.25,
+	CloseDuration = 0.18,
+	OpenEasingStyle = Enum.EasingStyle.Quart,
+	OpenEasingDirection = Enum.EasingDirection.Out,
+	CloseEasingStyle = Enum.EasingStyle.Quart,
+	CloseEasingDirection = Enum.EasingDirection.In,
+}
+
+ThemeModule.Typography = {
+	Font = Enum.Font.GothamMedium,
+	FontBold = Enum.Font.GothamBold,
+	SizeTitle = 16,
+	SizeSubtitle = 13,
+	SizeBody = 12,
+	SizeCaption = 10,
+}
+
+ThemeModule.Dimensions = {
+	HeaderHeight = 44,
+	MinTouchTarget = 44,
+	CornerSmall = 6,
+	CornerMedium = 8,
+	CornerLarge = 12,
+	CornerPill = 99,
+	StrokeThin = 1,
+	StrokeMedium = 1.5,
+	StrokeBold = 2,
+}
+
 ThemeModule.GradientSystem = {
 	Gradients = {},
 	Connection = nil,
 	Speed = 1.2,
 	Time = 0,
-	IsRunning = false
+	IsRunning = false,
+	BeatMultiplier = 1.0,
 }
+
+function ThemeModule.GradientSystem.SetBeat(multiplier)
+	ThemeModule.GradientSystem.BeatMultiplier = math.clamp(multiplier or 1.0, 0.5, 3.0)
+end
 
 function ThemeModule.GradientSystem.Register(gradient, speed)
 	if not gradient then return end
 
-	-- Check if already registered
 	for _, data in ipairs(ThemeModule.GradientSystem.Gradients) do
 		if data.gradient == gradient then
 			data.speed = speed or data.speed
@@ -156,7 +174,12 @@ function ThemeModule.GradientSystem.Start()
 
 	ThemeModule.GradientSystem.IsRunning = true
 	ThemeModule.GradientSystem.Connection = RunService.Heartbeat:Connect(function(dt)
-		ThemeModule.GradientSystem.Time = ThemeModule.GradientSystem.Time + dt * ThemeModule.GradientSystem.Speed
+		local currentSpeed = ThemeModule.GradientSystem.Speed * ThemeModule.GradientSystem.BeatMultiplier
+		ThemeModule.GradientSystem.Time = ThemeModule.GradientSystem.Time + dt * currentSpeed
+
+		if ThemeModule.GradientSystem.BeatMultiplier > 1.0 then
+			ThemeModule.GradientSystem.BeatMultiplier = math.max(1.0, ThemeModule.GradientSystem.BeatMultiplier - dt * 2.0)
+		end
 
 		for i = #ThemeModule.GradientSystem.Gradients, 1, -1 do
 			local data = ThemeModule.GradientSystem.Gradients[i]
@@ -164,7 +187,6 @@ function ThemeModule.GradientSystem.Start()
 				local offset = math.sin(ThemeModule.GradientSystem.Time * data.speed) * 0.5
 				data.gradient.Offset = Vector2.new(offset, 0)
 			else
-				-- Remove invalid gradient
 				table.remove(ThemeModule.GradientSystem.Gradients, i)
 			end
 		end
@@ -183,6 +205,7 @@ function ThemeModule.GradientSystem.Clear()
 	ThemeModule.GradientSystem.Stop()
 	ThemeModule.GradientSystem.Gradients = {}
 	ThemeModule.GradientSystem.Time = 0
+	ThemeModule.GradientSystem.BeatMultiplier = 1.0
 end
 
 function ThemeModule.GradientSystem.SetSpeed(speed)
@@ -193,11 +216,6 @@ function ThemeModule.GradientSystem.GetCount()
 	return #ThemeModule.GradientSystem.Gradients
 end
 
--- ========================================
--- HELPER FUNCTIONS - CREATE
--- ========================================
-
--- Create UIGradient with primary colors (animated)
 function ThemeModule.CreatePrimaryGradient(parent, rotation, speed)
 	local gradient = Instance.new("UIGradient")
 	gradient.Color = ThemeModule.Gradients.Primary
@@ -207,7 +225,6 @@ function ThemeModule.CreatePrimaryGradient(parent, rotation, speed)
 	return gradient
 end
 
--- Create UIGradient with any gradient (animated)
 function ThemeModule.CreateAnimatedGradient(parent, gradientName, rotation, speed)
 	local gradient = Instance.new("UIGradient")
 	gradient.Color = ThemeModule.Gradients[gradientName] or ThemeModule.Gradients.Primary
@@ -217,7 +234,6 @@ function ThemeModule.CreateAnimatedGradient(parent, gradientName, rotation, spee
 	return gradient
 end
 
--- Create static UIGradient (not animated)
 function ThemeModule.CreateStaticGradient(parent, gradientName, rotation)
 	local gradient = Instance.new("UIGradient")
 	gradient.Color = ThemeModule.Gradients[gradientName] or ThemeModule.Gradients.Primary
@@ -226,15 +242,12 @@ function ThemeModule.CreateStaticGradient(parent, gradientName, rotation)
 	return gradient
 end
 
--- ========================================
--- FIXED: Create animated stroke with gradient
--- ========================================
 function ThemeModule.CreateAnimatedStroke(parent, thickness, gradientName, speed)
 	local stroke = Instance.new("UIStroke")
 	stroke.Name = "AnimatedStroke"
 	stroke.Thickness = thickness or 2
-	stroke.Color = ThemeModule.Colors.StrokeBase  -- FIXED: Set base color
-	stroke.Transparency = 0  -- FIXED: Ensure visible
+	stroke.Color = ThemeModule.Colors.StrokeBase
+	stroke.Transparency = 0
 	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	stroke.Parent = parent
 
@@ -248,7 +261,6 @@ function ThemeModule.CreateAnimatedStroke(parent, thickness, gradientName, speed
 	return stroke, gradient
 end
 
--- Create static stroke (no animation)
 function ThemeModule.CreateStaticStroke(parent, thickness, color, transparency)
 	local stroke = Instance.new("UIStroke")
 	stroke.Name = "StaticStroke"
@@ -261,7 +273,6 @@ function ThemeModule.CreateStaticStroke(parent, thickness, color, transparency)
 	return stroke
 end
 
--- Create stroke with gradient (no animation)
 function ThemeModule.CreateGradientStroke(parent, thickness, gradientName, rotation)
 	local stroke = Instance.new("UIStroke")
 	stroke.Name = "GradientStroke"
@@ -280,7 +291,6 @@ function ThemeModule.CreateGradientStroke(parent, thickness, gradientName, rotat
 	return stroke, gradient
 end
 
--- Create UICorner
 function ThemeModule.CreateCorner(parent, radius)
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, radius or 8)
@@ -288,11 +298,6 @@ function ThemeModule.CreateCorner(parent, radius)
 	return corner
 end
 
--- ========================================
--- HELPER FUNCTIONS - APPLY
--- ========================================
-
--- Apply primary gradient to existing UIGradient
 function ThemeModule.ApplyPrimaryGradient(uiGradient, rotation, speed)
 	if not uiGradient then return end
 	uiGradient.Color = ThemeModule.Gradients.Primary
@@ -300,7 +305,6 @@ function ThemeModule.ApplyPrimaryGradient(uiGradient, rotation, speed)
 	ThemeModule.GradientSystem.Register(uiGradient, speed or 1)
 end
 
--- Apply any gradient to existing UIGradient
 function ThemeModule.ApplyGradient(uiGradient, gradientName, rotation, animated, speed)
 	if not uiGradient then return end
 	uiGradient.Color = ThemeModule.Gradients[gradientName] or ThemeModule.Gradients.Primary
@@ -310,37 +314,25 @@ function ThemeModule.ApplyGradient(uiGradient, gradientName, rotation, animated,
 	end
 end
 
--- Apply background gradient
 function ThemeModule.ApplyBackgroundGradient(uiGradient, rotation)
 	if not uiGradient then return end
 	uiGradient.Color = ThemeModule.Gradients.Background
 	uiGradient.Rotation = rotation or 135
 end
 
--- ========================================
--- HELPER FUNCTIONS - GET
--- ========================================
-
--- Get color by name
 function ThemeModule.GetColor(name)
 	return ThemeModule.Colors[name] or ThemeModule.Colors.TextWhite
 end
 
--- Get gradient by name
 function ThemeModule.GetGradient(name)
 	return ThemeModule.Gradients[name] or ThemeModule.Gradients.Primary
 end
 
--- Get primary colors
 function ThemeModule.GetPrimaryColors()
 	return ThemeModule.Colors.Primary1, ThemeModule.Colors.Primary2
 end
 
--- ========================================
--- PRESET STYLES
--- ========================================
 ThemeModule.Styles = {
-	-- Button style
 	Button = {
 		BackgroundColor = ThemeModule.Colors.BackgroundMedium,
 		TextColor = ThemeModule.Colors.TextWhite,
@@ -348,21 +340,32 @@ ThemeModule.Styles = {
 		Font = Enum.Font.GothamBold,
 	},
 
-	-- Card style
+	ButtonPrimary = {
+		BackgroundColor = ThemeModule.Colors.ButtonPrimaryBg,
+		TextColor = ThemeModule.Colors.ButtonPrimaryText,
+		CornerRadius = 8,
+		Font = Enum.Font.GothamBold,
+	},
+
+	ButtonSecondary = {
+		BackgroundColor = ThemeModule.Colors.ButtonSecondaryBg,
+		TextColor = ThemeModule.Colors.ButtonSecondaryText,
+		CornerRadius = 8,
+		Font = Enum.Font.GothamMedium,
+	},
+
 	Card = {
 		BackgroundColor = ThemeModule.Colors.BackgroundDark,
 		CornerRadius = 12,
 	},
 
-	-- Header style
 	Header = {
 		BackgroundColor = ThemeModule.Colors.BackgroundMedium,
 		TextColor = ThemeModule.Colors.TextWhite,
-		Height = 50,
+		Height = 44,
 		CornerRadius = 12,
 	},
 
-	-- Input style
 	Input = {
 		BackgroundColor = ThemeModule.Colors.BackgroundLight,
 		TextColor = ThemeModule.Colors.TextWhite,
@@ -370,7 +373,6 @@ ThemeModule.Styles = {
 		CornerRadius = 6,
 	},
 
-	-- Toggle style
 	Toggle = {
 		BackgroundColorOff = ThemeModule.Colors.BackgroundLight,
 		BackgroundColorOn = ThemeModule.Colors.Primary1,
@@ -378,7 +380,6 @@ ThemeModule.Styles = {
 	},
 }
 
--- Apply style to instance
 function ThemeModule.ApplyStyle(instance, styleName)
 	local style = ThemeModule.Styles[styleName]
 	if not style then return end
@@ -413,9 +414,6 @@ function ThemeModule.ApplyStyle(instance, styleName)
 	end
 end
 
--- ========================================
--- THEME PRESETS (untuk ganti tema)
--- ========================================
 ThemeModule.Presets = {}
 
 ThemeModule.Presets.Gold = {
@@ -453,19 +451,16 @@ ThemeModule.Presets.Pink = {
 	Primary2 = Color3.fromRGB(255, 100, 150),
 }
 
--- Apply theme preset
 function ThemeModule.ApplyPreset(presetName)
 	local preset = ThemeModule.Presets[presetName]
-	if not preset then 
-		warn("ThemeModule: Preset '" .. tostring(presetName) .. "' not found")
+	if not preset then
+		warn("ThemeModule: Preset '" .. tostring(presetName) .. "' tidak ditemukan")
 		return false
 	end
 
-	-- Update colors
 	ThemeModule.Colors.Primary1 = preset.Primary1
 	ThemeModule.Colors.Primary2 = preset.Primary2
 
-	-- Update gradients
 	ThemeModule.Gradients.Primary = ColorSequence.new({
 		ColorSequenceKeypoint.new(0, preset.Primary1),
 		ColorSequenceKeypoint.new(1, preset.Primary2)
@@ -476,27 +471,20 @@ function ThemeModule.ApplyPreset(presetName)
 		ColorSequenceKeypoint.new(1, preset.Primary1)
 	})
 
-	-- Update existing gradients
 	for _, data in ipairs(ThemeModule.GradientSystem.Gradients) do
 		if data.gradient and data.gradient.Parent then
 			data.gradient.Color = ThemeModule.Gradients.Primary
 		end
 	end
 
-	print("✅ ThemeModule: Applied preset '" .. presetName .. "'")
+	print("ThemeModule: Tema '" .. presetName .. "' berhasil diterapkan")
 	return true
 end
 
--- Get current preset colors
 function ThemeModule.GetCurrentPrimaryColors()
 	return ThemeModule.Colors.Primary1, ThemeModule.Colors.Primary2
 end
 
--- ========================================
--- UTILITY FUNCTIONS
--- ========================================
-
--- Lerp between two colors
 function ThemeModule.LerpColor(color1, color2, alpha)
 	return Color3.new(
 		color1.R + (color2.R - color1.R) * alpha,
@@ -505,7 +493,6 @@ function ThemeModule.LerpColor(color1, color2, alpha)
 	)
 end
 
--- Darken a color
 function ThemeModule.DarkenColor(color, amount)
 	amount = amount or 0.2
 	return Color3.new(
@@ -515,7 +502,6 @@ function ThemeModule.DarkenColor(color, amount)
 	)
 end
 
--- Lighten a color
 function ThemeModule.LightenColor(color, amount)
 	amount = amount or 0.2
 	return Color3.new(
@@ -525,13 +511,12 @@ function ThemeModule.LightenColor(color, amount)
 	)
 end
 
--- Get contrasting text color (white or black)
 function ThemeModule.GetContrastColor(backgroundColor)
 	local luminance = 0.299 * backgroundColor.R + 0.587 * backgroundColor.G + 0.114 * backgroundColor.B
 	if luminance > 0.5 then
-		return Color3.new(0, 0, 0)  -- Dark text
+		return Color3.new(0, 0, 0)
 	else
-		return Color3.new(1, 1, 1)  -- Light text
+		return Color3.new(1, 1, 1)
 	end
 end
 

@@ -1,16 +1,10 @@
 --!strict
--- LOCAL
+
 local VERSION = {}
 
-
-
--- SHARED
 VERSION.appVersion = "v3.4.0"
 VERSION.latestVersion = nil :: string?
 
-
-
--- FUNCTIONS
 function VERSION.getLatestVersion(): string?
 	local DEVELOPMENT_PLACE_ID = 117501901079852
 	local latestVersion = VERSION.latestVersion
@@ -30,7 +24,7 @@ function VERSION.getLatestVersion(): string?
 	end
 	latestVersion = string.match(placeName, "^TopbarPlus (.*)$")
 	if latestVersion then
-		latestVersion = latestVersion:gsub("%s+", "") -- Remove all whitespace (spaces, tabs, newlines)
+		latestVersion = latestVersion:gsub("%s+", "")
 	end
 	VERSION.latestVersion = latestVersion
 	return latestVersion
@@ -45,7 +39,5 @@ function VERSION.isUpToDate()
 	local appVersion = VERSION.getAppVersion()
 	return latestVersion ~= nil and latestVersion == appVersion
 end
-
-
 
 return VERSION

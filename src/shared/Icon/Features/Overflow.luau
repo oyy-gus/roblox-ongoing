@@ -1,11 +1,3 @@
--- When designing your game for many devices and screen sizes, icons may occasionally
--- particularly for smaller devices like phones, overlap with other icons or the bounds
--- of the screen. The overflow handler solves this challenge by moving the out-of-bounds
--- icon into an overflow menu (with a limited scrolling canvas) preventing overlaps occuring
-
-
-
--- LOCAL
 local Overflow = {}
 local holders = {}
 local orderedAvailableIcons = {}
@@ -18,10 +10,6 @@ local beginCheckingCenterIcons = false
 local beganSecondaryCenterCheck = false
 local Icon
 
-
-
--- FUNCTIONS
--- This is called upon the Icon initializing
 function Overflow.start(incomingIcon)
 	Icon = incomingIcon
 	iconsDict = Icon.iconsDictionary
@@ -37,8 +25,6 @@ function Overflow.start(incomingIcon)
 		end
 	end
 
-	-- We listen for changes in icons (such as them being added, removed,
-	-- the setting of a different alignment, the widget size changing, etc)
 	local beginOverflow = false
 	local updateBoundaries = Utility.createStagger(0.1, function(ignoreAvailable)
 		if not beginOverflow then
@@ -55,9 +41,7 @@ function Overflow.start(incomingIcon)
 		updateBoundaries()
 	end)
 	task.delay(2, function()
-		-- This is essential to prevent central icons begin added
-		-- left or right due to incomplete UIListLayout calculations
-		-- within the first few frames
+
 		beginCheckingCenterIcons = true
 		updateBoundaries()
 	end)
@@ -87,7 +71,6 @@ end
 
 function Overflow.updateAvailableIcons(alignment)
 
-	-- We only track items that are directly on the topbar (i.e. not within a parent icon)
 	local ourTotal = 0
 	local ourOrderedIcons = {}
 	for _, icon in pairs(iconsDict) do
@@ -100,13 +83,10 @@ function Overflow.updateAvailableIcons(alignment)
 		end
 	end
 
-	-- Ignore if no icons are available
 	if ourTotal <= 0 then
 		return {}
 	end
 
-	-- This sorts these icons by smallest order, or if equal, left-most position
-	-- (even for the right alignment because all icons are sorted left-to-right)
 	table.sort(ourOrderedIcons, function(iconA, iconB)
 		local orderA = iconA.widget.LayoutOrder
 		local orderB = iconB.widget.LayoutOrder
@@ -128,15 +108,13 @@ function Overflow.updateAvailableIcons(alignment)
 		return nil
 	end)
 
-	-- Finish up
 	orderedAvailableIcons[alignment] = ourOrderedIcons
 	return ourOrderedIcons
 
 end
 
 function Overflow.getRealXPositions(alignment, orderedIcons)
-	-- We calculate the the absolute position of icons instead of reading
-	-- directly to determine where they would be if not within an overflow
+
 	local isLeft = alignment == "Left"
 	local holder = holders[alignment]
 	local holderXPos = holder.AbsolutePosition.X
@@ -165,7 +143,6 @@ end
 
 function Overflow.updateBoundary(alignment)
 
-	-- We only track items that are directly on the topbar (i.e. not within a parent icon) or within an overflow
 	local holder = holders[alignment]
 	local holderUIList = holder.UIListLayout
 	local holderXPos = holder.AbsolutePosition.X
@@ -183,23 +160,21 @@ function Overflow.updateBoundary(alignment)
 	if ourTotal <= 0 then
 		return
 	end
-	
-	-- These are the icons with menus which icons will be moved into
-	-- when overflowing
+
 	local isCentral = alignment == "Center"
 	local isLeft = alignment == "Left"
 	local isRight = not isLeft
 	local overflowIcon = overflowIcons[alignment]
 	if not overflowIcon and not isCentral and #ourOrderedIcons > 0 then
 		local order = (isLeft and -9999999) or 9999999
-		overflowIcon = Icon.new()--:setLabel(`{alignment}`)
+		overflowIcon = Icon.new()
 		overflowIcon:setImage(6069276526, "Deselected")
 		overflowIcon:setName("Overflow"..alignment)
 		overflowIcon:setOrder(order)
 		overflowIcon:setAlignment(alignment)
 		overflowIcon:autoDeselect(false)
 		overflowIcon.isAnOverflow = true
-		--overflowIcon:freezeMenu()
+
 		overflowIcon:select("OverflowStart", overflowIcon)
 		overflowIcon:setEnabled(false)
 		overflowIcons[alignment] = overflowIcon
@@ -210,8 +185,6 @@ function Overflow.updateBoundary(alignment)
 		end
 	end
 
-	-- The default boundary is the point where both the left-most-right-icon
-	-- and left-most-right-icon meet OR the opposite side of the screen
 	local oppositeAlignment = (alignment == "Left" and "Right") or "Left"
 	local oppositeOrderedIcons = Overflow.updateAvailableIcons(oppositeAlignment)
 	local nearestOppositeIcon = (isLeft and oppositeOrderedIcons[1]) or (isRight and oppositeOrderedIcons[#oppositeOrderedIcons])
@@ -223,11 +196,7 @@ function Overflow.updateBoundary(alignment)
 		local oppositeXSize = Overflow.getWidth(nearestOppositeIcon)
 		boundary = (isLeft and oppositeX - BOUNDARY_GAP) or oppositeX + oppositeXSize + BOUNDARY_GAP
 	end
-	
-	-- We get the left-most icon (if left alignment) or right-most-icon (if
-	-- right alignment) of the central icons group to see if we need to change
-	-- the boundary (if the central icon boundary is smaller than the alignment
-	-- boundary then we use the central)
+
 	local totalChecks = 0
 	local usingNearestCenter = false
 	local function checkToShiftCentralIcon()
@@ -279,14 +248,7 @@ function Overflow.updateBoundary(alignment)
 		end
 	end
 	checkToShiftCentralIcon()
-	
-	--[[
-	This updates the maximum size of the overflow menus
-	The menu determines its bounds from the smallest of either:
-	 	1. The closest center-aligned icon (i.e. the boundary)
-	 	2. The edge of the opposite overflow menu UNLESS...
-	 	3. ... the edge exceeds more than half the screenGui
-	--]]
+
 	if overflowIcon then
 		local menuBoundary = boundary
 		local menu = overflowIcon:getInstance("Menu")
@@ -316,10 +278,6 @@ function Overflow.updateBoundary(alignment)
 		end
 	end
 
-	-- Parent ALL icons of that alignment into the overflow if at least on
-	-- sibling exceeds the bounds.
-	-- We calculate the the absolute position of icons instead of reading
-	-- directly to determine where they would be if not within an overflow
 	local joinOverflow = false
 	local realXPositions = Overflow.getRealXPositions(alignment, ourOrderedIcons)
 	for i = #ourOrderedIcons, 1, -1 do
@@ -341,20 +299,16 @@ function Overflow.updateBoundary(alignment)
 			end
 		end
 	end
-	
-	-- Hide the overflows when not in use
+
 	if overflowIcon.isEnabled ~= joinOverflow then
 		overflowIcon:setEnabled(joinOverflow)
 	end
-	
-	-- Have the menus auto selected
+
 	if overflowIcon.isEnabled and not overflowIcon.overflowAlreadyOpened then
 		overflowIcon.overflowAlreadyOpened = true
 		overflowIcon:select()
 	end
 
 end
-
-
 
 return Overflow

@@ -1,7 +1,3 @@
--- MODULE: UIModule (FINAL)
--- Letakkan sebagai child dari DonationClientHandler
--- ========================================
-
 local starterGui = game:GetService("StarterGui")
 local ClientConfig = require(script.Parent.ClientConfig)
 
@@ -88,6 +84,3 @@ function UIModule.setLoading(container, show)
 end
 
 return UIModule
-
--- ========================================
--- LOCALSCRIPT - DonationDisplayClient

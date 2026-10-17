@@ -1,4 +1,3 @@
--- AnimationLoader.lua — SIMPLIFIED: Direct access tanpa duplikasi + Config Loader
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ContentProvider = game:GetService("ContentProvider")
 
@@ -6,9 +5,6 @@ local emotesFolder = ReplicatedStorage:WaitForChild("Emotes")
 
 local module = {}
 
--- ============================================
--- CONFIG
--- ============================================
 local DEBUG_MODE = false
 
 local function debug(...)
@@ -16,16 +12,12 @@ local function debug(...)
 	print("[AnimLoader]", ...)
 end
 
--- ============================================
--- MAIN: Build animation table (NO CLONING!)
--- ============================================
 function module.loadAnimations()
 	local animations = {}
 	local animCount = 0
 
 	debug("📂 Loading animations from DanceConfig, PoseConfig, and Emotes folder...")
 
-	-- Ensure Pose folder exists in Emotes
 	local poseFolder = emotesFolder:FindFirstChild("Pose")
 	if not poseFolder then
 		poseFolder = Instance.new("Folder")
@@ -33,7 +25,6 @@ function module.loadAnimations()
 		poseFolder.Parent = emotesFolder
 	end
 
-	-- 1) Load from DanceConfig if available
 	local danceConfigModule = emotesFolder:FindFirstChild("DanceConfig")
 	if danceConfigModule and danceConfigModule:IsA("ModuleScript") then
 		local ok, danceList = pcall(require, danceConfigModule)
@@ -59,7 +50,6 @@ function module.loadAnimations()
 		end
 	end
 
-	-- 2) Load from PoseConfig if available
 	local poseConfigModule = emotesFolder:FindFirstChild("PoseConfig")
 	if poseConfigModule and poseConfigModule:IsA("ModuleScript") then
 		local ok, poseList = pcall(require, poseConfigModule)
@@ -85,7 +75,6 @@ function module.loadAnimations()
 		end
 	end
 
-	-- 3) Load any additional Dance animations directly placed in Emotes root
 	for _, anim in ipairs(emotesFolder:GetChildren()) do
 		if anim:IsA("Animation") and not animations[anim.Name] then
 			animations[anim.Name] = anim
@@ -94,7 +83,6 @@ function module.loadAnimations()
 		end
 	end
 
-	-- 4) Load any additional Pose animations directly placed in Pose folder
 	for _, anim in ipairs(poseFolder:GetChildren()) do
 		if anim:IsA("Animation") and not animations[anim.Name] then
 			animations[anim.Name] = anim
@@ -105,19 +93,14 @@ function module.loadAnimations()
 
 	debug(string.format("📦 Total: %d animations loaded", animCount))
 
-	-- ============================================
-	-- PRELOAD (Optional - untuk faster load)
-	-- ============================================
 	if animCount > 0 then
 		local startTime = tick()
 		local allAnims = {}
 
-		-- Collect all animations
 		for _, anim in pairs(animations) do
 			table.insert(allAnims, anim)
 		end
 
-		-- Preload
 		local success = pcall(function()
 			ContentProvider:PreloadAsync(allAnims)
 		end)
@@ -127,24 +110,20 @@ function module.loadAnimations()
 		if success then
 			debug(string.format("⚡ Preloaded in %.2fs", loadTime))
 		else
-			warn("[AnimLoader] Preload failed (non-critical)")
+			warn("[AnimLoader] Pra-muat gagal (non-kritis)")
 		end
 	end
 
 	return animations
 end
 
--- ============================================
--- HELPER: Get animation by name
--- ============================================
 function module.getAnimation(animName)
-	-- Direct lookup from Emotes folder
+
 	local anim = emotesFolder:FindFirstChild(animName)
 	if anim and anim:IsA("Animation") then
 		return anim
 	end
 
-	-- Check Pose folder
 	local poseFolder = emotesFolder:FindFirstChild("Pose")
 	if poseFolder then
 		anim = poseFolder:FindFirstChild(animName)
@@ -156,9 +135,6 @@ function module.getAnimation(animName)
 	return nil
 end
 
--- ============================================
--- HELPER: Get category
--- ============================================
 function module.getAnimationCategory(animName)
 	local poseFolder = emotesFolder:FindFirstChild("Pose")
 	if poseFolder and poseFolder:FindFirstChild(animName) then
@@ -167,9 +143,6 @@ function module.getAnimationCategory(animName)
 	return "Dance"
 end
 
--- ============================================
--- HELPER: Get all by category
--- ============================================
 function module.getAnimationsByCategory(category)
 	local results = {}
 

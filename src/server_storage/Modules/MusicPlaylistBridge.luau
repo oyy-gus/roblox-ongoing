@@ -1,10 +1,3 @@
--- ====================================
--- MUSIC PLAYLIST BRIDGE (IMPROVED)
--- Place in: ServerStorage > Modules(Folder) > MusicPlaylistBridge(ModuleScript)
--- ====================================
--- Changes:
---   ✅ tick() → workspace:GetServerTimeNow()
-
 local MusicPlaylistBridge = {}
 
 local HttpService       = game:GetService("HttpService")

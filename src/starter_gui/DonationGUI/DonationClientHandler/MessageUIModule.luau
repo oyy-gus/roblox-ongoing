@@ -1,7 +1,3 @@
--- MODULE: MessageUIModule (FINAL)
--- Letakkan sebagai child dari DonationClientHandler
--- ========================================
-
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local ClientConfig = require(script.Parent.ClientConfig)
 local ClientDebug = require(script.Parent.ClientDebug)
@@ -74,10 +70,10 @@ local function sendMessage(elements, state)
 		)
 		state.lastMessageTime = currentTime
 		hideMessageFrame(elements, state)
-		ClientDebug.log("PURCHASE", "Message sent successfully")
+		ClientDebug.log("PURCHASE", "Pesan berhasil dikirim")
 	else
 		UIModule.notify("Error", "Gagal mengirim pesan", ClientConfig.NOTIFICATIONS.DURATION.ERROR)
-		ClientDebug.warn("ERROR", "Failed to send message:", result)
+		ClientDebug.warn("KESALAHAN", "Gagal mengirim pesan:", result)
 	end
 end
 
@@ -108,5 +104,3 @@ function MessageUIModule.setupMessageFrame(elements, state)
 end
 
 return MessageUIModule
-
--- ========================================

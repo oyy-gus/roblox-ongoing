@@ -1,11 +1,3 @@
--- ====================================
--- VALIDATION MANAGER (SIMPLIFIED)
--- Place in: StarterScriptService > GamePass(Folder) > GamePassHandler(Script) > ValidationManager(ModuleScript)
--- ====================================
--- Removed: Give gamepass validation, validation cache
--- Kept: Basic player validation only
--- ====================================
-
 local Logger = require(script.Parent.Logger)
 
 local Players = game:GetService("Players")

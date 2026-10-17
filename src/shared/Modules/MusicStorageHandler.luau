@@ -1,38 +1,25 @@
--- Place in: ReplicatedStorage > Modules > MusicStorageHandler(ModuleScript)
--- ====================================
--- Changes:
---   ✅ tick() → workspace:GetServerTimeNow()
---   ✅ Tambah PreloadSound() method (non-blocking preload)
---   ✅ Perbaiki cleanup: hindari destroy sound yang sedang di-preload
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local HttpService       = game:GetService("HttpService")
 
 local MusicStorageHandler = {}
 
--- ====================================
--- CONFIGURATION
--- ====================================
 local CONFIG = {
 	MAX_CACHED_SOUNDS     = 20,
-	LOAD_TIMEOUT          = 3.5,  -- DIPERCEPAT: dari 15 ke 3.5s agar audio rusak/502 langsung di-skip tanpa freeze
+	LOAD_TIMEOUT          = 3.5,
 	PARALLEL_BATCH_SIZE   = 5,
 	CLEANUP_INTERVAL      = 300,
 	MIN_USAGE_THRESHOLD   = 60,
-	RETRY_ATTEMPTS        = 1,    -- 1x coba cukup, hindari 30 detik freeze saat asset bermasalah
+	RETRY_ATTEMPTS        = 1,
 	RETRY_DELAY           = 0.5,
 }
 
--- ====================================
--- STATE MANAGEMENT
--- ====================================
 MusicStorageHandler.Status = {
 	IsLoading       = false,
 	CachedSounds    = {},
 	LoadingPromises = {},
 	AccessTimes     = {},
 	FailedSounds    = {},
-	PreloadingSounds = {},  -- BARU: track sounds yang sedang di-preload
+	PreloadingSounds = {},
 	Stats = {
 		TotalLoads  = 0,
 		CacheHits   = 0,
@@ -41,9 +28,6 @@ MusicStorageHandler.Status = {
 	},
 }
 
--- ====================================
--- STORAGE FOLDER
--- ====================================
 local storageFolder
 local function getStorageFolder()
 	if not storageFolder or not storageFolder.Parent then
@@ -57,9 +41,6 @@ local function getStorageFolder()
 	return storageFolder
 end
 
--- ====================================
--- LRU CACHE MANAGEMENT
--- ====================================
 local function updateAccessTime(musicId)
 	MusicStorageHandler.Status.AccessTimes[musicId] = workspace:GetServerTimeNow()
 end
@@ -85,7 +66,6 @@ local function cleanupOldSounds()
 	local removed     = 0
 	local currentTime = workspace:GetServerTimeNow()
 
-	-- Jangan destroy sound yang sedang di-preload
 	local preloading = MusicStorageHandler.Status.PreloadingSounds
 
 	while #sounds > CONFIG.MAX_CACHED_SOUNDS do
@@ -120,9 +100,6 @@ local function cleanupOldSounds()
 	return removed
 end
 
--- ====================================
--- LOADING WITH RETRY
--- ====================================
 local function loadSoundWithRetry(musicId, musicTitle)
 	for attempt = 1, CONFIG.RETRY_ATTEMPTS do
 		local sound       = Instance.new("Sound")
@@ -155,9 +132,6 @@ local function loadSoundWithRetry(musicId, musicTitle)
 	return nil, 0
 end
 
--- ====================================
--- LAZY LOAD (ON-DEMAND)
--- ====================================
 function MusicStorageHandler:LoadSound(musicId, musicTitle)
 	local cached = self.Status.CachedSounds[musicId]
 	if cached then
@@ -200,14 +174,10 @@ function MusicStorageHandler:LoadSound(musicId, musicTitle)
 	end
 end
 
--- ====================================
--- PRELOAD (NON-BLOCKING) — BARU
--- ====================================
---- Preload lagu di background tanpa blocking. Untuk digunakan oleh preload system.
 function MusicStorageHandler:PreloadSound(musicId, musicTitle)
-	-- Sudah ada di cache? Skip.
+
 	if self.Status.CachedSounds[musicId] then return end
-	-- Sedang loading? Skip.
+
 	if self.Status.LoadingPromises[musicId] then return end
 
 	self.Status.PreloadingSounds[musicId] = true
@@ -217,9 +187,6 @@ function MusicStorageHandler:PreloadSound(musicId, musicTitle)
 	end)
 end
 
--- ====================================
--- BATCH PRELOAD
--- ====================================
 function MusicStorageHandler:PreloadBatch(musicList, onProgress, onComplete)
 	if self.Status.IsLoading then return end
 
@@ -256,9 +223,6 @@ function MusicStorageHandler:PreloadBatch(musicList, onProgress, onComplete)
 	end)
 end
 
--- ====================================
--- GET METHODS
--- ====================================
 function MusicStorageHandler:GetSound(musicId)
 	local sound = self.Status.CachedSounds[musicId]
 	if sound then
@@ -282,9 +246,6 @@ function MusicStorageHandler:IsSoundFailed(musicId)
 	return self.Status.FailedSounds[musicId] ~= nil
 end
 
--- ====================================
--- AUTO CLEANUP LOOP
--- ====================================
 function MusicStorageHandler:StartAutoCleanup()
 	task.spawn(function()
 		while true do
@@ -294,9 +255,6 @@ function MusicStorageHandler:StartAutoCleanup()
 	end)
 end
 
--- ====================================
--- STATISTICS
--- ====================================
 function MusicStorageHandler:GetStats()
 	local cacheSize = 0
 	for _ in pairs(self.Status.CachedSounds) do
@@ -316,12 +274,9 @@ function MusicStorageHandler:GetStats()
 end
 
 function MusicStorageHandler:PrintStats()
-	-- Method kept for compatibility
+
 end
 
--- ====================================
--- MANUAL CLEANUP
--- ====================================
 function MusicStorageHandler:ForceCleanup()
 	return cleanupOldSounds()
 end
@@ -339,6 +294,3 @@ function MusicStorageHandler:ClearCache()
 end
 
 return MusicStorageHandler
-
--- ====================================
--- NOTIF MODULE

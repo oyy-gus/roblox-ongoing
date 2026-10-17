@@ -1,10 +1,5 @@
--- MODULE: BroadcastConfig
--- Letakkan sebagai child dari DonationBroadcastHandler
--- ========================================
-
 local BroadcastConfig = {}
 
--- Debug Settings
 BroadcastConfig.DEBUG = {
 	ENABLED = false,
 	SHOW_BROADCAST = true,
@@ -13,18 +8,15 @@ BroadcastConfig.DEBUG = {
 	SHOW_SECURITY = true,
 }
 
--- Broadcast Settings
 BroadcastConfig.BROADCAST = {
 	MIN_DONATION = 50,
 	DISPLAY_DURATION = 5,
 	MAX_MESSAGE_LENGTH = 200,
 	QUEUE_DELAY = 0.5,
-	-- NEW: Auto message untuk donasi kecil
 	AUTO_MESSAGE_ENABLED = true,
-	AUTO_MESSAGE_THRESHOLD = 50, -- Donasi < 50 Robux akan dapat pesan otomatis
+	AUTO_MESSAGE_THRESHOLD = 50,
 }
 
--- Auto Messages (random pilih salah satu)
 BroadcastConfig.AUTO_MESSAGES = {
 	"Terima kasih atas dukungannya!",
 	"Setiap donasi sangat berarti!",
@@ -34,7 +26,6 @@ BroadcastConfig.AUTO_MESSAGES = {
 	"Apresiasi untuk donasi kamu!",
 }
 
--- Anti-Spam
 BroadcastConfig.ANTISPAM = {
 	ENABLED = true,
 	COOLDOWN = 10,
@@ -42,15 +33,13 @@ BroadcastConfig.ANTISPAM = {
 	MAX_QUEUE_PER_PLAYER = 3,
 }
 
--- Security
 BroadcastConfig.SECURITY = {
 	TRACK_PURCHASES = false,
 	PURCHASE_TIMEOUT = 300,
 	KICK_ON_FAKE = false,
 }
 
--- Product Prices (sync dengan DonationServerHandler)
-BroadcastConfig.PRODUCT_PRICES = {
+local rawProductPrices = {
 	{id = 3569205896, name = "10 Robux", price = 10},
 	{id = 3575392550, name = "25 Robux", price = 25},
 	{id = 3579402644, name = "50 Robux", price = 50},
@@ -66,7 +55,24 @@ BroadcastConfig.PRODUCT_PRICES = {
 	{id = 3579402654, name = "10000 Robux", price = 10000},
 	{id = 3579402655, name = "25000 Robux", price = 25000},
 	{id = 3579405557, name = "50000 Robux", price = 50000},
-
 }
+
+local priceById = {}
+for _, item in ipairs(rawProductPrices) do
+	priceById[item.id] = item.price
+end
+
+BroadcastConfig.PRODUCT_PRICES = setmetatable(rawProductPrices, {
+	__index = function(self, key)
+		if typeof(key) == "number" and priceById[key] then
+			return priceById[key]
+		end
+		return nil
+	end,
+})
+
+function BroadcastConfig.GetProductPrice(productId: number): number?
+	return priceById[productId]
+end
 
 return BroadcastConfig

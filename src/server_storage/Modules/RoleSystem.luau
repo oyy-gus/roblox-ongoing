@@ -1,8 +1,3 @@
--- ====================================
--- ROLE SYSTEM (FIXED VERSION)
--- Place in: ServerStorage > Modules(Folder) > RoleSystem(ModuleScript)
--- ====================================
-
 local RoleSystem = {}
 
 local DataStoreService = game:GetService("DataStoreService")
@@ -45,7 +40,6 @@ RoleSystem.Config = {
 local roleDataStore = DataStoreService:GetDataStore(RoleSystem.Config.DATASTORE_NAME)
 local playerOwnershipCache = {}
 
--- Events
 local roleChangedEvent = Instance.new("BindableEvent")
 roleChangedEvent.Name = "RoleChanged"
 RoleSystem.RoleChanged = roleChangedEvent.Event
@@ -58,14 +52,9 @@ local streamerChangedEvent = Instance.new("BindableEvent")
 streamerChangedEvent.Name = "StreamerChanged"
 RoleSystem.StreamerChanged = streamerChangedEvent.Event
 
--- ====== NEW: Creator Changed Event ======
 local creatorChangedEvent = Instance.new("BindableEvent")
 creatorChangedEvent.Name = "CreatorChanged"
 RoleSystem.CreatorChanged = creatorChangedEvent.Event
-
--- ====================================
--- UTILITY FUNCTIONS
--- ====================================
 
 local function isInList(userId, list)
 	for _, id in ipairs(list) do
@@ -79,8 +68,8 @@ local function datastoreGetAsync(key)
 		local success, result = pcall(function()
 			return roleDataStore:GetAsync(key)
 		end)
-		if success then 
-			return result 
+		if success then
+			return result
 		end
 		warn(string.format("[RoleSystem] DataStore GetAsync attempt %d failed: %s", attempt, tostring(result)))
 		if attempt < RoleSystem.Config.DATASTORE_RETRY_ATTEMPTS then
@@ -95,9 +84,9 @@ local function datastoreSetAsync(key, value)
 		local success, err = pcall(function()
 			roleDataStore:SetAsync(key, value)
 		end)
-		if success then 
+		if success then
 			print(string.format("[RoleSystem] DataStore saved successfully: %s", key))
-			return true 
+			return true
 		end
 		warn(string.format("[RoleSystem] DataStore SetAsync attempt %d failed: %s", attempt, tostring(err)))
 		if attempt < RoleSystem.Config.DATASTORE_RETRY_ATTEMPTS then
@@ -155,10 +144,6 @@ local function checkAnyGamepass(player, gamepassIds)
 	return false
 end
 
--- ====================================
--- CACHE MANAGEMENT
--- ====================================
-
 function RoleSystem:CachePlayerOwnership(player)
 	local userId = player.UserId
 
@@ -204,7 +189,7 @@ function RoleSystem:CachePlayerOwnership(player)
 
 	playerOwnershipCache[userId] = ownership
 
-	print(string.format("[RoleSystem] Final ownership for %s: VIP=%s, Streamer=%s, Creator=%s", 
+	print(string.format("[RoleSystem] Final ownership for %s: VIP=%s, Streamer=%s, Creator=%s",
 		player.Name, tostring(ownership.VIP), tostring(ownership.Streamer), tostring(ownership.Creator)))
 
 	return ownership
@@ -221,10 +206,6 @@ end
 function RoleSystem:InvalidateOwnershipCache(userId)
 	playerOwnershipCache[userId] = nil
 end
-
--- ====================================
--- ROLE CHECKING
--- ====================================
 
 function RoleSystem:GetPlayerRole(player)
 	local userId = player.UserId
@@ -268,10 +249,6 @@ function RoleSystem:HasCreator(player)
 	local ownership = self:GetPlayerOwnership(player)
 	return ownership.Creator == true
 end
-
--- ====================================
--- ROLE MANAGEMENT
--- ====================================
 
 function RoleSystem:InitializePlayer(player)
 	self:CachePlayerOwnership(player)
@@ -334,14 +311,10 @@ function RoleSystem:SaveRoleToPlayer(targetUserId, roleType, giverUserId)
 	return success
 end
 
--- ====================================
--- ⭐ FIXED: GiveRoleToPlayer - No more race condition!
--- ====================================
 function RoleSystem:GiveRoleToPlayer(targetUserId, roleType, giverUserId)
-	print(string.format("[RoleSystem] ⭐ GiveRoleToPlayer: userId=%d, role=%s, giver=%s", 
+	print(string.format("[RoleSystem] ⭐ GiveRoleToPlayer: userId=%d, role=%s, giver=%s",
 		targetUserId, roleType, tostring(giverUserId)))
 
-	-- Validate role type
 	local isGiveable = false
 	for _, r in ipairs(self.Config.GiveableRoles) do
 		if r == roleType then
@@ -351,20 +324,18 @@ function RoleSystem:GiveRoleToPlayer(targetUserId, roleType, giverUserId)
 	end
 
 	if not isGiveable then
-		return false, "Invalid role type: " .. tostring(roleType)
+		return false, "Tipe role tidak valid: " .. tostring(roleType)
 	end
 
-	-- ⭐ Step 1: Save to DataStore FIRST and WAIT for it
 	local saveSuccess = self:SaveRoleToPlayer(targetUserId, roleType, giverUserId)
 
 	if not saveSuccess then
-		warn("[RoleSystem] ❌ Failed to save to DataStore")
-		return false, "DataStore error"
+		warn("[RoleSystem] ❌ Gagal menyimpan ke DataStore")
+		return false, "Kesalahan DataStore"
 	end
 
 	print(string.format("[RoleSystem] ✅ Role %s saved to DataStore for user %d", roleType, targetUserId))
 
-	-- ⭐ Step 2: Update cache DIRECTLY (no invalidation!)
 	local ownership = playerOwnershipCache[targetUserId]
 	if not ownership then
 		ownership = {
@@ -376,7 +347,6 @@ function RoleSystem:GiveRoleToPlayer(targetUserId, roleType, giverUserId)
 		}
 	end
 
-	-- Update the specific role flag
 	if roleType == "VIP" then
 		ownership.VIP = true
 		print(string.format("[RoleSystem] ✅ Set VIP=true in cache"))
@@ -388,7 +358,6 @@ function RoleSystem:GiveRoleToPlayer(targetUserId, roleType, giverUserId)
 		print(string.format("[RoleSystem] ✅ Set Creator=true in cache"))
 	end
 
-	-- Add to GivenRoles if not exists
 	local roleInList = false
 	for _, r in ipairs(ownership.GivenRoles) do
 		if r == roleType then
@@ -403,13 +372,12 @@ function RoleSystem:GiveRoleToPlayer(targetUserId, roleType, giverUserId)
 	ownership.CheckedAt = tick()
 	playerOwnershipCache[targetUserId] = ownership
 
-	print(string.format("[RoleSystem] ✅ Cache updated: VIP=%s, Streamer=%s, Creator=%s", 
+	print(string.format("[RoleSystem] ✅ Cache updated: VIP=%s, Streamer=%s, Creator=%s",
 		tostring(ownership.VIP), tostring(ownership.Streamer), tostring(ownership.Creator)))
 
-	-- ⭐ Step 3: Update player if online
 	local player = game.Players:GetPlayerByUserId(targetUserId)
 	if player then
-		-- Update Role StringValue directly (no re-caching!)
+
 		local roleValue = player:FindFirstChild("Role")
 		if not roleValue then
 			roleValue = Instance.new("StringValue")
@@ -423,7 +391,6 @@ function RoleSystem:GiveRoleToPlayer(targetUserId, roleType, giverUserId)
 
 		print(string.format("[RoleSystem] ✅ Updated %s: %s -> %s", player.Name, oldRole, newRole))
 
-		-- Fire appropriate events
 		if roleType == "VIP" then
 			vipChangedEvent:Fire(player, true)
 			print("[RoleSystem] 🔔 Fired VIPChanged event")
@@ -435,7 +402,6 @@ function RoleSystem:GiveRoleToPlayer(targetUserId, roleType, giverUserId)
 			print("[RoleSystem] 🔔 Fired CreatorChanged event")
 		end
 
-		-- Fire RoleChanged if role actually changed
 		if oldRole ~= newRole then
 			roleChangedEvent:Fire(player, oldRole, newRole)
 			print("[RoleSystem] 🔔 Fired RoleChanged event")
@@ -447,9 +413,6 @@ function RoleSystem:GiveRoleToPlayer(targetUserId, roleType, giverUserId)
 	return true, "Role given successfully"
 end
 
--- ====================================
--- RemoveRoleFromPlayer - Also Fixed
--- ====================================
 function RoleSystem:RemoveRoleFromPlayer(targetUserId, roleType)
 	local key = "playerroles_" .. tostring(targetUserId)
 
@@ -473,7 +436,7 @@ function RoleSystem:RemoveRoleFromPlayer(targetUserId, roleType)
 	local success = datastoreSetAsync(key, data)
 
 	if success then
-		-- Update cache directly
+
 		local ownership = playerOwnershipCache[targetUserId]
 		if ownership then
 			if roleType == "VIP" then
@@ -521,7 +484,6 @@ function RoleSystem:RemoveRoleFromPlayer(targetUserId, roleType)
 	return false, "DataStore error"
 end
 
--- Legacy compatibility
 function RoleSystem:GivePassToPlayer(targetUserId, passType, giverUserId)
 	return self:GiveRoleToPlayer(targetUserId, passType, giverUserId)
 end
@@ -529,10 +491,6 @@ end
 function RoleSystem:RemovePassFromPlayer(targetUserId)
 	return self:RemoveRoleFromPlayer(targetUserId, "VIP")
 end
-
--- ====================================
--- UTILITY FUNCTIONS
--- ====================================
 
 function RoleSystem:GetPlayerGivenRoles(player)
 	local ownership = self:GetPlayerOwnership(player)
@@ -573,7 +531,6 @@ function RoleSystem:GetOwnershipStats()
 	return stats
 end
 
--- Debug function
 function RoleSystem:DebugPrintCache(userId)
 	local ownership = playerOwnershipCache[userId]
 	if ownership then
@@ -587,7 +544,6 @@ function RoleSystem:DebugPrintCache(userId)
 	end
 end
 
--- Compatibility stubs
 function RoleSystem:GetRolePermissions(role) return {} end
 function RoleSystem:GetPlayerPermissions(player) return {} end
 function RoleSystem:HasZoneAccess(player, zoneName) return false end

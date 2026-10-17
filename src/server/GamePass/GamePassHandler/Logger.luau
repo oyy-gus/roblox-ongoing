@@ -1,8 +1,3 @@
--- ====================================
--- SERVER LOGGER MODULE
--- Place in: StarterScriptService > GamePass(Folder) > GamePassHandler(Script) > Logger(ModuleScript)
--- ====================================
-
 local Config = require(script.Parent.Config)
 
 local Logger = {}

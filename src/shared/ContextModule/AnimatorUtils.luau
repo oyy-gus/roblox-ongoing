@@ -1,16 +1,9 @@
--- AnimatorUtils.lua — PURE: No Priority Logic, Let Roblox Handle It
-
 local module = {}
 
--- 🧠 Simple cache with weak keys (auto-cleanup by Lua GC)
 local trackCache = setmetatable({}, { __mode = "k" })
 
--- Reference to AnimationPreloader (set by EmoteHandler)
 module.AnimationPreloader = nil
 
--- ============================================
--- Animation Set (for O(1) lookup)
--- ============================================
 local function animationSetFrom(loadedAnimations)
 	if not loadedAnimations then return nil end
 	if loadedAnimations.__asSet then return loadedAnimations.__asSet end
@@ -26,9 +19,6 @@ local function animationSetFrom(loadedAnimations)
 	return set
 end
 
--- ============================================
--- Check if track is a dance track
--- ============================================
 local function isDanceTrack(track, loadedAnimations)
 	if not track or not loadedAnimations then return false end
 	if not track.Animation then return false end
@@ -45,61 +35,53 @@ local function isDanceTrack(track, loadedAnimations)
 	return false
 end
 
--- ============================================
--- Character Readiness Check
--- ============================================
 function module.isCharacterReady(player)
-	if not player or not player.Parent then 
-		return false 
+	if not player or not player.Parent then
+		return false
 	end
 
-	if not player.Character or not player.Character.Parent then 
-		return false 
+	if not player.Character or not player.Character.Parent then
+		return false
 	end
 
 	local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-	if not humanoid or not humanoid.Parent then 
-		return false 
+	if not humanoid or not humanoid.Parent then
+		return false
 	end
 
 	local animator = humanoid:FindFirstChildOfClass("Animator")
-	if not animator or not animator.Parent then 
-		return false 
+	if not animator or not animator.Parent then
+		return false
 	end
 
 	local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-	if not hrp or not hrp.Parent then 
-		return false 
+	if not hrp or not hrp.Parent then
+		return false
 	end
 
 	return true
 end
 
 function module.getAnimator(player)
-	if not module.isCharacterReady(player) then 
-		return nil 
+	if not module.isCharacterReady(player) then
+		return nil
 	end
 
 	local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
 	return humanoid:FindFirstChildOfClass("Animator")
 end
 
--- ============================================
--- 🎯 PURE: Get or Create Animation Track
--- ============================================
 function module.getOrCreateTrack(animator, animation)
 	if not animator or not animation then return nil end
 
-	-- Validate animator hierarchy
 	if not animator.Parent or not animator.Parent.Parent then
 		return nil
 	end
 
-	-- ✅ Try preloaded track first (CLIENT-SIDE ONLY)
 	if module.AnimationPreloader then
 		local preloadedTrack = module.AnimationPreloader.getPreloadedTrack(animation)
 		if preloadedTrack then
-			-- Validate preloaded track
+
 			local isValid = pcall(function()
 				return preloadedTrack.IsPlaying, preloadedTrack.Animation
 			end)
@@ -107,7 +89,7 @@ function module.getOrCreateTrack(animator, animation)
 			if isValid and preloadedTrack.Parent == animator then
 				return preloadedTrack
 			else
-				-- Preloaded track is invalid, clear it
+
 				if module.AnimationPreloader then
 					module.AnimationPreloader.invalidateTrack(animation)
 				end
@@ -115,7 +97,6 @@ function module.getOrCreateTrack(animator, animation)
 		end
 	end
 
-	-- Fallback to cache system
 	local perAnimator = trackCache[animator]
 	if not perAnimator then
 		perAnimator = setmetatable({}, { __mode = "k" })
@@ -124,7 +105,6 @@ function module.getOrCreateTrack(animator, animation)
 
 	local track = perAnimator[animation]
 
-	-- Validate cached track
 	if track then
 		local isValid = pcall(function()
 			if not track.Parent or track.Parent ~= animator then
@@ -139,17 +119,14 @@ function module.getOrCreateTrack(animator, animation)
 		end
 	end
 
-	-- Create new track if needed
 	if not track then
 		local ok, loaded = pcall(function()
 			return animator:LoadAnimation(animation)
 		end)
 
-		if not ok or not loaded then 
-			return nil 
+		if not ok or not loaded then
+			return nil
 		end
-
-		-- ✨ NO PRIORITY SETTING - Let Roblox handle it!
 
 		perAnimator[animation] = loaded
 		track = loaded
@@ -158,9 +135,6 @@ function module.getOrCreateTrack(animator, animation)
 	return track
 end
 
--- ============================================
--- Get Currently Playing Dance Track
--- ============================================
 function module.getPlayingDanceTrack(animator, loadedAnimations)
 	if not animator or not animator.Parent then return nil end
 
@@ -173,7 +147,7 @@ function module.getPlayingDanceTrack(animator, loadedAnimations)
 
 	for _, t in ipairs(tracks) do
 		if isDanceTrack(t, loadedAnimations) then
-			-- Try to find name from map
+
 			local hit = nil
 			for name, animObj in pairs(loadedAnimations or {}) do
 				if typeof(animObj) == "Instance" and t.Animation == animObj then
@@ -188,9 +162,6 @@ function module.getPlayingDanceTrack(animator, loadedAnimations)
 	return nil
 end
 
--- ============================================
--- Stop All Dance Tracks
--- ============================================
 function module.stopAllDances(animator, loadedAnimations, fadeOut)
 	if not animator or not animator.Parent then return end
 	fadeOut = (fadeOut ~= nil) and fadeOut or 0.06
@@ -209,9 +180,6 @@ function module.stopAllDances(animator, loadedAnimations, fadeOut)
 	end
 end
 
--- ============================================
--- Stop all dances EXCEPT the specified track
--- ============================================
 function module.stopOtherDances(animator, excludeTrack, loadedAnimations, fadeOut)
 	if not animator or not animator.Parent then return end
 	fadeOut = (fadeOut ~= nil) and fadeOut or 0.06
@@ -230,9 +198,6 @@ function module.stopOtherDances(animator, excludeTrack, loadedAnimations, fadeOu
 	end
 end
 
--- ============================================
--- Clear Cache (call on character death)
--- ============================================
 function module.clearCacheForPlayer(player)
 	if not player or not player.Character then return end
 
@@ -242,7 +207,6 @@ function module.clearCacheForPlayer(player)
 	local animator = humanoid:FindFirstChildOfClass("Animator")
 	if not animator then return end
 
-	-- Clear this animator's cache
 	trackCache[animator] = nil
 end
 

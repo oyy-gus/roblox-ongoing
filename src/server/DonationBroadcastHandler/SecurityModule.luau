@@ -1,22 +1,9 @@
--- ========================================
--- MODULE: SecurityModule
--- Letakkan sebagai child dari DonationBroadcastHandler
--- ========================================
-
 local BroadcastConfig = require(script.Parent.BroadcastConfig)
 local BroadcastDebug = require(script.Parent.BroadcastDebug)
 
 local SecurityModule = {}
 
--- ============================================
--- 📊 STATE
--- ============================================
 local verifiedPurchases = {}
--- Format: [userId] = {[timestamp] = {productId, amount, claimed}}
-
--- ============================================
--- 🔒 FUNCTIONS
--- ============================================
 
 function SecurityModule.recordPurchase(player, productId, amount)
 	local userId = player.UserId

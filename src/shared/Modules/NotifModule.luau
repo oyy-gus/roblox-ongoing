@@ -1,6 +1,3 @@
--- Place in: ReplicatedStorage > Modules(Folder) > NotifModule(ModuleScript)
--- ====================================
-
 local NotifModule = {}
 
 local TweenService = game:GetService("TweenService")
@@ -175,7 +172,6 @@ local function createNotifFrame(options)
 	local notifType = NOTIFICATION_TYPES[options.Type] or NOTIFICATION_TYPES.Notification
 	local primaryColor = options.Color or notifType.PrimaryColor
 
-	-- FRAME UTAMA
 	local mainFrame = Instance.new("Frame")
 	mainFrame.Name = "Notification"
 	mainFrame.Size = UDim2.new(1, 0, 0, CONFIG.MinHeight)
@@ -189,7 +185,6 @@ local function createNotifFrame(options)
 	mainCorner.CornerRadius = UDim.new(0, CONFIG.CornerRadius)
 	mainCorner.Parent = mainFrame
 
-	-- ACCENT BAR (kiri)
 	local accentBar = Instance.new("Frame")
 	accentBar.Size = UDim2.new(0, 3, 1, -6)
 	accentBar.Position = UDim2.new(0, 3, 0, 3)
@@ -200,7 +195,6 @@ local function createNotifFrame(options)
 
 	Instance.new("UICorner", accentBar).CornerRadius = UDim.new(0, 2)
 
-	-- ICON
 	local iconLabel = Instance.new("TextLabel")
 	iconLabel.Size = UDim2.new(0, CONFIG.IconSize, 0, CONFIG.IconSize)
 	iconLabel.Position = UDim2.new(0, 10, 0, 6)
@@ -212,12 +206,10 @@ local function createNotifFrame(options)
 	iconLabel.ZIndex = 999999 + 1
 	iconLabel.Parent = mainFrame
 
-	-- TEXT
 	local textX = 10 + CONFIG.IconSize + 4
 	local closeBtnSpace = 18
 	local textW = CONFIG.Width - textX - closeBtnSpace
 
-	-- Title
 	local title = Instance.new("TextLabel")
 	title.Size = UDim2.new(0, textW, 0, 12)
 	title.Position = UDim2.new(0, textX, 0, 5)
@@ -236,7 +228,6 @@ local function createNotifFrame(options)
 	titleConstraint.MinTextSize = 7
 	titleConstraint.Parent = title
 
-	-- Message
 	local message = Instance.new("TextLabel")
 	message.Size = UDim2.new(0, textW, 0, 11)
 	message.Position = UDim2.new(0, textX, 0, 18)
@@ -255,7 +246,6 @@ local function createNotifFrame(options)
 	msgConstraint.MinTextSize = 7
 	msgConstraint.Parent = message
 
-	-- PROGRESS BAR
 	local progressBg = Instance.new("Frame")
 	progressBg.Size = UDim2.new(1, -12, 0, CONFIG.ProgressBarHeight)
 	progressBg.Position = UDim2.new(0, 6, 1, -(CONFIG.ProgressBarHeight + 4))
@@ -276,9 +266,6 @@ local function createNotifFrame(options)
 
 	Instance.new("UICorner", progressFill).CornerRadius = UDim.new(0, 1)
 
-	-- ========================================
-	-- CLOSE BUTTON (compact, pojok kanan atas)
-	-- ========================================
 	local closeBtn = Instance.new("TextButton")
 	closeBtn.Name = "CloseButton"
 	closeBtn.Size = UDim2.new(0, 16, 0, 16)
@@ -369,7 +356,6 @@ function NotifModule.Notify(options)
 		}):Play()
 	end
 
-	-- Close button handler
 	notifData.closeBtn.MouseButton1Click:Connect(function()
 		NotifModule.Dismiss(notifData)
 	end)
@@ -407,7 +393,6 @@ function NotifModule.DismissAll()
 	end
 end
 
--- SHORTCUTS
 function NotifModule.Success(title, text, duration)
 	return NotifModule.Notify({ Type = "Success", Title = title, Text = text, Duration = duration })
 end
@@ -437,6 +422,3 @@ function NotifModule.ForceOnTop()
 end
 
 return NotifModule
-
--- ====================================
--- THEME MODULE

@@ -1,42 +1,29 @@
--- ====================================
--- VIP ZONE ACCESS MODULE (PREFIX SYSTEM)
--- Place in: ServerStorage > Modules(Folder) > VIPZoneModule(ModuleScript)
--- ====================================
-
 local VIPZoneModule = {}
 
 local Players = game:GetService("Players")
 local PhysicsService = game:GetService("PhysicsService")
 local ServerStorage = game:GetService("ServerStorage")
 
--- Import RoleSystem Module
 local RoleSystem = require(ServerStorage.Modules.RoleSystem)
 
--- Configuration
 local CONFIG = {
-	ZONE_PART_NAME = "VIPZone1","VIPZone2","VIPZone3","VIPZone4","VIPZone5","VIPZone6","VIPZone7","VIPZone8",
-	ZONE_PREFIX = "VIPZone",                  -- Prefix untuk mencari zone parts (VIPZone1, VIPZone2, dll)
-	ZONE_COLLISION_GROUP = "VIPZone",         -- Group untuk zone itu sendiri
-	VIP_COLLISION_GROUP = "VIPPlayers",       -- Group untuk VIP
-	NONVIP_COLLISION_GROUP = "NonVIPPlayers", -- Group untuk NON-VIP
+	ZONE_PART_NAMES = {"VIPZone1","VIPZone2","VIPZone3","VIPZone4","VIPZone5","VIPZone6","VIPZone7","VIPZone8"},
+	ZONE_PREFIX = "VIPZone",
+	ZONE_COLLISION_GROUP = "VIPZone",
+	VIP_COLLISION_GROUP = "VIPPlayers",
+	NONVIP_COLLISION_GROUP = "NonVIPPlayers",
 	MIN_ROLE_LEVEL = 2,
-	DEBUG_ENABLED = false  -- Set true untuk melihat debug messages
+	DEBUG_ENABLED = false
 }
 
 local activeZones = {}
 
--- ====================================
--- DEBUG PRINT FUNCTION
--- ====================================
 local function debugPrint(...)
 	if CONFIG.DEBUG_ENABLED then
 		print("[VIPZone]", ...)
 	end
 end
 
--- ====================================
--- COLLISION GROUP SETUP
--- ====================================
 local function setupCollisionGroups()
 	local groups = {
 		CONFIG.ZONE_COLLISION_GROUP,
@@ -44,45 +31,31 @@ local function setupCollisionGroups()
 		CONFIG.NONVIP_COLLISION_GROUP
 	}
 
-	-- Register semua collision groups
 	for _, groupName in ipairs(groups) do
 		pcall(function()
 			PhysicsService:RegisterCollisionGroup(groupName)
 		end)
 	end
 
-	-- ===== PLAYER DENGAN PLAYER =====
-	-- VIP dengan VIP = tembus
 	PhysicsService:CollisionGroupSetCollidable(CONFIG.VIP_COLLISION_GROUP, CONFIG.VIP_COLLISION_GROUP, false)
 
-	-- NON-VIP dengan NON-VIP = tembus
 	PhysicsService:CollisionGroupSetCollidable(CONFIG.NONVIP_COLLISION_GROUP, CONFIG.NONVIP_COLLISION_GROUP, false)
 
-	-- VIP dengan NON-VIP = tembus
 	PhysicsService:CollisionGroupSetCollidable(CONFIG.VIP_COLLISION_GROUP, CONFIG.NONVIP_COLLISION_GROUP, false)
 
-	-- ===== PLAYER DENGAN ZONE =====
-	-- VIP dengan ZONE = TEMBUS (false)
 	PhysicsService:CollisionGroupSetCollidable(CONFIG.VIP_COLLISION_GROUP, CONFIG.ZONE_COLLISION_GROUP, false)
 
-	-- NON-VIP dengan ZONE = TERTAHAN (true)
 	PhysicsService:CollisionGroupSetCollidable(CONFIG.NONVIP_COLLISION_GROUP, CONFIG.ZONE_COLLISION_GROUP, true)
 
 	debugPrint("✅ Collision groups configured")
 end
 
--- ====================================
--- CHECK PLAYER VIP ACCESS
--- ====================================
 local function isPlayerVIP(player)
 	local role = RoleSystem:GetPlayerRole(player)
 	local roleLevel = RoleSystem.Config.RoleHierarchy[role] or 0
 	return roleLevel >= CONFIG.MIN_ROLE_LEVEL
 end
 
--- ====================================
--- APPLY COLLISION GROUP
--- ====================================
 local function applyCollisionToCharacter(character, groupName)
 	for _, part in ipairs(character:GetDescendants()) do
 		if part:IsA("BasePart") then
@@ -92,7 +65,6 @@ local function applyCollisionToCharacter(character, groupName)
 		end
 	end
 
-	-- Handle new parts yang ditambahkan ke character
 	character.DescendantAdded:Connect(function(descendant)
 		if descendant:IsA("BasePart") then
 			task.wait()
@@ -103,9 +75,6 @@ local function applyCollisionToCharacter(character, groupName)
 	end)
 end
 
--- ====================================
--- UPDATE PLAYER ACCESS
--- ====================================
 local function updatePlayerAccess(player)
 	if not player.Character then return end
 
@@ -114,24 +83,19 @@ local function updatePlayerAccess(player)
 
 	applyCollisionToCharacter(player.Character, groupName)
 
-	-- Debug info
-	debugPrint(string.format("%s (%s) → CollisionGroup: %s", 
-		player.Name, 
-		isVIP and "VIP" or "NON-VIP", 
+	debugPrint(string.format("%s (%s) → CollisionGroup: %s",
+		player.Name,
+		isVIP and "VIP" or "NON-VIP",
 		groupName
 		))
 end
 
--- ====================================
--- REGISTER VIP ZONE
--- ====================================
 function VIPZoneModule.registerZone(zonePart)
 	if not zonePart or not zonePart:IsA("BasePart") then
-		warn("[VIPZone] Invalid zone part!")
+		warn("[VIPZone] Part zona tidak valid!")
 		return false
 	end
 
-	-- Setup zone part
 	zonePart.CanCollide = true
 	zonePart.CollisionGroup = CONFIG.ZONE_COLLISION_GROUP
 	zonePart.Transparency = 1
@@ -146,13 +110,9 @@ function VIPZoneModule.registerZone(zonePart)
 	return true
 end
 
--- ====================================
--- FIND AND REGISTER ALL ZONES BY PREFIX
--- ====================================
 local function findAndRegisterZones()
 	local zonesFound = 0
 
-	-- Recursive function untuk mencari di semua descendants
 	local function searchInContainer(container)
 		for _, obj in ipairs(container:GetDescendants()) do
 			if obj:IsA("BasePart") and string.match(obj.Name, "^" .. CONFIG.ZONE_PREFIX) then
@@ -163,7 +123,6 @@ local function findAndRegisterZones()
 		end
 	end
 
-	-- Search di Workspace
 	searchInContainer(workspace)
 
 	if zonesFound > 0 then
@@ -175,13 +134,9 @@ local function findAndRegisterZones()
 	return zonesFound
 end
 
--- ====================================
--- FIND AND REGISTER SPECIFIC ZONES (LEGACY SUPPORT)
--- ====================================
 local function findAndRegisterSpecificZones()
 	local zonesFound = 0
 
-	-- Jika ZONE_PART_NAME adalah table (multiple zones)
 	if type(CONFIG.ZONE_PART_NAME) == "table" then
 		for _, zoneName in ipairs(CONFIG.ZONE_PART_NAME) do
 			local zone = workspace:FindFirstChild(zoneName)
@@ -191,7 +146,7 @@ local function findAndRegisterSpecificZones()
 				end
 			end
 		end
-		-- Jika ZONE_PART_NAME adalah string (single zone)
+
 	elseif type(CONFIG.ZONE_PART_NAME) == "string" then
 		local zone = workspace:FindFirstChild(CONFIG.ZONE_PART_NAME)
 		if zone then
@@ -204,9 +159,6 @@ local function findAndRegisterSpecificZones()
 	return zonesFound
 end
 
--- ====================================
--- SETUP PLAYER
--- ====================================
 local function setupPlayer(player)
 	RoleSystem:InitializePlayer(player)
 
@@ -221,18 +173,13 @@ local function setupPlayer(player)
 	end
 end
 
--- ====================================
--- INITIALIZE SYSTEM
--- ====================================
 function VIPZoneModule.Init()
 	debugPrint("🔧 Initializing VIP Zone System...")
 
 	setupCollisionGroups()
 
-	-- Register zones menggunakan nama spesifik (dari ZONE_PART_NAME)
 	local specificZones = findAndRegisterSpecificZones()
 
-	-- Register zones menggunakan prefix system
 	local prefixZones = findAndRegisterZones()
 
 	local totalZones = specificZones + prefixZones
@@ -241,17 +188,14 @@ function VIPZoneModule.Init()
 		warn("[VIPZone] ⚠️ No zones registered! Check your zone names or prefix.")
 	end
 
-	-- Setup existing players
 	for _, player in ipairs(Players:GetPlayers()) do
 		setupPlayer(player)
 	end
 
-	-- Setup new players
 	Players.PlayerAdded:Connect(function(player)
 		setupPlayer(player)
 	end)
 
-	-- Handle role changes (misal: player beli gamepass)
 	RoleSystem.RoleChanged:Connect(function(player, oldRole, newRole)
 		debugPrint(string.format("Role changed: %s (%s → %s)", player.Name, oldRole, newRole))
 		updatePlayerAccess(player)
@@ -259,17 +203,11 @@ function VIPZoneModule.Init()
 
 end
 
--- ====================================
--- UTILITY: Change Zone Prefix (Optional)
--- ====================================
 function VIPZoneModule.setZonePrefix(newPrefix)
 	CONFIG.ZONE_PREFIX = newPrefix
 	debugPrint("Zone prefix changed to:", newPrefix)
 end
 
--- ====================================
--- UTILITY: Get Active Zones Count
--- ====================================
 function VIPZoneModule.getActiveZonesCount()
 	return #activeZones
 end

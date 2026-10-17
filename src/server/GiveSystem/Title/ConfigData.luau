@@ -1,8 +1,3 @@
--- ============================================================
--- ConfigData
--- Place in: ServerScriptService > GiveSystem(Folder) > Title(Folder) > ConfigData(ModuleScript)
--- ============================================================
-
 local ConfigData = {}
 
 ConfigData.ColorTemplates = {

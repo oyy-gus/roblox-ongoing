@@ -1,8 +1,3 @@
--- ============================================================
---  Lokasi : ReplicatedStorage > AutoScaleSystem > ScaleSystem(ModuleScript)
---  VERSI DIPERBAIKI - Mencegah bug full screen
--- ============================================================
-
 local ScaleSystem = {}
 ScaleSystem.__index = ScaleSystem
 
@@ -10,35 +5,31 @@ local RunService   = game:GetService("RunService")
 local Config       = require(script.Parent:WaitForChild("Config"))
 local ScaleUtils   = require(script.Parent:WaitForChild("ScaleUtils"))
 
--- ══════════════════════════════════════════
--- PRIVATE HELPERS
--- ══════════════════════════════════════════
-
 local function getOrCreateUIScale(targetGui: ScreenGui): UIScale
-	-- ★ PENTING: Hapus UIScale lama jika ada (mencegah duplikat)
+
 	local existing = targetGui:FindFirstChildOfClass("UIScale")
-	if existing then 
-		-- Jika sudah ada AutoUIScale, gunakan itu
+	if existing then
+
 		if existing.Name == "AutoUIScale" then
 			return existing
 		end
-		-- Jika ada UIScale lain, hapus untuk mencegah konflik
+
 		warn("[ScaleSystem] Menghapus UIScale duplikat:", existing.Name)
 		existing:Destroy()
 	end
 
 	local uiScale    = Instance.new("UIScale")
 	uiScale.Name     = "AutoUIScale"
-	uiScale.Scale    = 1 -- ★ Default ke 1, bukan 0
+	uiScale.Scale    = 1
 	uiScale.Parent   = targetGui
 	return uiScale
 end
 
 local function applyScale(uiScale: UIScale)
 	local camera = workspace.CurrentCamera
-	if not camera then 
+	if not camera then
 		warn("[ScaleSystem] Camera tidak tersedia")
-		return 
+		return
 	end
 
 	local viewportSize = camera.ViewportSize
@@ -67,7 +58,7 @@ local function applyScale(uiScale: UIScale)
 
 	finalScale = math.clamp(finalScale, Config.MIN_SCALE, Config.MAX_SCALE)
 
-	if finalScale ~= finalScale then -- NaN check
+	if finalScale ~= finalScale then
 		warn("[ScaleSystem] Scale NaN detected, reset ke 1")
 		finalScale = 1
 	end
@@ -79,7 +70,6 @@ local function applyScale(uiScale: UIScale)
 
 	uiScale.Scale = finalScale
 
-	-- Debug info
 	if Config.DEBUG_MODE then
 		print(string.format(
 			"[ScaleSystem] Viewport: %dx%d | Raw: %.3f | Final: %.3f",
@@ -87,10 +77,6 @@ local function applyScale(uiScale: UIScale)
 			))
 	end
 end
-
--- ══════════════════════════════════════════
--- CONSTRUCTOR
--- ══════════════════════════════════════════
 
 function ScaleSystem.new(targetGui: ScreenGui)
 	assert(typeof(targetGui) == "Instance" and targetGui:IsA("ScreenGui"),
@@ -107,15 +93,10 @@ function ScaleSystem.new(targetGui: ScreenGui)
 	return self
 end
 
--- ══════════════════════════════════════════
--- PUBLIC METHODS
--- ══════════════════════════════════════════
-
 function ScaleSystem:Start()
 	if self._active then return end
 	self._active = true
 
-	-- ★ Delay sedikit untuk memastikan viewport ready
 	task.defer(function()
 		applyScale(self._uiScale)
 	end)
@@ -125,7 +106,7 @@ function ScaleSystem:Start()
 		if not camera then return end
 
 		local conn = camera:GetPropertyChangedSignal("ViewportSize"):Connect(function()
-			-- ★ Debounce untuk mencegah spam
+
 			task.defer(function()
 				if self._active then
 					applyScale(self._uiScale)
@@ -160,14 +141,12 @@ function ScaleSystem:GetCurrentScale(): number
 	return self._uiScale and self._uiScale.Scale or 1
 end
 
--- ★ BARU: Set scale manual (untuk testing)
 function ScaleSystem:SetScale(scale: number)
 	if self._uiScale then
 		self._uiScale.Scale = math.clamp(scale, Config.MIN_SCALE, Config.MAX_SCALE)
 	end
 end
 
--- ★ BARU: Reset ke scale default
 function ScaleSystem:Reset()
 	if self._uiScale then
 		self._uiScale.Scale = 1
@@ -192,5 +171,3 @@ function ScaleSystem:Destroy()
 end
 
 return ScaleSystem
-
--- ============================================================

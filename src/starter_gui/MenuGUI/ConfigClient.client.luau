@@ -1,16 +1,9 @@
--- Place in: StarterGui > MenuGUI(ScreenGui) > ConfigClient(LocalScript)
--- Dioptimalkan untuk ContentContainer panel 800×460 (konten ~784×398px)
--- ========================================
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Modules = ReplicatedStorage:WaitForChild("Modules")  
+local Modules = ReplicatedStorage:WaitForChild("Modules")
 local SoundService = game:GetService("SoundService")
 local MenuConfig  = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
 
--- ========================================
--- TUNGGU PENGATURAN PAGE DULU
--- ========================================
 repeat task.wait() until MenuConfig.GUI.PengaturanPage or MenuConfig.GUI.ConfigPage
 
 local Players = MenuConfig.Services.Players
@@ -24,25 +17,17 @@ local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
 
--- Gunakan PengaturanPage atau ConfigPage (backward compatibility)
 local configPage = MenuConfig.GUI.PengaturanPage or MenuConfig.GUI.ConfigPage
 
 local CONFIG = MenuConfig.GetConfig()
 
--- ========================================
--- START THEME GRADIENT SYSTEM
--- ========================================
 ThemeModule.GradientSystem.Start()
 
--- ========================================
--- UKURAN KONSTAN (Optimized for 800×460 panel)
--- ========================================
 local SIZES = {
-	-- Section Header
+
 	SECTION_H = 28,
 	SECTION_TEXT = 13,
 
-	-- Toggle Items
 	TOGGLE_H = 60,
 	TOGGLE_LABEL_TEXT = 14,
 	TOGGLE_DESC_TEXT = 11,
@@ -50,7 +35,6 @@ local SIZES = {
 	TOGGLE_HEIGHT = 26,
 	TOGGLE_KNOB = 22,
 
-	-- Slider Items
 	SLIDER_H = 70,
 	SLIDER_LABEL_TEXT = 14,
 	SLIDER_VALUE_TEXT = 13,
@@ -58,11 +42,9 @@ local SIZES = {
 	SLIDER_KNOB = 22,
 	SLIDER_VALUE_W = 55,
 
-	-- Button
 	BUTTON_H = 48,
 	BUTTON_TEXT = 14,
 
-	-- General
 	CORNER_SM = 6,
 	CORNER_MD = 8,
 	CORNER_LG = 10,
@@ -71,9 +53,6 @@ local SIZES = {
 	ITEM_PAD = 12,
 }
 
--- ========================================
--- NOTIF MODULE (NON-BLOCKING)
--- ========================================
 local NotifModule = nil
 local useCustomNotif = false
 
@@ -127,9 +106,6 @@ task.spawn(function()
 	end
 end)
 
--- ========================================
--- SOUND SYSTEM
--- ========================================
 local SoundSystem = {
 	ClickSound = nil,
 	SoundId = "rbxassetid://139658322785649"
@@ -157,9 +133,6 @@ end
 
 SoundSystem.Setup()
 
--- ========================================
--- REMOTE DATASTORE
--- ========================================
 local ConfigRemotes = ReplicatedStorage:FindFirstChild("ConfigRemotes")
 if not ConfigRemotes then
 	ConfigRemotes = ReplicatedStorage:WaitForChild("ConfigRemotes", 10)
@@ -169,9 +142,6 @@ local LoadSettingsRemote = ConfigRemotes and ConfigRemotes:FindFirstChild("LoadS
 local SaveSettingRemote = ConfigRemotes and ConfigRemotes:FindFirstChild("SaveSetting")
 local ResetSettingsRemote = ConfigRemotes and ConfigRemotes:FindFirstChild("ResetSettings")
 
--- ========================================
--- UI ELEMENT REFERENCES
--- ========================================
 local UIElements = {
 	sections = {},
 	toggles = {},
@@ -180,14 +150,8 @@ local UIElements = {
 	scrollFrame = nil,
 }
 
--- ========================================
--- ACTIVE SLIDER TRACKING
--- ========================================
 local activeSlider = nil
 
--- ========================================
--- PENGATURAN DEFAULT
--- ========================================
 local DEFAULT_SETTINGS = {
 	hideBubbleChat = false,
 	hidePlayerEffects = false,
@@ -198,15 +162,9 @@ local DEFAULT_SETTINGS = {
 	musicVolume = 100
 }
 
--- ========================================
--- STATUS PENGATURAN
--- ========================================
 local settingsLoaded = false
 local userSettings = nil
 
--- ========================================
--- MUAT PENGATURAN
--- ========================================
 local function loadSettings()
 	for attempt = 1, 3 do
 		if LoadSettingsRemote then
@@ -244,9 +202,6 @@ end
 
 userSettings = MenuConfig.UserSettings
 
--- ========================================
--- FUNGSI SINKRONISASI & SIMPAN
--- ========================================
 local function syncUserSettings()
 	if MenuConfig.UserSettings then
 		userSettings = MenuConfig.UserSettings
@@ -261,9 +216,6 @@ local function saveSetting(settingKey, value)
 	end
 end
 
--- ========================================
--- MUSIC SYSTEM FUNCTIONS
--- ========================================
 local function getMusicGroup()
 	return SoundService:FindFirstChild("MusicGroup") or SoundService:FindFirstChild("ServerMusicSound")
 end
@@ -288,9 +240,6 @@ local function setMusicVolume(volume)
 	end
 end
 
--- ========================================
--- REFRESH UI TOGGLE STATES
--- ========================================
 local function refreshAllUI()
 	syncUserSettings()
 	local knobPadding = 2
@@ -303,8 +252,8 @@ local function refreshAllUI()
 		if toggleBg and toggleKnob and settingKey then
 			local isOn = userSettings[settingKey]
 			local targetBgColor = isOn and ThemeModule.Colors.Primary1 or Color3.fromRGB(80, 80, 90)
-			local targetKnobPos = isOn 
-				and UDim2.new(1, -(SIZES.TOGGLE_KNOB + knobPadding), 0.5, -SIZES.TOGGLE_KNOB/2) 
+			local targetKnobPos = isOn
+				and UDim2.new(1, -(SIZES.TOGGLE_KNOB + knobPadding), 0.5, -SIZES.TOGGLE_KNOB/2)
 				or UDim2.new(0, knobPadding, 0.5, -SIZES.TOGGLE_KNOB/2)
 
 			TweenService:Create(toggleBg, TweenInfo.new(0.3, Enum.EasingStyle.Quint), {
@@ -353,10 +302,6 @@ local function resetAllSettings()
 	refreshAllUI()
 end
 
--- ========================================
--- FUNGSI SISTEM TAMPILAN
--- ========================================
-
 local function setBubbleChatHidden(hide)
 	pcall(function()
 		local bubbleConfig = TextChatService:FindFirstChild("BubbleChatConfiguration")
@@ -369,8 +314,8 @@ local function setBubbleChatHidden(hide)
 		if not character then return end
 		for _, descendant in pairs(character:GetDescendants()) do
 			if descendant:IsA("BillboardGui") then
-				if descendant.Name == "BubbleChat" or 
-					descendant.Name == "ChatBubble" or 
+				if descendant.Name == "BubbleChat" or
+					descendant.Name == "ChatBubble" or
 					string.find(descendant.Name:lower(), "bubble") then
 					pcall(function()
 						descendant.Enabled = not hide
@@ -484,9 +429,6 @@ local function setPlayersHidden(hide)
 	end
 end
 
--- ========================================
--- SETUP CHARACTER MONITOR
--- ========================================
 local function setupCharacter(targetPlayer, character)
 	task.wait(0.5)
 
@@ -513,7 +455,7 @@ local function setupCharacter(targetPlayer, character)
 		end
 
 		if userSettings.hideBubbleChat then
-			if descendant:IsA("BillboardGui") and 
+			if descendant:IsA("BillboardGui") and
 				(descendant.Name == "BubbleChat" or string.find(descendant.Name:lower(), "bubble")) then
 				pcall(function() descendant.Enabled = false end)
 			end
@@ -566,9 +508,6 @@ task.spawn(function()
 	setupPlayerMonitor()
 end)
 
--- ========================================
--- HELPER FUNCTIONS
--- ========================================
 local function mk(cls, props, parent)
 	local inst = Instance.new(cls)
 	for k, v in pairs(props) do inst[k] = v end
@@ -581,9 +520,6 @@ end
 
 local function crn(r, f) mk("UICorner", { CornerRadius = UDim.new(0, r) }, f) end
 
--- ========================================
--- FRAME GULIR KONFIGURASI (AUTO CANVAS)
--- ========================================
 local configScroll = mk("ScrollingFrame", {
 	Name = "ConfigScroll",
 	Size = UDim2.new(1, 0, 1, 0),
@@ -618,10 +554,6 @@ mk("UIPadding", {
 }, configScroll)
 
 UIElements.scrollFrame = configScroll
-
--- ========================================
--- UI ELEMENT CREATORS
--- ========================================
 
 local function createSectionHeader(text, layoutOrder)
 	local section = mk("Frame", {
@@ -669,7 +601,6 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 	}, configScroll)
 	crn(SIZES.CORNER_MD, item)
 
-	-- Text Container
 	local textContainer = mk("Frame", {
 		Name = "TextContainer",
 		Size = UDim2.new(1, -toggleTotalWidth, 1, 0),
@@ -718,7 +649,6 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 
 	local isOn = userSettings[settingKey]
 
-	-- Toggle Background
 	local toggleBg = mk("Frame", {
 		Name = "ToggleBg",
 		Size = UDim2.new(0, SIZES.TOGGLE_WIDTH, 0, SIZES.TOGGLE_HEIGHT),
@@ -732,20 +662,18 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 		ThemeModule.CreatePrimaryGradient(toggleBg, 0, 1.2)
 	end
 
-	-- Toggle Knob
 	local knobPadding = 2
 	local toggleKnob = mk("Frame", {
 		Name = "Knob",
 		Size = UDim2.new(0, SIZES.TOGGLE_KNOB, 0, SIZES.TOGGLE_KNOB),
-		Position = isOn 
-			and UDim2.new(1, -(SIZES.TOGGLE_KNOB + knobPadding), 0.5, -SIZES.TOGGLE_KNOB/2) 
+		Position = isOn
+			and UDim2.new(1, -(SIZES.TOGGLE_KNOB + knobPadding), 0.5, -SIZES.TOGGLE_KNOB/2)
 			or UDim2.new(0, knobPadding, 0.5, -SIZES.TOGGLE_KNOB/2),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BorderSizePixel = 0,
 	}, toggleBg)
 	crn(SIZES.TOGGLE_KNOB/2, toggleKnob)
 
-	-- Toggle Button
 	local toggleBtn = mk("TextButton", {
 		Name = "ToggleBtn",
 		Text = "",
@@ -785,8 +713,8 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 			}):Play()
 		end
 
-		local targetKnobPos = currentIsOn 
-			and UDim2.new(1, -(SIZES.TOGGLE_KNOB + knobPadding), 0.5, -SIZES.TOGGLE_KNOB/2) 
+		local targetKnobPos = currentIsOn
+			and UDim2.new(1, -(SIZES.TOGGLE_KNOB + knobPadding), 0.5, -SIZES.TOGGLE_KNOB/2)
 			or UDim2.new(0, knobPadding, 0.5, -SIZES.TOGGLE_KNOB/2)
 
 		TweenService:Create(toggleKnob, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Position = targetKnobPos}):Play()
@@ -799,7 +727,6 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 		MenuConfig.Events.OnSettingChanged:Fire(settingKey, currentIsOn)
 	end)
 
-	-- Hover effects
 	item.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseMovement then
 			TweenService:Create(item, TweenInfo.new(0.15), {
@@ -819,9 +746,6 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 	return item
 end
 
--- ========================================
--- SLIDER CREATOR
--- ========================================
 local function createSliderSetting(labelText, settingKey, layoutOrder, minValue, maxValue, onValueChanged)
 	minValue = minValue or 0
 	maxValue = maxValue or 100
@@ -836,7 +760,6 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 	}, configScroll)
 	crn(SIZES.CORNER_MD, item)
 
-	-- Label
 	local label = mk("TextLabel", {
 		Name = "Label",
 		Text = labelText,
@@ -855,7 +778,6 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 	local progress = (currentValue - minValue) / (maxValue - minValue)
 	local sliderY = 38
 
-	-- Value Label
 	local valueLabel = mk("TextLabel", {
 		Name = "ValueLabel",
 		Text = tostring(math.floor(currentValue)) .. "%",
@@ -869,7 +791,6 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 		Font = Enum.Font.GothamBold,
 	}, item)
 
-	-- Slider Container
 	local sliderContainer = mk("Frame", {
 		Name = "SliderContainer",
 		Size = UDim2.new(1, -(SIZES.ITEM_PAD * 2 + SIZES.SLIDER_VALUE_W + 10), 0, SIZES.SLIDER_KNOB + 10),
@@ -878,7 +799,6 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 		ClipsDescendants = false,
 	}, item)
 
-	-- Slider Background
 	local sliderBg = mk("Frame", {
 		Name = "SliderBg",
 		Size = UDim2.new(1, 0, 0, SIZES.SLIDER_BAR_H),
@@ -888,7 +808,6 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 	}, sliderContainer)
 	crn(SIZES.SLIDER_BAR_H / 2, sliderBg)
 
-	-- Slider Fill
 	local sliderFill = mk("Frame", {
 		Name = "SliderFill",
 		Size = UDim2.new(progress, 0, 1, 0),
@@ -900,7 +819,6 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 
 	ThemeModule.CreatePrimaryGradient(sliderFill, 0, 0.8)
 
-	-- Slider Knob
 	local sliderKnob = mk("Frame", {
 		Name = "SliderKnob",
 		Size = UDim2.new(0, SIZES.SLIDER_KNOB, 0, SIZES.SLIDER_KNOB),
@@ -911,7 +829,6 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 	}, sliderBg)
 	crn(SIZES.SLIDER_KNOB / 2, sliderKnob)
 
-	-- Knob Glow
 	local knobGlow = mk("Frame", {
 		Name = "KnobGlow",
 		Size = UDim2.new(1, 6, 1, 6),
@@ -923,7 +840,6 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 	}, sliderKnob)
 	crn(SIZES.SLIDER_KNOB / 2 + 3, knobGlow)
 
-	-- Slider Hit Area
 	local sliderHitArea = mk("TextButton", {
 		Name = "SliderHitArea",
 		Text = "",
@@ -979,7 +895,7 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 	local isDragging = false
 
 	sliderHitArea.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or
 			input.UserInputType == Enum.UserInputType.Touch then
 			SoundSystem.PlayClick()
 			isDragging = true
@@ -1003,7 +919,7 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 	end)
 
 	sliderHitArea.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or
 			input.UserInputType == Enum.UserInputType.Touch then
 			if isDragging then
 				isDragging = false
@@ -1019,7 +935,6 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 		end
 	end)
 
-	-- Hover effects
 	item.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseMovement then
 			TweenService:Create(item, TweenInfo.new(0.15), {
@@ -1039,9 +954,6 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 	return item
 end
 
--- ========================================
--- GLOBAL INPUT HANDLER FOR SLIDER DRAGGING
--- ========================================
 UserInputService.InputChanged:Connect(function(input, gameProcessed)
 	if activeSlider then
 		if input.UserInputType == Enum.UserInputType.MouseMovement then
@@ -1109,7 +1021,7 @@ end)
 
 UserInputService.InputEnded:Connect(function(input)
 	if activeSlider then
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or
 			input.UserInputType == Enum.UserInputType.Touch then
 
 			saveSetting(activeSlider.settingKey, userSettings[activeSlider.settingKey])
@@ -1124,9 +1036,6 @@ UserInputService.InputEnded:Connect(function(input)
 	end
 end)
 
--- ========================================
--- RESET BUTTON CREATOR
--- ========================================
 local function createResetButton(layoutOrder)
 	local btn = mk("TextButton", {
 		Name = "ResetButton",
@@ -1178,11 +1087,6 @@ local function createResetButton(layoutOrder)
 	return btn
 end
 
--- ========================================
--- BANGUN UI KONFIGURASI
--- ========================================
-
--- SECTION 1: PENGATURAN TAMPILAN
 createSectionHeader("PENGATURAN TAMPILAN", 1)
 
 createToggleSetting("💬 Sembunyikan Bubble Chat", "Menyembunyikan chat bubble pemain lain", "hideBubbleChat", 2, function(isHidden)
@@ -1210,7 +1114,6 @@ createToggleSetting("🌑 Sembunyikan Bayangan", "Mematikan bayangan global game
 	showNotification("Settings", "🌑 Bayangan", isHidden and "Dimatikan" or "Dinyalakan", 2)
 end)
 
--- SECTION 2: PENGATURAN MUSIK
 createSectionHeader("PENGATURAN MUSIK", 10)
 
 createToggleSetting("🔇 Bisukan Musik", "Mematikan suara musik sepenuhnya", "muteMusic", 11, function(isMuted)
@@ -1222,19 +1125,12 @@ createSliderSetting("🔊 Volume Musik", "musicVolume", 12, 0, 100, function(vol
 	setMusicVolume(volume)
 end)
 
--- RESET BUTTON
 createResetButton(20)
 
--- ========================================
--- REGISTER CONTENT UPDATE CALLBACK
--- ========================================
 MenuConfig.RegisterContentUpdateCallback("ConfigClient", function()
-	-- No need to update sizes, we use fixed sizes now
+
 end)
 
--- ========================================
--- EVENT LISTENERS
--- ========================================
 MenuConfig.Events.OnMenuToggled.Event:Connect(function(isOpen)
 	if isOpen and MenuConfig.State.currentMainTab == "Pengaturan" then
 		task.wait(0.1)
@@ -1249,9 +1145,6 @@ MenuConfig.Events.OnTabChanged.Event:Connect(function(tab)
 	end
 end)
 
--- ========================================
--- TERAPKAN PENGATURAN SAAT MULAI
--- ========================================
 task.spawn(function()
 	task.wait(1)
 
@@ -1265,9 +1158,6 @@ task.spawn(function()
 	setMusicVolume(userSettings.musicVolume)
 end)
 
--- ========================================
--- LISTEN FOR MUSIC SETTING CHANGES
--- ========================================
 MenuConfig.Events.OnSettingChanged.Event:Connect(function(key, value)
 	if key == "musicVolume" then
 		for _, sliderData in ipairs(UIElements.sliders) do
@@ -1302,8 +1192,8 @@ MenuConfig.Events.OnSettingChanged.Event:Connect(function(key, value)
 					}):Play()
 				end
 
-				local targetKnobPos = value 
-					and UDim2.new(1, -(SIZES.TOGGLE_KNOB + knobPadding), 0.5, -SIZES.TOGGLE_KNOB/2) 
+				local targetKnobPos = value
+					and UDim2.new(1, -(SIZES.TOGGLE_KNOB + knobPadding), 0.5, -SIZES.TOGGLE_KNOB/2)
 					or UDim2.new(0, knobPadding, 0.5, -SIZES.TOGGLE_KNOB/2)
 
 				TweenService:Create(toggleData.toggleKnob, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {Position = targetKnobPos}):Play()
@@ -1313,5 +1203,5 @@ MenuConfig.Events.OnSettingChanged.Event:Connect(function(key, value)
 	end
 end)
 
-print("✅ ConfigClient (Fixed Layout) Loaded Successfully!")
-print("🎨 Optimized for 800×460 panel")
+print("✅ ConfigClient (Tata Letak Tetap) Berhasil Dimuat!")
+print("🎨 Dioptimalkan untuk panel 800×460")

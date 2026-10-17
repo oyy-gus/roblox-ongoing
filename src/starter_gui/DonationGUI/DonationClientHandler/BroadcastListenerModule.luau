@@ -1,6 +1,3 @@
--- MODULE: BroadcastListenerModule (FINAL)
--- ========================================
-
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local Players           = game:GetService("Players")
 
@@ -134,7 +131,7 @@ end
 function BroadcastListenerModule.setupListener(notificationframe)
 	local broadcastRemote = replicatedStorage:WaitForChild("ReceiveDonationBroadcast", 10)
 	if not broadcastRemote then
-		ClientDebug.warn("ERROR", "Broadcast remote not found!")
+		ClientDebug.warn("KESALAHAN", "Remote broadcast tidak ditemukan!")
 		return
 	end
 
@@ -148,10 +145,8 @@ function BroadcastListenerModule.setupListener(notificationframe)
 		local isSelf = donorUserId and (donorUserId == localPlayer.UserId)
 		local tierColor, tierName, tierEmoji = getDonationTier(amount)
 
-		-- Reset avatar
 		resetAvatar(notificationframe, tierEmoji)
 
-		-- Load avatar headshot
 		if donorUserId and type(donorUserId) == "number" then
 			local avatarBorder = notificationframe:FindFirstChild("AvatarBorder")
 			if avatarBorder then
@@ -167,13 +162,10 @@ function BroadcastListenerModule.setupListener(notificationframe)
 			end
 		end
 
-		-- Update online indicator
 		updateOnlineIndicator(notificationframe, donorUserId)
 
-		-- Update tier badge
 		updateTierBadge(notificationframe, amount)
 
-		-- Update content area
 		local contentArea = notificationframe:FindFirstChild("ContentArea")
 		if contentArea then
 			local headerLabel = contentArea:FindFirstChild("HeaderLabel")
@@ -222,5 +214,3 @@ function BroadcastListenerModule.setupListener(notificationframe)
 end
 
 return BroadcastListenerModule
-
--- ========================================

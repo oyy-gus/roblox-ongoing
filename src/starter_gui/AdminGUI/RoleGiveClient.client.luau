@@ -1,9 +1,3 @@
--- ========================================
--- ROLE GIVE CLIENT (Admin Panel)
--- Place in: StarterGui > AdminGUI(ScreenGui) > RoleGiveClient(LocalScript)
--- Supports: VIP + Streamer + Creator
--- ========================================
-
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService      = game:GetService("TweenService")
@@ -18,10 +12,6 @@ local NotifModule    = require(Modules:WaitForChild("NotifModule"))
 local LocalPlayer = Players.LocalPlayer
 local Config = AdminConfig.Config
 
--- ========================================
--- DEBUG HELPER
--- ========================================
-
 local function debugPrint(...)
 	if GiveRoleConfig.Debug.ENABLE_DEBUG and GiveRoleConfig.Debug.SHOW_CLIENT_LOGS then
 		print("[RoleGiveClient]", ...)
@@ -34,64 +24,48 @@ local function debugDispatch(...)
 	end
 end
 
--- ========================================
--- WAIT FOR GUI READY
--- ========================================
-
 repeat task.wait(0.1) until AdminConfig.IsGUIReady()
 
 local roleGivePage = AdminConfig.GUI.RoleGivePage
 if not roleGivePage then
-	warn("[RoleGiveClient] RoleGivePage not found!")
+	warn("[RoleGiveClient] Halaman RoleGive tidak ditemukan!")
 	return
 end
-
--- ========================================
--- REMOTE EVENT
--- ========================================
 
 local giveRoleRemote = ReplicatedStorage:WaitForChild("GiveRoleRemote", 30)
 if not giveRoleRemote then
-	warn("[RoleGiveClient] Failed to find GiveRoleRemote!")
+	warn("[RoleGiveClient] Gagal menemukan GiveRoleRemote!")
 	return
 end
 
-debugPrint("Connected to GiveRoleRemote")
-
--- ========================================
--- ROLE DEFINITIONS
--- ========================================
+debugPrint("Terhubung ke GiveRoleRemote")
 
 local RoleDefinitions = {
-	{ 
-		Name = "VIP", 
-		Icon = "👑", 
-		Color = Color3.fromRGB(255, 215, 0), 
-		Priority = 1, 
+	{
+		Name = "VIP",
+		Icon = "👑",
+		Color = Color3.fromRGB(255, 215, 0),
+		Priority = 1,
 		RequiresPayment = false,
 		Description = "VIP Role"
 	},
-	{ 
-		Name = "Streamer", 
-		Icon = "📺", 
-		Color = Color3.fromRGB(138, 43, 226), 
-		Priority = 2, 
+	{
+		Name = "Streamer",
+		Icon = "📺",
+		Color = Color3.fromRGB(138, 43, 226),
+		Priority = 2,
 		RequiresPayment = false,
 		Description = "Streamer Role"
 	},
-	{ 
-		Name = "Creator", 
-		Icon = "🎨", 
-		Color = Color3.fromRGB(255, 105, 180), 
-		Priority = 3, 
+	{
+		Name = "Creator",
+		Icon = "🎨",
+		Color = Color3.fromRGB(255, 105, 180),
+		Priority = 3,
 		RequiresPayment = false,
 		Description = "Creator Role"
 	},
 }
-
--- ========================================
--- STATE
--- ========================================
 
 local State = {
 	SelectedPlayer = nil,
@@ -101,11 +75,6 @@ local State = {
 	Gradients = {},
 }
 
--- ========================================
--- BUILD UI
--- ========================================
-
--- Main Container
 local mainContainer = Instance.new("Frame")
 mainContainer.Name = "RoleGiveContainer"
 mainContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -114,7 +83,6 @@ mainContainer.Parent = roleGivePage
 
 AdminConfig.CreatePadding(mainContainer, 15, 15, 15, 15)
 
--- Title Section
 local titleSection = Instance.new("Frame")
 titleSection.Name = "TitleSection"
 titleSection.Size = UDim2.new(1, 0, 0, 40)
@@ -125,7 +93,7 @@ local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "Title"
 titleLabel.Size = UDim2.new(1, 0, 1, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "🎭 Role Management"
+titleLabel.Text = "🎭 Manajemen Role"
 titleLabel.TextColor3 = ThemeModule.Colors.TextWhite
 titleLabel.TextSize = 20
 titleLabel.Font = Enum.Font.GothamBold
@@ -140,24 +108,19 @@ subtitleLabel.Name = "Subtitle"
 subtitleLabel.Size = UDim2.new(1, 0, 0, 18)
 subtitleLabel.Position = UDim2.new(0, 0, 1, 3)
 subtitleLabel.BackgroundTransparency = 1
-subtitleLabel.Text = "Halo @" .. LocalPlayer.DisplayName .. " - Pilih player dan role untuk diberikan"
+subtitleLabel.Text = "Halo @" .. LocalPlayer.DisplayName .. " - Pilih pemain dan role untuk diberikan"
 subtitleLabel.TextColor3 = ThemeModule.Colors.TextMuted
 subtitleLabel.TextSize = 12
 subtitleLabel.Font = Enum.Font.Gotham
 subtitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 subtitleLabel.Parent = titleSection
 
--- Content Area
 local contentArea = Instance.new("Frame")
 contentArea.Name = "ContentArea"
 contentArea.Size = UDim2.new(1, 0, 1, -70)
 contentArea.Position = UDim2.new(0, 0, 0, 65)
 contentArea.BackgroundTransparency = 1
 contentArea.Parent = mainContainer
-
--- ========================================
--- LEFT PANEL - PLAYER LIST
--- ========================================
 
 local leftPanel = Instance.new("Frame")
 leftPanel.Name = "LeftPanel"
@@ -171,7 +134,6 @@ leftPanel.Parent = contentArea
 AdminConfig.CreateCorner(leftPanel, 8)
 ThemeModule.CreateAnimatedStroke(leftPanel, 1, "Primary", 1.2)
 
--- Left Panel Header
 local leftHeader = Instance.new("Frame")
 leftHeader.Name = "Header"
 leftHeader.Size = UDim2.new(1, -4, 0, 34)
@@ -209,7 +171,6 @@ playerCountLabel.Font = Enum.Font.GothamMedium
 playerCountLabel.TextXAlignment = Enum.TextXAlignment.Right
 playerCountLabel.Parent = leftHeader
 
--- Player List ScrollingFrame (VERTICAL ONLY)
 local playerListScroll = Instance.new("ScrollingFrame")
 playerListScroll.Name = "PlayerList"
 playerListScroll.Size = UDim2.new(1, -8, 1, -44)
@@ -221,7 +182,7 @@ playerListScroll.ScrollBarThickness = 4
 playerListScroll.ScrollBarImageColor3 = ThemeModule.Colors.Primary1
 playerListScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 playerListScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-playerListScroll.ScrollingDirection = Enum.ScrollingDirection.Y  -- VERTICAL ONLY
+playerListScroll.ScrollingDirection = Enum.ScrollingDirection.Y
 playerListScroll.ElasticBehavior = Enum.ElasticBehavior.Never
 playerListScroll.Parent = leftPanel
 
@@ -237,10 +198,6 @@ playerListPadding.PaddingLeft = UDim.new(0, 2)
 playerListPadding.PaddingRight = UDim.new(0, 4)
 playerListPadding.Parent = playerListScroll
 
--- ========================================
--- RIGHT PANEL - ROLE SELECTION
--- ========================================
-
 local rightPanel = Instance.new("Frame")
 rightPanel.Name = "RightPanel"
 rightPanel.Size = UDim2.new(0.5, -8, 1, 0)
@@ -254,7 +211,6 @@ rightPanel.Parent = contentArea
 AdminConfig.CreateCorner(rightPanel, 8)
 ThemeModule.CreateAnimatedStroke(rightPanel, 1, "Primary", 1.2)
 
--- Right Panel Header
 local rightHeader = Instance.new("Frame")
 rightHeader.Name = "Header"
 rightHeader.Size = UDim2.new(1, -8, 0, 34)
@@ -280,7 +236,6 @@ rightHeaderLabel.Parent = rightHeader
 local rightHeaderGradient = ThemeModule.CreatePrimaryGradient(rightHeaderLabel, 0, 1.2)
 State.Gradients.rightHeaderGradient = rightHeaderGradient
 
--- Selected Player Info: Y=42, H=48
 local selectedInfoFrame = Instance.new("Frame")
 selectedInfoFrame.Name = "SelectedInfo"
 selectedInfoFrame.Size = UDim2.new(1, -8, 0, 48)
@@ -316,7 +271,6 @@ selectedPlayerName.TextXAlignment = Enum.TextXAlignment.Left
 selectedPlayerName.TextTruncate = Enum.TextTruncate.AtEnd
 selectedPlayerName.Parent = selectedInfoFrame
 
--- Selected Role Info: Y=94, H=48
 local selectedRoleFrame = Instance.new("Frame")
 selectedRoleFrame.Name = "SelectedRoleInfo"
 selectedRoleFrame.Size = UDim2.new(1, -8, 0, 48)
@@ -352,11 +306,6 @@ selectedRoleName.TextXAlignment = Enum.TextXAlignment.Left
 selectedRoleName.TextTruncate = Enum.TextTruncate.AtEnd
 selectedRoleName.Parent = selectedRoleFrame
 
--- ========================================
--- Role Buttons: ScrollingFrame (VERTICAL ONLY)
--- Mulai Y=146, memanjang sampai 50px sebelum bawah panel
--- ========================================
-
 local roleButtonsContainer = Instance.new("ScrollingFrame")
 roleButtonsContainer.Name = "RoleButtons"
 roleButtonsContainer.Size = UDim2.new(1, -8, 1, -200)
@@ -370,7 +319,7 @@ roleButtonsContainer.ScrollingEnabled = true
 roleButtonsContainer.VerticalScrollBarInset = Enum.ScrollBarInset.None
 roleButtonsContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
 roleButtonsContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
-roleButtonsContainer.ScrollingDirection = Enum.ScrollingDirection.Y  -- VERTICAL ONLY
+roleButtonsContainer.ScrollingDirection = Enum.ScrollingDirection.Y
 roleButtonsContainer.ElasticBehavior = Enum.ElasticBehavior.Never
 roleButtonsContainer.ClipsDescendants = true
 roleButtonsContainer.Parent = rightPanel
@@ -389,7 +338,6 @@ roleButtonsPadding.PaddingLeft = UDim.new(0, 2)
 roleButtonsPadding.PaddingRight = UDim.new(0, 2)
 roleButtonsPadding.Parent = roleButtonsContainer
 
--- Create Role Buttons
 for i, roleDef in ipairs(RoleDefinitions) do
 	local roleBtn = Instance.new("TextButton")
 	roleBtn.Name = roleDef.Name .. "Btn"
@@ -409,15 +357,14 @@ for i, roleDef in ipairs(RoleDefinitions) do
 	local btnStroke = AdminConfig.CreateStroke(roleBtn, roleDef.Color, 2)
 	btnStroke.Transparency = 0.5
 
-	-- FREE badge
 	local freeBadge = Instance.new("TextLabel")
 	freeBadge.Name = "FreeBadge"
 	freeBadge.Size = UDim2.new(0, 26, 0, 10)
 	freeBadge.Position = UDim2.new(1, -28, 0, 2)
-	freeBadge.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+	freeBadge.BackgroundColor3 = ThemeModule.Colors.BackgroundLighter
 	freeBadge.BorderSizePixel = 0
-	freeBadge.Text = "FREE"
-	freeBadge.TextColor3 = Color3.new(1, 1, 1)
+	freeBadge.Text = "GRATIS"
+	freeBadge.TextColor3 = ThemeModule.Colors.TextWhite
 	freeBadge.TextSize = 6
 	freeBadge.Font = Enum.Font.GothamBold
 	freeBadge.Parent = roleBtn
@@ -468,7 +415,6 @@ for i, roleDef in ipairs(RoleDefinitions) do
 	end)
 end
 
--- Action Buttons Container
 local actionContainer = Instance.new("Frame")
 actionContainer.Name = "ActionContainer"
 actionContainer.Size = UDim2.new(1, -8, 0, 40)
@@ -484,7 +430,6 @@ actionLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 actionLayout.Padding = UDim.new(0, 6)
 actionLayout.Parent = actionContainer
 
--- Confirm Button
 local confirmBtn = Instance.new("TextButton")
 confirmBtn.Name = "ConfirmBtn"
 confirmBtn.Size = UDim2.new(0.5, -4, 1, 0)
@@ -501,7 +446,6 @@ confirmBtn.Parent = actionContainer
 AdminConfig.CreateCorner(confirmBtn, 6)
 ThemeModule.CreateStaticGradient(confirmBtn, "Success", 90)
 
--- Cancel Button
 local cancelBtn = Instance.new("TextButton")
 cancelBtn.Name = "CancelBtn"
 cancelBtn.Size = UDim2.new(0.5, -4, 1, 0)
@@ -518,7 +462,6 @@ cancelBtn.Parent = actionContainer
 AdminConfig.CreateCorner(cancelBtn, 6)
 ThemeModule.CreateStaticGradient(cancelBtn, "Error", 90)
 
--- Button Hover Effects
 confirmBtn.MouseEnter:Connect(function()
 	TweenService:Create(confirmBtn, TweenInfo.new(0.15), {BackgroundTransparency = 0.1}):Play()
 end)
@@ -532,10 +475,6 @@ end)
 cancelBtn.MouseLeave:Connect(function()
 	TweenService:Create(cancelBtn, TweenInfo.new(0.15), {BackgroundTransparency = 0}):Play()
 end)
-
--- ========================================
--- FUNCTIONS
--- ========================================
 
 local function resetSelection()
 	State.SelectedRole = nil
@@ -714,10 +653,6 @@ local function initializePlayers()
 	updatePlayerCount()
 end
 
--- ========================================
--- PLAYER EVENTS
--- ========================================
-
 Players.PlayerAdded:Connect(function(targetPlayer)
 	createPlayerButton(targetPlayer)
 	updatePlayerCount()
@@ -727,10 +662,6 @@ Players.PlayerRemoving:Connect(function(targetPlayer)
 	removePlayerButton(targetPlayer)
 	updatePlayerCount()
 end)
-
--- ========================================
--- ACTION BUTTON HANDLERS
--- ========================================
 
 confirmBtn.MouseButton1Click:Connect(function()
 	AdminConfig.PlayClick()
@@ -760,10 +691,6 @@ cancelBtn.MouseButton1Click:Connect(function()
 	NotifModule.Warning("Role Give", "Seleksi dibatalkan", 2)
 end)
 
--- ========================================
--- REMOTE EVENT RESPONSE
--- ========================================
-
 giveRoleRemote.OnClientEvent:Connect(function(responseData)
 	if responseData.source ~= "AdminPanel" then return end
 
@@ -780,10 +707,6 @@ giveRoleRemote.OnClientEvent:Connect(function(responseData)
 		NotifModule.Error("Role Give", responseData.message or "Operasi gagal", 4)
 	end
 end)
-
--- ========================================
--- ACCESS CHECK
--- ========================================
 
 local function checkAdminAccess()
 	local roleValue = LocalPlayer:FindFirstChild("Role")
@@ -835,10 +758,6 @@ else
 		end
 	end)
 end
-
--- ========================================
--- CLEANUP
--- ========================================
 
 roleGivePage.Destroying:Connect(function()
 	for _, gradient in pairs(State.Gradients) do

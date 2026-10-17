@@ -2,8 +2,6 @@ local CAPTION_COLOR = Color3.fromRGB(39, 41, 48)
 local TEXT_SIZE = 15
 return function(icon)
 
-	-- Credit to lolmansReturn and Canary Software for
-	-- retrieving these values
 	local clickRegion = icon:getInstance("ClickRegion")
 	local caption = Instance.new("CanvasGroup")
 	caption.Name = "Caption"
@@ -118,7 +116,7 @@ return function(icon)
 	labelContent.Size = UDim2.fromScale(1, 1)
 	labelContent.ZIndex = 16
 	labelContent.Parent = keyTag1
-	
+
 	local caret = Instance.new("ImageLabel")
 	caret.Name = "Caret"
 	caret.Image = "rbxassetid://101906294438076"
@@ -145,10 +143,7 @@ return function(icon)
 	box:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 		dropShadow.Size = UDim2.new(1, 0, 0, box.AbsoluteSize.Y + 8)
 	end)
-	
-	-- It's important we match the sizes as this is not
-	-- handles within clipOutside (as it assumes the sizes
-	-- are already the same)
+
 	local captionJanitor = icon.captionJanitor
 	local _, captionClone = icon:clipOutside(caption)
 	captionClone.AutomaticSize = Enum.AutomaticSize.None
@@ -158,10 +153,7 @@ return function(icon)
 	end
 	captionJanitor:add(caption:GetPropertyChangedSignal("AbsoluteSize"):Connect(matchSize))
 	matchSize()
-	
-	
-	
-	-- This handles the appearing/disappearing/positioning of the caption
+
 	local isCompletelyEnabled = false
 	local captionHeader = caption.Box.Header
 	local UserInputService = game:GetService("UserInputService")
@@ -199,21 +191,15 @@ return function(icon)
 		return UDim2.new(0.5, 0, 1, yOffset)
 	end
 	local function updatePosition(forcedEnabled)
-		
-		-- Ignore changes if not enabled to reduce redundant calls
+
 		if not isCompletelyEnabled then
 			return
 		end
-		
-		-- Currently the one thing which isn't accounted for are the bounds of the screen
-		-- This would be an issue if someone sets a long caption text for the left or
-		-- right most icon
+
 		local enabled = if forcedEnabled ~= nil then forcedEnabled else isCompletelyEnabled
 		local startPosition = getCaptionPosition(not enabled)
 		local endPosition = getCaptionPosition(enabled)
-		
-		-- It's essential we reset the carets position to prevent the x sizing bounds
-		-- of the caption from infinitely scaling up
+
 		if enabled then
 			local caretY = caret.Position.Y.Offset
 			caret.Position = UDim2.fromOffset(0, caretY)
@@ -224,18 +210,14 @@ return function(icon)
 			caption.AutomaticSize = Enum.AutomaticSize.Y
 			caption.Size = UDim2.fromOffset(absolute.X, absolute.Y)
 		end
-		
-		-- We initially default to the opposite state
+
 		local previousCaretX
 		local function updateCaret()
 			local caretX = clickRegion.AbsolutePosition.X - caption.AbsolutePosition.X + clickRegion.AbsoluteSize.X/2 - caret.AbsoluteSize.X/2
 			local caretY = caret.Position.Y.Offset
 			local newCaretPosition = UDim2.fromOffset(caretX, caretY)
 			if previousCaretX ~= caretX then
-				-- Again, it's essential we reset the caret if
-				-- a difference in X position is detected otherwise
-				-- a slight quirk with AutomaticCanvas can cause
-				-- the caption to infinitely scale
+
 				previousCaretX = caretX
 				caret.Position = UDim2.fromOffset(0, caretY)
 				task.wait()
@@ -244,8 +226,7 @@ return function(icon)
 		end
 		captionClone.Position = startPosition
 		updateCaret()
-		
-		-- Now we tween into the new state
+
 		local tweenInfo = (enabled and TWEEN_INFO_IN) or TWEEN_INFO_OUT
 		local tween = TweenService:Create(captionClone, tweenInfo, {Position = endPosition})
 		local updateCaretConnection = RunService.Heartbeat:Connect(updateCaret)
@@ -253,13 +234,13 @@ return function(icon)
 		tween.Completed:Once(function()
 			updateCaretConnection:Disconnect()
 		end)
-		
+
 	end
 	captionJanitor:add(clickRegion:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
 		updatePosition()
 	end))
 	updatePosition(false)
-	
+
 	captionJanitor:add(icon.toggleKeyAdded:Connect(updateHotkey))
 	for keyCodeEnum, _ in pairs(icon.bindedToggleKeys) do
 		updateHotkey(keyCodeEnum)
@@ -292,7 +273,7 @@ return function(icon)
 		updatePosition()
 		updateHotkey()
 	end
-	
+
 	local WAIT_DURATION = 0.5
 	local RECOVER_PERIOD = 0.3
 	local Icon = require(icon.iconModule)
@@ -311,6 +292,6 @@ return function(icon)
 			setCaptionEnabled(false)
 		end
 	end))
-	
+
 	return caption
 end

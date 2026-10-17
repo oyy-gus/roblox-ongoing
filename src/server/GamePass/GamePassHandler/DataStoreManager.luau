@@ -1,8 +1,3 @@
--- ====================================
--- DATASTORE MANAGER
--- Place in: StarterScriptService > GamePass(Folder) > GamePassHandler(Script) > DataStoreManager(ModuleScript)
--- ====================================
-
 local Logger = require(script.Parent.Logger)
 
 local DataStoreService = game:GetService("DataStoreService")
@@ -14,7 +9,7 @@ DataStoreManager.TransactionLogStore = DataStoreService:GetDataStore("Transactio
 function DataStoreManager:LogTransaction(data)
 	local success = pcall(function()
 		local key = "log_" .. os.time() .. "_" .. data.giver
-		self.TransactionLogStore:SetAsync(key, data, 2592000) -- 30 days expiry
+		self.TransactionLogStore:SetAsync(key, data, 2592000)
 	end)
 
 	if not success then
@@ -37,9 +32,9 @@ function DataStoreManager:LogFailedGive(giverUserId, targetUserId, targetName, g
 			canRetry = true
 		}
 
-		self.FailedGivesStore:SetAsync(key, data, 2592000) -- 30 days expiry
+		self.FailedGivesStore:SetAsync(key, data, 2592000)
 
-		Logger:Transaction(string.format("Logged failed give: %s -> %s (%s) Reason: %s", 
+		Logger:Transaction(string.format("Logged failed give: %s -> %s (%s) Reason: %s",
 			giverUserId, targetName, gamepassType, reason))
 	end)
 

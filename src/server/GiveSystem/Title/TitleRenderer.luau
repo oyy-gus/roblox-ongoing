@@ -1,15 +1,6 @@
--- ============================================================
--- TitleRenderer
--- Place in: ServerScriptService > GiveSystem(Folder) > Title(Folder) > TitleRenderer(ModuleScript)
--- Langsung set TitleLabel1–14 di Overhead > Canvas > Custom
--- Tidak membuat BillboardGui atau label baru
--- ============================================================
-
 local TitleRenderer = {}
 local ConfigData = require(script.Parent.ConfigData)
 
--- Track thread animasi per player per slot agar bisa di-cancel
--- animThreads[userId][slot] = thread
 local animThreads = {}
 
 local function cancelAnims(userId)
@@ -21,7 +12,6 @@ local function cancelAnims(userId)
 	animThreads[userId] = {}
 end
 
--- Ambil frame Custom dari overhead yang aktif di head
 local function getCustomFrame(character)
 	local head = character:FindFirstChild("Head")
 	if not head then return nil end
@@ -39,7 +29,6 @@ local function getCustomFrame(character)
 	return nil
 end
 
--- Clear semua custom title label
 function TitleRenderer:ClearTitles(character, userId)
 	local customFrame = getCustomFrame(character)
 	if not customFrame then return end
@@ -59,11 +48,9 @@ function TitleRenderer:ClearTitles(character, userId)
 	end
 end
 
--- Apply color mode ke satu label
 local function applyColorMode(label, mode, colorTemplate, userId, slot)
 	mode = tostring(mode or "fixed"):lower()
 
-	-- Bersihkan gradient lama
 	for _, child in ipairs(label:GetChildren()) do
 		if child:IsA("UIGradient") then child:Destroy() end
 	end
@@ -132,14 +119,13 @@ local function applyColorMode(label, mode, colorTemplate, userId, slot)
 	end
 end
 
--- Render semua titles ke TitleLabel1–14 yang sudah ada
 function TitleRenderer:RenderAllTitles(player, character, titles)
 	if not character then return end
 
 	local userId = player.UserId
 	local customFrame = getCustomFrame(character)
 	if not customFrame then
-		warn("[TitleRenderer] Canvas > Custom not found for:", player.Name)
+		warn("[TitleRenderer] Canvas > Custom tidak ditemukan untuk:", player.Name)
 		return
 	end
 
@@ -149,7 +135,6 @@ function TitleRenderer:RenderAllTitles(player, character, titles)
 		local label = customFrame:FindFirstChild("TitleLabel" .. i)
 		if not label then continue end
 
-		-- Reset label
 		for _, child in ipairs(label:GetChildren()) do
 			if child:IsA("UIGradient") then child:Destroy() end
 		end
@@ -168,7 +153,6 @@ function TitleRenderer:RenderAllTitles(player, character, titles)
 	end
 end
 
--- Dipanggil saat player leave
 function TitleRenderer:OnPlayerRemoving(userId)
 	cancelAnims(userId)
 	animThreads[userId] = nil

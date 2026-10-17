@@ -1,8 +1,3 @@
--- ====================================
--- CUSTOM INVENTORY
--- Place in: StarterGui > CustomInventory(ScreenGui) > BackpackCustom(LocalScript)
--- ====================================
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -15,14 +10,8 @@ local playerGui = player:WaitForChild("PlayerGui")
 local mouse = player:GetMouse()
 local camera = workspace.CurrentCamera
 
--- ============================================================
--- DISABLE DEFAULT BACKPACK
--- ============================================================
 StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, false)
 
--- ============================================================
--- SETTINGS (ULTRA COMPACT)
--- ============================================================
 local SETTINGS = {
 	MAX_HOTBAR_SLOTS = 5,
 	MAX_TOTAL_SLOTS = 9,
@@ -50,9 +39,6 @@ local SETTINGS = {
 	TWEEN_SPEED = 0.2,
 }
 
--- ============================================================
--- STATE
--- ============================================================
 local State = {
 	hotbarTools = {},
 	inventoryTools = {},
@@ -66,9 +52,6 @@ local State = {
 	dragStartPos = nil,
 }
 
--- ============================================================
--- KEY BINDINGS
--- ============================================================
 local EnumKeys = {
 	Enum.KeyCode.One,
 	Enum.KeyCode.Two,
@@ -81,14 +64,8 @@ local EnumKeys = {
 	Enum.KeyCode.Nine,
 }
 
--- ============================================================
--- USE EXISTING SCREENGUI
--- ============================================================
 local screenGui = playerGui:WaitForChild("CustomInventory")
 
--- ============================================================
--- HELPER FUNCTIONS
--- ============================================================
 local function addCorner(parent, radius)
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, radius or 5)
@@ -127,23 +104,14 @@ local function tweenProperty(object, properties, duration, style, direction)
 	return tween
 end
 
--- ============================================================
--- CHECK IF USER IS TYPING
--- ============================================================
 local function isUserTyping()
 	return UserInputService:GetFocusedTextBox() ~= nil
 end
 
--- ============================================================
--- INVENTORY DIMENSIONS (ULTRA COMPACT)
--- ============================================================
 local INVENTORY_WIDTH = 260
 local INVENTORY_HEIGHT = 115
 local INVENTORY_GAP = 8
 
--- ============================================================
--- CREATE HOTBAR CONTAINER (CENTER BOTTOM)
--- ============================================================
 local hotbarFrame = Instance.new("Frame")
 hotbarFrame.Name = "HotbarFrame"
 hotbarFrame.AnchorPoint = Vector2.new(0.5, 1)
@@ -178,9 +146,6 @@ hotbarLayout.Padding = UDim.new(0, SETTINGS.SLOT_PADDING)
 hotbarLayout.SortOrder = Enum.SortOrder.LayoutOrder
 hotbarLayout.Parent = hotbarContainer
 
--- ============================================================
--- OPEN BACKPACK BUTTON (Transparent, No Stroke)
--- ============================================================
 local openBtn = Instance.new("TextButton")
 openBtn.Name = "OpenBackpackBtn"
 openBtn.Size = UDim2.new(0, 50, 0, 18)
@@ -203,9 +168,6 @@ openBtn.MouseLeave:Connect(function()
 	tweenProperty(openBtn, {TextColor3 = Color3.fromHex("#A0A0A0")}, 0.15)
 end)
 
--- ============================================================
--- COUNT TOTAL TOOLS
--- ============================================================
 local function getTotalToolCount()
 	local hotbarCount = 0
 	local inventoryCount = 0
@@ -221,9 +183,6 @@ local function getTotalToolCount()
 	return hotbarCount + inventoryCount, hotbarCount, inventoryCount
 end
 
--- ============================================================
--- UPDATE VISIBILITY BASED ON TOOL COUNT
--- ============================================================
 local function updateVisibility()
 	local totalTools, hotbarCount, inventoryCount = getTotalToolCount()
 
@@ -250,9 +209,6 @@ local function updateVisibility()
 	end
 end
 
--- ============================================================
--- HOTBAR SIZE UPDATER
--- ============================================================
 local function updateHotbarSize()
 	local slotCount = 0
 	for _, child in ipairs(hotbarContainer:GetChildren()) do
@@ -280,9 +236,6 @@ hotbarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
 	task.defer(updateHotbarSize)
 end)
 
--- ============================================================
--- CREATE INVENTORY PANEL
--- ============================================================
 local inventoryFrame = Instance.new("Frame")
 inventoryFrame.Name = "InventoryPanel"
 inventoryFrame.AnchorPoint = Vector2.new(0.5, 1)
@@ -300,7 +253,6 @@ addCorner(inventoryFrame, 8)
 local invStroke = addStroke(inventoryFrame, SETTINGS.ACCENT_COLOR, 1, 0.4)
 addGradient(invStroke, SETTINGS.ACCENT_COLOR, SETTINGS.ACCENT_COLOR_2, 45)
 
--- Header
 local invHeader = Instance.new("Frame")
 invHeader.Name = "Header"
 invHeader.Size = UDim2.new(1, 0, 0, 24)
@@ -327,7 +279,7 @@ invTitle.Name = "Title"
 invTitle.Size = UDim2.new(0, 50, 1, 0)
 invTitle.Position = UDim2.new(0, 8, 0, 0)
 invTitle.BackgroundTransparency = 1
-invTitle.Text = "Backpack"
+invTitle.Text = "Tas"
 invTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
 invTitle.TextSize = 11
 invTitle.Font = Enum.Font.GothamBold
@@ -337,9 +289,6 @@ invTitle.Parent = invHeader
 
 addGradient(invTitle, SETTINGS.ACCENT_COLOR, SETTINGS.ACCENT_COLOR_2, 0)
 
--- ============================================================
--- SEARCH BOX
--- ============================================================
 local searchContainer = Instance.new("Frame")
 searchContainer.Name = "SearchContainer"
 searchContainer.Size = UDim2.new(0, 90, 0, 18)
@@ -356,7 +305,7 @@ searchPlaceholder.Name = "Placeholder"
 searchPlaceholder.Size = UDim2.new(1, -16, 1, 0)
 searchPlaceholder.Position = UDim2.new(0, 8, 0, 0)
 searchPlaceholder.BackgroundTransparency = 1
-searchPlaceholder.Text = "Search..."
+searchPlaceholder.Text = "Cari..."
 searchPlaceholder.TextColor3 = Color3.fromHex("#777777")
 searchPlaceholder.TextSize = 9
 searchPlaceholder.Font = Enum.Font.Gotham
@@ -387,7 +336,6 @@ searchBox:GetPropertyChangedSignal("Text"):Connect(updatePlaceholder)
 searchBox.Focused:Connect(updatePlaceholder)
 searchBox.FocusLost:Connect(updatePlaceholder)
 
--- Close Button
 local closeBtn = Instance.new("TextButton")
 closeBtn.Name = "CloseBtn"
 closeBtn.Size = UDim2.new(0, 22, 0, 18)
@@ -412,7 +360,6 @@ closeBtn.MouseLeave:Connect(function()
 	tweenProperty(closeBtn, {BackgroundColor3 = Color3.fromHex("#2A2A2A")}, 0.1)
 end)
 
--- Content container
 local invContent = Instance.new("Frame")
 invContent.Name = "Content"
 invContent.Size = UDim2.new(1, -8, 1, -28)
@@ -422,7 +369,6 @@ invContent.ClipsDescendants = true
 invContent.ZIndex = 3
 invContent.Parent = inventoryFrame
 
--- Scroll Frame
 local invScroll = Instance.new("ScrollingFrame")
 invScroll.Name = "ItemsContainer"
 invScroll.Size = UDim2.new(1, 0, 1, 0)
@@ -453,9 +399,6 @@ invGrid.SortOrder = Enum.SortOrder.Name
 invGrid.HorizontalAlignment = Enum.HorizontalAlignment.Left
 invGrid.Parent = invScroll
 
--- ============================================================
--- CREATE DRAG GHOST FRAME
--- ============================================================
 local dragGhost = Instance.new("Frame")
 dragGhost.Name = "DragGhost"
 dragGhost.Size = UDim2.new(0, SETTINGS.SLOT_SIZE, 0, SETTINGS.SLOT_SIZE)
@@ -497,9 +440,6 @@ dragNameConstraint.MaxTextSize = 9
 dragNameConstraint.MinTextSize = 6
 dragNameConstraint.Parent = dragGhostName
 
--- ============================================================
--- CREATE TOOL SLOT
--- ============================================================
 local function createToolSlot(position, parent, isHotbar)
 	local slotWrapper = Instance.new("Frame")
 	slotWrapper.Name = "Wrapper_" .. tostring(position)
@@ -610,9 +550,6 @@ local function createToolSlot(position, parent, isHotbar)
 	return slotWrapper, slot
 end
 
--- ============================================================
--- TOOL OBJECT CLASS
--- ============================================================
 local ToolObject = {}
 ToolObject.__index = ToolObject
 
@@ -803,9 +740,6 @@ function ToolObject:DisconnectAll()
 	task.defer(updateVisibility)
 end
 
--- ============================================================
--- INVENTORY MODULE
--- ============================================================
 local InventoryModule = {}
 
 function InventoryModule:getObjectFromTool(tool)
@@ -858,9 +792,6 @@ function InventoryModule:countHotbarTools()
 	return count
 end
 
--- ============================================================
--- DRAG & DROP SYSTEM
--- ============================================================
 function InventoryModule:startDrag(toolObject)
 	if not State.inventoryOpen then return end
 	if State.isDragging then return end
@@ -1108,9 +1039,6 @@ function InventoryModule:moveToolToInventory(toolObject)
 	self:addTool(tool, "Inventory", nil)
 end
 
--- ============================================================
--- ADD TOOL FUNCTION
--- ============================================================
 function InventoryModule:addTool(tool, parent, position)
 	if State.boundTools[tool] then return end
 	State.boundTools[tool] = true
@@ -1149,11 +1077,9 @@ function InventoryModule:addTool(tool, parent, position)
 		State.currentlyEquipped = toolObject
 	end
 
-	-- FIXED: Check if user is typing before processing keyboard input
 	local function manageTool(_, inputState, inputObject)
 		if State.isDragging then return end
 
-		-- Don't process if user is typing
 		if isUserTyping() then return end
 
 		if inputObject and inputObject.UserInputType ~= Enum.UserInputType.Keyboard and inputObject.UserInputType ~= Enum.UserInputType.Touch then
@@ -1401,10 +1327,6 @@ function InventoryModule:reloadInventory(character)
 	task.defer(updateVisibility)
 end
 
--- ============================================================
--- EVENT CONNECTIONS
--- ============================================================
-
 openBtn.MouseButton1Click:Connect(function()
 	InventoryModule:toggleInventory()
 end)
@@ -1417,7 +1339,6 @@ searchBox:GetPropertyChangedSignal("Text"):Connect(function()
 	InventoryModule:searchTool()
 end)
 
--- FIXED: Check if user is typing before toggle
 ContextActionService:BindAction("ToggleInventory", function(_, inputState)
 	if inputState == Enum.UserInputState.Begin then
 		if isUserTyping() then return end
@@ -1441,26 +1362,22 @@ UserInputService.InputEnded:Connect(function(input)
 	end
 end)
 
--- FIXED: Only scroll when mouse is over hotbar
 UserInputService.InputChanged:Connect(function(input)
 	if input.UserInputType == Enum.UserInputType.MouseWheel and SETTINGS.SCROLL_HOTBAR_WITH_WHEEL then
-		-- Don't process if user is typing
+
 		if isUserTyping() then return end
 
-		-- Check if hotbar is visible
 		if not hotbarFrame.Visible then return end
 
-		-- Check if mouse is over hotbar area
 		local mousePos = UserInputService:GetMouseLocation()
 		local hotbarPos = hotbarFrame.AbsolutePosition
 		local hotbarSize = hotbarFrame.AbsoluteSize
 
-		local isOverHotbar = mousePos.X >= hotbarPos.X and 
+		local isOverHotbar = mousePos.X >= hotbarPos.X and
 			mousePos.X <= hotbarPos.X + hotbarSize.X and
-			mousePos.Y >= hotbarPos.Y and 
+			mousePos.Y >= hotbarPos.Y and
 			mousePos.Y <= hotbarPos.Y + hotbarSize.Y
 
-		-- Only scroll if mouse is over hotbar
 		if not isOverHotbar then return end
 
 		local direction = input.Position.Z > 0 and -1 or 1
@@ -1505,9 +1422,6 @@ task.spawn(function()
 	task.defer(updateVisibility)
 end)
 
--- ============================================================
--- MOBILE SUPPORT
--- ============================================================
 local function updateForDevice()
 	local viewportSize = camera.ViewportSize
 	local isMobile = UserInputService.TouchEnabled and viewportSize.X < 1000
@@ -1558,7 +1472,4 @@ end
 camera:GetPropertyChangedSignal("ViewportSize"):Connect(updateForDevice)
 task.defer(updateForDevice)
 
-print("Ultra Compact Inventory Loaded!")
-
--- ========================================
--- LOCALSCRIPT - DonationClientHandler (FINAL)
+print("Inventaris Ultra Ringkas Siap!")

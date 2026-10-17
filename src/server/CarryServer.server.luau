@@ -1,11 +1,8 @@
--- Services
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Config
-local CarryConfig = require(ReplicatedStorage:WaitForChild("ContextModule"):WaitForChild("CarryConfig"))
+local CarryConfig = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("CarryConfig"))
 
--- Remotes Setup
 local remoteFolder = ReplicatedStorage:FindFirstChild(CarryConfig.REMOTE_FOLDER)
 if not remoteFolder then
 	remoteFolder = Instance.new("Folder")
@@ -27,16 +24,8 @@ local RequestRemote = createRemote("CarryRequest")
 local ResponseRemote = createRemote("CarryResponse")
 local EndRemote = createRemote("CarryEnd")
 
--- ============================================
--- STATE MANAGEMENT
--- ============================================
-
-local pendingRequests = {} -- [targetUserId] = {carrier, style, time}
-local activeCarries = {} -- [carrierId] = targetId, [targetId] = carrierId (bidirectional mapping)
-
--- ============================================
--- UTILITY FUNCTIONS
--- ============================================
+local pendingRequests = {}
+local activeCarries = {}
 
 local function getCharHRP(p)
 	if not p or not p.Character then return nil end
@@ -58,10 +47,10 @@ local function getAttachmentPart(character)
 	local rigType = getRigType(character)
 
 	if rigType == "R15" then
-		-- R15: Gunakan UpperTorso karena ini yang bergerak saat animasi
+
 		return character:FindFirstChild("UpperTorso") or character:FindFirstChild("HumanoidRootPart")
 	else
-		-- R6: Gunakan Torso
+
 		return character:FindFirstChild("Torso") or character:FindFirstChild("HumanoidRootPart")
 	end
 end
@@ -77,10 +66,6 @@ local function canAskCarry(player)
 	return canAsk and canAsk.Value == true
 end
 
--- ============================================
--- WELD MANAGEMENT (FIXED)
--- ============================================
-
 local function clearCarryWeld(char)
 	if not char then return end
 
@@ -94,28 +79,25 @@ local function clearCarryWeld(char)
 end
 
 local function createCarryWeld(carrierChar, targetChar, offset)
-	-- Dapatkan part yang tepat untuk attachment
+
 	local carrierPart = getAttachmentPart(carrierChar)
 	local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
 
 	if not carrierPart or not targetHRP then
-		warn("[CARRY] Failed to get attachment parts")
+		warn("[CARRY] Gagal mendapatkan part attachment")
 		return nil
 	end
 
-	-- Create weld ke part yang bergerak saat animasi (bukan HRP!)
 	local weld = Instance.new("Weld")
 	weld.Name = "CarryWeld"
-	weld.Part0 = carrierPart  -- UpperTorso/Torso yang bergerak saat emote
-	weld.Part1 = targetHRP     -- HRP target
+	weld.Part0 = carrierPart
+	weld.Part1 = targetHRP
 
-	-- Adjust offset jika perlu
 	local rigType = getRigType(carrierChar)
 	local adjustedOffset = offset
 
-	-- Untuk R15, UpperTorso posisinya sedikit lebih tinggi dari HRP
 	if rigType == "R15" and carrierPart.Name == "UpperTorso" then
-		-- Kompensasi perbedaan posisi UpperTorso dengan HRP
+
 		local hrp = carrierChar:FindFirstChild("HumanoidRootPart")
 		if hrp then
 			local heightDiff = carrierPart.Position.Y - hrp.Position.Y
@@ -130,10 +112,6 @@ local function createCarryWeld(carrierChar, targetChar, offset)
 	CarryConfig.debugPrint("WELD", "Weld created:", carrierPart.Name, "->", targetHRP.Name, "RigType:", rigType)
 	return weld
 end
-
--- ============================================
--- PHYSICS MANAGEMENT
--- ============================================
 
 local savedPhysics = {}
 
@@ -170,10 +148,6 @@ local function restorePhysics(userId)
 	savedPhysics[userId] = nil
 	CarryConfig.debugPrint("PHYSICS", "Restored for user:", userId)
 end
-
--- ============================================
--- HUMANOID STATE MANAGEMENT
--- ============================================
 
 local savedHumanoidStates = {}
 
@@ -234,46 +208,38 @@ local function restoreHumanoidState(userId, hum)
 	hum:SetStateEnabled(Enum.HumanoidStateType.Swimming, true)
 end
 
--- ============================================
--- START CARRY
--- ============================================
-
 local function startCarry(carrier, target, style)
 	CarryConfig.debugPrint("START", carrier.Name, "->", target.Name, "Style:", style)
 
 	if not CarryConfig.isValidStyle(style) then
-		return false, "Invalid style"
+		return false, "Gaya tidak valid"
 	end
 
 	local cChar, cHRP, cHum = getCharHRP(carrier)
 	local tChar, tHRP, tHum = getCharHRP(target)
 
 	if not (cChar and cHRP and cHum and tChar and tHRP and tHum) then
-		return false, "Character not found"
+		return false, "Karakter tidak ditemukan"
 	end
 
 	if (cHRP.Position - tHRP.Position).Magnitude > CarryConfig.MAX_DISTANCE then
-		return false, "Too far"
+		return false, "Jarak terlalu jauh"
 	end
 
 	if isCarrying(cChar) or isCarrying(tChar) then
-		return false, "Player busy"
+		return false, "Pemain sedang sibuk"
 	end
 
 	local success, err = pcall(function()
-		-- STEP 1: Make target weightless FIRST
+
 		makeCarriedWeightless(tChar, target.UserId)
 
-		-- STEP 2: Save humanoid state
 		saveHumanoidState(target.UserId, tHum)
 
-		-- STEP 3: Apply carried state (disable movement)
 		applyCarriedState(tHum)
 
-		-- STEP 4: Get offset
 		local offset = CarryConfig.getStyleOffset(style)
 
-		-- STEP 5: Position target initially
 		local carrierPart = getAttachmentPart(cChar)
 		if carrierPart then
 			tHRP.CFrame = carrierPart.CFrame * offset
@@ -281,20 +247,16 @@ local function startCarry(carrier, target, style)
 			tHRP.CFrame = cHRP.CFrame * offset
 		end
 
-		-- STEP 6: Create weld (ini yang penting - weld ke part yang bergerak!)
 		createCarryWeld(cChar, tChar, offset)
 
-		-- STEP 7: Update BoolValues
 		cChar.Carryable.Value = false
 		tChar.Carryable.Value = false
 		carrier.CanAskCarry.Value = true
 		target.CanAskCarry.Value = true
 
-		-- STEP 7.5: Register active carry (bidirectional mapping)
 		activeCarries[carrier.UserId] = target.UserId
 		activeCarries[target.UserId] = carrier.UserId
 
-		-- STEP 8: Setup cleanup on death
 		local cleanupDone = false
 		local function cleanup()
 			if cleanupDone then return end
@@ -303,7 +265,6 @@ local function startCarry(carrier, target, style)
 			task.defer(function()
 				CarryConfig.debugPrint("CLEANUP", "Starting cleanup")
 
-				-- Clear active carry mapping
 				activeCarries[carrier.UserId] = nil
 				activeCarries[target.UserId] = nil
 
@@ -377,10 +338,6 @@ local function startCarry(carrier, target, style)
 	return true
 end
 
--- ============================================
--- END CARRY (FIXED)
--- ============================================
-
 local function endCarry(player1, player2)
 	CarryConfig.debugPrint("END", "Manual end carry between", player1.Name, "and", player2.Name)
 
@@ -391,12 +348,10 @@ local function endCarry(player1, player2)
 
 	if not (char1 and char2) then return end
 
-	-- Only end if actually carrying
 	if not isCarrying(char1) and not isCarrying(char2) then
 		return
 	end
 
-	-- Clear active carry mapping
 	activeCarries[player1.UserId] = nil
 	activeCarries[player2.UserId] = nil
 
@@ -410,7 +365,6 @@ local function endCarry(player1, player2)
 		char2.Carryable.Value = true
 	end
 
-	-- Restore humanoid for both (in case either was carried)
 	if hum2 then
 		restoreHumanoidState(player2.UserId, hum2)
 	end
@@ -420,20 +374,14 @@ local function endCarry(player1, player2)
 		restoreHumanoidState(player1.UserId, hum1)
 	end
 
-	-- Restore physics for both
 	restorePhysics(player1.UserId)
 	restorePhysics(player2.UserId)
 
-	-- Notify both clients
 	EndRemote:FireClient(player1, {cmd = "CarryEnded"})
 	EndRemote:FireClient(player2, {cmd = "CarryEnded"})
 
 	CarryConfig.debugPrint("CLEANUP", "Manual end complete")
 end
-
--- ============================================
--- PLAYER ADDED FUNCTION
--- ============================================
 
 local function PlayerAddedFunction(plr)
 	local CanAskCarry = Instance.new("BoolValue")
@@ -464,10 +412,6 @@ end
 
 Players.PlayerAdded:Connect(PlayerAddedFunction)
 
--- ============================================
--- PENDING REQUESTS TIMEOUT
--- ============================================
-
 task.spawn(function()
 	while true do
 		task.wait(2)
@@ -497,10 +441,6 @@ task.spawn(function()
 	end
 end)
 
--- ============================================
--- REMOTE HANDLERS
--- ============================================
-
 RequestRemote.OnServerEvent:Connect(function(carrier, data)
 	if not data or type(data) ~= "table" then return end
 
@@ -517,7 +457,7 @@ RequestRemote.OnServerEvent:Connect(function(carrier, data)
 		if not CarryConfig.isValidStyle(style) then
 			RequestRemote:FireClient(carrier, {
 				cmd = "RequestFailed",
-				reason = "Invalid style"
+				reason = "Gaya tidak valid"
 			})
 			return
 		end
@@ -526,7 +466,7 @@ RequestRemote.OnServerEvent:Connect(function(carrier, data)
 		if not target or target == carrier then
 			RequestRemote:FireClient(carrier, {
 				cmd = "RequestFailed",
-				reason = "Invalid target"
+				reason = "Target tidak valid"
 			})
 			return
 		end
@@ -534,7 +474,7 @@ RequestRemote.OnServerEvent:Connect(function(carrier, data)
 		if not carrier.Character or not target.Character then
 			RequestRemote:FireClient(carrier, {
 				cmd = "RequestFailed",
-				reason = "Character not ready"
+				reason = "Karakter belum siap"
 			})
 			return
 		end
@@ -542,7 +482,7 @@ RequestRemote.OnServerEvent:Connect(function(carrier, data)
 		if not canAskCarry(target) or isCarrying(target.Character) or isCarrying(carrier.Character) then
 			RequestRemote:FireClient(carrier, {
 				cmd = "RequestFailed",
-				reason = "Player busy"
+				reason = "Pemain sedang sibuk"
 			})
 			return
 		end
@@ -552,7 +492,7 @@ RequestRemote.OnServerEvent:Connect(function(carrier, data)
 		if not (cHRP and tHRP) then
 			RequestRemote:FireClient(carrier, {
 				cmd = "RequestFailed",
-				reason = "Character not ready"
+				reason = "Karakter belum siap"
 			})
 			return
 		end
@@ -560,7 +500,7 @@ RequestRemote.OnServerEvent:Connect(function(carrier, data)
 		if (cHRP.Position - tHRP.Position).Magnitude > CarryConfig.MAX_DISTANCE then
 			RequestRemote:FireClient(carrier, {
 				cmd = "RequestFailed",
-				reason = "Too far"
+				reason = "Jarak terlalu jauh"
 			})
 			return
 		end
@@ -568,7 +508,7 @@ RequestRemote.OnServerEvent:Connect(function(carrier, data)
 		if pendingRequests[target.UserId] then
 			RequestRemote:FireClient(carrier, {
 				cmd = "RequestFailed",
-				reason = "Target has pending request"
+				reason = "Target sedang menunggu permintaan lain"
 			})
 			return
 		end
@@ -649,10 +589,8 @@ EndRemote.OnServerEvent:Connect(function(player, data)
 	local char = player.Character
 	if not char then return end
 
-	-- Check if player is carrying or being carried
 	if not isCarrying(char) then return end
 
-	-- Find partner using activeCarries mapping
 	local partnerUserId = activeCarries[player.UserId]
 
 	if not partnerUserId then
@@ -664,30 +602,24 @@ EndRemote.OnServerEvent:Connect(function(player, data)
 
 	if not partner then
 		CarryConfig.debugPrint("ERROR", "Partner not found for", player.Name)
-		-- Clean up orphaned carry
+
 		activeCarries[player.UserId] = nil
 		return
 	end
 
-	-- End carry between player and partner
 	endCarry(player, partner)
 end)
-
--- ============================================
--- PLAYER EVENTS
--- ============================================
 
 Players.PlayerRemoving:Connect(function(player)
 	pendingRequests[player.UserId] = nil
 
-	-- Find and end active carry if exists
 	local partnerUserId = activeCarries[player.UserId]
 	if partnerUserId then
 		local partner = Players:GetPlayerByUserId(partnerUserId)
 		if partner then
 			endCarry(player, partner)
 		else
-			-- Clean up orphaned mapping
+
 			activeCarries[player.UserId] = nil
 			activeCarries[partnerUserId] = nil
 		end
@@ -699,9 +631,5 @@ Players.PlayerRemoving:Connect(function(player)
 
 	restorePhysics(player.UserId)
 end)
-
--- ============================================
--- INITIALIZATION
--- ============================================
 
 CarryConfig.debugPrint("SERVER", "Enhanced Carry System Initialized")

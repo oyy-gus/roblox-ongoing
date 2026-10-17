@@ -1,9 +1,3 @@
--- ====================================
--- CARRY HANDLER - GTA V RADIAL MENU (AUTO SCALED)
--- Close button di tengah + Garis pembatas antar style + Auto Scale
--- Place in: StarterGui > CarryGui(ScreenGui) > CarryHandler(LocalScript)
--- ====================================
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
@@ -13,22 +7,17 @@ local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Wait for character
 repeat task.wait() until player.Character
 task.wait(1)
 
--- ============================================
--- LOAD MODULES
--- ============================================
 local CarryConfig = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("CarryConfig"))
 
--- ★ LOAD AUTO SCALE SYSTEM
 local AutoScaleSystem = ReplicatedStorage:WaitForChild("AutoScaleSystem")
 local ScaleSystem = require(AutoScaleSystem:WaitForChild("ScaleSystem"))
 
 local remoteFolder = ReplicatedStorage:WaitForChild(CarryConfig.REMOTE_FOLDER, 10)
 if not remoteFolder then
-	warn("[CARRY UI] Remote folder not found!")
+	warn("[Gendong UI] Folder Remote tidak ditemukan!")
 	return
 end
 
@@ -36,12 +25,9 @@ local RequestRemote = remoteFolder:WaitForChild("CarryRequest", 10)
 local ResponseRemote = remoteFolder:WaitForChild("CarryResponse", 10)
 local EndRemote = remoteFolder:WaitForChild("CarryEnd", 10)
 
--- ============================================
--- ★ GET EXISTING SCREEN GUI (jangan buat ulang)
--- ============================================
 local gui = script.Parent
 if not gui:IsA("ScreenGui") then
-	-- Fallback: buat ScreenGui sendiri jika parent bukan ScreenGui
+
 	warn("[CARRY UI] Parent bukan ScreenGui — membuat fallback ScreenGui")
 	local Players = game:GetService("Players")
 	local localPlayer = Players.LocalPlayer
@@ -60,96 +46,78 @@ if not gui:IsA("ScreenGui") then
 	script.Parent = gui
 end
 
-
--- ★ Setup ScreenGui properties jika perlu
 if gui:IsA("ScreenGui") then
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 100
 end
 
--- ★ INITIALIZE AUTO SCALE SYSTEM
 local guiScaler = ScaleSystem.new(gui)
 
--- ★ HELPER: Get current scale for calculations
 local function getCurrentScale()
 	return guiScaler:GetCurrentScale()
 end
 
--- ============================================
--- THEME COLORS (GTA V Style)
--- ============================================
 local Theme = {
-	-- Background
-	MenuBg = Color3.fromRGB(15, 15, 20),
+	MenuBg = Color3.fromHex("#080808"),
 	MenuBgTransparency = 0.1,
 
-	-- Segments
-	SegmentDefault = Color3.fromRGB(35, 35, 45),
-	SegmentHover = Color3.fromRGB(255, 200, 50),
-	SegmentSelected = Color3.fromRGB(255, 180, 0),
+	SegmentDefault = Color3.fromHex("#151515"),
+	SegmentHover = Color3.fromHex("#FFFFFF"),
+	SegmentSelected = Color3.fromHex("#888888"),
 
-	-- Text
-	TextWhite = Color3.fromRGB(255, 255, 255),
-	TextMuted = Color3.fromRGB(150, 150, 150),
-	TextDark = Color3.fromRGB(20, 20, 20),
+	TextWhite = Color3.fromHex("#FFFFFF"),
+	TextMuted = Color3.fromHex("#666666"),
+	TextDark = Color3.fromHex("#111111"),
 
-	-- Accents
-	AccentGold = Color3.fromRGB(255, 200, 50),
-	AccentRed = Color3.fromRGB(220, 60, 60),
-	AccentGreen = Color3.fromRGB(80, 200, 80),
+	AccentGold = Color3.fromHex("#FFFFFF"),
+	AccentRed = Color3.fromHex("#2A2A2A"),
+	AccentGreen = Color3.fromHex("#FFFFFF"),
 
-	-- Borders & Dividers
-	BorderColor = Color3.fromRGB(80, 80, 100),
-	BorderGlow = Color3.fromRGB(255, 200, 50),
-	DividerColor = Color3.fromRGB(70, 70, 90),
-	DividerHighlight = Color3.fromRGB(255, 200, 50),
+	BorderColor = Color3.fromHex("#353535"),
+	BorderGlow = Color3.fromHex("#FFFFFF"),
+	DividerColor = Color3.fromHex("#353535"),
+	DividerHighlight = Color3.fromHex("#FFFFFF"),
 }
 
--- ============================================
--- CARRY STYLES DATA
--- ============================================
 local CarryStyles = {
 	{
 		id = "bridal",
-		name = "Bridal",
+		name = "Pengantin",
 		icon = "💒",
-		description = "Romantic carry style",
+		description = "Gaya gendong romantis",
 		angle = 0,
 	},
 	{
 		id = "couplehug",
-		name = "Couple Hug",
+		name = "Pelukan",
 		icon = "🤗",
-		description = "Hug while carrying",
+		description = "Peluk saat menggendong",
 		angle = 72,
 	},
 	{
 		id = "pasakal",
 		name = "Pasakal",
 		icon = "🎭",
-		description = "Traditional style",
+		description = "Gaya tradisional",
 		angle = 144,
 	},
 	{
 		id = "piggyback",
-		name = "Piggyback",
+		name = "Punggung",
 		icon = "🐷",
-		description = "On the back",
+		description = "Gendong di punggung",
 		angle = 216,
 	},
 	{
 		id = "piggyupperback",
-		name = "Upper Back",
+		name = "Pundak Atas",
 		icon = "🔝",
-		description = "Higher piggyback",
+		description = "Gendong di pundak atas",
 		angle = 288,
 	},
 }
 
--- ============================================
--- GUI DIMENSIONS
--- ============================================
 local MENU_SIZE = 320
 local CENTER_SIZE = 70
 local ICON_SIZE = 50
@@ -157,9 +125,6 @@ local LABEL_OFFSET = 115
 local DIVIDER_INNER = 40
 local DIVIDER_OUTER = 155
 
--- ============================================
--- UTILITY FUNCTIONS
--- ============================================
 local function corner(parent, radius)
 	local c = Instance.new("UICorner")
 	c.CornerRadius = UDim.new(0, radius or 8)
@@ -187,9 +152,6 @@ local function createGradient(parent, color1, color2, rotation)
 	return g
 end
 
--- ============================================
--- ★ CLEANUP EXISTING UI ELEMENTS (jika ada)
--- ============================================
 local function cleanupExistingUI()
 	local existingElements = {"RadialMenu", "NotificationFrame", "GetDownBtn"}
 	for _, name in ipairs(existingElements) do
@@ -202,9 +164,6 @@ end
 
 cleanupExistingUI()
 
--- ============================================
--- RADIAL MENU CONTAINER
--- ============================================
 local menuContainer = Instance.new("Frame")
 menuContainer.Name = "RadialMenu"
 menuContainer.Size = UDim2.new(0, MENU_SIZE, 0, MENU_SIZE)
@@ -215,9 +174,6 @@ menuContainer.Visible = false
 menuContainer.ZIndex = 10
 menuContainer.Parent = gui
 
--- ============================================
--- OUTER RING (Background Circle)
--- ============================================
 local outerRing = Instance.new("Frame")
 outerRing.Name = "OuterRing"
 outerRing.Size = UDim2.new(1, 0, 1, 0)
@@ -231,7 +187,6 @@ corner(outerRing, MENU_SIZE / 2)
 
 stroke(outerRing, 3, Theme.BorderColor, 0.2)
 
--- Animated glow stroke
 local glowStroke = Instance.new("UIStroke")
 glowStroke.Name = "GlowStroke"
 glowStroke.Thickness = 2
@@ -239,9 +194,6 @@ glowStroke.Color = Theme.AccentGold
 glowStroke.Transparency = 0.7
 glowStroke.Parent = outerRing
 
--- ============================================
--- DIVIDER LINES (PIE CHART STYLE)
--- ============================================
 local dividerContainer = Instance.new("Frame")
 dividerContainer.Name = "DividerContainer"
 dividerContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -289,9 +241,6 @@ for i = 1, #CarryStyles do
 	})
 end
 
--- ============================================
--- CENTER CIRCLE (CLOSE BUTTON)
--- ============================================
 local centerCircle = Instance.new("Frame")
 centerCircle.Name = "CenterCircle"
 centerCircle.Size = UDim2.new(0, CENTER_SIZE, 0, CENTER_SIZE)
@@ -303,9 +252,9 @@ centerCircle.Parent = menuContainer
 corner(centerCircle, CENTER_SIZE / 2)
 stroke(centerCircle, 2, Theme.AccentRed, 0.3)
 
-createGradient(centerCircle, 
-	Color3.fromRGB(70, 35, 35), 
-	Color3.fromRGB(40, 20, 20), 
+createGradient(centerCircle,
+	Color3.fromRGB(70, 35, 35),
+	Color3.fromRGB(40, 20, 20),
 	135
 )
 
@@ -355,9 +304,6 @@ closeBtn.MouseLeave:Connect(function()
 	end
 end)
 
--- ============================================
--- HOVER INFO DISPLAY
--- ============================================
 local hoverInfoFrame = Instance.new("Frame")
 hoverInfoFrame.Name = "HoverInfo"
 hoverInfoFrame.Size = UDim2.new(0, 120, 0, 50)
@@ -395,9 +341,6 @@ hoverLabel.TextColor3 = Theme.AccentGold
 hoverLabel.ZIndex = 26
 hoverLabel.Parent = hoverInfoFrame
 
--- ============================================
--- TARGET NAME LABEL
--- ============================================
 local targetLabel = Instance.new("TextLabel")
 targetLabel.Name = "TargetLabel"
 targetLabel.Size = UDim2.new(0, 200, 0, 25)
@@ -414,9 +357,6 @@ targetLabel.Parent = menuContainer
 corner(targetLabel, 12)
 stroke(targetLabel, 1, Theme.AccentGold, 0.5)
 
--- ============================================
--- CREATE SEGMENT BUTTONS
--- ============================================
 local segmentButtons = {}
 local segmentFrames = {}
 
@@ -503,25 +443,19 @@ for i, styleData in ipairs(CarryStyles) do
 	createSegmentButton(styleData, i)
 end
 
--- ============================================
--- INSTRUCTION LABEL
--- ============================================
 local instructionLabel = Instance.new("TextLabel")
 instructionLabel.Name = "InstructionLabel"
 instructionLabel.Size = UDim2.new(0, 250, 0, 20)
 instructionLabel.Position = UDim2.new(0.5, 0, 1, 25)
 instructionLabel.AnchorPoint = Vector2.new(0.5, 0)
 instructionLabel.BackgroundTransparency = 1
-instructionLabel.Text = "Tap style to select • Center to close"
+instructionLabel.Text = "Ketuk gaya untuk memilih • Tengah untuk menutup"
 instructionLabel.TextSize = 11
 instructionLabel.Font = Enum.Font.Gotham
 instructionLabel.TextColor3 = Theme.TextMuted
 instructionLabel.ZIndex = 25
 instructionLabel.Parent = menuContainer
 
--- ============================================
--- NOTIFICATION FRAME
--- ============================================
 local notificationFrame = Instance.new("Frame")
 notificationFrame.Name = "NotificationFrame"
 notificationFrame.Size = UDim2.new(0, 350, 0, 120)
@@ -545,7 +479,7 @@ notifTitle.Name = "Title"
 notifTitle.Size = UDim2.new(1, -20, 0, 25)
 notifTitle.Position = UDim2.new(0, 10, 0, 10)
 notifTitle.BackgroundTransparency = 1
-notifTitle.Text = "📩 CARRY REQUEST"
+notifTitle.Text = "📩 PERMINTAAN GENDONG"
 notifTitle.TextSize = 14
 notifTitle.Font = Enum.Font.GothamBold
 notifTitle.TextColor3 = Theme.AccentGold
@@ -558,7 +492,7 @@ notifLabel.Name = "NotifLabel"
 notifLabel.Size = UDim2.new(1, -20, 0, 35)
 notifLabel.Position = UDim2.new(0, 10, 0, 38)
 notifLabel.BackgroundTransparency = 1
-notifLabel.Text = "PlayerName wants to carry you"
+notifLabel.Text = "Pemain ingin menggendong Anda"
 notifLabel.TextSize = 13
 notifLabel.Font = Enum.Font.Gotham
 notifLabel.TextColor3 = Theme.TextWhite
@@ -584,7 +518,7 @@ local acceptBtn = Instance.new("TextButton")
 acceptBtn.Name = "AcceptBtn"
 acceptBtn.Size = UDim2.new(0, 120, 0, 35)
 acceptBtn.BackgroundColor3 = Theme.AccentGreen
-acceptBtn.Text = "✓ Accept"
+acceptBtn.Text = "✓ Terima"
 acceptBtn.TextSize = 13
 acceptBtn.Font = Enum.Font.GothamBold
 acceptBtn.TextColor3 = Theme.TextWhite
@@ -596,7 +530,7 @@ local rejectBtn = Instance.new("TextButton")
 rejectBtn.Name = "RejectBtn"
 rejectBtn.Size = UDim2.new(0, 120, 0, 35)
 rejectBtn.BackgroundColor3 = Theme.AccentRed
-rejectBtn.Text = "✖️ Reject"
+rejectBtn.Text = "✖️ Tolak"
 rejectBtn.TextSize = 13
 rejectBtn.Font = Enum.Font.GothamBold
 rejectBtn.TextColor3 = Theme.TextWhite
@@ -604,16 +538,13 @@ rejectBtn.ZIndex = 52
 rejectBtn.Parent = notifBtnContainer
 corner(rejectBtn, 8)
 
--- ============================================
--- GET DOWN BUTTON
--- ============================================
 local getDownBtn = Instance.new("TextButton")
 getDownBtn.Name = "GetDownBtn"
 getDownBtn.Size = UDim2.new(0, 180, 0, 50)
 getDownBtn.Position = UDim2.new(0.5, 0, 0.85, 0)
 getDownBtn.AnchorPoint = Vector2.new(0.5, 0.5)
 getDownBtn.BackgroundColor3 = Theme.AccentRed
-getDownBtn.Text = "🚫 GET DOWN"
+getDownBtn.Text = "🚫 TURUN"
 getDownBtn.TextSize = 16
 getDownBtn.Font = Enum.Font.GothamBold
 getDownBtn.TextColor3 = Theme.TextWhite
@@ -629,9 +560,6 @@ createGradient(getDownBtn,
 	90
 )
 
--- ============================================
--- STATE MANAGEMENT
--- ============================================
 local currentState = "idle"
 local selectedTarget = nil
 local pendingCarrier = nil
@@ -642,9 +570,6 @@ local currentAnimTracks = {carrier = nil, carried = nil}
 local jumpBlockConn = nil
 local hoveredStyle = nil
 
--- ============================================
--- CLEANUP UTILITIES
--- ============================================
 local function trackConnection(conn)
 	table.insert(connections, conn)
 	return conn
@@ -667,9 +592,6 @@ local function cleanupState()
 	stopAllAnimations()
 end
 
--- ============================================
--- ANIMATION MANAGEMENT
--- ============================================
 local function getHumanoid()
 	return player.Character and player.Character:FindFirstChildOfClass("Humanoid")
 end
@@ -715,13 +637,10 @@ local function playAnimation(style, role)
 		currentAnimTracks[role] = track
 		CarryConfig.debugPrint("ANIM", "Playing", style, role, animId)
 	else
-		warn("[CARRY UI] Failed to load animation:", animId)
+		warn("[Gendong UI] Gagal memuat animasi:", animId)
 	end
 end
 
--- ============================================
--- DIVIDER HIGHLIGHT FUNCTIONS
--- ============================================
 local function getAdjacentDividerIndices(segmentIndex)
 	local totalStyles = #CarryStyles
 	local leftIndex = segmentIndex
@@ -761,9 +680,6 @@ local function resetAllDividers()
 	end
 end
 
--- ============================================
--- UI ANIMATIONS
--- ============================================
 local function animateMenuOpen()
 	menuContainer.Visible = true
 	menuContainer.Size = UDim2.new(0, 0, 0, 0)
@@ -915,9 +831,6 @@ local function animateGetDownOut(callback)
 	end)
 end
 
--- ============================================
--- HOVER EFFECTS
--- ============================================
 local function setSegmentHover(styleId, isHovered)
 	local segment = segmentButtons[styleId]
 	if not segment then return end
@@ -996,9 +909,6 @@ for styleId, segment in pairs(segmentButtons) do
 	end)
 end
 
--- ============================================
--- UI STATE FUNCTIONS
--- ============================================
 local function hideAllFrames()
 	menuContainer.Visible = false
 	notificationFrame.Visible = false
@@ -1017,7 +927,7 @@ end
 
 local function showStyleSelection(target)
 	if not target or not target:IsA("Player") then
-		warn("[CARRY UI] Invalid target for style selection")
+		warn("[Gendong UI] Target tidak valid untuk pemilihan gaya")
 		return
 	end
 
@@ -1028,7 +938,7 @@ local function showStyleSelection(target)
 	CarryConfig.debugPrint("UI", "Target:", target.Name)
 
 	if not player.Character or not target.Character then
-		warn("[CARRY UI] Character not ready")
+		warn("[Gendong UI] Karakter belum siap")
 		return
 	end
 
@@ -1036,17 +946,17 @@ local function showStyleSelection(target)
 	local targetHRP = target.Character:FindFirstChild("HumanoidRootPart")
 
 	if not myHRP or not targetHRP then
-		warn("[CARRY UI] HumanoidRootPart not found")
+		warn("[Gendong UI] HumanoidRootPart tidak ditemukan")
 		return
 	end
 
 	local distance = (myHRP.Position - targetHRP.Position).Magnitude
 	if distance > CarryConfig.MAX_DISTANCE then
-		warn("[CARRY UI] Target too far! Distance:", distance)
+		warn("[Gendong UI] Target terlalu jauh! Jarak:", distance)
 		return
 	end
 
-	targetLabel.Text = "🎯 Carry: " .. target.DisplayName
+	targetLabel.Text = "🎯 Gendong: " .. target.DisplayName
 	hoveredStyle = nil
 
 	hideAllFrames()
@@ -1088,7 +998,7 @@ local function showCarryNotification(carrierId, carrierName, style)
 		end
 	end
 
-	notifLabel.Text = string.format("%s %s wants to carry you\nStyle: %s", styleIcon, carrierName, styleName)
+	notifLabel.Text = string.format("%s %s ingin menggendong Anda\nGaya: %s", styleIcon, carrierName, styleName)
 
 	task.wait(0.05)
 	animateNotificationIn()
@@ -1120,9 +1030,6 @@ local function hideGetDownButton()
 	end
 end
 
--- ============================================
--- BUTTON HANDLERS
--- ============================================
 local function handleStyleSelection(styleName)
 	CarryConfig.debugPrint("UI", "=== STYLE SELECTED ===")
 	CarryConfig.debugPrint("UI", "Style:", styleName)
@@ -1133,7 +1040,7 @@ local function handleStyleSelection(styleName)
 	end
 
 	if not CarryConfig.isValidStyle(styleName) then
-		warn("[CARRY UI] Invalid style:", styleName)
+		warn("[Gendong UI] Gaya tidak valid:", styleName)
 		return
 	end
 
@@ -1176,9 +1083,6 @@ closeBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- ============================================
--- NOTIFICATION BUTTON HANDLERS
--- ============================================
 acceptBtn.MouseButton1Click:Connect(function()
 	if currentState ~= "pending_response" or not pendingCarrier then
 		return
@@ -1244,9 +1148,6 @@ rejectBtn.MouseLeave:Connect(function()
 	}):Play()
 end)
 
--- ============================================
--- GET DOWN BUTTON HANDLER
--- ============================================
 getDownBtn.MouseButton1Click:Connect(function()
 	if currentState ~= "being_carried" and currentState ~= "carrying" then
 		return
@@ -1271,9 +1172,6 @@ getDownBtn.MouseLeave:Connect(function()
 	}):Play()
 end)
 
--- ============================================
--- REMOTE EVENT HANDLERS
--- ============================================
 RequestRemote.OnClientEvent:Connect(function(data)
 	if not data or type(data) ~= "table" then return end
 
@@ -1344,9 +1242,6 @@ EndRemote.OnClientEvent:Connect(function(data)
 	end
 end)
 
--- ============================================
--- CONTEXT MENU INTEGRATION
--- ============================================
 local carryEventConnection = nil
 
 local function setupCarryEventListener()
@@ -1368,7 +1263,7 @@ local function setupCarryEventListener()
 
 	local connection = showUIEvent.Event:Connect(function(target)
 		if not target or not target:IsA("Player") then
-			warn("[CARRY UI] Invalid target received:", target)
+			warn("[Gendong UI] Target tidak valid diterima:", target)
 			return
 		end
 
@@ -1395,9 +1290,6 @@ end
 
 carryEventConnection = setupCarryEventListener()
 
--- ============================================
--- KEYBOARD SHORTCUT
--- ============================================
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
 
@@ -1411,9 +1303,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	end
 end)
 
--- ============================================
--- RESPAWN HANDLING
--- ============================================
 player.CharacterAdded:Connect(function()
 	hideAllFrames()
 	cleanupState()
@@ -1429,9 +1318,6 @@ player.CharacterAdded:Connect(function()
 	CarryConfig.debugPrint("UI", "Character respawned - listener reset")
 end)
 
--- ============================================
--- CLEANUP ON LEAVE
--- ============================================
 Players.PlayerRemoving:Connect(function(leavingPlayer)
 	if leavingPlayer == player then
 		for _, conn in ipairs(connections) do
@@ -1442,30 +1328,24 @@ Players.PlayerRemoving:Connect(function(leavingPlayer)
 		stopAllAnimations()
 		cleanupState()
 
-		-- ★ Cleanup scaler
 		if guiScaler then
 			guiScaler:Destroy()
 		end
 	end
 end)
 
--- ★ Cleanup on GUI destroy
 gui.Destroying:Connect(function()
 	if guiScaler then
 		guiScaler:Destroy()
 	end
 end)
 
--- ============================================
--- INITIALIZATION
--- ============================================
 hideAllFrames()
-CarryConfig.debugPrint("UI", "✅ Carry UI Initialized (Auto Scaled)")
-
-print("[CarryHandler] 🎮 GTA V Radial Menu Ready!")
-print("  • Using existing ScreenGui:", gui.Name)
-print("  • Auto scale system enabled")
-print("  • Close button at center")
-print("  • Divider lines between styles")
-print("  • Hover info popup")
-print("  • Current scale:", getCurrentScale())
+CarryConfig.debugPrint("UI", "✅ Antarmuka Gendong Siap (Skala Otomatis)")
+print("[CarryHandler] 🎮 Menu Radial Gendong Siap!")
+print("  • Menggunakan ScreenGui:", gui.Name)
+print("  • Sistem skala otomatis aktif")
+print("  • Tombol tutup di bagian tengah")
+print("  • Garis pemisah antar gaya")
+print("  • Info popup hover aktif")
+print("  • Skala saat ini:", getCurrentScale())

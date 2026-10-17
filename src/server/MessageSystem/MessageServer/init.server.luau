@@ -1,5 +1,3 @@
--- Place in: StarterScriptService > MessageSystem(Folder) > MessageServer(Script)
-
 local ServerStorage = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
@@ -8,9 +6,6 @@ local TextService = game:GetService("TextService")
 local RoleSystem = require(ServerStorage.Modules.RoleSystem)
 local MessageConfig = require(script.MessageConfig)
 
--- ====================================
--- REMOTE SETUP
--- ====================================
 local RemoteFolder = ReplicatedStorage:FindFirstChild("Message") or Instance.new("Folder")
 RemoteFolder.Name = "Message"
 RemoteFolder.Parent = ReplicatedStorage
@@ -27,9 +22,6 @@ local ReceiveMessageRemote = RemoteFolder:FindFirstChild("ReceiveMessage") or In
 ReceiveMessageRemote.Name = "ReceiveMessage"
 ReceiveMessageRemote.Parent = RemoteFolder
 
--- ====================================
--- PLAYER DATA
--- ====================================
 local PlayerData = {}
 
 local function initPlayerData(userId)
@@ -46,9 +38,6 @@ local function cleanPlayerData(userId)
 	PlayerData[userId] = nil
 end
 
--- ====================================
--- ACCESS CHECK
--- ====================================
 local function hasAccess(player)
 	local role = RoleSystem:GetPlayerRole(player)
 	local minRole = MessageConfig.Access.MinimumRole
@@ -63,9 +52,6 @@ CheckAccessRemote.OnServerInvoke = function(player)
 	return hasAccess(player)
 end
 
--- ====================================
--- MESSAGE VALIDATION
--- ====================================
 local function validateMessage(player, message)
 	initPlayerData(player.UserId)
 	local data = PlayerData[player.UserId]
@@ -102,9 +88,6 @@ local function validateMessage(player, message)
 	return true, "Valid"
 end
 
--- ====================================
--- TEXT FILTERING
--- ====================================
 local function filterText(text, fromUserId)
 	if not MessageConfig.Validation.EnableFilter then
 		return text
@@ -127,9 +110,6 @@ local function filterText(text, fromUserId)
 	return text
 end
 
--- ====================================
--- SEND MESSAGE
--- ====================================
 SendMessageRemote.OnServerEvent:Connect(function(player, message)
 	local isValid, errorMsg = validateMessage(player, message)
 
@@ -167,9 +147,6 @@ SendMessageRemote.OnServerEvent:Connect(function(player, message)
 	end
 end)
 
--- ====================================
--- PLAYER MANAGEMENT
--- ====================================
 Players.PlayerAdded:Connect(function(player)
 	initPlayerData(player.UserId)
 end)

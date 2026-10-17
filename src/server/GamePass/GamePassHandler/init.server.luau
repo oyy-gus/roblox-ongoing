@@ -1,8 +1,3 @@
--- ====================================
--- GAMEPASS HANDLER SCRIPT - VIP ONLY VERSION
--- Place in: StarterScriptService > GamePass(Folder) > GamePassHandler(Script)
--- ====================================
-
 local Config = require(script.Config)
 local Logger = require(script.Logger)
 local AntiSpamManager = require(script.AntiSpamManager)
@@ -88,7 +83,7 @@ end)
 Logger:Success("Marketplace events connected")
 
 RoleSystem.RoleChanged:Connect(function(player, oldRole, newRole)
-	Logger:Info(string.format("Role changed: %s -> %s (%s)", 
+	Logger:Info(string.format("Role changed: %s -> %s (%s)",
 		oldRole, newRole, player.Name))
 
 	if Config.BroadcastRoleChange then

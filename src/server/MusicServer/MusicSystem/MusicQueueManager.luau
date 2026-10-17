@@ -1,10 +1,3 @@
--- ====================================
--- MUSIC QUEUE MANAGER (IMPROVED)
--- Place in: ServerScriptService > MusicServer(Folder) > MusicSystem(Script) > MusicQueueManager(ModuleScript)
--- ====================================
--- Changes:
---   ✅ tick() → workspace:GetServerTimeNow()
-
 local MusicQueueManager = {}
 MusicQueueManager.__index = MusicQueueManager
 
@@ -15,10 +8,6 @@ function MusicQueueManager.new(config)
 	self.playerQueueCount = {}
 	return self
 end
-
--- ====================================
--- QUEUE OPERATIONS
--- ====================================
 
 function MusicQueueManager:AddToQueue(musicData, uploaderName, userId)
 	if #self.queue >= self.config.MAX_QUEUE_SIZE then
@@ -35,7 +24,7 @@ function MusicQueueManager:AddToQueue(musicData, uploaderName, userId)
 		uploader  = uploaderName,
 		userId    = userId,
 		Duration  = (musicData and (musicData.Duration or musicData.duration)) or 0,
-		addedTime = workspace:GetServerTimeNow(),  -- ← SHARED CLOCK
+		addedTime = workspace:GetServerTimeNow(),
 	})
 
 	self.playerQueueCount[userId] = userCount + 1
@@ -82,7 +71,6 @@ function MusicQueueManager:GetUserQueueCount(userId)
 	return self.playerQueueCount[userId] or 0
 end
 
--- Update durasi nyata pada entry queue berdasarkan musicId
 function MusicQueueManager:UpdateDuration(musicId, duration)
 	if not musicId or not duration or duration <= 0 then return false end
 	local updated = false

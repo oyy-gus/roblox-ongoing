@@ -1,8 +1,3 @@
--- Place in: ReplicatedStorage > Modules > MusicModule(ModuleScript)
--- ====================================
--- Changes:
---   ✅ tick() → workspace:GetServerTimeNow()
-
 local MusicModule = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -101,6 +96,3 @@ MusicModule.EventTypes = {
 }
 
 return MusicModule
-
--- ====================================
--- MUSIC STORAGE HANDLER (IMPROVED)

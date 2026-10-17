@@ -1,25 +1,13 @@
--- ============================================================
--- ChatTagClient (CLIENT)
--- Menampilkan tag di chat menggunakan TextChatService
--- Place in: StarterPlayer > StarterPlayerScripts > ChatTagClient
--- ============================================================
-
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TextChatService   = game:GetService("TextChatService")
 
 local LocalPlayer = Players.LocalPlayer
 
--- ============================================================
--- GET REMOTES (Manual)
--- ============================================================
 local Remotes     = ReplicatedStorage:WaitForChild("Remotes")
 local GetChatTags = Remotes:WaitForChild("GetChatTags")
 local TagsUpdated = Remotes:WaitForChild("TagsUpdated")
 
--- ============================================================
--- CACHE TAGS
--- ============================================================
 local tagsCache = {}
 
 local function fetchTags(userId)
@@ -42,16 +30,10 @@ local function getTags(userId)
 	return fetchTags(userId)
 end
 
--- ============================================================
--- LISTEN FOR TAG UPDATES
--- ============================================================
 TagsUpdated.OnClientEvent:Connect(function(userId, tags)
 	tagsCache[userId] = tags
 end)
 
--- ============================================================
--- HELPER: Color3 to Hex
--- ============================================================
 local function color3ToHex(color)
 	return string.format("#%02X%02X%02X",
 		math.floor(color.R * 255 + 0.5),
@@ -60,9 +42,6 @@ local function color3ToHex(color)
 	)
 end
 
--- ============================================================
--- TEXTCHATSERVICE: OnIncomingMessage
--- ============================================================
 TextChatService.OnIncomingMessage = function(message)
 	local properties = Instance.new("TextChatMessageProperties")
 
@@ -95,9 +74,6 @@ TextChatService.OnIncomingMessage = function(message)
 	return properties
 end
 
--- ============================================================
--- PRE-FETCH TAGS FOR EXISTING PLAYERS
--- ============================================================
 for _, player in ipairs(Players:GetPlayers()) do
 	task.spawn(function()
 		fetchTags(player.UserId)

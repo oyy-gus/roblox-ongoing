@@ -1,22 +1,16 @@
--- ============================================================
--- PlayerManager
--- Place in: ServerScriptService > GiveSystem(Folder) > Title(Folder) > PlayerManager(ModuleScript)
--- ============================================================
-
 local Players = game:GetService("Players")
 
 local PlayerManager = {}
 local PlayerLastCharacter = {}
 
 function PlayerManager:SetupPlayerMonitoring(player, dataStoreModule, titleRenderer)
-	-- Render saat CharacterAdded
+
 	player.CharacterAdded:Connect(function(char)
 		task.wait(0.8)
 		local titles = dataStoreModule:LoadTitlesForUserId(player.UserId) or {}
 		titleRenderer:RenderAllTitles(player, char, titles)
 	end)
 
-	-- Backup: detector Head yang muncul terlambat
 	workspace.DescendantAdded:Connect(function(descendant)
 		if descendant.Name == "Head" and descendant.Parent then
 			local char = descendant.Parent
@@ -28,13 +22,12 @@ function PlayerManager:SetupPlayerMonitoring(player, dataStoreModule, titleRende
 		end
 	end)
 
-	-- Auto-fix loop: restore titles jika hilang (cek tiap 2 detik)
 	task.spawn(function()
 		while player.Parent do
 			task.wait(2)
 			local char = player.Character
 			if char and char:FindFirstChild("Head") then
-				-- Cek apakah ada label yang seharusnya visible tapi tidak
+
 				local titles = dataStoreModule:LoadTitlesForUserId(player.UserId) or {}
 				local shouldHaveTitles = false
 				for i = 1, 14 do
@@ -45,7 +38,7 @@ function PlayerManager:SetupPlayerMonitoring(player, dataStoreModule, titleRende
 				end
 
 				if shouldHaveTitles then
-					-- Cek overhead masih ada dan label visible
+
 					local head = char:FindFirstChild("Head")
 					local hasOverhead = false
 					if head then
@@ -61,7 +54,7 @@ function PlayerManager:SetupPlayerMonitoring(player, dataStoreModule, titleRende
 					end
 
 					if hasOverhead then
-						-- Cek apakah label pertama yang seharusnya ada sudah visible
+
 						local head2 = char:FindFirstChild("Head")
 						local customFrame = nil
 						if head2 then

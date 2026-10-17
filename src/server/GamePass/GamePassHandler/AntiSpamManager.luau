@@ -1,7 +1,3 @@
--- ====================================
--- ANTI-SPAM MANAGER (FIXED)
--- Place in: StarterScriptService > GamePass(Folder) > GamePassHandler(Script) > AntiSpamManager(ModuleScript)
--- ====================================
 local Config = require(script.Parent.Config)
 local Logger = require(script.Parent.Logger)
 
@@ -15,19 +11,16 @@ function AntiSpamManager:IsSpamming(player, actionType)
 	local userId = player.UserId
 	local currentTime = tick()
 
-	-- Create unique key per action type
 	local cooldownKey = userId .. "_" .. (actionType or "generic")
 
-	-- Check cooldown untuk action ini
 	if self.playerCooldowns[cooldownKey] then
 		if currentTime - self.playerCooldowns[cooldownKey] < Config.AntiSpam.CooldownTime then
-			Logger:Debug(string.format("Player %s is spamming action: %s (cooldown)", 
+			Logger:Debug(string.format("Player %s is spamming action: %s (cooldown)",
 				player.Name, actionType or "generic"))
 			return true
 		end
 	end
 
-	-- Check request count per minute (global)
 	if not self.playerRequestCounts[userId] then
 		self.playerRequestCounts[userId] = {count = 0, resetTime = currentTime + 60}
 	end
@@ -42,23 +35,22 @@ function AntiSpamManager:IsSpamming(player, actionType)
 	requestData.count = requestData.count + 1
 
 	if requestData.count > Config.AntiSpam.MaxRequestsPerMinute then
-		Logger:Debug(string.format("Player %s exceeded request limit (%d/%d)", 
+		Logger:Debug(string.format("Player %s exceeded request limit (%d/%d)",
 			player.Name, requestData.count, Config.AntiSpam.MaxRequestsPerMinute))
 		return true
 	end
 
-	-- Set cooldown untuk action ini
 	self.playerCooldowns[cooldownKey] = currentTime
 
-	Logger:Debug(string.format("Player %s request OK: %s (%d/%d)", 
-		player.Name, actionType or "generic", 
+	Logger:Debug(string.format("Player %s request OK: %s (%d/%d)",
+		player.Name, actionType or "generic",
 		requestData.count, Config.AntiSpam.MaxRequestsPerMinute))
 
 	return false
 end
 
 function AntiSpamManager:CleanupPlayer(userId)
-	-- Cleanup all cooldowns untuk user ini
+
 	for key in pairs(self.playerCooldowns) do
 		if key:match("^" .. userId .. "_") then
 			self.playerCooldowns[key] = nil

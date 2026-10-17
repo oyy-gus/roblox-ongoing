@@ -1,8 +1,3 @@
--- ========================================
--- MENU CLIENT - Control Panel (Fixed Layout)
--- Place in: StarterGui > MenuGUI(ScreenGui) > MenuClient(LocalScript)
--- ========================================
-
 local Players            = game:GetService("Players")
 local ReplicatedStorage  = game:GetService("ReplicatedStorage")
 local TweenService       = game:GetService("TweenService")
@@ -22,42 +17,27 @@ local Config = MenuConfig.Config
 
 MenuConfig.SetThemeModule(ThemeModule)
 
--- ========================================
--- PANEL SIZE
--- ========================================
 local PANEL_WIDTH   = Config.PanelSize.Width
 local PANEL_HEIGHT  = Config.PanelSize.Height
 local HEADER_HEIGHT = Config.HeaderHeight
 
--- ========================================
--- PANEL POSITION SETTINGS
--- ========================================
 local PANEL_PADDING = 10
 
--- ========================================
--- ANIMATION SETTINGS
--- ========================================
 local ANIMATION_CONFIG = {
-	OpenDuration   = 0.35,
-	CloseDuration  = 0.25,
-	ScaleStart     = 0.85,
+	OpenDuration   = 0.25,
+	CloseDuration  = 0.18,
+	ScaleStart     = 0.9,
 	ScaleEnd       = 1,
-	SlideOffsetY   = 25,
-	OpenEaseStyle      = Enum.EasingStyle.Back,
+	SlideOffsetY   = 20,
+	OpenEaseStyle      = Enum.EasingStyle.Quart,
 	OpenEaseDirection  = Enum.EasingDirection.Out,
 	CloseEaseStyle     = Enum.EasingStyle.Quart,
 	CloseEaseDirection = Enum.EasingDirection.In,
 }
 
--- ========================================
--- CEGAH EKSEKUSI GANDA
--- ========================================
 if gui:GetAttribute("PanelInitialized") then return end
 gui:SetAttribute("PanelInitialized", true)
 
--- ========================================
--- SCREEN GUI SETUP
--- ========================================
 gui.Name = "MenuGUI"
 if gui:IsA("ScreenGui") then
 	gui.ResetOnSpawn   = false
@@ -67,14 +47,8 @@ if gui:IsA("ScreenGui") then
 	gui.Enabled        = true
 end
 
--- ========================================
--- START GRADIENT ANIMATION SYSTEM
--- ========================================
 ThemeModule.GradientSystem.Start()
 
--- ========================================
--- UI SCALE SYSTEM
--- ========================================
 local ScalingSystem = require(
 	ReplicatedStorage
 		:WaitForChild("AutoScaleSystem")
@@ -89,9 +63,6 @@ end
 
 local uiScale = gui:FindFirstChildOfClass("UIScale")
 
--- ========================================
--- SOUND SYSTEM
--- ========================================
 local SoundSystem = {
 	ClickSound = nil,
 	SoundId    = "rbxassetid://139658322785649"
@@ -149,9 +120,6 @@ end
 SoundSystem.Setup()
 MenuConfig.SoundSystem = SoundSystem
 
--- ========================================
--- PANEL CONTAINER
--- ========================================
 local panelContainer = Instance.new("Frame")
 panelContainer.Name                   = "PanelContainer"
 panelContainer.Size                   = UDim2.new(1, 0, 1, 0)
@@ -161,9 +129,6 @@ panelContainer.BorderSizePixel        = 0
 panelContainer.Visible                = false
 panelContainer.Parent                 = gui
 
--- ========================================
--- HELPER: Get Default Panel Offset
--- ========================================
 local function getDefaultPanelOffset()
 	local currentScale = getCurrentScale()
 	local viewportSize = workspace.CurrentCamera.ViewportSize
@@ -173,9 +138,6 @@ local function getDefaultPanelOffset()
 	return offsetX, offsetY
 end
 
--- ========================================
--- MAIN PANEL
--- ========================================
 local mainPanel = Instance.new("CanvasGroup")
 mainPanel.Name              = "MainPanel"
 mainPanel.Size              = UDim2.new(0, PANEL_WIDTH, 0, PANEL_HEIGHT)
@@ -196,9 +158,6 @@ ThemeModule.CreateCorner(mainPanel, 12)
 local mainStroke, mainStrokeGradient = ThemeModule.CreateAnimatedStroke(mainPanel, 2, "Primary", 1.2)
 mainStroke.Transparency = 1
 
--- ========================================
--- HEADER
--- ========================================
 local header = Instance.new("Frame")
 header.Name             = "Header"
 header.Size             = UDim2.new(1, 0, 0, HEADER_HEIGHT)
@@ -287,9 +246,6 @@ closeButton.MouseLeave:Connect(function()
 		{ BackgroundColor3 = ThemeModule.Colors.CloseRed }):Play()
 end)
 
--- ========================================
--- CONTENT CONTAINER
--- ========================================
 local contentContainer = Instance.new("Frame")
 contentContainer.Name                   = "ContentContainer"
 contentContainer.Size                   = UDim2.new(1, -16, 1, -(HEADER_HEIGHT + 16))
@@ -303,20 +259,14 @@ contentContainer.Parent                 = mainPanel
 
 ThemeModule.CreateCorner(contentContainer, 8)
 
--- ========================================
--- TAB DEFINITIONS  (Commands dihapus)
--- ========================================
 local tabDefinitions = {
-	{ Name = "Music",      Icon = "🎵", DisplayName = "Music",      Order = 1 },
+	{ Name = "Music",      Icon = "🎵", DisplayName = "Musik",      Order = 1 },
 	{ Name = "Pengaturan", Icon = "⚙️", DisplayName = "Pengaturan", Order = 2 },
 	{ Name = "Pemain",     Icon = "👥", DisplayName = "Pemain",     Order = 3 },
 	{ Name = "Toko",       Icon = "🛒", DisplayName = "Toko",       Order = 4 },
 	{ Name = "Lapor",      Icon = "📜", DisplayName = "Lapor",      Order = 5 },
 }
 
--- ========================================
--- BUILD TABS & PAGES
--- ========================================
 local tabButtons     = {}
 local tabFrames      = {}
 local tabPages       = {}
@@ -417,9 +367,6 @@ for _, def in ipairs(tabDefinitions) do
 	table.insert(tabNames, def.Name)
 end
 
--- ========================================
--- TAB SWITCHING
--- ========================================
 local function switchTab(tabName)
 	SoundSystem.PlayClick()
 	MenuConfig.State.currentTab     = tabName
@@ -458,9 +405,6 @@ for tabName, btn in pairs(tabButtons) do
 	btn.MouseButton1Click:Connect(function() switchTab(tabName) end)
 end
 
--- ========================================
--- NOTIFICATION SYSTEM
--- ========================================
 local function showNotification(message, messageType)
 	local title    = "Control Panel"
 	local duration = Config.Notification.Duration or 3
@@ -477,9 +421,6 @@ local function showNotification(message, messageType)
 	end
 end
 
--- ========================================
--- PANEL POSITION
--- ========================================
 local function resetPanelPosition()
 	local offsetX, offsetY = getDefaultPanelOffset()
 	mainPanel.Position = UDim2.new(0.5, offsetX, 0.5, offsetY)
@@ -491,9 +432,6 @@ workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(functio
 	end
 end)
 
--- ========================================
--- PANEL TOGGLE
--- ========================================
 local panelVisible = false
 local isAnimating  = false
 local panelIcon    = nil
@@ -564,9 +502,6 @@ local function forceClosePanel()
 	resetPanelPosition()
 end
 
--- ========================================
--- REGISTER CALLBACKS
--- ========================================
 MenuConfig.OpenPanel          = openPanel
 MenuConfig.ClosePanel         = closePanel
 MenuConfig.TogglePanel        = togglePanel
@@ -575,9 +510,6 @@ MenuConfig.SwitchTab          = switchTab
 MenuConfig.ShowNotification   = showNotification
 MenuConfig.ResetPanelPosition = resetPanelPosition
 
--- ========================================
--- REGISTER GUI REFERENCES
--- ========================================
 MenuConfig.GUI.ScreenGui        = gui
 MenuConfig.GUI.MainPanel        = mainPanel
 MenuConfig.GUI.PanelContainer   = panelContainer
@@ -595,7 +527,6 @@ MenuConfig.GUI.UIScale          = uiScale
 MenuConfig.GUI.PanelUIScale     = panelUIScale
 MenuConfig.GUI.GUIScaler        = guiScaler
 
--- Page references (Commands dihapus)
 MenuConfig.GUI.MusicPage      = tabPages["Music"]
 MenuConfig.GUI.PengaturanPage = tabPages["Pengaturan"]
 MenuConfig.GUI.PemainPage     = tabPages["Pemain"]
@@ -606,16 +537,12 @@ MenuConfig.GUI.ConfigPage     = tabPages["Pengaturan"]
 MenuConfig.GUI.GamePassPage   = tabPages["Toko"]
 MenuConfig.GUI.ReportPage     = tabPages["Lapor"]
 
--- Tab button references (Commands dihapus)
 MenuConfig.GUI.MusicTab      = tabButtons["Music"]
 MenuConfig.GUI.PengaturanTab = tabButtons["Pengaturan"]
 MenuConfig.GUI.PemainTab     = tabButtons["Pemain"]
 MenuConfig.GUI.TokoTab       = tabButtons["Toko"]
 MenuConfig.GUI.LaporTab      = tabButtons["Lapor"]
 
--- ========================================
--- ICON TOOLBAR
--- ========================================
 local existingIcon = Icon.getIcon("PanelIcon")
 if existingIcon then existingIcon:destroy() end
 
@@ -631,9 +558,6 @@ panelIcon.deselected:Connect(function() SoundSystem.PlayClick(); closePanel() en
 
 MenuConfig.GUI.PanelIcon = panelIcon
 
--- ========================================
--- RESPAWN HANDLER
--- ========================================
 local function onCharacterAdded()
 	task.defer(function()
 		forceClosePanel()
@@ -643,18 +567,12 @@ end
 
 player.CharacterAdded:Connect(onCharacterAdded)
 
--- ========================================
--- BUTTON CONNECTIONS
--- ========================================
 closeButton.MouseButton1Click:Connect(function()
 	SoundSystem.PlayClick()
 	closePanel()
 	if panelIcon then panelIcon:deselect() end
 end)
 
--- ========================================
--- KEYBOARD TOGGLE
--- ========================================
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
 	if input.KeyCode == Config.ToggleKey then
@@ -665,9 +583,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	end
 end)
 
--- ========================================
--- CLEANUP ON DESTROY
--- ========================================
 gui.Destroying:Connect(function()
 	guiScaler:Destroy()
 	ThemeModule.GradientSystem.Unregister(mainStrokeGradient)
@@ -676,9 +591,6 @@ gui.Destroying:Connect(function()
 	if panelIcon then panelIcon:destroy(); panelIcon = nil end
 end)
 
--- ========================================
--- INIT
--- ========================================
 switchTab("Music")
 MenuConfig.MarkGUIReady()
 

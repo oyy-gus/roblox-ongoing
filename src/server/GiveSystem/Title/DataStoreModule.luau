@@ -1,8 +1,3 @@
--- ============================================================
--- DataStoreModule
--- Place in: ServerScriptService > GiveSystem(Folder) > Title(Folder) > DataStoreModule(ModuleScript)
--- ============================================================
-
 local DataStoreService = game:GetService("DataStoreService")
 
 local DataStoreModule = {}
@@ -13,7 +8,7 @@ function DataStoreModule:Set(key, value)
 		TitleStore:SetAsync(key, value)
 	end)
 	if not ok then
-		warn("[DataStoreModule] SetAsync error:", err)
+		warn("[DataStoreModule] Kesalahan SetAsync:", err)
 	end
 end
 
@@ -22,7 +17,7 @@ function DataStoreModule:Remove(key)
 		TitleStore:RemoveAsync(key)
 	end)
 	if not ok then
-		warn("[DataStoreModule] RemoveAsync error:", err)
+		warn("[DataStoreModule] Kesalahan RemoveAsync:", err)
 	end
 end
 
@@ -31,7 +26,7 @@ function DataStoreModule:Get(key)
 		return TitleStore:GetAsync(key)
 	end)
 	if ok then return res end
-	warn("[DataStoreModule] GetAsync failed for key:", key)
+	warn("[DataStoreModule] GetAsync gagal untuk kunci:", key)
 	return nil
 end
 

@@ -1,12 +1,5 @@
--- MODULE: ConfigModule
--- Letakkan sebagai child dari DonationServerHandler
--- ========================================
-
 local ConfigModule = {}
 
--- ============================================
--- 📋 KONFIGURASI
--- ============================================
 ConfigModule.DEBUG = {
 	ENABLED = false,
 	SHOW_PLAYER_REQUESTS = false,
@@ -17,7 +10,7 @@ ConfigModule.DEBUG = {
 }
 
 ConfigModule.CACHE = {
-	DURATION = 300, -- 5 menit
+	DURATION = 300,
 }
 
 ConfigModule.PRODUCTS = {

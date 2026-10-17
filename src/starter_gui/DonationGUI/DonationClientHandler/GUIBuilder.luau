@@ -1,6 +1,3 @@
--- MODULE: GUIBuilder (FINAL - Avatar Headshot & Fixed Layout)
--- ========================================
-
 local GUIBuilder = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -363,9 +360,6 @@ local function buildMessageFrame(gui)
 	return frame
 end
 
--- ═══════════════════════════════════════════════════════════
--- NOTIFICATION FRAME - Avatar Headshot (Tanpa Close Button)
--- ═══════════════════════════════════════════════════════════
 local function buildNotificationFrame(gui)
 	if gui:FindFirstChild("NotificationFrame") then return gui:FindFirstChild("NotificationFrame") end
 
@@ -387,7 +381,6 @@ local function buildNotificationFrame(gui)
 		Parent       = gui,
 	})
 
-	-- Accent bar vertikal di kiri (dengan padding)
 	local accentBar = makeFrame({
 		Name         = "AccentBar",
 		Size         = UDim2.new(0, ACCENT_W, 1, -20),
@@ -400,7 +393,6 @@ local function buildNotificationFrame(gui)
 	})
 	ThemeModule.CreateStaticGradient(accentBar, "Primary", 90)
 
-	-- Avatar container dengan border gradient
 	local avatarStartX = PADDING + ACCENT_W + 10
 	local avatarBorder = makeFrame({
 		Name         = "AvatarBorder",
@@ -414,7 +406,6 @@ local function buildNotificationFrame(gui)
 	})
 	ThemeModule.CreateAnimatedGradient(avatarBorder, "Primary", 45, 1.5)
 
-	-- Avatar container (inner)
 	local avatarContainer = makeFrame({
 		Name         = "AvatarContainer",
 		Size         = UDim2.new(0, AVATAR_SIZE, 0, AVATAR_SIZE),
@@ -427,7 +418,6 @@ local function buildNotificationFrame(gui)
 		Parent       = avatarBorder,
 	})
 
-	-- Avatar headshot image
 	local avatarImage = Instance.new("ImageLabel")
 	avatarImage.Name = "AvatarImage"
 	avatarImage.Size = UDim2.new(1, 0, 1, 0)
@@ -438,7 +428,6 @@ local function buildNotificationFrame(gui)
 	avatarImage.ZIndex = 33
 	avatarImage.Parent = avatarContainer
 
-	-- Fallback icon
 	makeLabel({
 		Name     = "FallbackIcon",
 		Size     = UDim2.new(1, 0, 1, 0),
@@ -452,7 +441,6 @@ local function buildNotificationFrame(gui)
 		Parent   = avatarContainer,
 	})
 
-	-- Online indicator
 	local onlineIndicator = makeFrame({
 		Name         = "OnlineIndicator",
 		Size         = UDim2.new(0, 12, 0, 12),
@@ -470,7 +458,6 @@ local function buildNotificationFrame(gui)
 	indicatorStroke.Thickness = 2
 	indicatorStroke.Parent = onlineIndicator
 
-	-- Content area untuk teks
 	local contentX = avatarStartX + AVATAR_SIZE + BORDER_SIZE * 2 + 12
 	local contentArea = makeFrame({
 		Name         = "ContentArea",
@@ -481,7 +468,6 @@ local function buildNotificationFrame(gui)
 		Parent       = frame,
 	})
 
-	-- Header label
 	makeLabel({
 		Name     = "HeaderLabel",
 		Size     = UDim2.new(1, 0, 0, 20),
@@ -496,7 +482,6 @@ local function buildNotificationFrame(gui)
 		Parent   = contentArea,
 	})
 
-	-- Info label
 	makeLabel({
 		Name     = "Infolabel",
 		Size     = UDim2.new(1, 0, 0, 18),
@@ -511,7 +496,6 @@ local function buildNotificationFrame(gui)
 		Parent   = contentArea,
 	})
 
-	-- Message container
 	local messageContainer = makeFrame({
 		Name         = "MessageContainer",
 		Size         = UDim2.new(1, 0, 0, 22),
@@ -522,7 +506,6 @@ local function buildNotificationFrame(gui)
 		Parent       = contentArea,
 	})
 
-	-- Quote mark
 	makeLabel({
 		Name     = "QuoteMark",
 		Size     = UDim2.new(0, 10, 0, 22),
@@ -536,7 +519,6 @@ local function buildNotificationFrame(gui)
 		Parent   = messageContainer,
 	})
 
-	-- Message text
 	makeLabel({
 		Name     = "Message",
 		Size     = UDim2.new(1, -12, 0, 22),
@@ -550,7 +532,6 @@ local function buildNotificationFrame(gui)
 		Parent   = messageContainer,
 	})
 
-	-- Tier badge
 	local tierBadge = makeFrame({
 		Name         = "TierBadge",
 		Size         = UDim2.new(0, 75, 0, 20),
@@ -615,5 +596,3 @@ function GUIBuilder.build(gui)
 end
 
 return GUIBuilder
-
--- ========================================

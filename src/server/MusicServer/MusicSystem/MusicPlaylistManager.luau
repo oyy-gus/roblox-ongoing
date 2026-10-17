@@ -1,11 +1,3 @@
--- ====================================
--- MUSIC PLAYLIST MANAGER (IMPROVED)
--- Place in: ServerScriptService > MusicServer(Folder) > MusicSystem(Script) > MusicPlaylistManager(ModuleScript)
--- ====================================
--- Changes:
---   ✅ Tambah PeekNextSong() — lihat lagu berikutnya tanpa mengonsumsi (untuk preload)
---   ✅ workspace:GetServerTimeNow() (tidak ada tick() di file ini, tapi distandarisasi)
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local MusicModule = require(ReplicatedStorage.Modules:WaitForChild("MusicModule"))
 
@@ -20,10 +12,6 @@ function MusicPlaylistManager.new(config)
 	self.playedSongs   = {}
 	return self
 end
-
--- ====================================
--- PLAYLIST OPERATIONS
--- ====================================
 
 function MusicPlaylistManager:GetNextSong()
 	local playlist = MusicModule:GetAllMusic()
@@ -62,14 +50,12 @@ function MusicPlaylistManager:GetNextSong()
 	return nextSong
 end
 
---- BARU: Lihat lagu berikutnya TANPA mengonsumsi (untuk preloading)
 function MusicPlaylistManager:PeekNextSong()
 	local playlist = MusicModule:GetAllMusic()
 	if #playlist == 0 then return nil end
 
 	if self.shuffleMode then
-		-- Dalam mode shuffle, kita tidak bisa memprediksi dengan pasti,
-		-- tapi kita bisa ambil satu random candidate untuk preload
+
 		local availableSongs = {}
 		for _, song in ipairs(playlist) do
 			if not self.playedSongs[song.id] then
@@ -79,10 +65,10 @@ function MusicPlaylistManager:PeekNextSong()
 		if #availableSongs == 0 then
 			availableSongs = playlist
 		end
-		-- Gunakan index tetap agar peek konsisten (tidak random setiap panggilan)
+
 		return availableSongs[1]
 	else
-		-- Sequential: kembalikan lagu di index berikutnya
+
 		local peekIndex = self.playlistIndex
 		if peekIndex > #playlist then peekIndex = 1 end
 		return playlist[peekIndex]

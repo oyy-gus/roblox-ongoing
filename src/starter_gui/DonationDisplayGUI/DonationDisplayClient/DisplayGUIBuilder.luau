@@ -1,7 +1,3 @@
--- MODULE: DisplayGUIBuilder
--- Letakkan sebagai child dari DonationDisplayClient
--- ========================================
-
 local DisplayGUIBuilder = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -71,7 +67,7 @@ local function applyStroke(frame, thickness, gradientName, speed)
 end
 
 function DisplayGUIBuilder.build(gui)
-	if gui:FindFirstChild("Frame") then 
+	if gui:FindFirstChild("Frame") then
 		return {
 			Frame = gui.Frame,
 			nameLabel = gui.Frame:FindFirstChild("nameLabel"),
@@ -83,7 +79,6 @@ function DisplayGUIBuilder.build(gui)
 
 	print("[DisplayGUIBuilder] 🏗️ Building Donation Display GUI...")
 
-	-- Main Frame (kanan bawah)
 	local frame = makeFrame({
 		Name = "Frame",
 		Size = UDim2.new(0, CFG.FRAME_WIDTH, 0, CFG.FRAME_HEIGHT),
@@ -97,7 +92,6 @@ function DisplayGUIBuilder.build(gui)
 		Parent = gui,
 	})
 
-	-- Accent bar di kiri
 	local accentBar = makeFrame({
 		Name = "AccentBar",
 		Size = UDim2.new(0, CFG.ACCENT_WIDTH, 1, -14),
@@ -110,7 +104,6 @@ function DisplayGUIBuilder.build(gui)
 	})
 	ThemeModule.CreateStaticGradient(accentBar, "Primary", 90)
 
-	-- Avatar border dengan gradient
 	local avatarStartX = 8 + CFG.ACCENT_WIDTH + 8
 	local avatarBorder = makeFrame({
 		Name = "AvatarBorder",
@@ -124,7 +117,6 @@ function DisplayGUIBuilder.build(gui)
 	})
 	ThemeModule.CreateAnimatedGradient(avatarBorder, "Primary", 45, 1.5)
 
-	-- Avatar container (inner)
 	local avatarContainer = makeFrame({
 		Name = "AvatarContainer",
 		Size = UDim2.new(0, CFG.AVATAR_SIZE, 0, CFG.AVATAR_SIZE),
@@ -137,7 +129,6 @@ function DisplayGUIBuilder.build(gui)
 		Parent = avatarBorder,
 	})
 
-	-- Avatar image
 	local avatarImage = Instance.new("ImageLabel")
 	avatarImage.Name = "AvatarImage"
 	avatarImage.Size = UDim2.new(1, 0, 1, 0)
@@ -148,7 +139,6 @@ function DisplayGUIBuilder.build(gui)
 	avatarImage.ZIndex = 53
 	avatarImage.Parent = avatarContainer
 
-	-- Fallback icon
 	local fallbackIcon = makeLabel({
 		Name = "FallbackIcon",
 		Size = UDim2.new(1, 0, 1, 0),
@@ -162,7 +152,6 @@ function DisplayGUIBuilder.build(gui)
 		Parent = avatarContainer,
 	})
 
-	-- Content area
 	local contentX = avatarStartX + CFG.AVATAR_SIZE + CFG.AVATAR_BORDER * 2 + 8
 	local contentArea = makeFrame({
 		Name = "ContentArea",
@@ -173,7 +162,6 @@ function DisplayGUIBuilder.build(gui)
 		Parent = frame,
 	})
 
-	-- Name label (donor name)
 	local nameLabel = makeLabel({
 		Name = "nameLabel",
 		Size = UDim2.new(1, 0, 0, 16),
@@ -188,7 +176,6 @@ function DisplayGUIBuilder.build(gui)
 	})
 	ThemeModule.CreateAnimatedGradient(nameLabel, "Primary", 0, 1.2)
 
-	-- Info label (donation amount)
 	local infoLabel = makeLabel({
 		Name = "infoLabel",
 		Size = UDim2.new(1, 0, 0, 14),
@@ -202,7 +189,6 @@ function DisplayGUIBuilder.build(gui)
 		Parent = contentArea,
 	})
 
-	-- Type label (donation tier/type)
 	local typeLabel = makeLabel({
 		Name = "typeLabel",
 		Size = UDim2.new(1, 0, 0, 14),
@@ -216,7 +202,6 @@ function DisplayGUIBuilder.build(gui)
 		Parent = contentArea,
 	})
 
-	-- Apply stroke
 	applyStroke(frame, 1.5, "Primary", 1.5)
 
 	print("[DisplayGUIBuilder] ✅ Donation Display GUI built!")
@@ -233,6 +218,3 @@ function DisplayGUIBuilder.build(gui)
 end
 
 return DisplayGUIBuilder
-
--- ====================================
--- EMOTE HANDLER - WITH AUTO SCALE + FULL FEATURES

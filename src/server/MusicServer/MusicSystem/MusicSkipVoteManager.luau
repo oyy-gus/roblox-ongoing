@@ -1,10 +1,3 @@
--- ====================================
--- MUSIC SKIP VOTE MANAGER (IMPROVED)
--- Place in: ServerScriptService > MusicServer(Folder) > MusicSystem(Script) > MusicSkipVoteManager(ModuleScript)
--- ====================================
--- Changes:
---   ✅ tick() → workspace:GetServerTimeNow()
-
 local Players = game:GetService("Players")
 
 local MusicSkipVoteManager = {}
@@ -27,17 +20,9 @@ function MusicSkipVoteManager.new(config, roleSystem)
 	return self
 end
 
--- ====================================
--- ELIGIBLE VOTERS
--- ====================================
-
 function MusicSkipVoteManager:GetEligibleVoters()
 	return Players:GetPlayers()
 end
-
--- ====================================
--- RATE LIMITING
--- ====================================
 
 function MusicSkipVoteManager:CheckRateLimit(player)
 	local userId   = player.UserId
@@ -51,10 +36,6 @@ function MusicSkipVoteManager:CheckRateLimit(player)
 	self.skipVoteRateLimit[userId] = workspace:GetServerTimeNow()
 	return true
 end
-
--- ====================================
--- VOTE MANAGEMENT
--- ====================================
 
 function MusicSkipVoteManager:IsActive()
 	return self.skipVote.active == true
@@ -103,7 +84,6 @@ function MusicSkipVoteManager:StartVote(initiatorPlayer, songData, dispatcher)
 		required    = requiredVotes,
 	})
 
-	-- Jika langsung lolos (misal hanya 1 pemain di server)
 	if self.skipVote.yesVotes >= requiredVotes then
 		self:EndVote(dispatcher, false, true)
 		return true, nil

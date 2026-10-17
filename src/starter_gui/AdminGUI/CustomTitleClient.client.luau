@@ -1,9 +1,3 @@
--- ========================================
--- CUSTOM TITLE CLIENT
--- Place in: StarterGui > AdminGUI(ScreenGui) > CustomTitleClient(LocalScript)
--- Inject UI ke CustomTitlePage di admin panel
--- ========================================
-
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService  = game:GetService("UserInputService")
@@ -21,15 +15,12 @@ AdminConfig.WaitForGUIReady()
 
 local page = AdminConfig.GUI.CustomTitlePage
 if not page then
-	warn("[CustomTitleClient] CustomTitlePage not found")
+	warn("[CustomTitleClient] Halaman CustomTitle tidak ditemukan")
 	return
 end
 
 ThemeModule.GradientSystem.Start()
 
--- ========================================
--- DATA
--- ========================================
 local ColorTemplates = {
 	Sunset = {
 		{ name = "Coral Red", color = Color3.fromRGB(255, 0, 18) },
@@ -106,9 +97,6 @@ local FontMap = {
 	Code    = Enum.Font.Code,
 }
 
--- ========================================
--- STATE
--- ========================================
 local currentPlayerList = {}
 local selectedPlayer    = ""
 local currentMode       = "fixed"
@@ -123,9 +111,6 @@ AdminConfig.CustomTitleState = {
 	editingSlot  = nil,
 }
 
--- ========================================
--- HELPER
--- ========================================
 local function makeCorner(parent, radius)
 	local c = Instance.new("UICorner")
 	c.CornerRadius = UDim.new(0, radius)
@@ -166,9 +151,6 @@ local function makeInput(parent, placeholder, size, pos)
 	return box
 end
 
--- ========================================
--- BUILD UI
--- ========================================
 local scroll = Instance.new("ScrollingFrame")
 scroll.Size                = UDim2.new(1, 0, 1, 0)
 scroll.BackgroundTransparency = 1
@@ -212,9 +194,6 @@ local function makeSection(title, order, height)
 	return section
 end
 
--- ──────────────────────────────────────
--- SECTION 1: Player + Slot
--- ──────────────────────────────────────
 local sec1 = makeSection("PlayerSlot", 1, 100)
 
 makeHeaderLabel(sec1, "PLAYER NAME", UDim2.new(0.5, -8, 0, 20), UDim2.new(0, 10, 0, 8), 10)
@@ -262,20 +241,13 @@ autoPad.Parent        = autoComplete
 local slotBox = makeInput(sec1, "1", UDim2.new(0.5, -12, 0, 34), UDim2.new(0.5, 4, 0, 30))
 slotBox.Text = "1"
 
--- ──────────────────────────────────────
--- SECTION 2: Title Text
--- ──────────────────────────────────────
 local sec2 = makeSection("TitleText", 2, 70)
 makeHeaderLabel(sec2, "TITLE TEXT", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 8), 10)
 local titleBox = makeInput(sec2, "Enter title text...", UDim2.new(1, -20, 0, 34), UDim2.new(0, 10, 0, 28))
 
--- ──────────────────────────────────────
--- SECTION 3: Mode Buttons (FIXED - dengan ScrollingFrame & Wraps)
--- ──────────────────────────────────────
-local sec3 = makeSection("Mode", 3, 88) -- Tinggi diperbesar untuk wrapping
+local sec3 = makeSection("Mode", 3, 88)
 makeHeaderLabel(sec3, "COLOR MODE", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 6), 10)
 
--- Gunakan ScrollingFrame agar bisa scroll jika wrapping terlalu banyak
 local modeScrollFrame = Instance.new("ScrollingFrame")
 modeScrollFrame.Name = "ModeScrollFrame"
 modeScrollFrame.Size = UDim2.new(1, -20, 0, 60)
@@ -298,7 +270,7 @@ modeLayout.FillDirection       = Enum.FillDirection.Horizontal
 modeLayout.Padding             = UDim.new(0, 4)
 modeLayout.VerticalAlignment   = Enum.VerticalAlignment.Top
 modeLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-modeLayout.Wraps               = true -- AKTIFKAN WRAPS
+modeLayout.Wraps               = true
 modeLayout.Parent              = modeScrollFrame
 
 local modeButtons = {}
@@ -308,7 +280,7 @@ local modeLabels = { fixed="Fixed", rgb="RGB", gradient="Gradient", rainbow="Rai
 for _, modeName in ipairs(modeList) do
 	local btn = Instance.new("TextButton")
 	btn.Name             = "Mode_" .. modeName
-	btn.Size             = UDim2.new(0, 72, 0, 28) -- Fixed height
+	btn.Size             = UDim2.new(0, 72, 0, 28)
 	btn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 	btn.BorderSizePixel  = 0
 	btn.Text             = modeLabels[modeName]
@@ -321,13 +293,9 @@ for _, modeName in ipairs(modeList) do
 	modeButtons[modeName] = btn
 end
 
--- ──────────────────────────────────────
--- SECTION 4: Font Buttons (FIXED - dengan ScrollingFrame & Wraps)
--- ──────────────────────────────────────
-local sec4 = makeSection("Font", 4, 88) -- Tinggi diperbesar untuk wrapping
+local sec4 = makeSection("Font", 4, 88)
 makeHeaderLabel(sec4, "FONT", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 6), 10)
 
--- Gunakan ScrollingFrame agar bisa scroll jika wrapping terlalu banyak
 local fontScrollFrame = Instance.new("ScrollingFrame")
 fontScrollFrame.Name = "FontScrollFrame"
 fontScrollFrame.Size = UDim2.new(1, -20, 0, 60)
@@ -350,7 +318,7 @@ fontLayout.FillDirection     = Enum.FillDirection.Horizontal
 fontLayout.Padding           = UDim.new(0, 4)
 fontLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 fontLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-fontLayout.Wraps             = true -- AKTIFKAN WRAPS
+fontLayout.Wraps             = true
 fontLayout.Parent            = fontScrollFrame
 
 local fontButtons = {}
@@ -359,7 +327,7 @@ local fontList = { "Gotham", "Source", "Fantasy", "Arcade", "SciFi", "Code" }
 for _, fontName in ipairs(fontList) do
 	local btn = Instance.new("TextButton")
 	btn.Name             = "Font_" .. fontName
-	btn.Size             = UDim2.new(0, 60, 0, 28) -- Fixed height
+	btn.Size             = UDim2.new(0, 60, 0, 28)
 	btn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 	btn.BorderSizePixel  = 0
 	btn.Text             = fontName
@@ -372,9 +340,6 @@ for _, fontName in ipairs(fontList) do
 	fontButtons[fontName] = btn
 end
 
--- ──────────────────────────────────────
--- SECTION 5: Color Picker
--- ──────────────────────────────────────
 local sec5 = makeSection("Color", 5, 180)
 makeHeaderLabel(sec5, "COLOR / TEMPLATE", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 6), 10)
 
@@ -386,9 +351,6 @@ colorSection.BackgroundTransparency = 1
 colorSection.ClipsDescendants = true
 colorSection.Parent           = sec5
 
--- ──────────────────────────────────────
--- SECTION 6: Height Slider + Distance
--- ──────────────────────────────────────
 local sec6 = makeSection("HeightDist", 6, 100)
 makeHeaderLabel(sec6, "HEIGHT OFFSET", UDim2.new(0.5, -8, 0, 20), UDim2.new(0, 10, 0, 6), 10)
 makeHeaderLabel(sec6, "DISTANCE LEVEL", UDim2.new(0.5, -8, 0, 20), UDim2.new(0.5, 4, 0, 6), 10)
@@ -432,9 +394,6 @@ heightValueLabel.Parent           = sec6
 local distanceBox = makeInput(sec6, "20", UDim2.new(0.5, -12, 0, 30), UDim2.new(0.5, 4, 0, 34))
 distanceBox.Text = "20"
 
--- ──────────────────────────────────────
--- SECTION 7: Preview
--- ──────────────────────────────────────
 local sec7 = makeSection("Preview", 7, 70)
 makeHeaderLabel(sec7, "PREVIEW", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 6), 10)
 
@@ -453,9 +412,6 @@ preview.TextStrokeColor3     = Color3.new(0, 0, 0)
 preview.Parent               = sec7
 makeCorner(preview, 6)
 
--- ──────────────────────────────────────
--- SECTION 8: Action Buttons
--- ──────────────────────────────────────
 local sec8 = makeSection("Actions", 8, 50)
 sec8.BackgroundTransparency = 1
 for _, child in ipairs(sec8:GetChildren()) do
@@ -520,15 +476,12 @@ local noPlayerLabel = Instance.new("TextLabel")
 noPlayerLabel.Name = "NoPlayerLabel"
 noPlayerLabel.Size = UDim2.new(1, 0, 1, 0)
 noPlayerLabel.BackgroundTransparency = 1
-noPlayerLabel.Text = "⬆️ Type player name to give title"
+noPlayerLabel.Text = "⬆️ Ketik nama pemain untuk memberikan gelar"
 noPlayerLabel.TextColor3 = ThemeModule.Colors.TextMuted
 noPlayerLabel.TextSize = 12
 noPlayerLabel.Font = Enum.Font.GothamMedium
 noPlayerLabel.Parent = sec8
 
--- ========================================
--- FUNCTIONS
--- ========================================
 local function updateButtonLayout(editMode)
 	if editMode then
 		giveBtn.AnchorPoint = Vector2.new(0, 0)
@@ -576,7 +529,7 @@ local function getMatchingPlayers(text)
 	for _, p in ipairs(Players:GetPlayers()) do
 		local name = p.Name
 		local displayName = p.DisplayName
-		if string.find(string.lower(name), lowerText, 1, true) or 
+		if string.find(string.lower(name), lowerText, 1, true) or
 			string.find(string.lower(displayName), lowerText, 1, true) then
 			table.insert(matches, {name = name, display = displayName})
 		end
@@ -667,7 +620,7 @@ local function validatePlayer(text)
 		playerStatus.TextColor3 = ThemeModule.Colors.Success
 	else
 		selectedPlayer = ""
-		playerStatus.Text = "✗ Player not found"
+		playerStatus.Text = "✗ Pemain tidak ditemukan"
 		playerStatus.TextColor3 = ThemeModule.Colors.Error
 	end
 	updateButtonVisibility()
@@ -980,10 +933,6 @@ local function showTemplates()
 	end
 end
 
--- ========================================
--- EVENTS
--- ========================================
-
 playerNameBox:GetPropertyChangedSignal("Text"):Connect(function()
 	local text = playerNameBox.Text
 	updateAutoComplete(text)
@@ -1043,24 +992,24 @@ for fontName, btn in pairs(fontButtons) do
 end
 
 titleBox:GetPropertyChangedSignal("Text"):Connect(function()
-	preview.Text = titleBox.Text ~= "" and titleBox.Text or "Preview Text"
+	preview.Text = titleBox.Text ~= "" and titleBox.Text or "Teks Pratinjau"
 end)
 
 giveBtn.MouseButton1Click:Connect(function()
 	local targetPlayer = findPlayerByName(playerNameBox.Text)
 
 	if not targetPlayer then
-		AdminConfig.ShowNotification("Player not found: " .. playerNameBox.Text, "error")
+		AdminConfig.ShowNotification("Pemain tidak ditemukan: " .. playerNameBox.Text, "error")
 		return
 	end
 
 	local slotNum = tonumber(slotBox.Text)
 	if not slotNum or slotNum < 1 or slotNum > 14 then
-		AdminConfig.ShowNotification("Slot must be between 1 and 14", "error")
+		AdminConfig.ShowNotification("Slot harus antara 1 dan 14", "error")
 		return
 	end
 	if titleBox.Text == "" then
-		AdminConfig.ShowNotification("Title text cannot be empty", "warning")
+		AdminConfig.ShowNotification("Teks gelar tidak boleh kosong", "warning")
 		return
 	end
 
@@ -1078,19 +1027,19 @@ giveBtn.MouseButton1Click:Connect(function()
 		state.editingSlot   = nil
 		slotBox.TextEditable = true
 
-		giveBtn.Text = "✨ GIVE TITLE"
+		giveBtn.Text = "✨ BERIKAN GELAR"
 		for _, child in ipairs(giveBtn:GetChildren()) do
 			if child:IsA("UIGradient") then child:Destroy() end
 		end
 		ThemeModule.CreateStaticGradient(giveBtn, "Success", 90)
 
 		updateButtonLayout(false)
-		AdminConfig.ShowNotification("Title updated!", "success")
+		AdminConfig.ShowNotification("Gelar berhasil diperbarui!", "success")
 		task.wait(0.3)
 		AdminConfig.SwitchTab("ManageTitle")
 		TitleEvent:FireServer("RequestPlayerTitles", targetPlayer)
 	else
-		AdminConfig.ShowNotification("Title given to " .. targetPlayer, "success")
+		AdminConfig.ShowNotification("Gelar berhasil diberikan ke " .. targetPlayer, "success")
 	end
 end)
 
@@ -1100,7 +1049,7 @@ cancelBtn.MouseButton1Click:Connect(function()
 	state.editingSlot   = nil
 	slotBox.TextEditable = true
 
-	giveBtn.Text = "✨ GIVE TITLE"
+	giveBtn.Text = "✨ BERIKAN GELAR"
 	for _, child in ipairs(giveBtn:GetChildren()) do
 		if child:IsA("UIGradient") then child:Destroy() end
 	end
@@ -1140,9 +1089,9 @@ AdminConfig.CustomTitleUI = {
 		end
 
 		updatePreview()
-		preview.Text = titleInfo.Text ~= "" and titleInfo.Text or "Preview Text"
+		preview.Text = titleInfo.Text ~= "" and titleInfo.Text or "Teks Pratinjau"
 
-		giveBtn.Text = "💾 UPDATE"
+		giveBtn.Text = "💾 PERBARUI"
 		for _, child in ipairs(giveBtn:GetChildren()) do
 			if child:IsA("UIGradient") then child:Destroy() end
 		end

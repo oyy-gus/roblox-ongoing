@@ -1,11 +1,5 @@
--- Place in: ReplicatedStorage > Modules > MenuConfig(ModuleScript)
--- ========================================
-
 local MenuConfig = {}
 
--- ========================================
--- SERVICES
--- ========================================
 MenuConfig.Services = {
 	Players              = game:GetService("Players"),
 	TweenService         = game:GetService("TweenService"),
@@ -20,9 +14,6 @@ MenuConfig.Services = {
 	MarketplaceService   = game:GetService("MarketplaceService"),
 }
 
--- ========================================
--- THEME MODULE REFERENCE
--- ========================================
 MenuConfig.ThemeModule = nil
 
 function MenuConfig.SetThemeModule(themeModule)
@@ -33,9 +24,6 @@ function MenuConfig.GetThemeModule()
 	return MenuConfig.ThemeModule
 end
 
--- ========================================
--- GET PRIMARY/ACTIVE COLOR (untuk PlayerClient)
--- ========================================
 function MenuConfig.GetPrimaryColor()
 	if MenuConfig.ThemeModule and MenuConfig.ThemeModule.Colors then
 		return MenuConfig.ThemeModule.Colors.Primary or Color3.fromRGB(88, 101, 242)
@@ -47,9 +35,6 @@ function MenuConfig.GetActiveColor()
 	return MenuConfig.GetPrimaryColor()
 end
 
--- ========================================
--- CONFIGURATION
--- ========================================
 MenuConfig.Config = {
 	ToggleKey = Enum.KeyCode.Insert,
 
@@ -76,7 +61,6 @@ MenuConfig.Config = {
 		TabActive     = Color3.fromRGB(88, 101, 242),
 		TabInactive   = Color3.fromRGB(32, 32, 40),
 
-		-- Player List Colors (untuk PlayerClient)
 		PlayerList = {
 			Background       = Color3.fromRGB(25, 27, 35),
 			ItemBg           = Color3.fromRGB(35, 38, 48),
@@ -117,9 +101,6 @@ MenuConfig.Config = {
 	},
 }
 
--- ========================================
--- STATE
--- ========================================
 MenuConfig.State = {
 	currentTab         = nil,
 	currentMainTab     = nil,
@@ -133,9 +114,6 @@ MenuConfig.State = {
 	lastViewportSize   = nil,
 }
 
--- ========================================
--- USER SETTINGS
--- ========================================
 MenuConfig.UserSettings = {
 	musicVolume        = 100,
 	muteMusic          = false,
@@ -146,9 +124,6 @@ MenuConfig.UserSettings = {
 	hideShadow         = false,
 }
 
--- ========================================
--- GUI REFERENCES
--- ========================================
 MenuConfig.GUI = {
 	ScreenGui        = nil,
 	MainPanel        = nil,
@@ -168,7 +143,6 @@ MenuConfig.GUI = {
 	PanelUIScale = nil,
 	GUIScaler    = nil,
 
-	-- Pages
 	MusicPage      = nil,
 	CommandsPage   = nil,
 	PengaturanPage = nil,
@@ -176,11 +150,10 @@ MenuConfig.GUI = {
 	PlayersPage    = nil,
 	TokoPage       = nil,
 	KreditPage     = nil,
-	ConfigPage     = nil,     
-	GamePassPage   = nil,    
-	CreditPage     = nil,     
+	ConfigPage     = nil,
+	GamePassPage   = nil,
+	CreditPage     = nil,
 
-	-- Tab buttons
 	MusicTab      = nil,
 	CommandsTab   = nil,
 	PengaturanTab = nil,
@@ -189,9 +162,6 @@ MenuConfig.GUI = {
 	KreditTab     = nil,
 }
 
--- ========================================
--- CACHED DIMENSIONS
--- ========================================
 MenuConfig.CachedDimensions = {
 	optimalWidth   = 0,
 	optimalHeight  = 0,
@@ -199,9 +169,6 @@ MenuConfig.CachedDimensions = {
 	contentPadding = 0,
 }
 
--- ========================================
--- EVENTS
--- ========================================
 MenuConfig.Events = {
 	OnMenuToggled        = Instance.new("BindableEvent"),
 	OnTabChanged         = Instance.new("BindableEvent"),
@@ -213,17 +180,11 @@ MenuConfig.Events = {
 	OnAvatarResetting    = Instance.new("BindableEvent"),
 	OnPositionReset      = Instance.new("BindableEvent"),
 	OnThemeChanged       = Instance.new("BindableEvent"),
-	OnColorChanged       = Instance.new("BindableEvent"), -- Untuk PlayerClient
+	OnColorChanged       = Instance.new("BindableEvent"),
 }
 
--- ========================================
--- SOUND SYSTEM REFERENCE
--- ========================================
 MenuConfig.SoundSystem = nil
 
--- ========================================
--- CALLBACKS (diisi oleh MenuClient)
--- ========================================
 MenuConfig.OpenPanel          = function() end
 MenuConfig.ClosePanel         = function() end
 MenuConfig.TogglePanel        = function() end
@@ -233,23 +194,16 @@ MenuConfig.ShowNotification   = function() end
 MenuConfig.ResetPanelPosition = function() end
 MenuConfig.ClampPanelPosition = function() end
 
--- Legacy aliases
 MenuConfig.CloseMenu      = function() MenuConfig.ClosePanel() end
 MenuConfig.OpenMenu       = function() MenuConfig.OpenPanel() end
 MenuConfig.ToggleMenu     = function() MenuConfig.TogglePanel() end
 MenuConfig.ForceCloseMenu = function() MenuConfig.ForceClosePanel() end
 MenuConfig.ResetPosition  = function() MenuConfig.ResetPanelPosition() end
 
--- ========================================
--- GET CONFIG
--- ========================================
 function MenuConfig.GetConfig()
 	return MenuConfig.Config
 end
 
--- ========================================
--- CONTENT UPDATE CALLBACKS
--- ========================================
 MenuConfig.ContentUpdateCallbacks = {}
 
 function MenuConfig.RegisterContentUpdateCallback(name, callback)
@@ -264,14 +218,11 @@ function MenuConfig.TriggerContentUpdate()
 	for name, callback in pairs(MenuConfig.ContentUpdateCallbacks) do
 		local ok, err = pcall(callback)
 		if not ok then
-			warn("ContentUpdate error for " .. name .. ": " .. tostring(err))
+			warn("Kesalahan ContentUpdate untuk " .. name .. ": " .. tostring(err))
 		end
 	end
 end
 
--- ========================================
--- GUI READY
--- ========================================
 function MenuConfig.IsGUIReady()
 	return MenuConfig.State.isGUIReady
 end
@@ -279,7 +230,7 @@ end
 function MenuConfig.MarkGUIReady()
 	MenuConfig.State.isGUIReady = true
 	MenuConfig.Events.OnGUIReady:Fire()
-	print("✅ MenuConfig: GUI Ready!")
+	print("✅ MenuConfig: Antarmuka Siap!")
 end
 
 function MenuConfig.WaitForGUIReady(timeout)
@@ -296,9 +247,6 @@ function MenuConfig.WaitForGUIReady(timeout)
 	return true
 end
 
--- ========================================
--- VIP ACCESS MANAGEMENT
--- ========================================
 function MenuConfig.SetVIPAccess(hasAccess)
 	local changed = MenuConfig.State.hasVIPAccess ~= hasAccess
 	MenuConfig.State.hasVIPAccess = hasAccess
@@ -315,9 +263,6 @@ end
 MenuConfig.SetVVIPAccess = MenuConfig.SetVIPAccess
 MenuConfig.HasVVIPAccess = MenuConfig.HasVIPAccess
 
--- ========================================
--- AVATAR RESET STATE
--- ========================================
 function MenuConfig.SetResettingAvatar(isResetting)
 	MenuConfig.State.isResettingAvatar = isResetting
 	MenuConfig.Events.OnAvatarResetting:Fire(isResetting)
@@ -327,31 +272,22 @@ function MenuConfig.IsResettingAvatar()
 	return MenuConfig.State.isResettingAvatar
 end
 
--- ========================================
--- THEME CHANGE FUNCTION
--- ========================================
 function MenuConfig.ChangeTheme(presetName)
 	if MenuConfig.ThemeModule then
 		local success = MenuConfig.ThemeModule.ApplyPreset(presetName)
 		if success then
 			MenuConfig.Events.OnThemeChanged:Fire(presetName)
-			MenuConfig.Events.OnColorChanged:Fire() -- Trigger untuk PlayerClient
+			MenuConfig.Events.OnColorChanged:Fire()
 		end
 		return success
 	end
 	return false
 end
 
--- ========================================
--- FIRE COLOR CHANGED (untuk manual trigger)
--- ========================================
 function MenuConfig.FireColorChanged()
 	MenuConfig.Events.OnColorChanged:Fire()
 end
 
--- ========================================
--- SCREEN INFO CACHE
--- ========================================
 local screenInfoCache = {
 	width       = 0,
 	height      = 0,
@@ -387,9 +323,6 @@ function MenuConfig.GetScreenInfo()
 	return screenInfoCache
 end
 
--- ========================================
--- CALCULATE OPTIMAL SIZE
--- ========================================
 function MenuConfig.CalculateOptimalSize()
 	local camera = workspace.CurrentCamera
 	if not camera then
@@ -433,9 +366,6 @@ function MenuConfig.CalculateOptimalSize()
 	return width, height
 end
 
--- ========================================
--- GET HEADER HEIGHT
--- ========================================
 function MenuConfig.GetHeaderHeight()
 	local isMobile = screenInfoCache.isMobile
 	local isLandscape = screenInfoCache.isLandscape
@@ -451,9 +381,6 @@ function MenuConfig.GetHeaderHeight()
 	return headerHeight
 end
 
--- ========================================
--- GET SCALED VALUE
--- ========================================
 function MenuConfig.GetScaledValue(base, min, max)
 	local camera = workspace.CurrentCamera
 	if not camera then return base end
@@ -462,18 +389,12 @@ function MenuConfig.GetScaledValue(base, min, max)
 	return math.clamp(base * scaleFactor, min, max)
 end
 
--- ========================================
--- SOUND
--- ========================================
 function MenuConfig.PlayClick()
 	if MenuConfig.SoundSystem and MenuConfig.SoundSystem.PlayClick then
 		MenuConfig.SoundSystem.PlayClick()
 	end
 end
 
--- ========================================
--- TWEEN HELPER
--- ========================================
 function MenuConfig.Tween(instance, properties, duration, easingStyle, easingDirection)
 	local tweenInfo = TweenInfo.new(
 		duration        or 0.2,
@@ -485,9 +406,6 @@ function MenuConfig.Tween(instance, properties, duration, easingStyle, easingDir
 	return tween
 end
 
--- ========================================
--- BUTTON HOVER HELPER
--- ========================================
 function MenuConfig.SetupButtonHover(button, normalColor, hoverLerp)
 	hoverLerp = hoverLerp or 0.15
 	button.MouseEnter:Connect(function()
@@ -502,9 +420,6 @@ function MenuConfig.SetupButtonHover(button, normalColor, hoverLerp)
 	end)
 end
 
--- ========================================
--- UI HELPER FUNCTIONS
--- ========================================
 function MenuConfig.CreateCorner(parent, radius)
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, radius or 6)
@@ -766,6 +681,3 @@ function MenuConfig.GetColor(colorName)
 end
 
 return MenuConfig
-
--- ====================================
--- MUSIC MODULE (IMPROVED)

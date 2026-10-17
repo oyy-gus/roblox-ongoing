@@ -1,7 +1,3 @@
--- ========================================
--- REPORT BUG CLIENT - DEBUG VERSION
--- ========================================
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService  = game:GetService("UserInputService")
 local RunService        = game:GetService("RunService")
@@ -11,12 +7,9 @@ local MenuConfig        = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule       = require(Modules:WaitForChild("ThemeModule"))
 local BugReportConfig   = require(Modules:WaitForChild("BugReportConfig"))
 
--- ========================================
--- TUNGGU GUI READY
--- ========================================
 local guiReady = MenuConfig.WaitForGUIReady(15)
 if not guiReady then
-	warn("❌ ReportBugClient: GUI tidak ready!")
+	warn("❌ ReportBugClient: GUI belum siap!")
 	return
 end
 
@@ -25,23 +18,17 @@ local reportPage = MenuConfig.GUI.ReportPage
 	or MenuConfig.GUI.KreditPage
 
 if not reportPage then
-	warn("❌ ReportBugClient: Page tidak ditemukan!")
+	warn("❌ ReportBugClient: Halaman tidak ditemukan!")
 	return
 end
 
 print("✅ reportPage ditemukan:", reportPage:GetFullName())
-print("✅ reportPage size:", reportPage.AbsoluteSize)
+print("✅ Ukuran reportPage:", reportPage.AbsoluteSize)
 
--- ========================================
--- SERVICES
--- ========================================
 local Players      = MenuConfig.Services.Players
 local TweenService = MenuConfig.Services.TweenService
 local player       = Players.LocalPlayer
 
--- ========================================
--- REMOTE
--- ========================================
 print("⏳ Menunggu RemoteEvent...")
 
 local remoteFolder = ReplicatedStorage:WaitForChild("Remotes", 30)
@@ -58,9 +45,6 @@ end
 
 print("✅ RemoteEvent:", bugRemote:GetFullName())
 
--- ========================================
--- STATE
--- ========================================
 local State = {
 	selectedCategory = nil,
 	selectedSeverity = nil,
@@ -68,9 +52,6 @@ local State = {
 	cooldownUntil    = 0,
 }
 
--- ========================================
--- SIZES & COLORS
--- ========================================
 local SIZES = {
 	CORNER_SM  = 6,
 	CORNER_MD  = 8,
@@ -104,9 +85,6 @@ local COLORS = {
 	BOTTOM_BG   = Color3.fromRGB(28, 28, 40),
 }
 
--- ========================================
--- HELPERS
--- ========================================
 local function mk(cls, props, parent)
 	local inst = Instance.new(cls)
 	for k, v in pairs(props) do inst[k] = v end
@@ -150,19 +128,15 @@ local function addStroke(parent, thickness, color, transparency)
 	}, parent)
 end
 
--- ========================================
--- isMouseOverFrame - VERSI LEBIH ROBUST
--- ========================================
 local function isMouseOverFrame(frame)
 	if not frame or not frame.Parent then return false end
-	-- Pastikan frame visible
+
 	if not frame.Visible then return false end
 
 	local ok, absPos  = pcall(function() return frame.AbsolutePosition end)
 	local ok2, absSize = pcall(function() return frame.AbsoluteSize end)
 	if not ok or not ok2 then return false end
 
-	-- Skip jika size 0
 	if absSize.X <= 0 or absSize.Y <= 0 then return false end
 
 	local mPos = UserInputService:GetMouseLocation()
@@ -175,16 +149,10 @@ local function isMouseOverFrame(frame)
 	return result
 end
 
--- ========================================
--- GRADIENT SYSTEM
--- ========================================
 if ThemeModule and ThemeModule.GradientSystem then
 	ThemeModule.GradientSystem.Start()
 end
 
--- ========================================
--- BOTTOM BAR
--- ========================================
 local BOTTOM_H   = SIZES.BOTTOM_H
 local BTN_MARGIN = 10
 local SUBMIT_W   = 185
@@ -211,10 +179,6 @@ mk("Frame", {
 	ZIndex           = 101,
 }, bottomBar)
 
--- ========================================
--- SUBMIT BUTTON - PAKAI TextButton LANGSUNG
--- Lebih reliable daripada Frame + UserInputService
--- ========================================
 local submitBtn = mk("TextButton", {
 	Name             = "SubmitBtn",
 	Size             = UDim2.new(0, SUBMIT_W, 0, BTN_H),
@@ -231,13 +195,9 @@ local submitBtn = mk("TextButton", {
 crn(SIZES.CORNER_SM, submitBtn)
 addStroke(submitBtn, 1.5, Color3.fromRGB(30, 100, 190), 0)
 
--- Alias untuk kode yang sudah ada
 local submitLabel = submitBtn
 local submitFrame = submitBtn
 
--- ========================================
--- RESET BUTTON - PAKAI TextButton
--- ========================================
 local resetBtn = mk("TextButton", {
 	Name             = "ResetBtn",
 	Size             = UDim2.new(0, RESET_W, 0, BTN_H),
@@ -257,7 +217,6 @@ addStroke(resetBtn, 1.5, Color3.fromRGB(70, 70, 90), 0)
 local resetLabel = resetBtn
 local resetFrame = resetBtn
 
--- Cooldown label
 local cooldownLabel = mk("TextLabel", {
 	Size                   = UDim2.new(
 		1, -(SUBMIT_W + RESET_W + BTN_MARGIN * 4),
@@ -277,9 +236,6 @@ local cooldownLabel = mk("TextLabel", {
 	ZIndex                 = 102,
 }, bottomBar)
 
--- ========================================
--- SCROLL FRAME
--- ========================================
 local rootScroll = mk("ScrollingFrame", {
 	Name                       = "BugReportScroll",
 	Size                       = UDim2.new(1, 0, 1, -BOTTOM_H),
@@ -312,9 +268,6 @@ mk("UIPadding", {
 	PaddingRight  = UDim.new(0, 10),
 }, rootScroll)
 
--- ========================================
--- NOTIF BANNER
--- ========================================
 local notifBanner = mk("Frame", {
 	Name             = "NotifBanner",
 	Size             = UDim2.new(1, 0, 0, 0),
@@ -361,9 +314,6 @@ local function showNotif(message, isSuccess, duration)
 	end)
 end
 
--- ========================================
--- SECTION BUILDER
--- ========================================
 local function makeSection(title, layoutOrder, contentHeight)
 	local totalH = 26 + SIZES.PAD + contentHeight + SIZES.PAD
 
@@ -413,9 +363,6 @@ local function makeSection(title, layoutOrder, contentHeight)
 	return frame, content
 end
 
--- ========================================
--- HELPERS
--- ========================================
 local function makeLabel(parent, text, yPos)
 	return mk("TextLabel", {
 		Size                   = UDim2.new(1, 0, 0, SIZES.LABEL_H),
@@ -498,9 +445,6 @@ local function makeCharCounter(parent, inputBox, maxLen, yPos)
 	return counter
 end
 
--- ========================================
--- CHIP GROUP
--- ========================================
 local function makeChipGroup(parent, items, groupName, onSelect)
 	local chips = {}
 
@@ -519,7 +463,7 @@ local function makeChipGroup(parent, items, groupName, onSelect)
 	}, wrapFrame)
 
 	for i, item in ipairs(items) do
-		-- PAKAI TextButton untuk chip juga
+
 		local chip = mk("TextButton", {
 			Name             = "Chip_" .. item.id,
 			BackgroundColor3 = COLORS.CHIP_NORMAL,
@@ -569,7 +513,6 @@ local function makeChipGroup(parent, items, groupName, onSelect)
 
 		chips[item.id].setSelected = setSelected
 
-		-- PAKAI MouseButton1Click - lebih simpel dan reliable
 		chip.MouseButton1Click:Connect(function()
 			for id, c in pairs(chips) do
 				c.setSelected(false)
@@ -598,11 +541,6 @@ local function makeChipGroup(parent, items, groupName, onSelect)
 	return wrapFrame, chips
 end
 
--- ========================================
--- BUILD SECTIONS
--- ========================================
-
--- Section 1: Header
 local _, headerContent = makeSection("📋 Laporan Bug", 1, 52)
 mk("TextLabel", {
 	Size                   = UDim2.new(1, 0, 0, 34),
@@ -640,7 +578,6 @@ mk("TextLabel", {
 	ZIndex                 = 9,
 }, playerBadge)
 
--- Section 2: Judul
 local _, titleContent = makeSection("📌 Judul Bug", 2,
 	SIZES.LABEL_H + 4 + SIZES.INPUT_H + 4 + 14)
 makeLabel(titleContent, "Deskripsikan bug secara singkat  *", 0)
@@ -651,7 +588,6 @@ makeCharCounter(titleContent, titleInput,
 	BugReportConfig.Validation.TitleMaxLength,
 	SIZES.LABEL_H + 4 + SIZES.INPUT_H + 2)
 
--- Section 3: Kategori
 local catRows = math.ceil(#BugReportConfig.Categories / 3)
 local catH    = catRows * SIZES.CHIP_H + (catRows - 1) * 6
 local _, catContent = makeSection("📂 Kategori  *", 3,
@@ -668,7 +604,6 @@ makeChipGroup(catWrap, BugReportConfig.Categories, "category", function(id)
 	print("📂 Category selected:", id)
 end)
 
--- Section 4: Severity
 local sevRows = math.ceil(#BugReportConfig.Severities / 3)
 local sevH    = sevRows * SIZES.CHIP_H + (sevRows - 1) * 6
 local _, sevContent = makeSection("⚡ Tingkat Keparahan  *", 4,
@@ -685,7 +620,6 @@ makeChipGroup(sevWrap, BugReportConfig.Severities, "severity", function(id)
 	print("⚡ Severity selected:", id)
 end)
 
--- Section 5: Deskripsi
 local _, descContent = makeSection("📝 Deskripsi Bug  *", 5,
 	SIZES.LABEL_H + 4 + SIZES.TEXTAREA_H + 4 + 14)
 makeLabel(descContent, "Jelaskan bug yang kamu temukan secara detail", 0)
@@ -696,7 +630,6 @@ makeCharCounter(descContent, descInput,
 	BugReportConfig.Validation.DescMaxLength,
 	SIZES.LABEL_H + 4 + SIZES.TEXTAREA_H + 2)
 
--- Section 6: Steps
 local stepsH = SIZES.TEXTAREA_H - 20
 local _, stepsContent = makeSection("🔁 Langkah Reproduksi  (Opsional)", 6,
 	SIZES.LABEL_H + 4 + stepsH + 4 + 14)
@@ -708,9 +641,6 @@ makeCharCounter(stepsContent, stepsInput,
 	BugReportConfig.Validation.StepsMaxLength,
 	SIZES.LABEL_H + 4 + stepsH + 2)
 
--- ========================================
--- FORM LOGIC
--- ========================================
 local function setSubmitState(loading)
 	State.isSubmitting = loading
 	if loading then
@@ -765,7 +695,6 @@ local function resetForm()
 	State.selectedCategory = nil
 	State.selectedSeverity = nil
 
-	-- Reset chip visuals
 	for _, desc in ipairs({
 		{rootScroll, "Chip_"},
 		}) do
@@ -804,9 +733,6 @@ local function startCooldownDisplay(seconds)
 	end)
 end
 
--- ========================================
--- SUBMIT LOGIC
--- ========================================
 local function doSubmit()
 	print("🚀 doSubmit() dipanggil!")
 
@@ -865,7 +791,6 @@ local function doSubmit()
 	print("✅ FireServer berhasil dipanggil!")
 	print("⏳ Menunggu response dari server...")
 
-	-- Safety timeout
 	task.delay(20, function()
 		if State.isSubmitting then
 			warn("⚠️ Timeout: server tidak merespons dalam 20 detik")
@@ -875,12 +800,8 @@ local function doSubmit()
 	end)
 end
 
--- ========================================
--- BUTTON EVENTS - PAKAI MouseButton1Click
--- Ini paling reliable, tidak butuh UserInputService workaround
--- ========================================
 submitBtn.MouseButton1Click:Connect(function()
-	print("🖱️ Submit button CLICKED!")
+	print("🖱️ Tombol kirim ditekan!")
 	doSubmit()
 end)
 
@@ -897,7 +818,7 @@ submitBtn.MouseLeave:Connect(function()
 end)
 
 resetBtn.MouseButton1Click:Connect(function()
-	print("🖱️ Reset button CLICKED!")
+	print("🖱️ Tombol reset ditekan!")
 	resetForm()
 end)
 
@@ -909,16 +830,13 @@ resetBtn.MouseLeave:Connect(function()
 	tw(resetBtn, { BackgroundColor3 = COLORS.PANEL2 }, 0.15)
 end)
 
--- ========================================
--- SERVER RESPONSE
--- ========================================
 bugRemote.OnClientEvent:Connect(function(response)
 	print("========================================")
-	print("📨 RESPONSE DITERIMA DARI SERVER!")
-	print("  type:", type(response))
+	print("📨 RESPON DITERIMA DARI SERVER!")
+	print("  tipe:", type(response))
 	if type(response) == "table" then
-		print("  success:", tostring(response.success))
-		print("  message:", tostring(response.message))
+		print("  sukses:", tostring(response.success))
+		print("  pesan:", tostring(response.message))
 	end
 	print("========================================")
 
@@ -937,7 +855,6 @@ bugRemote.OnClientEvent:Connect(function(response)
 		State.selectedSeverity = nil
 		State.cooldownUntil    = tick() + BugReportConfig.RateLimit.CooldownSeconds
 
-		-- Reset chips
 		for _, frame in ipairs(rootScroll:GetDescendants()) do
 			if frame:IsA("TextButton") and frame.Name:sub(1, 5) == "Chip_" then
 				local lbl    = frame:FindFirstChild("ChipLabel")
@@ -970,9 +887,6 @@ bugRemote.OnClientEvent:Connect(function(response)
 	end
 end)
 
--- ========================================
--- MENU EVENTS
--- ========================================
 if MenuConfig.Events and MenuConfig.Events.OnMenuToggled then
 	MenuConfig.Events.OnMenuToggled.Event:Connect(function(isOpen)
 		if not isOpen then
@@ -991,10 +905,7 @@ if MenuConfig.Events and MenuConfig.Events.OnTabChanged then
 end
 
 print("========================================")
-print("✅ ReportBugClient loaded!")
+print("✅ ReportBugClient siap!")
 print("📡 Remote:", bugRemote:GetFullName())
-print("🔘 Submit via MouseButton1Click")
+print("🔘 Kirim via MouseButton1Click")
 print("========================================")
-
--- ========================================
--- CONFIG CLIENT (Pengaturan Tab) - FIXED LAYOUT

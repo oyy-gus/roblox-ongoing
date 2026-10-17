@@ -34,7 +34,7 @@ return function(icon, Icon)
 	noticeLabel.TextWrap = true
 	noticeLabel.Font = Enum.Font.Arial
 	noticeLabel.Parent = notice
-	
+
 	local iconModule = script.Parent.Parent
 	local packages = iconModule.Packages
 	local Janitor = require(packages.Janitor)
@@ -42,7 +42,6 @@ return function(icon, Icon)
 	local Utility = require(iconModule.Utility)
 	icon.noticeChanged:Connect(function(totalNotices)
 
-		-- Notice amount
 		if not totalNotices then
 			return
 		end
@@ -53,7 +52,6 @@ return function(icon, Icon)
 			noticeLabel.TextSize = 11
 		end
 
-		-- Should enable
 		local enabled = true
 		if totalNotices < 1 then
 			enabled = false
@@ -69,7 +67,7 @@ return function(icon, Icon)
 
 	end)
 	icon.noticeStarted:Connect(function(customClearSignal, noticeId)
-	
+
 		if not customClearSignal then
 			customClearSignal = icon.deselected
 		end
@@ -77,7 +75,7 @@ return function(icon, Icon)
 		if parentIcon then
 			parentIcon:notify(customClearSignal)
 		end
-		
+
 		local noticeJanitor = icon.janitor:add(Janitor.new())
 		local noticeComplete = noticeJanitor:add(Signal.new())
 		noticeJanitor:add(icon.endNotices:Connect(function()
@@ -104,10 +102,9 @@ return function(icon, Icon)
 			updateNotice()
 		end)
 	end)
-	
-	-- Establish the notice
+
 	notice:SetAttribute("ClipToJoinedParent", true)
 	icon:clipOutside(notice)
-	
+
 	return notice
 end

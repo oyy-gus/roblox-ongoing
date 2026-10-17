@@ -1,8 +1,3 @@
--- ========================================
--- ADMIN CLIENT - Control Panel
--- Place in: StarterGui > AdminGUI(ScreenGui) > AdminClient(LocalScript)
--- ========================================
-
 local Players              = game:GetService("Players")
 local ReplicatedStorage    = game:GetService("ReplicatedStorage")
 local TweenService         = game:GetService("TweenService")
@@ -21,52 +16,34 @@ local Icon      = require(ReplicatedStorage:WaitForChild("Icon"))
 local gui    = script.Parent
 local Config = AdminConfig.Config
 
--- ========================================
--- ALLOWED ROLES FOR ADMIN PANEL
--- ========================================
 local ALLOWED_ROLES = {
 	["Owner"]     = true,
 	["Developer"] = true,
 	["Admin"]     = true,
 }
 
--- ========================================
--- PANEL SIZE
--- ========================================
 local PANEL_WIDTH   = Config.PanelSize.Width
 local PANEL_HEIGHT  = Config.PanelSize.Height
 local HEADER_HEIGHT = Config.HeaderHeight
 local SIDEBAR_WIDTH = Config.SidebarWidth
 
--- ========================================
--- DRAG BOUNDARY SETTINGS
--- ========================================
 local DRAG_PADDING = 10
 
--- ========================================
--- ANIMATION SETTINGS
--- ========================================
 local ANIMATION_CONFIG = {
-	OpenDuration       = 0.35,
-	CloseDuration      = 0.25,
-	ScaleStart         = 0.85,
+	OpenDuration       = 0.25,
+	CloseDuration      = 0.18,
+	ScaleStart         = 0.9,
 	ScaleEnd           = 1,
-	SlideOffsetY       = 25,
-	OpenEaseStyle      = Enum.EasingStyle.Back,
+	SlideOffsetY       = 20,
+	OpenEaseStyle      = Enum.EasingStyle.Quart,
 	OpenEaseDirection  = Enum.EasingDirection.Out,
 	CloseEaseStyle     = Enum.EasingStyle.Quart,
 	CloseEaseDirection = Enum.EasingDirection.In,
 }
 
--- ========================================
--- CEGAH EKSEKUSI GANDA
--- ========================================
 if gui:GetAttribute("AdminInitialized") then return end
 gui:SetAttribute("AdminInitialized", true)
 
--- ========================================
--- SCREEN GUI SETUP
--- ========================================
 gui.Name = "AdminGUI"
 if gui:IsA("ScreenGui") then
 	gui.ResetOnSpawn   = false
@@ -76,14 +53,8 @@ if gui:IsA("ScreenGui") then
 	gui.Enabled        = true
 end
 
--- ========================================
--- START GRADIENT ANIMATION SYSTEM
--- ========================================
 ThemeModule.GradientSystem.Start()
 
--- ========================================
--- UI SCALE SYSTEM
--- ========================================
 local ScalingSystem = require(
 	ReplicatedStorage
 		:WaitForChild("AutoScaleSystem")
@@ -98,9 +69,6 @@ end
 
 local uiScale = gui:FindFirstChildOfClass("UIScale")
 
--- ========================================
--- SOUND SYSTEM
--- ========================================
 local SoundSystem = { ClickSound = nil, SoundId = "rbxassetid://139658322785649" }
 
 function SoundSystem.Setup()
@@ -122,9 +90,6 @@ end
 SoundSystem.Setup()
 AdminConfig.SoundSystem = SoundSystem
 
--- ========================================
--- CAMERA LOCK SYSTEM
--- ========================================
 local CameraLockSystem = { isLocked = false }
 
 function CameraLockSystem.Lock()
@@ -147,9 +112,6 @@ function CameraLockSystem.Unlock()
 	CameraLockSystem.isLocked = false
 end
 
--- ========================================
--- PANEL CONTAINER
--- ========================================
 local panelContainer = Instance.new("Frame")
 panelContainer.Name                   = "PanelContainer"
 panelContainer.Size                   = UDim2.new(1, 0, 1, 0)
@@ -159,9 +121,6 @@ panelContainer.BorderSizePixel        = 0
 panelContainer.Visible                = false
 panelContainer.Parent                 = gui
 
--- ========================================
--- HELPER: Get Default Panel Offset
--- ========================================
 local function getDefaultPanelOffset()
 	local currentScale = getCurrentScale()
 	local viewportSize = workspace.CurrentCamera.ViewportSize
@@ -171,9 +130,6 @@ local function getDefaultPanelOffset()
 	return offsetX, offsetY
 end
 
--- ========================================
--- MAIN PANEL (CanvasGroup)
--- ========================================
 local mainPanel = Instance.new("CanvasGroup")
 mainPanel.Name              = "MainPanel"
 mainPanel.Size              = UDim2.new(0, PANEL_WIDTH, 0, PANEL_HEIGHT)
@@ -194,9 +150,6 @@ ThemeModule.CreateCorner(mainPanel, 12)
 local mainStroke, mainStrokeGradient = ThemeModule.CreateAnimatedStroke(mainPanel, 2, "Primary", 1.2)
 mainStroke.Transparency = 1
 
--- ========================================
--- HEADER
--- ========================================
 local header = Instance.new("Frame")
 header.Name             = "Header"
 header.Size             = UDim2.new(1, 0, 0, HEADER_HEIGHT)
@@ -220,7 +173,7 @@ titleLabel.Name               = "Title"
 titleLabel.Size               = UDim2.new(0, 300, 1, 0)
 titleLabel.Position           = UDim2.new(0, 16, 0, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text               = "🛡️  Admin Control Panel"
+titleLabel.Text               = "🛡️  Panel Kontrol Admin"
 titleLabel.TextColor3         = ThemeModule.Colors.TextWhite
 titleLabel.TextSize           = 16
 titleLabel.Font               = Enum.Font.GothamBold
@@ -251,9 +204,6 @@ closeButton.MouseLeave:Connect(function()
 	TweenService:Create(closeButton, TweenInfo.new(0.2), { BackgroundColor3 = ThemeModule.Colors.CloseRed }):Play()
 end)
 
--- ========================================
--- TAB CONTAINER (Sidebar)
--- ========================================
 local tabContainer = Instance.new("Frame")
 tabContainer.Name             = "TabContainer"
 tabContainer.Size             = UDim2.new(0, SIDEBAR_WIDTH, 1, -(HEADER_HEIGHT + 16))
@@ -280,9 +230,6 @@ tabLayout.VerticalAlignment   = Enum.VerticalAlignment.Top
 tabLayout.SortOrder           = Enum.SortOrder.LayoutOrder
 tabLayout.Parent              = tabContainer
 
--- ========================================
--- CONTENT CONTAINER
--- ========================================
 local contentContainer = Instance.new("Frame")
 contentContainer.Name                   = "ContentContainer"
 contentContainer.Size                   = UDim2.new(1, -(SIDEBAR_WIDTH + 24), 1, -(HEADER_HEIGHT + 16))
@@ -296,22 +243,16 @@ contentContainer.Parent                 = mainPanel
 
 ThemeModule.CreateCorner(contentContainer, 8)
 
--- ========================================
--- TAB DEFINITIONS
--- ========================================
 local tabDefinitions = {
-	{ Name = "RoleGive",    Icon = "🎭", DisplayName = "Role Give",    Order = 1 },
-	{ Name = "Broadcast",   Icon = "📢", DisplayName = "Broadcast",    Order = 2 },
-	{ Name = "CustomTitle", Icon = "✨", DisplayName = "Custom Title", Order = 3 },
-	{ Name = "ManageTitle", Icon = "📝", DisplayName = "Manage Title", Order = 4 },
-	{ Name = "Logs",        Icon = "📋", DisplayName = "Logs",         Order = 5 },
-	{ Name = "Players",     Icon = "👥", DisplayName = "Players",      Order = 6 },
-	{ Name = "Settings",    Icon = "⚙️", DisplayName = "Settings",     Order = 7 },
+	{ Name = "RoleGive",    Icon = "🎭", DisplayName = "Bagi Role",    Order = 1 },
+	{ Name = "Broadcast",   Icon = "📢", DisplayName = "Siaran",       Order = 2 },
+	{ Name = "CustomTitle", Icon = "✨", DisplayName = "Gelar Khusus", Order = 3 },
+	{ Name = "ManageTitle", Icon = "📝", DisplayName = "Kelola Gelar", Order = 4 },
+	{ Name = "Logs",        Icon = "📋", DisplayName = "Catatan Log",  Order = 5 },
+	{ Name = "Players",     Icon = "👥", DisplayName = "Daftar Pemain", Order = 6 },
+	{ Name = "Settings",    Icon = "⚙️", DisplayName = "Pengaturan",    Order = 7 },
 }
 
--- ========================================
--- BUILD TABS & PAGES
--- ========================================
 local tabButtons     = {}
 local tabFrames      = {}
 local tabPages       = {}
@@ -405,9 +346,6 @@ for _, def in ipairs(tabDefinitions) do
 	table.insert(tabNames, def.Name)
 end
 
--- ========================================
--- TAB SWITCHING
--- ========================================
 local function switchTab(tabName)
 	SoundSystem.PlayClick()
 	AdminConfig.State.currentTab = tabName
@@ -445,11 +383,8 @@ for tabName, btn in pairs(tabButtons) do
 	btn.MouseButton1Click:Connect(function() switchTab(tabName) end)
 end
 
--- ========================================
--- NOTIFICATION SYSTEM
--- ========================================
 local function showNotification(message, messageType)
-	local title    = "Admin Panel"
+	local title    = "Panel Admin"
 	local duration = Config.Notification.Duration or 3
 	if messageType == "success" then
 		NotifModule.Success(title, message, duration)
@@ -464,9 +399,6 @@ local function showNotification(message, messageType)
 	end
 end
 
--- ========================================
--- DRAG BOUNDARY
--- ========================================
 local function calculateDragBoundaries()
 	local currentScale = getCurrentScale()
 	if not currentScale or currentScale <= 0 then
@@ -517,9 +449,6 @@ workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(functio
 	end
 end)
 
--- ========================================
--- PANEL TOGGLE
--- ========================================
 local panelVisible   = false
 local isAnimating    = false
 local adminIcon      = nil
@@ -590,9 +519,6 @@ local function forceClosePanel()
 	resetPanelPosition()
 end
 
--- ========================================
--- REGISTER CALLBACKS
--- ========================================
 AdminConfig.OpenPanel          = openPanel
 AdminConfig.ClosePanel         = closePanel
 AdminConfig.TogglePanel        = togglePanel
@@ -602,9 +528,6 @@ AdminConfig.ShowNotification   = showNotification
 AdminConfig.ResetPanelPosition = resetPanelPosition
 AdminConfig.ClampPanelPosition = clampPanelPosition
 
--- ========================================
--- REGISTER GUI REFERENCES
--- ========================================
 AdminConfig.GUI.ScreenGui        = gui
 AdminConfig.GUI.MainPanel        = mainPanel
 AdminConfig.GUI.PanelContainer   = panelContainer
@@ -620,7 +543,6 @@ AdminConfig.GUI.UIScale          = uiScale
 AdminConfig.GUI.PanelUIScale     = panelUIScale
 AdminConfig.GUI.GUIScaler        = guiScaler
 
--- Individual page references
 AdminConfig.GUI.RoleGivePage    = tabPages["RoleGive"]
 AdminConfig.GUI.BroadcastPage   = tabPages["Broadcast"]
 AdminConfig.GUI.CustomTitlePage = tabPages["CustomTitle"]
@@ -629,7 +551,6 @@ AdminConfig.GUI.LogsPage        = tabPages["Logs"]
 AdminConfig.GUI.PlayersPage     = tabPages["Players"]
 AdminConfig.GUI.SettingsPage    = tabPages["Settings"]
 
--- Individual tab button references
 AdminConfig.GUI.RoleGiveTab    = tabButtons["RoleGive"]
 AdminConfig.GUI.BroadcastTab   = tabButtons["Broadcast"]
 AdminConfig.GUI.CustomTitleTab = tabButtons["CustomTitle"]
@@ -638,9 +559,6 @@ AdminConfig.GUI.LogsTab        = tabButtons["Logs"]
 AdminConfig.GUI.PlayersTab     = tabButtons["Players"]
 AdminConfig.GUI.SettingsTab    = tabButtons["Settings"]
 
--- ========================================
--- DRAGGING SYSTEM
--- ========================================
 local dragging  = false
 local dragInput = nil
 local dragStart = nil
@@ -701,9 +619,6 @@ UserInputService.InputEnded:Connect(function(input)
 	end
 end)
 
--- ========================================
--- ACCESS CHECK SYSTEM
--- ========================================
 local function hasAllowedRole(role)
 	return ALLOWED_ROLES[role] == true
 end
@@ -720,7 +635,7 @@ local function checkAdminAccess()
 			adminIcon = Icon.new()
 			adminIcon:setName("AdminPanelIcon")
 			adminIcon:setImage("rbxassetid://135964688013914")
-			adminIcon:setCaption("Admin Panel")
+			adminIcon:setCaption("Panel Admin")
 			adminIcon:setRight()
 			adminIcon:setOrder(4)
 
@@ -750,18 +665,12 @@ local function checkAdminAccess()
 	end
 end
 
--- ========================================
--- BUTTON CONNECTIONS
--- ========================================
 closeButton.MouseButton1Click:Connect(function()
 	SoundSystem.PlayClick()
 	closePanel()
 	if adminIcon then adminIcon:deselect() end
 end)
 
--- ========================================
--- KEYBOARD TOGGLE
--- ========================================
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed or not hasAdminAccess then return end
 	if input.KeyCode == Config.ToggleKey then
@@ -772,9 +681,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	end
 end)
 
--- ========================================
--- PLACEHOLDER PAGES (Logs, Players, Settings)
--- ========================================
 local placeholders = {
 	{ page = "Logs",     text = "📋 Logs\n\nKonten akan ditambahkan nanti" },
 	{ page = "Players",  text = "👥 Players\n\nKonten akan ditambahkan nanti" },
@@ -792,9 +698,6 @@ for _, p in ipairs(placeholders) do
 	lbl.Parent                 = tabPages[p.page]
 end
 
--- ========================================
--- ROLE MONITORING
--- ========================================
 task.spawn(function()
 	local roleValue = player:WaitForChild("Role", 15)
 	if roleValue then
@@ -832,9 +735,6 @@ player.ChildRemoved:Connect(function(child)
 	end
 end)
 
--- ========================================
--- CLEANUP ON DESTROY
--- ========================================
 gui.Destroying:Connect(function()
 	guiScaler:Destroy()
 	ThemeModule.GradientSystem.Unregister(mainStrokeGradient)
@@ -844,10 +744,7 @@ gui.Destroying:Connect(function()
 	if adminIcon then adminIcon:destroy(); adminIcon = nil end
 end)
 
--- ========================================
--- INIT
--- ========================================
 switchTab("RoleGive")
 AdminConfig.MarkGUIReady()
 
-print("✅ [AdminClient] Loaded successfully!")
+print("✅ [AdminClient] Berhasil dimuat!")

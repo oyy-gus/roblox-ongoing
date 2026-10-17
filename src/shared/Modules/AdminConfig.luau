@@ -1,11 +1,4 @@
--- Place in: ReplicatedStorage > Modules(Folder) > AdminConfig(ModuleScript)
--- ========================================
-
 local AdminConfig = {}
-
--- ========================================
--- SERVICES
--- ========================================
 
 AdminConfig.Services = {
 	Players = game:GetService("Players"),
@@ -16,10 +9,6 @@ AdminConfig.Services = {
 	ContextActionService = game:GetService("ContextActionService"),
 	SoundService = game:GetService("SoundService"),
 }
-
--- ========================================
--- CONFIGURATION
--- ========================================
 
 AdminConfig.Config = {
 	ToggleKey = Enum.KeyCode.Insert,
@@ -48,7 +37,6 @@ AdminConfig.Config = {
 		TabActive     = Color3.fromHex("#FFFFFF"),
 		TabInactive   = Color3.fromHex("#1C1C1C"),
 
-		-- Role Colors (Monochrome accents)
 		Owner         = Color3.fromHex("#FFFFFF"),
 		Admin         = Color3.fromHex("#E0E0E0"),
 		Moderator     = Color3.fromHex("#CCCCCC"),
@@ -70,19 +58,11 @@ AdminConfig.Config = {
 	},
 }
 
--- ========================================
--- STATE
--- ========================================
-
 AdminConfig.State = {
 	currentTab = nil,
 	isMenuOpen = false,
 	isGUIReady = false,
 }
-
--- ========================================
--- GUI REFERENCES
--- ========================================
 
 AdminConfig.GUI = {
 	ScreenGui        = nil,
@@ -96,22 +76,16 @@ AdminConfig.GUI = {
 	TabPages         = {},
 	TabNames         = {},
 
-	-- Individual Pages
 	RoleGivePage     = nil,
 	LogsPage         = nil,
 	PlayersPage      = nil,
 	SettingsPage     = nil,
 
-	-- Individual Tabs
 	RoleGiveTab      = nil,
 	LogsTab          = nil,
 	PlayersTab       = nil,
 	SettingsTab      = nil,
 }
-
--- ========================================
--- EVENTS
--- ========================================
 
 AdminConfig.Events = {
 	OnTabChanged   = Instance.new("BindableEvent"),
@@ -119,15 +93,7 @@ AdminConfig.Events = {
 	OnGUIReady     = Instance.new("BindableEvent"),
 }
 
--- ========================================
--- SOUND SYSTEM REFERENCE
--- ========================================
-
 AdminConfig.SoundSystem = nil
-
--- ========================================
--- CALLBACKS (Set oleh AdminClient)
--- ========================================
 
 AdminConfig.OpenPanel        = function() end
 AdminConfig.ClosePanel       = function() end
@@ -135,10 +101,6 @@ AdminConfig.TogglePanel      = function() end
 AdminConfig.ForceClosePanel  = function() end
 AdminConfig.SwitchTab        = function() end
 AdminConfig.ShowNotification = function() end
-
--- ========================================
--- GUI READY FUNCTIONS
--- ========================================
 
 function AdminConfig.IsGUIReady()
 	return AdminConfig.State.isGUIReady
@@ -157,10 +119,6 @@ function AdminConfig.WaitForGUIReady()
 	return true
 end
 
--- ========================================
--- COLOR FUNCTIONS
--- ========================================
-
 function AdminConfig.GetColor(colorName)
 	return AdminConfig.Config.Colors[colorName]
 end
@@ -175,10 +133,6 @@ function AdminConfig.GetRoleColor(roleName)
 	}
 	return roleColors[roleName] or AdminConfig.Config.Colors.Player
 end
-
--- ========================================
--- UI HELPER FUNCTIONS
--- ========================================
 
 function AdminConfig.CreateCorner(parent, radius)
 	local corner = Instance.new("UICorner")
@@ -250,19 +204,11 @@ function AdminConfig.CreateScrollingFrame(parent, name, position, size)
 	return scroll
 end
 
--- ========================================
--- SOUND FUNCTIONS
--- ========================================
-
 function AdminConfig.PlayClick()
 	if AdminConfig.SoundSystem and AdminConfig.SoundSystem.PlayClick then
 		AdminConfig.SoundSystem.PlayClick()
 	end
 end
-
--- ========================================
--- TWEEN HELPER
--- ========================================
 
 function AdminConfig.Tween(instance, properties, duration, easingStyle, easingDirection)
 	local TweenService = AdminConfig.Services.TweenService
@@ -275,10 +221,6 @@ function AdminConfig.Tween(instance, properties, duration, easingStyle, easingDi
 	tween:Play()
 	return tween
 end
-
--- ========================================
--- BUTTON HOVER HELPER
--- ========================================
 
 function AdminConfig.SetupButtonHover(button, normalColor, hoverLerp)
 	local TweenService = AdminConfig.Services.TweenService
@@ -296,10 +238,6 @@ function AdminConfig.SetupButtonHover(button, normalColor, hoverLerp)
 		}):Play()
 	end)
 end
-
--- ========================================
--- CREATE STANDARD BUTTON
--- ========================================
 
 function AdminConfig.CreateButton(parent, name, text, size, position, bgColor, textColor)
 	local button = Instance.new("TextButton")
@@ -325,10 +263,6 @@ function AdminConfig.CreateButton(parent, name, text, size, position, bgColor, t
 	return button
 end
 
--- ========================================
--- CREATE PANEL SECTION
--- ========================================
-
 function AdminConfig.CreateSection(parent, name, position, size)
 	local section = Instance.new("Frame")
 	section.Name = name or "Section"
@@ -344,10 +278,6 @@ function AdminConfig.CreateSection(parent, name, position, size)
 	return section
 end
 
--- ========================================
--- CREATE SECTION HEADER
--- ========================================
-
 function AdminConfig.CreateSectionHeader(parent, text, icon)
 	local header = Instance.new("Frame")
 	header.Name = "Header"
@@ -358,7 +288,6 @@ function AdminConfig.CreateSectionHeader(parent, text, icon)
 
 	AdminConfig.CreateCorner(header, 8)
 
-	-- Cover bottom corners
 	local cover = Instance.new("Frame")
 	cover.Size = UDim2.new(1, 0, 0, 10)
 	cover.Position = UDim2.new(0, 0, 1, -10)
@@ -366,7 +295,6 @@ function AdminConfig.CreateSectionHeader(parent, text, icon)
 	cover.BorderSizePixel = 0
 	cover.Parent = header
 
-	-- Label
 	local label = Instance.new("TextLabel")
 	label.Size = UDim2.new(1, -20, 1, 0)
 	label.Position = UDim2.new(0, 10, 0, 0)
@@ -381,10 +309,6 @@ function AdminConfig.CreateSectionHeader(parent, text, icon)
 	return header, label
 end
 
--- ========================================
--- CREATE INFO BOX
--- ========================================
-
 function AdminConfig.CreateInfoBox(parent, labelText, position, size)
 	local frame = Instance.new("Frame")
 	frame.Name = "InfoBox"
@@ -396,7 +320,6 @@ function AdminConfig.CreateInfoBox(parent, labelText, position, size)
 
 	AdminConfig.CreateCorner(frame, 6)
 
-	-- Label
 	local label = Instance.new("TextLabel")
 	label.Name = "Label"
 	label.Size = UDim2.new(1, -16, 0, 18)
@@ -409,7 +332,6 @@ function AdminConfig.CreateInfoBox(parent, labelText, position, size)
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.Parent = frame
 
-	-- Value
 	local value = Instance.new("TextLabel")
 	value.Name = "Value"
 	value.Size = UDim2.new(1, -16, 0, 22)
@@ -425,10 +347,6 @@ function AdminConfig.CreateInfoBox(parent, labelText, position, size)
 
 	return frame, label, value
 end
-
--- ========================================
--- CREATE PLAYER BUTTON
--- ========================================
 
 function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 	local Players = AdminConfig.Services.Players
@@ -446,7 +364,6 @@ function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 	AdminConfig.CreateCorner(btn, 6)
 	local btnStroke = AdminConfig.CreateStroke(btn, AdminConfig.Config.Colors.Border)
 
-	-- Avatar
 	local avatarImage = Instance.new("ImageLabel")
 	avatarImage.Name = "Avatar"
 	avatarImage.Size = UDim2.new(0, 30, 0, 30)
@@ -456,7 +373,6 @@ function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 	avatarImage.Parent = btn
 	AdminConfig.CreateCorner(avatarImage, 15)
 
-	-- Load avatar
 	task.spawn(function()
 		local success, result = pcall(function()
 			return Players:GetUserThumbnailAsync(targetPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
@@ -466,7 +382,6 @@ function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 		end
 	end)
 
-	-- Name
 	local nameLabel = Instance.new("TextLabel")
 	nameLabel.Name = "PlayerName"
 	nameLabel.Size = UDim2.new(1, -50, 0, 18)
@@ -480,7 +395,6 @@ function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	nameLabel.Parent = btn
 
-	-- Username
 	local usernameLabel = Instance.new("TextLabel")
 	usernameLabel.Name = "Username"
 	usernameLabel.Size = UDim2.new(1, -50, 0, 14)
@@ -494,7 +408,6 @@ function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 	usernameLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	usernameLabel.Parent = btn
 
-	-- Hover
 	btn.MouseEnter:Connect(function()
 		TweenService:Create(btn, TweenInfo.new(0.15), {
 			BackgroundColor3 = AdminConfig.Config.Colors.Surface:Lerp(Color3.new(1,1,1), 0.05)
@@ -507,7 +420,6 @@ function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 		}):Play()
 	end)
 
-	-- Click
 	if onClick then
 		btn.MouseButton1Click:Connect(function()
 			AdminConfig.PlayClick()
@@ -518,20 +430,9 @@ function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 	return btn, btnStroke, avatarImage, nameLabel, usernameLabel
 end
 
--- ========================================
--- ROLE DEFINITIONS
--- ========================================
-
 AdminConfig.RoleDefinitions = {
 	{ Name = "VIP", Icon = "👑", Color = AdminConfig.Config.Colors.VIP, Priority = 1 },
 }
-
--- Untuk extend roles:
--- table.insert(AdminConfig.RoleDefinitions, { Name = "Moderator", Icon = "⚔️", Color = AdminConfig.Config.Colors.Moderator, Priority = 2 })
-
--- ========================================
--- GET ROLE DEFINITION
--- ========================================
 
 function AdminConfig.GetRoleDefinition(roleName)
 	for _, def in ipairs(AdminConfig.RoleDefinitions) do

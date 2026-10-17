@@ -1,11 +1,6 @@
--- ====================================
--- MUSIC FETCHER (TIDAK BERUBAH)
--- Place in: ServerScriptService > MusicFetcher(Script)
--- ====================================
-
 local ServerStorage = game:GetService("ServerStorage")
 
-print("[MusicFetcher] Starting...")
+print("[MusicFetcher] Memulai...")
 
 local bridge = require(ServerStorage:WaitForChild("Modules"):WaitForChild("MusicPlaylistBridge"))
 local list   = bridge:FetchAsync()

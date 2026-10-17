@@ -1,9 +1,3 @@
--- ====================================
--- GAMEPASS CLIENT (Toko Tab) - FIXED LAYOUT
--- Place in: StarterGui > MenuGUI(ScreenGui) > GamePassClient(LocalScript)
--- Dioptimalkan untuk ContentContainer panel 800×460 (konten ~784×398px)
--- ====================================
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService = game:GetService("TweenService")
 local MarketplaceService = game:GetService("MarketplaceService")
@@ -12,9 +6,6 @@ local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
 local Modules = ReplicatedStorage:WaitForChild("Modules")
 
--- ====================================
--- LOAD MODULES
--- ====================================
 local gui = script.Parent
 local MenuConfig = nil
 local ThemeModule = nil
@@ -25,13 +16,10 @@ local success, err = pcall(function()
 end)
 
 if not success or not MenuConfig then
-	warn("[GamePass] ❌ Failed to load MenuConfig:", err)
+	warn("[Toko] ❌ Gagal memuat MenuConfig:", err)
 	return
 end
 
--- ====================================
--- UKURAN KONSTAN (Optimized for 800×460 panel)
--- ====================================
 local SIZES = {
 	HEADER_H = 54,
 	HEADER_TITLE_TEXT = 20,
@@ -57,9 +45,6 @@ local SIZES = {
 	SCROLL_PAD = 8,
 }
 
--- ====================================
--- WAIT FOR GUI ELEMENTS
--- ====================================
 local gamepassPage = nil
 local SoundSystem = nil
 local maxWaitTime = 15
@@ -87,11 +72,10 @@ while not gamepassPage and waitedTime < maxWaitTime do
 end
 
 if not gamepassPage then
-	warn("[GamePass] ❌ TokoPage not found!")
+	warn("[Toko] ❌ Halaman Toko tidak ditemukan!")
 	return
 end
 
--- Setup SoundSystem fallback
 if not SoundSystem then
 	SoundSystem = {
 		PlayClick = function()
@@ -109,9 +93,6 @@ if not SoundSystem then
 	}
 end
 
--- ====================================
--- HELPER FUNCTIONS
--- ====================================
 local function mk(cls, props, parent)
 	local inst = Instance.new(cls)
 	for k, v in pairs(props) do inst[k] = v end
@@ -164,9 +145,6 @@ local function addAnimatedStrokeGradient(parent, thickness, speed)
 	end
 end
 
--- ====================================
--- COLORS
--- ====================================
 local COLORS = {
 	VIP = {
 		Primary   = getThemeColor("Primary1", Color3.fromRGB(255, 215, 0)),
@@ -186,12 +164,9 @@ local COLORS = {
 	}
 }
 
--- ====================================
--- BUTTON STATES CONFIG
--- ====================================
 local ButtonStates = {
 	Loading = {
-		Text            = "⏳ Loading...",
+		Text            = "⏳ Memuat...",
 		BackgroundColor = COLORS.Button.Loading,
 		Enabled         = false
 	},
@@ -206,15 +181,12 @@ local ButtonStates = {
 		Enabled         = false
 	},
 	Error = {
-		Text            = "❌ Error",
+		Text            = "❌ Kesalahan",
 		BackgroundColor = COLORS.Button.Error,
 		Enabled         = false
 	}
 }
 
--- ====================================
--- REMOTES
--- ====================================
 local GamepassFolder = ReplicatedStorage:FindFirstChild("Gamepass")
 local remotes = nil
 
@@ -226,9 +198,6 @@ if GamepassFolder then
 	}
 end
 
--- ====================================
--- GAMEPASS DATA (VIP ONLY)
--- ====================================
 local GamepassData = {
 	VIP = {
 		Button      = nil,
@@ -252,16 +221,10 @@ local GamepassData = {
 local shopDataLoaded = false
 local uiBuilt        = false
 
--- ====================================
--- START THEME GRADIENT ANIMATION
--- ====================================
 if ThemeModule and ThemeModule.GradientSystem then
 	ThemeModule.GradientSystem.Start()
 end
 
--- ====================================
--- NOTIFICATION SYSTEM
--- ====================================
 local notifContainer, notifFrame, notifText
 local isShowingNotif = false
 
@@ -290,9 +253,6 @@ local function showNotification(message, isSuccess)
 	end)
 end
 
--- ====================================
--- BUTTON STATE MANAGEMENT
--- ====================================
 local function setButtonState(passType, state)
 	local data = GamepassData[passType]
 	if not data or not data.Button then return end
@@ -320,9 +280,6 @@ local function updatePriceLabel(passType, price)
 	end
 end
 
--- ====================================
--- OWNERSHIP HANDLER (dipakai dari dua tempat)
--- ====================================
 local function handleOwnershipUpdate(passType, owned)
 	local data = GamepassData[passType]
 	if not data then return end
@@ -330,11 +287,10 @@ local function handleOwnershipUpdate(passType, owned)
 	data.Owned = owned
 
 	if owned then
-		-- Instant disable tombol tanpa delay
+
 		setButtonState(passType, "Owned")
 		showNotification("🎉 Kamu telah menerima " .. data.Name .. "!", true)
 
-		-- Refresh role di server (async, tidak block tombol)
 		if remotes and remotes.refreshRole then
 			task.spawn(function()
 				task.wait(1)
@@ -346,9 +302,6 @@ local function handleOwnershipUpdate(passType, owned)
 	end
 end
 
--- ====================================
--- CREATE GAMEPASS CARD
--- ====================================
 local function createGamePassCard(passType, passData, colors, parent)
 	local card = mk("Frame", {
 		Name                = passType .. "Card",
@@ -370,7 +323,6 @@ local function createGamePassCard(passType, passData, colors, parent)
 		Rotation = 135,
 	}, card)
 
-	-- Shine animation
 	local shine = mk("Frame", {
 		Name                = "Shine",
 		Size                = UDim2.new(0.3, 0, 1, 0),
@@ -402,7 +354,6 @@ local function createGamePassCard(passType, passData, colors, parent)
 		end
 	end)
 
-	-- LEFT SECTION
 	local leftSection = mk("Frame", {
 		Name               = "LeftSection",
 		Size               = UDim2.new(SIZES.LEFT_SECTION_W, 0, 1, 0),
@@ -458,14 +409,13 @@ local function createGamePassCard(passType, passData, colors, parent)
 		Position           = UDim2.new(0.5, 0, 0, priceYPos),
 		AnchorPoint        = Vector2.new(0.5, 0),
 		BackgroundTransparency = 1,
-		Text               = "💎 Loading...",
+		Text               = "💎 Memuat...",
 		TextSize           = SIZES.PRICE_TEXT,
 		Font               = Enum.Font.GothamMedium,
 		TextColor3         = COLORS.Text.Gold,
 		TextTruncate       = Enum.TextTruncate.AtEnd,
 	}, leftSection)
 
-	-- RIGHT SECTION
 	local rightSection = mk("Frame", {
 		Name               = "RightSection",
 		Size               = UDim2.new(1 - SIZES.LEFT_SECTION_W, -16, 1, -16),
@@ -537,14 +487,13 @@ local function createGamePassCard(passType, passData, colors, parent)
 		}, benefitFrame)
 	end
 
-	-- Buy Button
 	local buyButton = mk("TextButton", {
 		Name               = "BuyButton",
 		Size               = UDim2.new(1, -8, 0, SIZES.BUTTON_H),
 		Position           = UDim2.new(0.5, 0, 1, -4),
 		AnchorPoint        = Vector2.new(0.5, 1),
 		BackgroundColor3   = COLORS.Button.Loading,
-		Text               = "⏳ Loading...",
+		Text               = "⏳ Memuat...",
 		TextSize           = SIZES.BUTTON_TEXT,
 		Font               = Enum.Font.GothamBold,
 		TextColor3         = COLORS.Text.Primary,
@@ -571,7 +520,6 @@ local function createGamePassCard(passType, passData, colors, parent)
 		}):Play()
 	end)
 
-	-- Store references
 	GamepassData[passType].Frame      = card
 	GamepassData[passType].Button     = buyButton
 	GamepassData[passType].PriceLabel = priceLabel
@@ -579,9 +527,6 @@ local function createGamePassCard(passType, passData, colors, parent)
 	return card
 end
 
--- ====================================
--- BUILD UI
--- ====================================
 local function buildGamePassUI()
 	if uiBuilt then return end
 
@@ -620,7 +565,6 @@ local function buildGamePassUI()
 		PaddingRight  = UDim.new(0, SIZES.SCROLL_PAD),
 	}, scrollFrame)
 
-	-- Header
 	local headerFrame = mk("Frame", {
 		Name               = "Header",
 		Size               = UDim2.new(1, 0, 0, SIZES.HEADER_H),
@@ -632,7 +576,7 @@ local function buildGamePassUI()
 		Name               = "Title",
 		Size               = UDim2.new(1, 0, 0, 28),
 		BackgroundTransparency = 1,
-		Text               = "👑 Premium VIP Shop",
+		Text               = "👑 Toko VIP Premium",
 		TextSize           = SIZES.HEADER_TITLE_TEXT,
 		Font               = Enum.Font.GothamBold,
 		TextColor3         = Color3.fromRGB(255, 255, 255),
@@ -652,10 +596,8 @@ local function buildGamePassUI()
 		TextTruncate       = Enum.TextTruncate.AtEnd,
 	}, headerFrame)
 
-	-- VIP Card
 	createGamePassCard("VIP", GamepassData.VIP, COLORS.VIP, scrollFrame)
 
-	-- Notification Container
 	notifContainer = mk("Frame", {
 		Name               = "NotificationContainer",
 		Size               = UDim2.new(1, -20, 0, 50),
@@ -694,17 +636,14 @@ local function buildGamePassUI()
 	}, notifFrame)
 
 	uiBuilt = true
-	print("[GamePass] ✅ UI built successfully!")
+	print("[GamePass] ✅ Antarmuka berhasil dibuat!")
 end
 
--- ====================================
--- SHOP DATA LOADING
--- ====================================
 local function loadShopData()
 	if shopDataLoaded then return end
 
 	if not remotes or not remotes.shopRequest then
-		print("[GamePass] Demo mode - setting dummy prices")
+		print("[GamePass] Mode demo - mengatur harga contoh")
 		updatePriceLabel("VIP", 499)
 		setButtonState("VIP", "Buy")
 		shopDataLoaded = true
@@ -731,16 +670,13 @@ local function loadShopData()
 		end
 
 		shopDataLoaded = true
-		print("[GamePass] ✅ Shop data loaded")
+		print("[GamePass] ✅ Data toko berhasil dimuat")
 	else
 		setButtonState("VIP", "Error")
-		showNotification("Gagal memuat data shop!", false)
+		showNotification("Gagal memuat data toko!", false)
 	end
 end
 
--- ====================================
--- PURCHASE HANDLING
--- ====================================
 local function promptPurchase(passType)
 	local data = GamepassData[passType]
 	if not data then return end
@@ -753,7 +689,7 @@ local function promptPurchase(passType)
 	end
 
 	if not remotes or not remotes.shopRequest then
-		showNotification("Demo mode - pembelian tidak tersedia", false)
+		showNotification("Mode demo - pembelian tidak tersedia", false)
 		return
 	end
 
@@ -773,16 +709,12 @@ local function promptPurchase(passType)
 				showNotification("Gagal membuka pembelian!", false)
 			end
 		end
-		-- Jika result.success = true, berarti prompt berhasil dibuka.
-		-- Tunggu event MarketplaceService / playerDataUpdated untuk konfirmasi.
+
 	else
 		showNotification("Error saat memproses pembelian!", false)
 	end
 end
 
--- ====================================
--- BUTTON CONNECTIONS
--- ====================================
 local function setupButtonConnections()
 	local data = GamepassData.VIP
 	if data.Button then
@@ -792,9 +724,6 @@ local function setupButtonConnections()
 	end
 end
 
--- ====================================
--- EVENT: Server konfirmasi pembelian berhasil
--- ====================================
 if remotes and remotes.playerDataUpdated then
 	remotes.playerDataUpdated.OnClientEvent:Connect(function(updateData)
 		if updateData.type == "ownership_updated" or updateData.type == "purchase_complete" then
@@ -803,15 +732,9 @@ if remotes and remotes.playerDataUpdated then
 	end)
 end
 
--- ====================================
--- EVENT: Native Roblox - Instant disable saat transaksi selesai
--- Ini fired SEBELUM server memproses, langsung dari Roblox client.
--- Digunakan untuk instant disable tombol tanpa menunggu server.
--- ====================================
 MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, gamepassId, purchaseSuccess)
 	if not purchaseSuccess then return end
 
-	-- Cari passType yang cocok berdasarkan gamepassId
 	for passType, data in pairs(GamepassData) do
 		for _, id in ipairs(data.IDs) do
 			if id == gamepassId then
@@ -823,9 +746,6 @@ MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, gamep
 	end
 end)
 
--- ====================================
--- EVENT: Tab switched ke Toko
--- ====================================
 if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnTabChanged then
 	MenuConfig.Events.OnTabChanged.Event:Connect(function(tabName)
 		if tabName == "Toko" then
@@ -843,9 +763,6 @@ if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnTabChanged then
 	end)
 end
 
--- ====================================
--- INITIALIZATION
--- ====================================
 task.spawn(function()
 	task.wait(0.5)
 	buildGamePassUI()

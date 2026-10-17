@@ -1,12 +1,6 @@
--- Place in: ReplicatedStorage > Modules(Folder) > CarryConfig(ModuleScript)
-
 local CarryConfig = {}
 
--- ============================================
--- DEBUG SETTINGS (ENABLED FOR TESTING)
--- ============================================
-
-CarryConfig.DEBUG_ENABLED = false  -- ✅ SET TRUE untuk debugging
+CarryConfig.DEBUG_ENABLED = false
 CarryConfig.DEBUG_PREFIX = "[CARRY]"
 
 function CarryConfig.debugPrint(category, ...)
@@ -14,23 +8,15 @@ function CarryConfig.debugPrint(category, ...)
 	print(CarryConfig.DEBUG_PREFIX, "[" .. category .. "]", ...)
 end
 
--- ============================================
--- SYSTEM SETTINGS
--- ============================================
-
 CarryConfig.REMOTE_FOLDER = "CarryRemotes"
 CarryConfig.REQUEST_TIMEOUT = 10
 CarryConfig.MAX_DISTANCE = 20
 CarryConfig.MAX_CARRY_PER_PLAYER = 5
 
--- ============================================
--- CARRY STYLES DEFINITION
--- ============================================
-
 CarryConfig.STYLES = {
 	piggyback = {
 		name = "piggyback",
-		displayName = "Piggy Back",
+		displayName = "Gendong Belakang",
 		maxCarry = 1,
 		offsetFunction = function(slotIndex)
 			local BASE_Z = 1.6
@@ -43,10 +29,10 @@ CarryConfig.STYLES = {
 			local MAX_EXTRA_Y = 6.0
 
 			local z = BASE_Z + (slotIndex - 1) * SPACING_Z
-			if slotIndex == 1 then 
-				z = z + SLOT1_ADJ_Z 
-			elseif slotIndex == 2 then 
-				z = z + SLOT2_ADJ_Z 
+			if slotIndex == 1 then
+				z = z + SLOT1_ADJ_Z
+			elseif slotIndex == 2 then
+				z = z + SLOT2_ADJ_Z
 			end
 
 			local elevIndex = math.max(0, slotIndex - 1)
@@ -61,7 +47,7 @@ CarryConfig.STYLES = {
 
 	bridal = {
 		name = "bridal",
-		displayName = "Bridal Carry",
+		displayName = "Gendong Pengantin",
 		maxCarry = 1,
 		offsetFunction = function(slotIndex)
 			return CFrame.new(1, 0.5, -1.0) * CFrame.fromEulerAnglesXYZ(
@@ -76,12 +62,12 @@ CarryConfig.STYLES = {
 
 	couplehug = {
 		name = "couplehug",
-		displayName = "Couple Hug",
+		displayName = "Pelukan Pasangan",
 		maxCarry = 1,
 		offsetFunction = function(slotIndex)
 			return CFrame.new(0, 0.6, -1.2) * CFrame.fromEulerAnglesXYZ(
-				-25, 
-				math.rad(165), 
+				-25,
+				math.rad(165),
 				0
 			)
 		end,
@@ -95,8 +81,8 @@ CarryConfig.STYLES = {
 		maxCarry = 1,
 		offsetFunction = function(slotIndex)
 			return CFrame.new(0, 0.5, -1.7) * CFrame.fromEulerAnglesXYZ(
-				-25, 
-				math.rad(175), 
+				-25,
+				math.rad(175),
 				0
 			)
 		end,
@@ -106,7 +92,7 @@ CarryConfig.STYLES = {
 
 	piggyupperback = {
 		name = "piggyupperback",
-		displayName = "Piggy Upper Back",
+		displayName = "Gendong Atas",
 		maxCarry = 1,
 		offsetFunction = function(slotIndex)
 			return CFrame.new(0, 2.5, 1.13)
@@ -115,10 +101,6 @@ CarryConfig.STYLES = {
 		carriedAnimId = 120268601721431
 	}
 }
-
--- ============================================
--- STYLE UTILITIES
--- ============================================
 
 function CarryConfig.getStyle(styleName)
 	return CarryConfig.STYLES[styleName]
@@ -130,8 +112,8 @@ end
 
 function CarryConfig.getStyleOffset(styleName, slotIndex)
 	local style = CarryConfig.STYLES[styleName]
-	if not style then 
-		warn("Invalid style:", styleName)
+	if not style then
+		warn("Gaya tidak valid:", styleName)
 		return CFrame.new(0, 0, 0)
 	end
 	return style.offsetFunction(slotIndex)
@@ -141,10 +123,6 @@ function CarryConfig.getMaxCarryForStyle(styleName)
 	local style = CarryConfig.STYLES[styleName]
 	return style and style.maxCarry or 1
 end
-
--- ============================================
--- ANIMATION IDs
--- ============================================
 
 CarryConfig.ANIM_IDS = {
 	piggyback = {

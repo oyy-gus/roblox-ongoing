@@ -1,8 +1,3 @@
--- ========================================
--- MODULE: BroadcastDebug
--- Letakkan sebagai child dari DonationBroadcastHandler
--- ========================================
-
 local BroadcastConfig = require(script.Parent.BroadcastConfig)
 
 local BroadcastDebug = {}

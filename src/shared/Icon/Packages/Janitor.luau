@@ -1,26 +1,3 @@
---[[
--------------------------------------
-This package was modified by ForeverHD.
-
-PACKAGE MODIFICATIONS:
-	1. Added pascalCase aliases for all methods
-	2. Modified behaviour of :add so that it takes both objects and promises (previously only objects)
-	3. Slight change to how promises are tracked
-	4. Added isAnInstanceBeingDestroyed check to line 228
-	5. Added 'OriginalTraceback' to help determine where an error was added to the janitor
-	6. Likely some additional changes which weren't record here
-	7. Removed comments as these were detected by Moonwave
--------------------------------------
---]]
-
-
-
--- Janitor
--- Original by Validark
--- Modifications by pobammer
--- roblox-ts support by OverHash and Validark
--- LinkToInstance fixed by Elttob.
-
 local RunService = game:GetService("RunService")
 local Heartbeat = RunService.Heartbeat
 local function getPromiseReference()
@@ -84,8 +61,7 @@ function Janitor.__index:Add(Object, MethodName, Index)
 	local objectType = typeof(Object)
 	if objectType == "table" and string.match(tostring(Object), "Promise") then
 		objectType = "Promise"
-		--local status = Object:getStatus()
-		--print("status =", status, status == "Rejected")
+
 	end
 	MethodName = MethodName or TypeDefaults[objectType] or "Destroy"
 	if type(Object) ~= "function" and not Object[MethodName] then
@@ -97,8 +73,6 @@ function Janitor.__index:Add(Object, MethodName, Index)
 	return Object
 end
 Janitor.__index.Give = Janitor.__index.Add
-
--- My version of Promise has PascalCase, but I converted it to use lowerCamelCase for this release since obviously that's important to do.
 
 function Janitor.__index:AddPromise(PromiseObject)
 	local Promise = getPromiseReference()
@@ -129,7 +103,6 @@ function Janitor.__index:AddPromise(PromiseObject)
 end
 Janitor.__index.GivePromise = Janitor.__index.AddPromise
 
--- This will assume whether or not the object is a Promise or a regular object.
 function Janitor.__index:AddObject(Object)
 	local Id = newproxy(false)
 	local Promise = getPromiseReference()
@@ -193,7 +166,6 @@ function Janitor.__index:Cleanup()
 				continue
 			end
 
-			-- Weird decision to rawset directly to the janitor in Agent. This should protect against it though.
 			local TypeOf = type(Object)
 			if TypeOf == "string" or TypeOf == "number" then
 				self[Object] = nil
@@ -203,7 +175,7 @@ function Janitor.__index:Cleanup()
 			local MethodName = ObjectDetail[1]
 			local OriginalTraceback = ObjectDetail[2]
 			local function warnUser(warning)
-				local cleanupLine = debug.traceback("", 3)--string.gsub(debug.traceback("", 3), "%c", "")
+				local cleanupLine = debug.traceback("", 3)
 				local addedLine = OriginalTraceback
 				warn("-------- Janitor Error --------".."\n"..tostring(warning).."\n"..cleanupLine..""..addedLine)
 			end
@@ -243,8 +215,7 @@ Janitor.__index.Clean = Janitor.__index.Cleanup
 
 function Janitor.__index:Destroy()
 	self:Cleanup()
-	--table.clear(self)
-	--setmetatable(self, nil)
+
 end
 
 Janitor.__call = Janitor.__index.Cleanup

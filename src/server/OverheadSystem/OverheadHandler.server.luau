@@ -1,9 +1,3 @@
--- ============================================================
--- OverheadHandler (Updated)
--- Fix: overhead hilang setelah /re (ApplyDescription)
--- Place in: StarterScriptService > OverheadSystem(Folder) > OverheadHandler(Script)
--- ============================================================
-
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage     = game:GetService("ServerStorage")
@@ -15,9 +9,6 @@ local TitleRenderer   = require(script.Parent.Parent:WaitForChild("GiveSystem"):
 
 local OverheadTemplate = ReplicatedStorage:WaitForChild("UI"):WaitForChild("Overhead")
 
--- ============================================================
--- CONFIG
--- ============================================================
 local Config = {
 	GROUP_ID = 550072302,
 
@@ -63,7 +54,7 @@ local Config = {
 		Icons         = 5,
 		PlayerName    = 6,
 		GuestLabel    = 7,
-	
+
 	},
 
 	LabelSize          = UDim2.new(1, 0, 0.037, 0),
@@ -73,9 +64,6 @@ local Config = {
 	IconsLayoutPadding = UDim.new(0.02, 0),
 }
 
--- ============================================================
--- DISABLE DEFAULT NAMETAGS
--- ============================================================
 local nametagConnections = {}
 
 local function disableDefaultNametag(player, character)
@@ -94,16 +82,10 @@ local function disableDefaultNametag(player, character)
 	end)
 end
 
--- ============================================================
--- HELPERS
--- ============================================================
 local function isStaffRole(role)
 	return role == "Owner" or role == "Developer" or role == "Admin"
 end
 
--- ============================================================
--- GROUP MEMBERSHIP CACHE
--- ============================================================
 local groupMembershipCache = {}
 
 local function isPlayerInGroup(player)
@@ -121,9 +103,6 @@ local function isPlayerInGroup(player)
 	return false
 end
 
--- ============================================================
--- STROKE SYSTEM
--- ============================================================
 local function applyStroke(label, strokeType)
 	if not label then return end
 	label.TextStrokeColor3       = Config.StrokeColors[strokeType] or Config.StrokeColors.PlayerName
@@ -135,9 +114,6 @@ local function hideStroke(label)
 	label.TextStrokeTransparency = 1
 end
 
--- ============================================================
--- SIZE & LAYOUT
--- ============================================================
 local function applySizes(canvas)
 	for _, name in ipairs({"StaffLabel","StreamerLabel","CreatorLabel","VIPLabel","PlayerName","GuestLabel"}) do
 		local el = canvas:FindFirstChild(name)
@@ -161,9 +137,6 @@ local function applyIconsSizes(iconsFrame)
 	if layout then layout.Padding = Config.IconsLayoutPadding end
 end
 
--- ============================================================
--- UPDATE ICONS
--- ============================================================
 local function updateIcons(player, iconsFrame)
 	if not iconsFrame then return end
 	applyIconsSizes(iconsFrame)
@@ -216,9 +189,6 @@ local function updateIcons(player, iconsFrame)
 	iconsFrame.Visible = true
 end
 
--- ============================================================
--- UPDATE LABELS (role, name, icons)
--- ============================================================
 local function updateOverheadLabels(player, overhead)
 	local canvas = overhead:FindFirstChild("Canvas")
 	if not canvas then return end
@@ -241,7 +211,6 @@ local function updateOverheadLabels(player, overhead)
 
 	if not playerNameLabel then return end
 
-	-- Reset semua
 	if staffLabel      then staffLabel.Visible      = false; hideStroke(staffLabel)      end
 	if streamerLabel   then streamerLabel.Visible   = false; hideStroke(streamerLabel)   end
 	if creatorLabel    then creatorLabel.Visible    = false; hideStroke(creatorLabel)    end
@@ -250,7 +219,6 @@ local function updateOverheadLabels(player, overhead)
 	if guestLabel      then guestLabel.Visible      = false; hideStroke(guestLabel)      end
 	if iconsFrame      then iconsFrame.Visible      = false                              end
 
-	-- Staff Role
 	if staffLabel and isStaffRole(role) then
 		staffLabel.Text        = Config.DisplayText[role] or role
 		staffLabel.TextColor3  = Config.RoleColors[role] or Config.RoleColors.Guest
@@ -259,7 +227,6 @@ local function updateOverheadLabels(player, overhead)
 		applyStroke(staffLabel, role)
 	end
 
-	-- Streamer Badge
 	if streamerLabel and (role == "Streamer" or hasStreamer) then
 		streamerLabel.Text        = Config.DisplayText.Streamer
 		streamerLabel.TextColor3  = Config.RoleColors.Streamer
@@ -268,7 +235,6 @@ local function updateOverheadLabels(player, overhead)
 		applyStroke(streamerLabel, "Streamer")
 	end
 
-	-- Creator Badge
 	if creatorLabel and (role == "Creator" or hasCreator) then
 		creatorLabel.Text        = Config.DisplayText.Creator
 		creatorLabel.TextColor3  = Config.RoleColors.Creator
@@ -277,7 +243,6 @@ local function updateOverheadLabels(player, overhead)
 		applyStroke(creatorLabel, "Creator")
 	end
 
-	-- VIP Badge
 	if vipLabel and (role == "VIP" or hasVIP) then
 		vipLabel.Text        = Config.DisplayText.VIP
 		vipLabel.TextColor3  = Config.RoleColors.VIP
@@ -286,14 +251,12 @@ local function updateOverheadLabels(player, overhead)
 		applyStroke(vipLabel, "VIP")
 	end
 
-	-- Player Name (selalu tampil)
 	playerNameLabel.Text        = player.DisplayName
 	playerNameLabel.TextColor3  = Config.RoleColors.PlayerName
 	playerNameLabel.LayoutOrder = Config.LayoutOrder.PlayerName
 	playerNameLabel.Visible     = true
 	applyStroke(playerNameLabel, "PlayerName")
 
-	-- Guest Label
 	if guestLabel and role == "Guest" and not hasVIP and not hasStreamer and not hasCreator then
 		guestLabel.Text        = Config.DisplayText.Guest
 		guestLabel.TextColor3  = Config.RoleColors.Guest
@@ -302,16 +265,12 @@ local function updateOverheadLabels(player, overhead)
 		applyStroke(guestLabel, "Guest")
 	end
 
-	-- Icons
 	if iconsFrame then
 		iconsFrame.LayoutOrder = Config.LayoutOrder.Icons
 		updateIcons(player, iconsFrame)
 	end
 end
 
--- ============================================================
--- OVERHEAD MANAGEMENT
--- ============================================================
 local activeOverheads = {}
 
 local function removeOverhead(player)
@@ -326,7 +285,7 @@ local function createOverhead(player, character)
 
 	local head = character:WaitForChild("Head", 5)
 	if not head then
-		warn("[OverheadHandler] Head not found for:", player.Name)
+		warn("[OverheadHandler] Kepala tidak ditemukan untuk:", player.Name)
 		return
 	end
 
@@ -352,9 +311,6 @@ local function updateOverhead(player)
 	updateOverheadLabels(player, overhead)
 end
 
--- ============================================================
--- PLAYER EVENTS
--- ============================================================
 local function onCharacterAdded(player, character)
 	task.wait(0.1)
 	disableDefaultNametag(player, character)
@@ -382,17 +338,11 @@ local function onPlayerRemoving(player)
 	removeOverhead(player)
 end
 
--- ============================================================
--- ROLE LISTENERS
--- ============================================================
 RoleSystem.RoleChanged:Connect(function(player)    updateOverhead(player) end)
 RoleSystem.VIPChanged:Connect(function(player)     updateOverhead(player) end)
 RoleSystem.StreamerChanged:Connect(function(player) updateOverhead(player) end)
 RoleSystem.CreatorChanged:Connect(function(player)  updateOverhead(player) end)
 
--- ============================================================
--- GROUP MEMBERSHIP UPDATE
--- ============================================================
 local groupJoinedRemote = ReplicatedStorage:FindFirstChild("GroupJoined")
 if not groupJoinedRemote then
 	groupJoinedRemote = Instance.new("RemoteEvent")
@@ -406,15 +356,9 @@ groupJoinedRemote.OnServerEvent:Connect(function(player)
 	updateOverhead(player)
 end)
 
--- ============================================================
--- FIX: /re (ApplyDescription) — overhead rebuild listener
--- VIPBenefit menembak RefreshOverheadEvent setelah ApplyDescription
--- selesai. Karena tidak ada LoadCharacter, CharacterAdded tidak
--- ter-fire, sehingga overhead perlu di-rebuild manual dari sini.
--- ============================================================
 local RefreshOverheadEvent = ServerStorage:FindFirstChild("RefreshOverheadEvent")
 if not RefreshOverheadEvent then
-	-- Buat jika VIPBenefit belum sempat membuat (race condition)
+
 	RefreshOverheadEvent = Instance.new("BindableEvent")
 	RefreshOverheadEvent.Name   = "RefreshOverheadEvent"
 	RefreshOverheadEvent.Parent = ServerStorage
@@ -426,19 +370,11 @@ RefreshOverheadEvent.Event:Connect(function(player)
 	local character = player.Character
 	if not character then return end
 
-	-- Tunggu sebentar agar ApplyDescription benar-benar selesai
-	-- dan semua aksesori sudah terpasang kembali di karakter
 	task.wait(0.2)
 
-	-- Overhead lama masih attached ke Head yang sama,
-	-- cukup rebuild (destroy lama → clone baru) agar
-	-- label & icon kembali muncul di atas kepala.
 	createOverhead(player, character)
 end)
 
--- ============================================================
--- INIT
--- ============================================================
 for _, player in ipairs(Players:GetPlayers()) do
 	task.spawn(onPlayerAdded, player)
 end
@@ -446,4 +382,4 @@ end
 Players.PlayerAdded:Connect(onPlayerAdded)
 Players.PlayerRemoving:Connect(onPlayerRemoving)
 
-print("✅ [OverheadHandler] Loaded successfully!")
+print("✅ [OverheadHandler] Berhasil dimuat!")

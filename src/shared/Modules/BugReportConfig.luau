@@ -1,17 +1,6 @@
--- ========================================
--- BUG REPORT CONFIG MODULE
--- Path: ReplicatedStorage > Modules > BugReportConfig
--- ========================================
-
 local BugReportConfig = {}
 
--- ========================================
--- DISCORD WEBHOOK SETTINGS
--- NOTE: URL dipindah ke server-side demi keamanan
--- ========================================
 BugReportConfig.Webhook = {
-	-- URL JANGAN taruh di sini! Taruh di server script
-	-- Client tidak boleh tahu webhook URL
 
 	BotUsername = "🐛 Bug Reporter",
 	AvatarURL = "https://cdn.discordapp.com/attachments/1162658783353385051/1493659081364345004/file_00000000592871faa5b267c838293de4.jpg",
@@ -31,18 +20,12 @@ BugReportConfig.Webhook = {
 	}
 }
 
--- ========================================
--- RATE LIMITING
--- ========================================
 BugReportConfig.RateLimit = {
 	CooldownSeconds = 60,
 	MaxReportsPerSession = 10,
 	CooldownMessage = "Harap tunggu %d detik sebelum mengirim laporan lagi.",
 }
 
--- ========================================
--- KATEGORI BUG
--- ========================================
 BugReportConfig.Categories = {
 	{ id = "gameplay",  label = "🎮 Gameplay",      desc = "Bug terkait mekanisme permainan" },
 	{ id = "ui",        label = "🖥️ UI/Interface",   desc = "Bug pada tampilan atau menu" },
@@ -53,9 +36,6 @@ BugReportConfig.Categories = {
 	{ id = "other",     label = "❓ Lainnya",         desc = "Bug yang tidak masuk kategori lain" },
 }
 
--- ========================================
--- SEVERITY LEVELS
--- ========================================
 BugReportConfig.Severities = {
 	{ id = "low",      label = "🟢 Rendah",  desc = "Bug kecil, tidak mengganggu gameplay" },
 	{ id = "medium",   label = "🟡 Sedang",  desc = "Mengganggu tapi masih bisa dimainkan" },
@@ -63,9 +43,6 @@ BugReportConfig.Severities = {
 	{ id = "critical", label = "🟣 Kritis",  desc = "Game tidak bisa dimainkan / exploit" },
 }
 
--- ========================================
--- VALIDASI
--- ========================================
 BugReportConfig.Validation = {
 	TitleMinLength  = 5,
 	TitleMaxLength  = 100,
@@ -74,9 +51,6 @@ BugReportConfig.Validation = {
 	StepsMaxLength  = 500,
 }
 
--- ========================================
--- REMOTE EVENT NAME
--- ========================================
 BugReportConfig.RemoteName = "SendBugReport"
 
 return BugReportConfig

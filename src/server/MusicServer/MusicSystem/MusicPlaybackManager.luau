@@ -1,19 +1,13 @@
--- ====================================
--- MUSIC PLAYBACK MANAGER (FIXED)
--- Place in: ServerScriptService > MusicServer(Folder) > MusicSystem(Script) > MusicPlaybackManager(ModuleScript)
--- ====================================
-
 local RunService = game:GetService("RunService")
 local ServerMusicAudioHandler = require(script.Parent.ServerMusicAudioHandler)
 
 local MusicPlaybackManager = {}
 MusicPlaybackManager.__index = MusicPlaybackManager
 
--- Konfigurasi fade & preload (Transisi Lagu Halus & Mulus)
-local FADE_IN_DURATION  = 1.2   -- Transisi fade-in lagu baru lebih mulus (1.2 detik)
-local FADE_OUT_DURATION = 1.0   -- Transisi fade-out lagu lama lebih lembut (1.0 detik)
-local PRE_FADE_BUFFER   = 1.5   -- Mulai fade out 1.5 detik sebelum lagu berakhir
-local PRELOAD_THRESHOLD = 0.80  -- Mulai preload pada 80% durasi
+local FADE_IN_DURATION  = 1.2
+local FADE_OUT_DURATION = 1.0
+local PRE_FADE_BUFFER   = 1.5
+local PRELOAD_THRESHOLD = 0.80
 
 function MusicPlaybackManager.new(config)
 	local self = setmetatable({}, MusicPlaybackManager)
@@ -35,10 +29,6 @@ function MusicPlaybackManager.new(config)
 	self.isTransitioning     = false
 	return self
 end
-
--- ====================================
--- STATE
--- ====================================
 
 function MusicPlaybackManager:GetState()
 	local elapsed = self:GetElapsedTime()
@@ -81,10 +71,6 @@ function MusicPlaybackManager:IsFromPlaylist()
 	return self.isPlaylistMode
 end
 
--- ====================================
--- ENDED EVENT
--- ====================================
-
 function MusicPlaybackManager:ConnectEndedEvent()
 	if self.endedConnection then
 		self.endedConnection:Disconnect()
@@ -98,15 +84,11 @@ function MusicPlaybackManager:ConnectEndedEvent()
 		if self.autoNextCallback and self.isPlaying then
 			task.spawn(function()
 				local success, err = pcall(self.autoNextCallback)
-				if not success then warn("[PlaybackManager] AutoNext error:", err) end
+				if not success then warn("[PlaybackManager] Kesalahan AutoNext:", err) end
 			end)
 		end
 	end)
 end
-
--- ====================================
--- PROGRESS BROADCAST + PRE-FADE + PRELOAD
--- ====================================
 
 function MusicPlaybackManager:StartProgressBroadcast(remotes)
 	if self.progressConnection then self.progressConnection:Disconnect() end
@@ -119,7 +101,6 @@ function MusicPlaybackManager:StartProgressBroadcast(remotes)
 		local elapsed = self.audioHandler:GetTimePosition()
 		local now     = workspace:GetServerTimeNow()
 
-		-- PRE-FADE: Fade-out otomatis di akhir lagu
 		if not self.isFadingOut and self.songDuration > 0 then
 			local remaining = self.songDuration - elapsed
 			if remaining <= PRE_FADE_BUFFER and remaining > 0 then
@@ -128,7 +109,6 @@ function MusicPlaybackManager:StartProgressBroadcast(remotes)
 			end
 		end
 
-		-- PRELOAD: Trigger preload di 80% durasi
 		if not self.preloadTriggered and self.songDuration > 0 then
 			if elapsed >= self.songDuration * PRELOAD_THRESHOLD then
 				self.preloadTriggered = true
@@ -138,21 +118,18 @@ function MusicPlaybackManager:StartProgressBroadcast(remotes)
 			end
 		end
 
-		-- WATCHDOG: Jika durasi lagu habis tapi sound.Ended tidak terpanggil oleh engine Roblox
 		if not self.isTransitioning and self.songDuration > 0 and self.autoNextCallback then
 			local wallElapsed = (self.songStartTime > 0) and (now - self.songStartTime) or 0
 			if (elapsed >= self.songDuration + 0.5) or (wallElapsed >= self.songDuration + 2) then
 				self.isTransitioning = true
 				task.spawn(function()
 					local success, err = pcall(self.autoNextCallback)
-					if not success then warn("[PlaybackManager] Watchdog AutoNext error:", err) end
+					if not success then warn("[PlaybackManager] Kesalahan Watchdog AutoNext:", err) end
 				end)
 				return
 			end
 		end
 
-		-- PROGRESS BROADCAST: Kirim update ke client setiap N detik
-		-- Client interpolasi sendiri, jadi ini hanya sebagai fallback/koreksi
 		if now - self.lastProgressBroadcast < progressInterval then return end
 		self.lastProgressBroadcast = now
 		self:UpdateProgress(remotes)
@@ -166,12 +143,8 @@ function MusicPlaybackManager:StopProgressBroadcast()
 	end
 end
 
--- ====================================
--- PLAYBACK CONTROL (DIPERBAIKI)
--- ====================================
-
 function MusicPlaybackManager:Play(remotes, songData, uploaderName, isFromPlaylist)
-	-- Disconnect lama
+
 	if self.endedConnection then self.endedConnection:Disconnect(); self.endedConnection = nil end
 	self:StopProgressBroadcast()
 
@@ -185,10 +158,9 @@ function MusicPlaybackManager:Play(remotes, songData, uploaderName, isFromPlayli
 		self.audioHandler:FadeOut(FADE_OUT_DURATION)
 		task.wait(FADE_OUT_DURATION + 0.02)
 	elseif self.isFadingOut then
-		task.wait(0.05)  -- DIPERCEPAT: dari 0.15 ke 0.05
+		task.wait(0.05)
 	end
 
-	-- Update state SEBELUM play
 	self.currentSong      = musicData
 	self.currentUploader  = uploaderName or "System"
 	self.isPlaying        = true
@@ -197,7 +169,6 @@ function MusicPlaybackManager:Play(remotes, songData, uploaderName, isFromPlayli
 	self.preloadTriggered = false
 	self.isFadingOut      = false
 
-	-- Play dengan fade-in
 	local success = self.audioHandler:PlayWithFade(musicData.id, 0, FADE_IN_DURATION)
 	if not success then
 		self.isTransitioning = false
@@ -252,10 +223,6 @@ function MusicPlaybackManager:StopWithFade(remotes, fadeDuration)
 	end)
 end
 
--- ====================================
--- BROADCAST (SERVER → ALL CLIENTS)
--- ====================================
-
 function MusicPlaybackManager:BroadcastSongUpdate(remotes, musicData, uploaderName, duration)
 	pcall(function()
 		remotes.MusicBroadcast:FireAllClients("SongUpdate", {
@@ -291,10 +258,6 @@ function MusicPlaybackManager:UpdateProgress(remotes)
 	end)
 end
 
--- ====================================
--- SYNC TO INDIVIDUAL PLAYER
--- ====================================
-
 function MusicPlaybackManager:SyncToPlayer(remotes, player)
 	if not self.isPlaying or not self.currentSong then return end
 	local elapsed = self.audioHandler:GetTimePosition()
@@ -312,10 +275,6 @@ function MusicPlaybackManager:SyncToPlayer(remotes, player)
 		})
 	end)
 end
-
--- ====================================
--- CLEANUP
--- ====================================
 
 function MusicPlaybackManager:Reset(remotes)
 	self:Stop(remotes)

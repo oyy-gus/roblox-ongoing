@@ -1,7 +1,3 @@
--- MODULE: ClientDebug (FINAL)
--- Letakkan sebagai child dari DonationClientHandler
--- ========================================
-
 local ClientConfig = require(script.Parent.ClientConfig)
 
 local ClientDebug = {}
@@ -30,5 +26,3 @@ function ClientDebug.warn(category, ...)
 end
 
 return ClientDebug
-
--- ========================================

@@ -1,41 +1,26 @@
--- AnimationPreloader.lua — CLIENT-SIDE: Preload animations for instant playback
--- Place this in ReplicatedStorage/Modules or StarterPlayer/StarterPlayerScripts/Modules
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local player = Players.LocalPlayer
 local module = {}
 
--- ============================================
--- CONFIG
--- ============================================
 local CONFIG = {
 	DEBUG_ENABLED = false,
 	PRELOAD_ON_SPAWN = false,
-	PRELOAD_DELAY = 2, -- Delay before starting preload (let character fully load)
-	BATCH_SIZE = 5, -- Load animations in batches to avoid lag spikes
-	BATCH_DELAY = 0.1 -- Delay between batches
+	PRELOAD_DELAY = 2,
+	BATCH_SIZE = 5,
+	BATCH_DELAY = 0.1
 }
 
--- ============================================
--- CACHE
--- ============================================
-local preloadedTracks = {} -- [Animation] = AnimationTrack
+local preloadedTracks = {}
 local isPreloaded = false
 
--- ============================================
--- DEBUG
--- ============================================
 local function debug(...)
 	if CONFIG.DEBUG_ENABLED then
 		print("[AnimPreloader]", ...)
 	end
 end
 
--- ============================================
--- GET ANIMATOR
--- ============================================
 local function getAnimator()
 	if not player.Character then return nil end
 
@@ -51,9 +36,6 @@ local function getAnimator()
 	return animator
 end
 
--- ============================================
--- ⚡ PRELOAD ALL ANIMATIONS
--- ============================================
 function module.preloadAnimations(animationFolder)
 	if isPreloaded then
 		debug("Already preloaded, skipping...")
@@ -62,7 +44,7 @@ function module.preloadAnimations(animationFolder)
 
 	local animator = getAnimator()
 	if not animator then
-		warn("[AnimPreloader] Cannot preload - no animator")
+		warn("[AnimPreloader] Tidak dapat pra-muat - tidak ada animator")
 		return
 	end
 
@@ -70,7 +52,6 @@ function module.preloadAnimations(animationFolder)
 
 	local animations = {}
 
-	-- Collect all animations
 	for _, anim in ipairs(animationFolder:GetDescendants()) do
 		if anim:IsA("Animation") then
 			table.insert(animations, anim)
@@ -83,7 +64,6 @@ function module.preloadAnimations(animationFolder)
 	local successCount = 0
 	local failCount = 0
 
-	-- Preload in batches
 	for i = 1, #animations, CONFIG.BATCH_SIZE do
 		local batch = {}
 
@@ -91,7 +71,6 @@ function module.preloadAnimations(animationFolder)
 			table.insert(batch, animations[j])
 		end
 
-		-- Load batch
 		for _, anim in ipairs(batch) do
 			local success, track = pcall(function()
 				return animator:LoadAnimation(anim)
@@ -103,11 +82,10 @@ function module.preloadAnimations(animationFolder)
 				debug("✅", anim.Name)
 			else
 				failCount = failCount + 1
-				warn("[AnimPreloader] Failed to preload:", anim.Name)
+				warn("[AnimPreloader] Gagal pra-muat:", anim.Name)
 			end
 		end
 
-		-- Small delay between batches
 		if i + CONFIG.BATCH_SIZE <= #animations then
 			task.wait(CONFIG.BATCH_DELAY)
 		end
@@ -126,27 +104,17 @@ function module.preloadAnimations(animationFolder)
 	return true
 end
 
--- ============================================
--- GET PRELOADED TRACK (Use this in your system)
--- ============================================
 function module.getPreloadedTrack(animation)
 	return preloadedTracks[animation]
 end
 
--- ============================================
--- CHECK IF PRELOADED
--- ============================================
 function module.isPreloaded()
 	return isPreloaded
 end
 
--- ============================================
--- CLEAR CACHE (Call on character death/respawn)
--- ============================================
 function module.clearCache()
 	debug("🧹 Clearing preload cache...")
 
-	-- Stop all tracks
 	for _, track in pairs(preloadedTracks) do
 		pcall(function()
 			track:Stop(0)
@@ -159,20 +127,15 @@ function module.clearCache()
 	debug("✅ Cache cleared")
 end
 
--- ============================================
--- AUTO PRELOAD ON CHARACTER SPAWN
--- ============================================
 if CONFIG.PRELOAD_ON_SPAWN then
 	local function setupPreload()
 		if not player.Character then
 			player.CharacterAdded:Wait()
 		end
 
-		-- Wait for character to fully load
 		local humanoid = player.Character:WaitForChild("Humanoid")
 		player.Character:WaitForChild("HumanoidRootPart")
 
-		-- Wait for Animator
 		task.wait(0.5)
 
 		local animator = humanoid:FindFirstChildOfClass("Animator")
@@ -181,21 +144,16 @@ if CONFIG.PRELOAD_ON_SPAWN then
 			return
 		end
 
-		-- Additional delay for stability
 		task.wait(CONFIG.PRELOAD_DELAY)
 
-		-- Wait for animations to be loaded
 		local animFolder = ReplicatedStorage:WaitForChild("StoredAnimations")
 		local emotesFolder = ReplicatedStorage:WaitForChild("Emotes")
 
-		-- Preload from Emotes folder (includes Pose subfolder)
 		module.preloadAnimations(emotesFolder)
 	end
 
-	-- Initial setup
 	task.spawn(setupPreload)
 
-	-- Setup on respawn
 	player.CharacterAdded:Connect(function()
 		module.clearCache()
 		task.wait(1)

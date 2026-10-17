@@ -1,42 +1,37 @@
--- ====================================
--- CONFIG DATA STORE (SYNCED WITH CONFIGCLIENT)
--- Place in: ServerScriptService > Setting(Folder) > ConfigDataStore(Script)
--- ====================================
--- Perubahan:
---   ✅ Key disinkronkan dengan ConfigClient (hide* format)
---   ✅ Tambah muteMusic & hideShadow
---   ✅ Hapus key lama yang tidak digunakan (bubbleChatEnabled, dll)
---   ✅ Migrasi otomatis dari format lama ke format baru
---   ✅ Throttle save untuk mencegah spam DataStore
-
 local Players          = game:GetService("Players")
 local DataStoreService = game:GetService("DataStoreService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local ConfigStore = DataStoreService:GetDataStore("ConfigClientStoreV3") -- versi baru (migrasi key)
+local ConfigStore = DataStoreService:GetDataStore("ConfigClientStoreV3")
 
--- ========================================
--- REMOTES
--- ========================================
-local RemotesFolder = Instance.new("Folder")
-RemotesFolder.Name   = "ConfigRemotes"
-RemotesFolder.Parent = ReplicatedStorage
+local RemotesFolder = ReplicatedStorage:FindFirstChild("ConfigRemotes") or ReplicatedStorage:WaitForChild("ConfigRemotes", 10)
+if not RemotesFolder then
+	RemotesFolder = Instance.new("Folder")
+	RemotesFolder.Name = "ConfigRemotes"
+	RemotesFolder.Parent = ReplicatedStorage
+end
 
-local LoadSettingsEvent = Instance.new("RemoteFunction")
-LoadSettingsEvent.Name   = "LoadSettings"
-LoadSettingsEvent.Parent = RemotesFolder
+local LoadSettingsEvent = RemotesFolder:FindFirstChild("LoadSettings")
+if not LoadSettingsEvent then
+	LoadSettingsEvent = Instance.new("RemoteFunction")
+	LoadSettingsEvent.Name = "LoadSettings"
+	LoadSettingsEvent.Parent = RemotesFolder
+end
 
-local SaveSettingEvent = Instance.new("RemoteEvent")
-SaveSettingEvent.Name   = "SaveSetting"
-SaveSettingEvent.Parent = RemotesFolder
+local SaveSettingEvent = RemotesFolder:FindFirstChild("SaveSetting")
+if not SaveSettingEvent then
+	SaveSettingEvent = Instance.new("RemoteEvent")
+	SaveSettingEvent.Name = "SaveSetting"
+	SaveSettingEvent.Parent = RemotesFolder
+end
 
-local ResetSettingsEvent = Instance.new("RemoteEvent")
-ResetSettingsEvent.Name   = "ResetSettings"
-ResetSettingsEvent.Parent = RemotesFolder
+local ResetSettingsEvent = RemotesFolder:FindFirstChild("ResetSettings")
+if not ResetSettingsEvent then
+	ResetSettingsEvent = Instance.new("RemoteEvent")
+	ResetSettingsEvent.Name = "ResetSettings"
+	ResetSettingsEvent.Parent = RemotesFolder
+end
 
--- ========================================
--- DEFAULT SETTINGS (SESUAI CONFIGCLIENT)
--- ========================================
 local DEFAULT_SETTINGS = {
 	hideBubbleChat    = false,
 	hidePlayerEffects = false,
@@ -47,12 +42,8 @@ local DEFAULT_SETTINGS = {
 	musicVolume       = 100,
 }
 
--- ========================================
--- MIGRASI DARI FORMAT LAMA
--- Konversi key lama (V2) ke key baru (V3)
--- ========================================
 local MIGRATION_MAP = {
-	-- oldKey = { newKey, invertValue }
+
 	bubbleChatEnabled    = { newKey = "hideBubbleChat",    invert = true },
 	playerEffectsEnabled = { newKey = "hidePlayerEffects", invert = true },
 	showPlayersEnabled   = { newKey = "hidePlayers",       invert = true },
@@ -70,10 +61,9 @@ local function migrateFromV2(player)
 	end)
 
 	if not ok or type(oldData) ~= "table" then
-		return nil -- Tidak ada data lama
+		return nil
 	end
 
-	-- Konversi ke format baru
 	local migrated = {}
 	for oldKey, mapping in pairs(MIGRATION_MAP) do
 		if oldData[oldKey] ~= nil then
@@ -85,33 +75,28 @@ local function migrateFromV2(player)
 		end
 	end
 
-	-- Pastikan semua key default ada
 	for k, v in pairs(DEFAULT_SETTINGS) do
 		if migrated[k] == nil then
 			migrated[k] = v
 		end
 	end
 
-	-- Simpan ke V3
 	local saveOk, saveErr = pcall(function()
 		ConfigStore:SetAsync(key, migrated)
 	end)
 
 	if saveOk then
-		print("🔄 Migrated V2→V3 settings for", player.Name)
+		print("🔄 Pengaturan V2→V3 dimigrasi untuk", player.Name)
 	else
-		warn("❌ Failed to save migrated settings for", player.Name, ":", saveErr)
+		warn("❌ Gagal menyimpan migrasi pengaturan untuk", player.Name, ":", saveErr)
 	end
 
 	return migrated
 end
 
--- ========================================
--- SAVE THROTTLE (Mencegah spam DataStore)
--- ========================================
-local pendingSaves = {} -- [userId] = { data = {}, scheduled = false }
+local pendingSaves = {}
 
-local SAVE_THROTTLE_TIME = 5 -- Tunggu 5 detik sebelum save batch
+local SAVE_THROTTLE_TIME = 5
 
 local function flushSave(userId)
 	local pending = pendingSaves[userId]
@@ -121,14 +106,12 @@ local function flushSave(userId)
 
 	local key = "Player_" .. tostring(userId)
 
-	-- Ambil data terbaru dari DataStore
 	local ok, currentData = pcall(function()
 		return ConfigStore:GetAsync(key)
 	end)
 
 	local dataToSave = (ok and type(currentData) == "table") and currentData or {}
 
-	-- Merge pending changes
 	for settingKey, value in pairs(pending.data) do
 		dataToSave[settingKey] = value
 	end
@@ -140,9 +123,9 @@ local function flushSave(userId)
 	if saveOk then
 		local count = 0
 		for _ in pairs(pending.data) do count = count + 1 end
-		print(string.format("💾 Batch saved %d setting(s) for userId %d", count, userId))
+		print(string.format("💾 Tersimpan %d pengaturan untuk userId %d", count, userId))
 	else
-		warn("❌ Failed to batch save for userId", userId, ":", saveErr)
+		warn("❌ Gagal menyimpan batch pengaturan untuk userId", userId, ":", saveErr)
 	end
 end
 
@@ -161,19 +144,15 @@ local function scheduleSave(userId, settingKey, value)
 	end
 end
 
--- ========================================
--- LOAD SETTINGS
--- ========================================
 LoadSettingsEvent.OnServerInvoke = function(player)
 	local key = "Player_" .. tostring(player.UserId)
 
-	-- Coba ambil dari V3
 	local ok, data = pcall(function()
 		return ConfigStore:GetAsync(key)
 	end)
 
 	if ok and type(data) == "table" then
-		-- Gabungkan dengan default (key baru yang belum ada)
+
 		local merged = {}
 		for k, v in pairs(DEFAULT_SETTINGS) do
 			if data[k] ~= nil then
@@ -182,20 +161,17 @@ LoadSettingsEvent.OnServerInvoke = function(player)
 				merged[k] = v
 			end
 		end
-		print("✅ Loaded settings for", player.Name)
+		print("✅ Pengaturan berhasil dimuat untuk", player.Name)
 		return merged
 	end
 
-	-- V3 kosong → coba migrasi dari V2
 	local migrated = migrateFromV2(player)
 	if migrated then
 		return migrated
 	end
 
-	-- Tidak ada data sama sekali → default
-	print("📋 No saved settings for", player.Name, "- using defaults")
+	print("📋 Tidak ada pengaturan tersimpan untuk", player.Name, "- menggunakan bawaan")
 
-	-- Simpan default ke DataStore agar load berikutnya lebih cepat
 	pcall(function()
 		local defaultCopy = {}
 		for k, v in pairs(DEFAULT_SETTINGS) do
@@ -207,47 +183,36 @@ LoadSettingsEvent.OnServerInvoke = function(player)
 	return DEFAULT_SETTINGS
 end
 
--- ========================================
--- SAVE SINGLE SETTING (THROTTLED)
--- ========================================
 SaveSettingEvent.OnServerEvent:Connect(function(player, settingKey, value)
-	-- Validasi: tipe key harus string
+
 	if type(settingKey) ~= "string" then
-		warn("⚠️ Invalid setting key type from", player.Name)
+		warn("⚠️ Tipe kunci pengaturan tidak valid dari", player.Name)
 		return
 	end
 
-	-- Validasi: hanya izinkan key yang dikenal
 	if DEFAULT_SETTINGS[settingKey] == nil then
-		warn("⚠️ Unknown setting key:", settingKey, "from", player.Name)
+		warn("⚠️ Kunci pengaturan tidak dikenal:", settingKey, "dari", player.Name)
 		return
 	end
 
-	-- Validasi: tipe value harus sesuai default
 	local expectedType = type(DEFAULT_SETTINGS[settingKey])
 	if type(value) ~= expectedType then
-		warn(string.format("⚠️ Type mismatch for %s: expected %s, got %s from %s",
+		warn(string.format("⚠️ Ketidakcocokan tipe untuk %s: diharapkan %s, diterima %s dari %s",
 			settingKey, expectedType, type(value), player.Name))
 		return
 	end
 
-	-- Validasi: range untuk musicVolume
 	if settingKey == "musicVolume" then
 		if type(value) ~= "number" then return end
 		value = math.clamp(math.floor(value), 0, 100)
 	end
 
-	-- Throttled save
 	scheduleSave(player.UserId, settingKey, value)
 end)
 
--- ========================================
--- RESET ALL SETTINGS
--- ========================================
 ResetSettingsEvent.OnServerEvent:Connect(function(player)
 	local key = "Player_" .. tostring(player.UserId)
 
-	-- Batalkan pending save jika ada
 	pendingSaves[player.UserId] = nil
 
 	local resetData = {}
@@ -260,31 +225,24 @@ ResetSettingsEvent.OnServerEvent:Connect(function(player)
 	end)
 
 	if ok then
-		print("🔄 Reset settings for", player.Name)
+		print("🔄 Atur ulang pengaturan untuk", player.Name)
 	else
-		warn("❌ Failed to reset settings for", player.Name, ":", err)
+		warn("❌ Gagal mengatur ulang pengaturan untuk", player.Name, ":", err)
 	end
 end)
 
--- ========================================
--- CLEANUP: Flush pending saves saat player keluar
--- ========================================
 Players.PlayerRemoving:Connect(function(player)
 	local userId = player.UserId
 
-	-- Flush pending save sebelum player pergi
 	if pendingSaves[userId] then
 		task.spawn(function()
 			flushSave(userId)
 		end)
 	end
 
-	print("👋", player.Name, "left")
+	print("👋", player.Name, "keluar")
 end)
 
--- ========================================
--- BIND TO CLOSE: Flush semua pending saves
--- ========================================
 game:BindToClose(function()
 	local flushThreads = {}
 
@@ -294,10 +252,9 @@ game:BindToClose(function()
 		end))
 	end
 
-	-- Tunggu semua flush selesai (max 5 detik)
 	task.wait(5)
 end)
 
-print("✅ ConfigDataStore V3 (Synced with ConfigClient) Loaded!")
-print("🔄 Auto-migration from V2 enabled")
-print("⏱️ Save throttle:", SAVE_THROTTLE_TIME, "seconds")
+print("✅ ConfigDataStore V3 (Tersinkronisasi dengan ConfigClient) Berhasil dimuat!")
+print("🔄 Migrasi otomatis dari V2 aktif")
+print("⏱️ Jeda penyimpanan:", SAVE_THROTTLE_TIME, "detik")

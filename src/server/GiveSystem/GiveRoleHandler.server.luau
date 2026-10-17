@@ -1,8 +1,3 @@
--- ====================================
--- GIVE ROLE HANDLER - VIP + STREAMER + CREATOR VERSION
--- Location: ServerScriptService > GiveSystem(Folder) > GiveRoleHandler(Script)
--- ====================================
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
@@ -12,9 +7,6 @@ local MarketplaceService = game:GetService("MarketplaceService")
 local RoleSystem = require(ServerStorage:WaitForChild("Modules"):WaitForChild("RoleSystem"))
 local GiveRoleConfig = require(ReplicatedStorage:WaitForChild("GiveModule"):WaitForChild("GiveRoleConfig"))
 
--- ====================================
--- DEBUG HELPER
--- ====================================
 local function debugPrint(...)
 	if GiveRoleConfig.Debug.ENABLE_DEBUG and GiveRoleConfig.Debug.SHOW_SERVER_LOGS then
 		print("[GiveRole]", ...)
@@ -46,18 +38,11 @@ else
 	debugPrint("Using existing GiveRoleRemote")
 end
 
--- ====================================
--- ADMIN ROLES CONFIGURATION
--- ====================================
 local ADMIN_ROLES = {Owner = true, Developer = true, Admin = true}
 
 local function isAdmin(player)
 	return ADMIN_ROLES[RoleSystem:GetPlayerRole(player)] == true
 end
-
--- ====================================
--- ROLE VALIDATION HELPERS
--- ====================================
 
 local function isAdminPanelRole(roleType)
 	for _, r in ipairs(GiveRoleConfig.AdminPanelRoles) do
@@ -76,10 +61,6 @@ local function isPlayerMenuRole(roleType)
 	end
 	return false
 end
-
--- ====================================
--- DATASTORE HELPERS
--- ====================================
 
 local function datastoreRetry(operation, maxAttempts)
 	maxAttempts = maxAttempts or GiveRoleConfig.Settings.MAX_RETRY_ATTEMPTS
@@ -129,10 +110,6 @@ local function clearPendingGift(purchaserUserId)
 	pcall(function() pendingGiftStore:RemoveAsync(key) end)
 end
 
--- ====================================
--- CHECK PLAYER ROLE (FOR PLAYER MENU - VIP ONLY)
--- ====================================
-
 local function checkPlayerRoleForVIP(player)
 	local currentRole = RoleSystem:GetPlayerRole(player)
 	local hasVIP = RoleSystem:HasVIP(player)
@@ -158,13 +135,8 @@ local function checkPlayerRoleForVIP(player)
 	}
 end
 
--- ====================================
--- CHECK PLAYER ROLE (FOR ADMIN PANEL - VIP + STREAMER + CREATOR)
--- Semua role bisa diberikan ke siapa saja
--- ====================================
-
 local function checkPlayerRoleForAdmin(player, roleType)
-	-- VIP check
+
 	if roleType == "VIP" then
 		if RoleSystem:HasVIP(player) then
 			return {
@@ -180,7 +152,6 @@ local function checkPlayerRoleForAdmin(player, roleType)
 		}
 	end
 
-	-- Streamer check
 	if roleType == "Streamer" then
 		if RoleSystem:HasStreamer(player) then
 			return {
@@ -196,7 +167,6 @@ local function checkPlayerRoleForAdmin(player, roleType)
 		}
 	end
 
-	-- Creator check
 	if roleType == "Creator" then
 		if RoleSystem:HasCreator(player) then
 			return {
@@ -218,10 +188,6 @@ local function checkPlayerRoleForAdmin(player, roleType)
 		message = "Role tidak valid"
 	}
 end
-
--- ====================================
--- PROCESS RECEIPT (FOR PLAYER MENU PURCHASES - VIP ONLY)
--- ====================================
 
 local function processReceipt(receiptInfo)
 	local purchaserUserId = receiptInfo.PlayerId
@@ -264,32 +230,26 @@ local function processReceipt(receiptInfo)
 
 		return Enum.ProductPurchaseDecision.PurchaseGranted
 	else
-		warn("[GiveRole] Failed to give role:", result)
+		warn("[GiveRole] Gagal memberikan role:", result)
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 end
 
-MarketplaceService.ProcessReceipt = processReceipt
-
--- ====================================
--- MAIN REQUEST HANDLER
--- ====================================
+local ReceiptDispatcher = require(ServerStorage:WaitForChild("Modules"):WaitForChild("ReceiptDispatcher"))
+ReceiptDispatcher.RegisterHandler("GiveRole", processReceipt)
 
 giveRoleRemote.OnServerEvent:Connect(function(player, requestData)
 	if type(requestData) ~= "table" then
-		warn("[GiveRole] Invalid request from", player.Name)
+		warn("[GiveRole] Permintaan tidak valid dari", player.Name)
 		return
 	end
 
 	local source = requestData.source
 	local action = requestData.action
 
-	debugDispatch(string.format("📥 Request | Player: %s | Source: %s | Action: %s", 
+	debugDispatch(string.format("📥 Request | Player: %s | Source: %s | Action: %s",
 		player.Name, source or "nil", action or "nil"))
 
-	-- ====================================
-	-- ADMIN PANEL HANDLER (VIP + STREAMER + CREATOR - FREE)
-	-- ====================================
 	if source == "AdminPanel" then
 		if action == "GiveRole" then
 			debugPrint("📋 AdminPanel: GiveRole")
@@ -362,9 +322,6 @@ giveRoleRemote.OnServerEvent:Connect(function(player, requestData)
 			warn("[GiveRole] Unknown AdminPanel action:", action)
 		end
 
-		-- ====================================
-		-- PLAYER MENU HANDLER (VIP ONLY - PAID)
-		-- ====================================
 	elseif source == "PlayerMenu" then
 		if action == "CheckPlayerRole" then
 			debugPrint("🎁 PlayerMenu: CheckPlayerRole")
@@ -467,7 +424,7 @@ giveRoleRemote.OnServerEvent:Connect(function(player, requestData)
 			end)
 
 			if not success then
-				warn("[GiveRole] Failed to prompt purchase:", errorMsg)
+				warn("[GiveRole] Gagal memicu pembelian:", errorMsg)
 				clearPendingGift(player.UserId)
 				giveRoleRemote:FireClient(player, {
 					source = "PlayerMenu",
@@ -477,13 +434,13 @@ giveRoleRemote.OnServerEvent:Connect(function(player, requestData)
 				})
 			end
 		else
-			warn("[GiveRole] Unknown PlayerMenu action:", action)
+			warn("[GiveRole] Aksi PlayerMenu tidak dikenal:", action)
 		end
 
 	else
-		warn("[GiveRole] ❌ Unknown source:", source, "from", player.Name)
+		warn("[GiveRole] ❌ Sumber tidak dikenal:", source, "dari", player.Name)
 	end
 end)
 
-debugPrint("✅ Give handler loaded (VIP + Streamer + Creator version)")
-print("✅ [GiveRoleHandler] Loaded successfully!")
+debugPrint("✅ Give handler siap (versi VIP + Streamer + Creator)")
+print("✅ [GiveRoleHandler] Berhasil dimuat!")

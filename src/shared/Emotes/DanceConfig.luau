@@ -1,9 +1,3 @@
--- ============================================================
--- DanceConfig.lua
--- Config daftar animasi Dance (185 animasi)
--- Path: ReplicatedStorage > Emotes > DanceConfig
--- ============================================================
-
 local DanceConfig = {
 	{ name = "Vibe", animationId = "rbxassetid://110530853297115" },
 	{ name = "Shuffle 2", animationId = "rbxassetid://117991470645633" },
@@ -192,7 +186,6 @@ local DanceConfig = {
 	{ name = "Break", animationId = "rbxassetid://96078519637664" },
 }
 
--- Lookup dictionary by name
 DanceConfig.Lookup = {}
 for _, item in ipairs(DanceConfig) do
 	item.id = item.animationId

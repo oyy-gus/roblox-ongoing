@@ -1,6 +1,3 @@
--- MODULE: NotificationModule (FINAL - Tanpa Close Button)
--- ========================================
-
 local tweenService = game:GetService("TweenService")
 local ClientConfig = require(script.Parent.ClientConfig)
 local ClientDebug  = require(script.Parent.ClientDebug)
@@ -154,5 +151,3 @@ function NotificationModule.cleanup()
 end
 
 return NotificationModule
-
--- ========================================

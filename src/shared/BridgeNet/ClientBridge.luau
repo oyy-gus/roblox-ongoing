@@ -18,19 +18,9 @@ local BridgeObjects = {}
 local threads: { thread? } = {}
 local replTicksSignal = {}
 
---[=[
-	@class ClientBridge
-	
-	Client-sided object for handling networking.
-]=]
 local ClientBridge = {}
 ClientBridge.__index = ClientBridge
 
---[=[
-	Starts the internal processes for ClientBridge.
-	
-	@ignore
-]=]
 function ClientBridge._start()
 	RemoteEvent = ReplicatedStorage:WaitForChild("RemoteEvent")
 
@@ -58,7 +48,7 @@ function ClientBridge._start()
 
 		for _, v: sendPacketQueue in SendQueue do
 			if replTicks[v.replRate] then
-				-- subtract 0.003 to make sure we don't accidentally skip any frames due to rounding errors
+
 				if (currentTime - replTicks[v.replRate]) <= (1 / v.replRate - 0.003) then
 					passingReplRates[v.replRate] = true
 					if not passingReplRates[v.replRate] then
@@ -148,8 +138,7 @@ function ClientBridge._start()
 
 			if args[1] ~= InvokeReply then
 				for _, callback in obj._connections do
-					-- Spawn a thread to be yield-safe. Potentially implement thread reusability for optimization later?
-					-- also for error protection
+
 					task.spawn(function()
 						if #obj._inboundMiddleware ~= 0 then
 							local result
@@ -181,7 +170,7 @@ function ClientBridge._start()
 				table.remove(args, 1)
 				argCount -= 2
 				task.spawn(threads[uuid], unpack(args, 1, argCount))
-				threads[uuid] = nil -- don't want a memory leak ;)
+				threads[uuid] = nil
 			end
 		end
 
@@ -267,17 +256,6 @@ function ClientBridge._returnQueue()
 	return SendQueue, ReceiveQueue
 end
 
---[=[
-	The equivalent of :FireServer().
-	
-	```lua
-	local Bridge = BridgeNet.CreateBridge("Remote")
-	
-	Bridge:Fire("Hello", "world!")
-	```
-	
-	@param ... any
-]=]
 function ClientBridge:Fire(...: any)
 	if self._id == nil then
 		self._id = SerdesLayer.FromIdentifier(self._name)
@@ -290,19 +268,6 @@ function ClientBridge:Fire(...: any)
 	})
 end
 
---[=[
-	Invokes the server for a response. Promise wrapper over :InvokeServerAsync()
-	
-	```lua
-	local Bridge = BridgeNet.CreateBridge("Remote")
-	
-	local data = Bridge:InvokeServerAsync("whats 2+2?")
-	print(data) -- prints "4"
-	```
-	
-	@param ... any
-	@return ...any
-]=]
 function ClientBridge:InvokeServerAsync(...: any)
 	if self._id == nil then
 		self._id = SerdesLayer.FromIdentifier(self._name)
@@ -329,20 +294,6 @@ function ClientBridge:InvokeServerAsync(...: any)
 	return table.unpack(response)
 end
 
---[=[
-	Creates a connection. Can be disconnected using :Disconnect().
-	
-	```lua
-	local Bridge = BridgeNet.CreateBridge("Remote")
-	
-	Bridge:Connect(function(text)
-		print(text)
-	end)
-	```
-	
-	@param func function
-	@return nil
-]=]
 function ClientBridge:Connect(func: (...any) -> nil)
 	assert(type(func) == "function", "[BridgeNet] Attempt to connect non-function to a Bridge")
 	local connectionUUID = SerdesLayer.CreateUUID()
@@ -358,29 +309,10 @@ function ClientBridge:Connect(func: (...any) -> nil)
 	return connection
 end
 
-
 function ClientBridge:GetName()
 	return self._name
 end
 
---[=[
-	Creates a connection, when fired it will disconnect.
-	
-	```lua
-	local Bridge = BridgeNet.CreateBridge("ConstantlyFiringText")
-	
-	Bridge:Connect(function(text)
-		print(text) -- Fires multiple times
-	end)
-	
-	Bridge:Once(function(text)
-		print(text) -- Fires once
-	end)
-	```
-	
-	@param func function
-	@return nil
-]=]
 function ClientBridge:Once(func: (...any) -> nil)
 	local connection
 	connection = self:Connect(function(...)
@@ -389,12 +321,6 @@ function ClientBridge:Once(func: (...any) -> nil)
 	end)
 end
 
---[=[
-	Sets the rate of which the Bridge sends and receives data.
-	
-	@param replRate number
-	@return nil
-]=]
 function ClientBridge:SetReplicationRate(replRate: number)
 	assert(typeof(replRate) == "number", "[BridgeNet] replication rate must be a number")
 	self._replRate = replRate
@@ -410,19 +336,6 @@ function ClientBridge:SetInboundMiddleware(middlewareTbl: { (plr: Player, ...any
 	self._inboundMiddleware = middlewareTbl
 end
 
---[=[
-	Destroys the ClientBridge object. Doesn't destroy the RemoteEvent, or destroy the identifier. It doesn't send anything to the server. Just destroys the client sided object.
-	
-	```lua
-	local Bridge = ClientBridge.new("Remote")
-	
-	ClientBridge:Destroy()
-	
-	ClientBridge:Fire() -- Errors
-	```
-	
-	@return nil
-]=]
 function ClientBridge:Destroy()
 	BridgeObjects[self._name] = nil
 	for k, v in self do

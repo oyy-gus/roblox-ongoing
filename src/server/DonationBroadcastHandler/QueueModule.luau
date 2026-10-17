@@ -1,7 +1,3 @@
--- ========================================
--- MODULE: QueueModule (FINAL - dengan donorUserId)
--- ========================================
-
 local BroadcastConfig = require(script.Parent.BroadcastConfig)
 local BroadcastDebug = require(script.Parent.BroadcastDebug)
 local SecurityModule = require(script.Parent.SecurityModule)
@@ -33,12 +29,12 @@ local function processQueue(receiveRemote)
 		BroadcastDebug.log("QUEUE", "Processing:", broadcast.displayName, "Queue:", #broadcastQueue)
 
 		if receiveRemote then
-			-- ★ FIXED: Kirim 4 parameter termasuk userId ★
+
 			receiveRemote:FireAllClients(
 				broadcast.displayName,
 				broadcast.amount,
 				broadcast.message,
-				broadcast.userId  -- ← Parameter ke-4: donorUserId
+				broadcast.userId
 			)
 			BroadcastDebug.log("BROADCAST", "Sent:", broadcast.displayName, "-", broadcast.amount, "R$ - UserId:", broadcast.userId)
 		end
@@ -51,7 +47,7 @@ local function processQueue(receiveRemote)
 end
 
 function QueueModule.addToQueue(player, message, amount, receiveRemote, skipSecurity)
-	-- Security check (skip jika dari ProcessReceipt)
+
 	if not skipSecurity then
 		if not SecurityModule.verifyPurchase(player, amount) then
 			BroadcastDebug.warn("SECURITY", "REJECTED:", player.Name)
@@ -65,45 +61,39 @@ function QueueModule.addToQueue(player, message, amount, receiveRemote, skipSecu
 		end
 	end
 
-	-- Validasi amount
 	if amount < BroadcastConfig.BROADCAST.MIN_DONATION then
-		BroadcastDebug.warn("ERROR", player.Name, "insufficient donation:", amount)
+		BroadcastDebug.warn("KESALAHAN", player.Name, "donasi tidak mencukupi:", amount)
 		return false, "Donasi minimal " .. BroadcastConfig.BROADCAST.MIN_DONATION .. " Robux"
 	end
 
-	-- Anti-spam cooldown
 	if BroadcastConfig.ANTISPAM.ENABLED then
 		local currentTime = tick()
 		local lastTime = playerCooldowns[player.UserId] or 0
 
 		if currentTime - lastTime < BroadcastConfig.ANTISPAM.COOLDOWN then
 			local remaining = math.ceil(BroadcastConfig.ANTISPAM.COOLDOWN - (currentTime - lastTime))
-			BroadcastDebug.warn("ERROR", player.Name, "on cooldown:", remaining, "seconds")
+			BroadcastDebug.warn("KESALAHAN", player.Name, "sedang cooldown:", remaining, "detik")
 			return false, "Cooldown: " .. remaining .. " detik lagi"
 		end
 
 		playerCooldowns[player.UserId] = currentTime
 	end
 
-	-- Check per-player queue limit
 	local playerQueueCount = getPlayerQueueCount(player.UserId)
 	if playerQueueCount >= BroadcastConfig.ANTISPAM.MAX_QUEUE_PER_PLAYER then
-		BroadcastDebug.warn("ERROR", player.Name, "exceeded queue limit:", playerQueueCount)
+		BroadcastDebug.warn("KESALAHAN", player.Name, "melebihi batas antrean:", playerQueueCount)
 		return false, "Anda sudah memiliki " .. playerQueueCount .. " pesan dalam antrian"
 	end
 
-	-- Check global queue limit
 	if #broadcastQueue >= BroadcastConfig.ANTISPAM.MAX_QUEUE then
-		BroadcastDebug.warn("ERROR", "Queue full:", #broadcastQueue)
+		BroadcastDebug.warn("KESALAHAN", "Antrean penuh:", #broadcastQueue)
 		return false, "Antrian penuh, coba lagi nanti"
 	end
 
-	-- Filter message
 	local filteredMessage = MessageModule.filterMessage(message)
 
-	-- Add to queue dengan userId
 	table.insert(broadcastQueue, {
-		userId = player.UserId,           -- ★ Simpan userId
+		userId = player.UserId,
 		displayName = player.DisplayName,
 		amount = amount,
 		message = filteredMessage,
@@ -112,7 +102,6 @@ function QueueModule.addToQueue(player, message, amount, receiveRemote, skipSecu
 
 	BroadcastDebug.log("QUEUE", "Added:", player.DisplayName, "- UserId:", player.UserId, "- Queue:", #broadcastQueue)
 
-	-- Start processing
 	task.spawn(function()
 		processQueue(receiveRemote)
 	end)

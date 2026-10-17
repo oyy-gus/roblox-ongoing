@@ -1,8 +1,3 @@
--- ====================================
--- BROADCAST CLIENT - Automatic GUI
--- Place in: StarterGui > AdminGUI(ScreenGui) > BroadcastClient(LocalScript)
--- ====================================
-
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local TS = game:GetService("TweenService")
@@ -25,9 +20,6 @@ local CheckAccessRemote = RemoteFolder:WaitForChild("CheckAccess")
 local SendMessageRemote = RemoteFolder:WaitForChild("SendMessage")
 local ReceiveMessageRemote = RemoteFolder:WaitForChild("ReceiveMessage")
 
--- ====================================
--- CONFIG
--- ====================================
 local Config = {
 	Notification = {
 		Duration = 6,
@@ -58,9 +50,6 @@ local Config = {
 	}
 }
 
--- ====================================
--- STATE
--- ====================================
 local activeNotifications = {}
 local notificationContainer = nil
 local broadcastGUIElements = {}
@@ -69,9 +58,6 @@ local registeredGradients = {}
 local sendBroadcastMessage
 local clearTextBox
 
--- ====================================
--- HELPER: Calculate text height
--- ====================================
 local function getTextHeight(text, font, textSize, maxWidth)
 	local success, textBounds = pcall(function()
 		return TextService:GetTextSize(text, textSize, font, Vector2.new(maxWidth, 1000))
@@ -82,13 +68,10 @@ local function getTextHeight(text, font, textSize, maxWidth)
 	return 20
 end
 
--- ====================================
--- BUILD BROADCAST GUI
--- ====================================
 local function buildBroadcastGUI()
 	local broadcastPage = AdminConfig.GUI.BroadcastPage
 	if not broadcastPage then
-		warn("[BroadcastClient] BroadcastPage not found!")
+		warn("[BroadcastClient] Halaman broadcast tidak ditemukan!")
 		return
 	end
 
@@ -128,7 +111,7 @@ local function buildBroadcastGUI()
 	headerTitle.Size = UDim2.new(1, -50, 0, 24)
 	headerTitle.Position = UDim2.new(0, 50, 0, 4)
 	headerTitle.BackgroundTransparency = 1
-	headerTitle.Text = "Broadcast Message"
+	headerTitle.Text = "Siaran Pesan"
 	headerTitle.TextColor3 = ThemeModule.Colors.TextWhite
 	headerTitle.TextSize = 18
 	headerTitle.Font = Enum.Font.GothamBold
@@ -143,7 +126,7 @@ local function buildBroadcastGUI()
 	headerSubtitle.Size = UDim2.new(1, -50, 0, 16)
 	headerSubtitle.Position = UDim2.new(0, 50, 0, 28)
 	headerSubtitle.BackgroundTransparency = 1
-	headerSubtitle.Text = "Send a message to all players in the server"
+	headerSubtitle.Text = "Kirim pesan ke seluruh pemain di dalam server"
 	headerSubtitle.TextColor3 = ThemeModule.Colors.TextGray
 	headerSubtitle.TextSize = 12
 	headerSubtitle.Font = Enum.Font.GothamMedium
@@ -171,7 +154,7 @@ local function buildBroadcastGUI()
 	inputLabel.Size = UDim2.new(1, 0, 0, 20)
 	inputLabel.Position = UDim2.new(0, 0, 0, 0)
 	inputLabel.BackgroundTransparency = 1
-	inputLabel.Text = "📝 Message Content"
+	inputLabel.Text = "📝 Isi Pesan"
 	inputLabel.TextColor3 = ThemeModule.Colors.TextWhite
 	inputLabel.TextSize = 13
 	inputLabel.Font = Enum.Font.GothamBold
@@ -291,7 +274,7 @@ local function buildBroadcastGUI()
 	sendText.Size = UDim2.new(1, -50, 1, 0)
 	sendText.Position = UDim2.new(0, 40, 0, 0)
 	sendText.BackgroundTransparency = 1
-	sendText.Text = "Send Broadcast"
+	sendText.Text = "Kirim Siaran"
 	sendText.TextColor3 = ThemeModule.Colors.BackgroundDark
 	sendText.TextSize = 13
 	sendText.Font = Enum.Font.GothamBold
@@ -333,7 +316,7 @@ local function buildBroadcastGUI()
 	clearText.Size = UDim2.new(1, -40, 1, 0)
 	clearText.Position = UDim2.new(0, 35, 0, 0)
 	clearText.BackgroundTransparency = 1
-	clearText.Text = "Clear"
+	clearText.Text = "Hapus"
 	clearText.TextColor3 = ThemeModule.Colors.TextWhite
 	clearText.TextSize = 12
 	clearText.Font = Enum.Font.GothamMedium
@@ -372,7 +355,7 @@ local function buildBroadcastGUI()
 	infoText.Size = UDim2.new(1, -50, 1, -16)
 	infoText.Position = UDim2.new(0, 40, 0, 8)
 	infoText.BackgroundTransparency = 1
-	infoText.Text = "Messages sent to all players. Max 200 chars. Ctrl+Enter to send."
+	infoText.Text = "Pesan dikirim ke seluruh pemain. Maks 200 karakter. Ctrl+Enter untuk mengirim."
 	infoText.TextColor3 = ThemeModule.Colors.TextGray
 	infoText.TextSize = 10
 	infoText.Font = Enum.Font.Gotham
@@ -383,12 +366,9 @@ local function buildBroadcastGUI()
 	sendButton.MouseButton1Click:Connect(sendBroadcastMessage)
 	clearButton.MouseButton1Click:Connect(clearTextBox)
 
-	print("[BroadcastClient] GUI built successfully!")
+	print("[BroadcastClient] Antarmuka berhasil dibuat!")
 end
 
--- ====================================
--- NOTIFICATION FUNCTIONS
--- ====================================
 local function setupNotificationContainer()
 	if notificationContainer then return end
 	notificationContainer = Instance.new("ScreenGui")
@@ -455,7 +435,6 @@ local function removeNotification(notifData)
 	end)
 end
 
--- Create broadcast notification with matching badges
 local function createBroadcastNotification(messageData)
 	setupNotificationContainer()
 
@@ -465,13 +444,11 @@ local function createBroadcastNotification(messageData)
 	local messageTextHeight = getTextHeight(message, Enum.Font.Gotham, 10, messageWidth)
 	local messageBoxHeight = math.max(22, messageTextHeight + 10)
 
-	-- Header(38) + messageBox + padding(6)
 	local totalHeight = 38 + messageBoxHeight + 6
 	totalHeight = math.clamp(totalHeight, Config.Notification.MinHeight, Config.Notification.MaxHeight)
 
 	local startY = -totalHeight - 15
 
-	-- Main Frame
 	local notif = Instance.new("CanvasGroup")
 	notif.Name = "BroadcastNotification"
 	notif.Size = UDim2.new(0, Config.Notification.Width, 0, totalHeight)
@@ -484,7 +461,6 @@ local function createBroadcastNotification(messageData)
 
 	ThemeModule.CreateCorner(notif, 8)
 
-	-- Shadow
 	local shadow = Instance.new("ImageLabel")
 	shadow.Size = UDim2.new(1, 16, 1, 16)
 	shadow.Position = UDim2.new(0.5, 0, 0.5, 3)
@@ -498,10 +474,8 @@ local function createBroadcastNotification(messageData)
 	shadow.ZIndex = -1
 	shadow.Parent = notif
 
-	-- Stroke
 	local notifStroke, notifGradient = ThemeModule.CreateAnimatedStroke(notif, 1, "Primary", 1.5)
 
-	-- Left Accent Bar
 	local accentBar = Instance.new("Frame")
 	accentBar.Size = UDim2.new(0, 3, 1, -10)
 	accentBar.Position = UDim2.new(0, 5, 0, 5)
@@ -511,7 +485,6 @@ local function createBroadcastNotification(messageData)
 	ThemeModule.CreateCorner(accentBar, 2)
 	local accentGradient = ThemeModule.CreateAnimatedGradient(accentBar, "Primary", 90, 1.5)
 
-	-- Avatar
 	local avatarContainer = Instance.new("Frame")
 	avatarContainer.Size = UDim2.new(0, 26, 0, 26)
 	avatarContainer.Position = UDim2.new(0, 12, 0, 6)
@@ -537,19 +510,17 @@ local function createBroadcastNotification(messageData)
 	end)
 	if success then avatarImage.Image = content end
 
-	-- BROADCAST label
 	local broadcastLabel = Instance.new("TextLabel")
 	broadcastLabel.Size = UDim2.new(0, 60, 0, 10)
 	broadcastLabel.Position = UDim2.new(0, 42, 0, 5)
 	broadcastLabel.BackgroundTransparency = 1
-	broadcastLabel.Text = "BROADCAST"
+	broadcastLabel.Text = "SIARAN"
 	broadcastLabel.TextColor3 = ThemeModule.Colors.Primary1
 	broadcastLabel.TextSize = 8
 	broadcastLabel.Font = Enum.Font.GothamBold
 	broadcastLabel.TextXAlignment = Enum.TextXAlignment.Left
 	broadcastLabel.Parent = notif
 
-	-- Badge container for Name and Role
 	local badgeContainer = Instance.new("Frame")
 	badgeContainer.Name = "BadgeContainer"
 	badgeContainer.Size = UDim2.new(1, -70, 0, 16)
@@ -564,7 +535,6 @@ local function createBroadcastNotification(messageData)
 	badgeLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	badgeLayout.Parent = badgeContainer
 
-	-- Player Name Badge (with background)
 	local nameBadge = Instance.new("Frame")
 	nameBadge.Name = "NameBadge"
 	nameBadge.Size = UDim2.new(0, 60, 0, 16)
@@ -586,7 +556,6 @@ local function createBroadcastNotification(messageData)
 	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	nameLabel.Parent = nameBadge
 
-	-- Role Badge (with background, same style)
 	local roleBadge = Instance.new("Frame")
 	roleBadge.Name = "RoleBadge"
 	roleBadge.Size = UDim2.new(0, 50, 0, 16)
@@ -608,7 +577,6 @@ local function createBroadcastNotification(messageData)
 	roleLabel.TextXAlignment = Enum.TextXAlignment.Center
 	roleLabel.Parent = roleBadge
 
-	-- Auto-size badges based on text
 	task.defer(function()
 		if nameLabel and nameLabel.Parent and nameBadge and nameBadge.Parent then
 			local nameText = "• " .. (messageData.SenderName or "Unknown")
@@ -623,7 +591,6 @@ local function createBroadcastNotification(messageData)
 		end
 	end)
 
-	-- Close Button
 	local closeBtn = Instance.new("TextButton")
 	closeBtn.Size = UDim2.new(0, 18, 0, 18)
 	closeBtn.Position = UDim2.new(1, -22, 0, 5)
@@ -644,7 +611,6 @@ local function createBroadcastNotification(messageData)
 		TS:Create(closeBtn, TweenInfo.new(0.1), {BackgroundColor3 = ThemeModule.Colors.CloseRed}):Play()
 	end)
 
-	-- Message Container (with background)
 	local messageContainer = Instance.new("Frame")
 	messageContainer.Name = "MessageContainer"
 	messageContainer.Size = UDim2.new(1, -20, 0, messageBoxHeight)
@@ -654,7 +620,6 @@ local function createBroadcastNotification(messageData)
 	messageContainer.Parent = notif
 	ThemeModule.CreateCorner(messageContainer, 5)
 
-	-- Message Content
 	local messageContent = Instance.new("TextLabel")
 	messageContent.Size = UDim2.new(1, -10, 1, -6)
 	messageContent.Position = UDim2.new(0, 5, 0, 3)
@@ -681,7 +646,6 @@ local function createBroadcastNotification(messageData)
 		removeNotification(notifData)
 	end)
 
-	-- Push existing down
 	for i, existingNotif in ipairs(activeNotifications) do
 		local newIndex = i + 1
 		if newIndex <= Config.Notification.MaxVisible then
@@ -706,7 +670,6 @@ local function createBroadcastNotification(messageData)
 		table.remove(activeNotifications, #activeNotifications)
 	end
 
-	-- Animate in
 	TS:Create(notif, TweenInfo.new(Config.Notification.Animation.DropSpeed, Config.Notification.Animation.EasingStyle, Config.Notification.Animation.EasingDirection), {
 		Position = UDim2.new(0.5, 0, 0, Config.Notification.TopOffset)
 	}):Play()
@@ -720,15 +683,12 @@ local function createBroadcastNotification(messageData)
 	end)
 end
 
--- ====================================
--- BROADCAST ACTIONS
--- ====================================
 sendBroadcastMessage = function()
 	local textBox = broadcastGUIElements.TextBox
 	if not textBox then return end
 	local message = textBox.Text:match("^%s*(.-)%s*$")
 	if message == "" then
-		NotifModule.Warning("Broadcast", "Please enter a message", 3)
+		NotifModule.Warning("Siaran", "Silakan masukkan pesan", 3)
 		return
 	end
 	if AdminConfig.SoundSystem and AdminConfig.SoundSystem.PlayClick then
@@ -736,7 +696,7 @@ sendBroadcastMessage = function()
 	end
 	SendMessageRemote:FireServer(message)
 	textBox.Text = ""
-	NotifModule.Success("Broadcast", "Sent!", 2)
+	NotifModule.Success("Siaran", "Pesan siaran berhasil dikirim!", 2)
 end
 
 clearTextBox = function()
@@ -746,13 +706,10 @@ clearTextBox = function()
 		if AdminConfig.SoundSystem and AdminConfig.SoundSystem.PlayClick then
 			AdminConfig.SoundSystem.PlayClick()
 		end
-		NotifModule.Info("Broadcast", "Cleared", 2)
+		NotifModule.Info("Siaran", "Teks dibersihkan", 2)
 	end
 end
 
--- ====================================
--- MESSAGE RECEIVER
--- ====================================
 ReceiveMessageRemote.OnClientEvent:Connect(function(messageData)
 	if messageData.Type == "Error" then
 		NotifModule.Error("Error", messageData.Message, 4)
@@ -761,9 +718,6 @@ ReceiveMessageRemote.OnClientEvent:Connect(function(messageData)
 	end
 end)
 
--- ====================================
--- CLEANUP
--- ====================================
 local function cleanup()
 	for _, gradient in ipairs(registeredGradients) do
 		if gradient then ThemeModule.GradientSystem.Unregister(gradient) end
@@ -777,9 +731,6 @@ local function cleanup()
 	activeNotifications = {}
 end
 
--- ====================================
--- INITIALIZATION
--- ====================================
 local function initialize()
 	buildBroadcastGUI()
 	local broadcastPage = AdminConfig.GUI.BroadcastPage

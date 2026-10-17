@@ -1,8 +1,3 @@
--- ====================================
--- MUSIC CLIENT (FIXED)
--- Place in: StarterGui > MenuGUI(ScreenGui) > MusicClient(LocalScript)
--- ====================================
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService      = game:GetService("SoundService")
 local RunService        = game:GetService("RunService")
@@ -16,13 +11,13 @@ local NotifModule = require(Modules:WaitForChild("NotifModule"))
 local MusicModule = require(Modules:WaitForChild("MusicModule"))
 
 local guiReady = MenuConfig.WaitForGUIReady(15)
-if not guiReady then warn("❌ MusicClient: GUI tidak ready!"); return end
+if not guiReady then warn("❌ MusicClient: GUI belum siap!"); return end
 
 local player    = Players.LocalPlayer
 local musicPage = MenuConfig.GUI.MusicPage
 
 local remoteFolder = ReplicatedStorage:WaitForChild("MusicRemotes", 30)
-if not remoteFolder then warn("❌ MusicClient: MusicRemotes not found!"); return end
+if not remoteFolder then warn("❌ MusicClient: Folder MusicRemotes tidak ditemukan!"); return end
 
 local dispatchAction = remoteFolder:WaitForChild("DispatchAction", 10)
 local dispatchEvent  = remoteFolder:WaitForChild("DispatchEvent",  10)
@@ -31,15 +26,12 @@ local musicUpdate    = remoteFolder:WaitForChild("MusicUpdate",    10)
 local requestSync    = remoteFolder:WaitForChild("RequestSync",    10)
 
 if not (dispatchAction and dispatchEvent and musicBroadcast) then
-	warn("❌ MusicClient: Critical remotes missing!"); return
+	warn("❌ MusicClient: Remote penting tidak ditemukan!"); return
 end
 
--- ====================================
--- SYNC CONSTANTS (DIPERBAIKI)
--- ====================================
-local DESYNC_THRESHOLD    = 0.5   -- DIPERKECIL: dari 2.0 ke 0.5 detik
-local CLIENT_FADE_IN_DUR  = 1.2   -- Transisi fade-in mulus (1.2 detik)
-local CLIENT_FADE_OUT_DUR = 1.0   -- Transisi fade-out halus (1.0 detik)
+local DESYNC_THRESHOLD    = 0.5
+local CLIENT_FADE_IN_DUR  = 1.2
+local CLIENT_FADE_OUT_DUR = 1.0
 
 local function getPlayerHierarchy()
 	local roleValue = player:FindFirstChild("Role")
@@ -158,22 +150,19 @@ local function resolveThumbnail(thumb, soundId)
 		return rbxThumbUrl or DEFAULT_THUMBNAIL
 	end
 
-	local t = thumb:gsub("%s", "")  -- strip whitespace
+	local t = thumb:gsub("%s", "")
 	if t == "" or t == "0" or t == "rbxassetid://0" or t:find("YOUR_LOGO_ASSET_ID") then
 		return rbxThumbUrl or DEFAULT_THUMBNAIL
 	end
 
-	-- Jika sudah format rbxthumb://, langsung gunakan
 	if t:find("^rbxthumb://") then
 		return t
 	end
 
-	-- Jika asset default, utamakan rbxthumb langsung dari asset audio jika ada soundId
 	if t == DEFAULT_THUMBNAIL or t:find("118306547253139") then
 		return rbxThumbUrl or DEFAULT_THUMBNAIL
 	end
 
-	-- Jika soundId sama dengan thumb (misal soundId diteruskan di arg thumb)
 	if sId and (t == sId or t == "rbxassetid://" .. sId) then
 		return rbxThumbUrl or DEFAULT_THUMBNAIL
 	end
@@ -202,7 +191,7 @@ end
 
 local DIM = {
 	SUBTAB_H           = 36,
-	NP_H               = 388,  -- Tinggi penuh viewport kartu Now Playing (sesuai tinggi contentContainer 450-46-16)
+	NP_H               = 388,
 	THUMB_SZ           = 70,
 	PROGRESS_H         = 5,
 	CONTROLS_H         = 32,
@@ -295,7 +284,7 @@ local function setupFixedScroll(sf)
 	sf.ScrollingDirection = Enum.ScrollingDirection.Y
 	sf.AutomaticCanvasSize = Enum.AutomaticSize.None
 	sf.HorizontalScrollBarInset = Enum.ScrollBarInset.None
-	-- Overlay: jangan inset konten, scrollbar tidak boleh makan lebar frame
+
 	sf.VerticalScrollBarInset = Enum.ScrollBarInset.None
 	sf.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
 end
@@ -318,9 +307,6 @@ local function notifyError(t,m)   if NotifModule then NotifModule.Error(t,m,3) e
 local function notifyWarning(t,m) if NotifModule then NotifModule.Warning(t,m,3) end end
 local function notifyInfo(t,m)    if NotifModule then NotifModule.Info(t,m,3) end end
 
--- ====================================
--- CLIENT STATE
--- ====================================
 local clientState = {
 	queue           = {},
 	currentSong     = nil,
@@ -355,9 +341,6 @@ local isMuted    = false
 local userVolume = 1.0
 local currentFadeTween = nil
 
--- ====================================
--- VOLUME CONTROL
--- ====================================
 local function cancelClientFade()
 	if currentFadeTween then
 		currentFadeTween:Cancel()
@@ -365,9 +348,6 @@ local function cancelClientFade()
 	end
 end
 
--- ====================================
--- CLEANUP SISA EKSPERIMENTAL AUDIO API (Mencegah Double Audio)
--- ====================================
 local function cleanupAudioAPINodes()
 	local toDestroy = {
 		"ClientMusicFader",
@@ -392,16 +372,12 @@ local function cleanupAudioAPINodes()
 end
 task.spawn(cleanupAudioAPINodes)
 
--- ====================================
--- 2D GLOBAL AUDIO SETUP (BEBAS PUTARAN KAMERA)
--- ====================================
 local function getServerSound()
 	local s = SoundService:FindFirstChild("ServerMusicSound")
 	if s and s:IsA("Sound") then return s end
 	return workspace:FindFirstChild("ServerMusicSound", true)
 end
 
--- Reset listener ke default Camera (karena audio di SoundService, otomatis 2D seimbang di headset & speaker)
 pcall(function()
 	SoundService:SetListener(Enum.ListenerType.Camera)
 end)
@@ -442,11 +418,6 @@ local function clientFadeOut(duration)
 	tween:Play()
 end
 
--- ====================================
--- SYNC HELPERS (MULUS & BEBAS PATAH-PATAH)
--- ====================================
-
---- Hitung posisi lagu yang benar berdasarkan shared clock
 local function calculateSyncPosition(serverStartTime, duration)
 	if not serverStartTime or serverStartTime <= 0 then return 0 end
 	local now = workspace:GetServerTimeNow()
@@ -454,10 +425,9 @@ local function calculateSyncPosition(serverStartTime, duration)
 	return math.clamp(elapsed, 0, duration or 9999)
 end
 
---- Flag sinkronisasi
 local syncInProgress = false
 local currentSyncId = 0
-local lastDriftCorrection = 0  -- timestamp koreksi drift terakhir
+local lastDriftCorrection = 0
 
 local function syncServerSoundPosition(expectedSoundId, serverStartTime, duration)
 	currentSyncId = currentSyncId + 1
@@ -488,7 +458,6 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 
 		local targetSoundId = "rbxassetid://" .. tostring(expectedSoundId)
 
-		-- Tunggu SoundId tepat (replication delay, maks 5 detik)
 		local waitStart = workspace:GetServerTimeNow()
 		while serverSound.SoundId ~= targetSoundId and (workspace:GetServerTimeNow() - waitStart) < 5 do
 			task.wait(0.05)
@@ -500,14 +469,12 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 			return
 		end
 
-		-- Tunggu sound loaded dan TimeLength terdeteksi (maks 6 detik)
 		local loadStart = workspace:GetServerTimeNow()
 		while (not serverSound.IsLoaded or serverSound.TimeLength <= 0) and (workspace:GetServerTimeNow() - loadStart) < 6 do
 			task.wait(0.05)
 			if mySyncId ~= currentSyncId then return end
 		end
 
-		-- Tunggu playing (maks 5 detik)
 		waitStart = workspace:GetServerTimeNow()
 		while not serverSound.IsPlaying and (workspace:GetServerTimeNow() - waitStart) < 5 do
 			task.wait(0.05)
@@ -532,12 +499,10 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 	end)
 end
 
---- Koreksi drift lembut: HANYA jika terjadi lag/desync parah (misal tab freeze)
---- Threshold ditinggikan ke 6.0 detik agar TIDAK memotong audio saat lagu berjalan normal
 local function gentleDriftCorrect(serverStartTime, duration)
 	if syncInProgress or isMuted then return end
 	local now = workspace:GetServerTimeNow()
-	-- Jangan koreksi terlalu sering (min 10 detik antar koreksi)
+
 	if (now - lastDriftCorrection) < 10 then return end
 
 	local serverSound = getServerSound()
@@ -547,7 +512,6 @@ local function gentleDriftCorrect(serverStartTime, duration)
 	local actualPos = serverSound.TimePosition
 	local drift = math.abs(expectedPos - actualPos)
 
-	-- Hanya seek jika drift benar-benar parah (> 6.0 detik)
 	if drift > 6.0 then
 		local maxLen = (serverSound.TimeLength > 0) and serverSound.TimeLength or duration
 		if expectedPos > 0 and (maxLen <= 0 or expectedPos < maxLen - 0.5) then
@@ -559,9 +523,6 @@ local function gentleDriftCorrect(serverStartTime, duration)
 	end
 end
 
--- ====================================
--- DYNAMIC SCROLL LAYOUT CALCULATION
--- ====================================
 local function getViewportHeight()
 	local panelH = 450
 	local headerH = 46
@@ -629,11 +590,6 @@ local function scrollToSection(targetY)
 	}):Play()
 end
 
--- Nav pills removed (single scrollable page, no tab bar needed)
-
--- ====================================
--- HELPER RUNTIME
--- ====================================
 local function updateProgressBar(timePos, timeLen)
 	currentTimePos = timePos or 0
 	currentTimeLen = timeLen or 0
@@ -688,6 +644,10 @@ local function updateBeatAnalysis(dt, now)
 		else
 			beatIntensity = math.max(0, beatIntensity - (dt * 5.0))
 		end
+	end
+
+	if ThemeModule and ThemeModule.GradientSystem and ThemeModule.GradientSystem.SetBeat then
+		ThemeModule.GradientSystem.SetBeat(1.0 + (beatIntensity * 1.5))
 	end
 end
 
@@ -1195,25 +1155,17 @@ local function selectPlaylist(pType)
 	end
 end
 
--- ====================================
--- UI BUILDERS (MODULAR SCOPES - NO TOP-LEVEL REGISTER OVERFLOW)
--- ====================================
-
--- buildQuickNav removed: tab bar not needed on a single scrollable page
-
 local function buildNowPlaying()
-	-- NowPlaying berada di dalam MusicScroll agar scroll berfungsi normal.
-	-- Tingginya diatur dinamis oleh updateMusicLayout agar menutup 100% viewport,
-	-- sehingga Antrean Lagu tersembunyi di bawah sampai di-scroll ke bawah.
+
 	local np = Instance.new("Frame")
 	np.Name = "NowPlaying"
-	np.Size = UDim2.new(1, 0, 0, DIM.NP_H)  -- resized by updateMusicLayout
+	np.Size = UDim2.new(1, 0, 0, DIM.NP_H)
 	np.Position = UDim2.new(0, 0, 0, 0)
 	np.ZIndex = 1
 	np.BackgroundColor3 = Color3.fromHex("#080808")
 	np.BorderSizePixel = 0
 	np.ClipsDescendants = true
-	np.Parent = UI.musicScroll  -- inside MusicScroll so scrolling works
+	np.Parent = UI.musicScroll
 	addCorner(np, 12)
 
 	local npStroke = Instance.new("UIStroke")
@@ -2383,21 +2335,17 @@ local function buildMusicUI()
 end
 buildMusicUI()
 
--- ====================================
--- NOTIFIKASI FILTER (BARU)
--- ====================================
--- Blokir pesan sistem yang mengganggu, hanya tampilkan yang relevan ke user
 local BLOCKED_NOTIFY_PATTERNS = {
-	"^Sistem musik",         -- "Sistem musik sedang diinisialisasi...", "Sistem musik siap!..."
-	"^Menunggu playlist",    -- "Menunggu playlist dari server..."
-	"^Playlist dimuat",      -- "Playlist dimuat: X lagu tersedia"
-	"^Peringatan: Gagal",    -- "Peringatan: Gagal memuat playlist dari API."
-	"^Selamat datang",       -- "Selamat datang! Ketik /retry..."
-	"^Sinkronisasi",         -- "Sinkronisasi... (Percobaan #X)"
-	"^Tersinkron",           -- "Tersinkron! Sedang diputar:..."
-	"^Sync terlalu",         -- "Sync terlalu cepat, harap tunggu..."
-	"^Terdeteksi banyak",    -- "Terdeteksi banyak percobaan sync..."
-	"^Gagal memuat lagu",    -- "Gagal memuat lagu, melewati..."
+	"^Sistem musik",
+	"^Menunggu playlist",
+	"^Playlist dimuat",
+	"^Peringatan: Gagal",
+	"^Selamat datang",
+	"^Sinkronisasi",
+	"^Tersinkron",
+	"^Sync terlalu",
+	"^Terdeteksi banyak",
+	"^Gagal memuat lagu",
 }
 
 local function isNotifyBlocked(message)
@@ -2408,10 +2356,6 @@ local function isNotifyBlocked(message)
 	end
 	return false
 end
-
--- ====================================
--- EVENT HANDLERS (DIPERBAIKI)
--- ====================================
 
 dispatchEvent.OnClientEvent:Connect(function(event)
 	if type(event) ~= "table" or type(event.type) ~= "string" then return end
@@ -2444,7 +2388,6 @@ dispatchEvent.OnClientEvent:Connect(function(event)
 			local syncPos = calculateSyncPosition(clientState.serverStartTime, clientState.duration)
 			updateProgressBar(syncPos, clientState.duration)
 
-			-- Sinkronkan posisi audio SEKALI
 			if clientState.currentSong.id then
 				syncServerSoundPosition(clientState.currentSong.id, clientState.serverStartTime, clientState.duration)
 			end
@@ -2518,10 +2461,6 @@ dispatchEvent.OnClientEvent:Connect(function(event)
 	end
 end)
 
--- ====================================
--- MUSIC BROADCAST HANDLER (DIPERBAIKI)
--- ====================================
-
 musicBroadcast.OnClientEvent:Connect(function(broadcastType, payload)
 	if type(broadcastType) ~= "string" then return end
 	payload = payload or {}
@@ -2574,22 +2513,16 @@ musicBroadcast.OnClientEvent:Connect(function(broadcastType, payload)
 	elseif broadcastType == "Progress" then
 		currentTimePos = payload.Current or 0
 		currentTimeLen = payload.Duration or currentTimeLen
-		-- Update serverStartTime untuk interpolation
+
 		if payload.ServerStartTime and payload.ServerStartTime > 0 then
 			clientState.serverStartTime = payload.ServerStartTime
 		end
 
-		-- Koreksi drift lembut: hanya berjalan jika selisih > 1.5 detik
-		-- Tidak menyebabkan audio kasar karena threshold tinggi dan cooldown 5 detik
 		if clientState.isPlaying and clientState.serverStartTime > 0 then
 			gentleDriftCorrect(clientState.serverStartTime, clientState.duration)
 		end
 	end
 end)
-
--- ====================================
--- SYNC MUSIC HANDLER (UNTUK PEMAIN BARU)
--- ====================================
 
 musicUpdate.OnClientEvent:Connect(function(syncType, data)
 	if syncType == "SyncMusic" and data then
@@ -2627,10 +2560,6 @@ musicUpdate.OnClientEvent:Connect(function(syncType, data)
 		end
 	end
 end)
-
--- ====================================
--- SETTINGS & MENU EVENTS
--- ====================================
 
 if MenuConfig.Events and MenuConfig.Events.OnSettingChanged then
 	MenuConfig.Events.OnSettingChanged.Event:Connect(function(key, value)
@@ -2677,9 +2606,6 @@ else
 	end)
 end
 
--- ====================================
--- INITIALIZATION
--- ====================================
 task.spawn(function()
 	task.wait(1)
 	loadFavorites()

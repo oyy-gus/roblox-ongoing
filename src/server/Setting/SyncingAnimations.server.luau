@@ -1,4 +1,3 @@
--- SyncingAnimations.lua — HYBRID: Clean sync + Proper cleanup
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
@@ -7,22 +6,16 @@ local animationStartRE = remotes:WaitForChild("animationStart")
 local startSyncRE = remotes:WaitForChild("startSync")
 local changeSpeedRE = remotes:WaitForChild("changeSpeed")
 
--- Server-only modules
 local AnimationController = require(script.Parent:WaitForChild("Modules"):WaitForChild("AnimationController"))
 local AnimationLoader = require(ReplicatedStorage:WaitForChild("ContextModule"):WaitForChild("AnimationLoader"))
 
--- Shared modules
 local AnimatorUtils = require(ReplicatedStorage:WaitForChild("ContextModule"):WaitForChild("AnimatorUtils"))
 local SyncController = require(script.Parent:WaitForChild("Modules"):WaitForChild("SyncController"))
 
 local loadedAnimations = AnimationLoader.loadAnimations()
 
--- Track connections
 local playerConnections = {}
 
--- ============================================
--- CONNECTION CLEANUP
--- ============================================
 local function cleanupPlayerConnections(player)
 	if playerConnections[player] then
 		for _, connection in ipairs(playerConnections[player]) do
@@ -34,9 +27,6 @@ local function cleanupPlayerConnections(player)
 	end
 end
 
--- ============================================
--- Force unsync all followers
--- ============================================
 local function forceUnsyncAllFollowers(leavingPlayer)
 	local leavingPlayerName = leavingPlayer.Name
 
@@ -45,7 +35,7 @@ local function forceUnsyncAllFollowers(leavingPlayer)
 			local syncTarget = follower.Character:GetAttribute("Syncing")
 
 			if syncTarget == leavingPlayerName then
-				-- Stop all animations
+
 				local animator = AnimatorUtils.getAnimator(follower)
 				if animator then
 					pcall(function()
@@ -53,7 +43,6 @@ local function forceUnsyncAllFollowers(leavingPlayer)
 					end)
 				end
 
-				-- Clear attributes
 				follower.Character:SetAttribute("Syncing", nil)
 				follower.Character:SetAttribute("IsLeader", nil)
 				follower.Character:SetAttribute("FollowerCount", nil)
@@ -62,9 +51,6 @@ local function forceUnsyncAllFollowers(leavingPlayer)
 	end
 end
 
--- ============================================
--- REMOTE HANDLERS
--- ============================================
 animationStartRE.OnServerInvoke = function(player, animation, shouldPlay, speed)
 	return AnimationController.executeAnimation(player, animation, shouldPlay, speed, loadedAnimations)
 end
@@ -77,9 +63,6 @@ startSyncRE.OnServerEvent:Connect(function(player, target, condition)
 	SyncController.handleSyncRequest(player, target, condition, loadedAnimations)
 end)
 
--- ============================================
--- RESPAWN HANDLER
--- ============================================
 local function setupPlayerRespawnHandler(player)
 	cleanupPlayerConnections(player)
 
@@ -88,7 +71,7 @@ local function setupPlayerRespawnHandler(player)
 	end
 
 	local charAddedConn = player.CharacterAdded:Connect(function(character)
-		-- Wait for character to be fully loaded
+
 		local humanoid = character:WaitForChild("Humanoid", 5)
 		local hrp = character:WaitForChild("HumanoidRootPart", 5)
 
@@ -97,24 +80,20 @@ local function setupPlayerRespawnHandler(player)
 			return
 		end
 
-		-- Additional stability wait
 		task.wait(0.5)
 
-		-- Force unsync followers
 		local unsyncSuccess = pcall(function()
 			forceUnsyncAllFollowers(player)
 		end)
 
 		if not unsyncSuccess then
-			warn("[SyncSystem] Force unsync failed for", player.Name)
+			warn("[SyncSystem] Gagal memaksa unsync untuk", player.Name)
 		end
 
-		-- Clean attributes
 		character:SetAttribute("Syncing", nil)
 		character:SetAttribute("IsLeader", nil)
 		character:SetAttribute("FollowerCount", nil)
 
-		-- Update leader statuses
 		task.delay(0.2, function()
 			SyncController.updateAllLeaderStatus()
 		end)
@@ -122,14 +101,12 @@ local function setupPlayerRespawnHandler(player)
 
 	table.insert(playerConnections[player], charAddedConn)
 
-	-- Character removing handler
 	local charRemovingConn = player.CharacterRemoving:Connect(function(character)
-		-- Protected cleanup
+
 		pcall(function()
 			forceUnsyncAllFollowers(player)
 		end)
 
-		-- Clear attributes
 		character:SetAttribute("Syncing", nil)
 		character:SetAttribute("IsLeader", nil)
 		character:SetAttribute("FollowerCount", nil)
@@ -137,7 +114,6 @@ local function setupPlayerRespawnHandler(player)
 
 	table.insert(playerConnections[player], charRemovingConn)
 
-	-- Setup for existing character
 	if player.Character then
 		task.spawn(function()
 			local humanoid = player.Character:WaitForChild("Humanoid", 5)
@@ -152,38 +128,29 @@ local function setupPlayerRespawnHandler(player)
 	end
 end
 
--- ============================================
--- PLAYER REMOVING
--- ============================================
 Players.PlayerRemoving:Connect(function(leavingPlayer)
-	-- Protected cleanup
+
 	pcall(function()
 		forceUnsyncAllFollowers(leavingPlayer)
 	end)
 
 	cleanupPlayerConnections(leavingPlayer)
 
-	-- Clear attributes
 	if leavingPlayer.Character then
 		leavingPlayer.Character:SetAttribute("Syncing", nil)
 		leavingPlayer.Character:SetAttribute("IsLeader", nil)
 		leavingPlayer.Character:SetAttribute("FollowerCount", nil)
 	end
 
-	-- Update remaining players
 	task.wait(0.1)
 	SyncController.updateAllLeaderStatus()
 end)
 
--- ============================================
--- PLAYER INITIALIZATION
--- ============================================
 Players.PlayerAdded:Connect(function(player)
 	task.wait(0.5)
 	setupPlayerRespawnHandler(player)
 end)
 
--- Setup existing players
 for _, player in ipairs(Players:GetPlayers()) do
 	task.spawn(function()
 		task.wait(0.5)
@@ -191,16 +158,12 @@ for _, player in ipairs(Players:GetPlayers()) do
 	end)
 end
 
--- ============================================
--- GLOBAL CLEANUP ON SHUTDOWN
--- ============================================
 game:BindToClose(function()
-	-- Cleanup all connections
+
 	for player, _ in pairs(playerConnections) do
 		cleanupPlayerConnections(player)
 	end
 
-	-- Clear all sync data
 	for _, player in ipairs(Players:GetPlayers()) do
 		if player.Character then
 			player.Character:SetAttribute("Syncing", nil)

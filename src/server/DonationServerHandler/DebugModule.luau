@@ -1,8 +1,3 @@
--- ========================================
--- MODULE: DebugModule
--- Letakkan sebagai child dari DonationServerHandler
--- ========================================
-
 local ConfigModule = require(script.Parent.ConfigModule)
 
 local DebugModule = {}

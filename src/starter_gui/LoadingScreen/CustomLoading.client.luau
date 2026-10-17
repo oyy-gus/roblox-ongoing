@@ -1,8 +1,3 @@
--- StarterGui > LoadingScreen > CustomLoading(LocalScript)
--- FINAL FULL LOADING + GROUP ASYNC + VERIFIED SIGNAL
--- =========================
-
--- SERVICES
 local Players = game:GetService("Players")
 local GroupService = game:GetService("GroupService")
 local TweenService = game:GetService("TweenService")
@@ -11,24 +6,19 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local UserInputService = game:GetService("UserInputService")
 
--- CONFIG
 local GROUP_ID = 550072302
 local LOADING_TIME = 5
 
--- PLAYER
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- REMOVE DEFAULT LOADING
 ReplicatedFirst:RemoveDefaultLoadingScreen()
 
--- HIDE CORE GUI
 pcall(function()
 	StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
 	StarterGui:SetCore("TopbarEnabled", false)
 end)
 
--- FREEZE PLAYER
 task.spawn(function()
 	local char = player.Character or player.CharacterAdded:Wait()
 	local hum = char:WaitForChild("Humanoid")
@@ -36,7 +26,6 @@ task.spawn(function()
 	hum.JumpPower = 0
 end)
 
--- GUI ROOT
 local gui = script.Parent
 if gui:IsA("ScreenGui") then
 	gui.IgnoreGuiInset = true
@@ -45,8 +34,6 @@ if gui:IsA("ScreenGui") then
 end
 gui.Parent = playerGui
 
-
--- BACKGROUND
 local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1,0,1,0)
 bg.BackgroundColor3 = Color3.fromHex("#080808")
@@ -61,7 +48,6 @@ bgGrad.Color = ColorSequence.new({
 bgGrad.Rotation = 45
 bgGrad.Parent = bg
 
--- OVERLAY
 local overlay = Instance.new("Frame")
 overlay.Size = UDim2.new(1,0,1,0)
 overlay.BackgroundColor3 = Color3.fromHex("#000000")
@@ -69,7 +55,6 @@ overlay.BackgroundTransparency = 0.5
 overlay.BorderSizePixel = 0
 overlay.Parent = gui
 
--- CENTER CARD (Glassmorphic Container)
 local center = Instance.new("Frame")
 center.Size = UDim2.new(0,440,0,240)
 center.Position = UDim2.new(0.5,0,0.5,0)
@@ -89,7 +74,6 @@ centerStroke.Thickness = 1.2
 centerStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 centerStroke.Parent = center
 
--- TITLE
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1,0,0,46)
 title.Position = UDim2.new(0,0,0,22)
@@ -100,7 +84,6 @@ title.TextSize = 34
 title.TextColor3 = Color3.fromHex("#FFFFFF")
 title.Parent = center
 
--- SUBTITLE
 local subtitle = Instance.new("TextLabel")
 subtitle.Size = UDim2.new(1,0,0,16)
 subtitle.Position = UDim2.new(0,0,0,68)
@@ -111,7 +94,6 @@ subtitle.TextSize = 10
 subtitle.TextColor3 = Color3.fromHex("#888888")
 subtitle.Parent = center
 
--- DOTS
 local dotsFrame = Instance.new("Frame")
 dotsFrame.Size = UDim2.new(0,80,0,16)
 dotsFrame.Position = UDim2.new(0.5,0,0,96)
@@ -132,7 +114,6 @@ for i = 1,3 do
 	table.insert(dots,d)
 end
 
--- BAR BG
 local barBg = Instance.new("Frame")
 barBg.Size = UDim2.new(1,-80,0,6)
 barBg.Position = UDim2.new(0.5,0,0,130)
@@ -148,7 +129,6 @@ barStroke.Thickness = 1
 barStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 barStroke.Parent = barBg
 
--- BAR
 local bar = Instance.new("Frame")
 bar.Size = UDim2.new(0,0,1,0)
 bar.BackgroundColor3 = Color3.fromHex("#FFFFFF")
@@ -163,7 +143,6 @@ barGrad.Color = ColorSequence.new({
 })
 barGrad.Parent = bar
 
--- PERCENT
 local percent = Instance.new("TextLabel")
 percent.Size = UDim2.new(1,0,0,24)
 percent.Position = UDim2.new(0,0,0,146)
@@ -174,7 +153,6 @@ percent.TextColor3 = Color3.fromHex("#FFFFFF")
 percent.Text = "0%"
 percent.Parent = center
 
--- SKIP TEXT
 local skipText = Instance.new("TextLabel")
 skipText.Size = UDim2.new(1,0,0,20)
 skipText.Position = UDim2.new(0,0,0,182)
@@ -185,27 +163,23 @@ skipText.TextColor3 = Color3.fromHex("#777777")
 skipText.Text = ""
 skipText.Parent = center
 
--- STATE
 local isLoading = true
 local canSkip = false
 local hasPromptedGroup = false
 
--- Get/Create GroupJoined remote
 local groupJoinedRemote = ReplicatedStorage:WaitForChild("GroupJoined", 5)
 if not groupJoinedRemote then
 	task.wait(1)
 	groupJoinedRemote = ReplicatedStorage:FindFirstChild("GroupJoined")
 end
 
--- Function to notify server about group status
 local function notifyGroupStatus()
 	if groupJoinedRemote then
 		groupJoinedRemote:FireServer()
-		print("[CustomLoading] Notified server about group status")
+		print("[CustomLoading] Memberitahu server status grup")
 	end
 end
 
--- DOT ANIMATION (Sleek Monochrome Bounce)
 task.spawn(function()
 	while isLoading do
 		for _,d in ipairs(dots) do
@@ -223,12 +197,9 @@ task.spawn(function()
 	end
 end)
 
--- ====================================
--- RESTORE CORE GUI (TANPA BACKPACK)
--- ====================================
 local function restoreCoreGui()
 	pcall(function()
-		-- Enable semua KECUALI Backpack
+
 		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, true)
 		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Health, true)
 		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
@@ -236,14 +207,11 @@ local function restoreCoreGui()
 		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.SelfView, true)
 		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Captures, true)
 		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.AvatarSwitcher, true)
-		-- StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Backpack, true)  -- JANGAN enable Backpack - biarkan custom inventory handle
 
-		-- Enable topbar
 		StarterGui:SetCore("TopbarEnabled", true)
 	end)
 end
 
--- FINISH FUNCTION
 local function finish()
 	if not isLoading then return end
 	isLoading = false
@@ -261,10 +229,8 @@ local function finish()
 
 	task.wait(0.6)
 
-	-- RESTORE GUI (tanpa Backpack)
 	restoreCoreGui()
 
-	-- RESTORE PLAYER
 	if player.Character then
 		local hum = player.Character:FindFirstChild("Humanoid")
 		if hum then
@@ -275,13 +241,11 @@ local function finish()
 
 	gui:Destroy()
 
-	-- Notify server about initial group status
 	notifyGroupStatus()
 
-	-- GROUP JOIN PROMPT (ASYNC)
 	task.defer(function()
 		if not hasPromptedGroup then
-			-- Cek dulu apakah sudah member pakai IsInGroupAsync
+
 			local alreadyMember = false
 			local checkSuccess, checkResult = pcall(function()
 				return player:IsInGroupAsync(GROUP_ID)
@@ -301,29 +265,28 @@ local function finish()
 					if result == Enum.GroupMembershipStatus.Joined then
 						task.wait(1)
 						notifyGroupStatus()
-						print("[CustomLoading] Player joined, updating overhead...")
+						print("[CustomLoading] Pemain bergabung, memperbarui overhead...")
 
 					elseif result == Enum.GroupMembershipStatus.AlreadyMember then
 						notifyGroupStatus()
 
 					elseif result == Enum.GroupMembershipStatus.JoinRequestPending then
-						print("[CustomLoading] Join request pending, waiting approval")
+						print("[CustomLoading] Permintaan bergabung tertunda, menunggu persetujuan")
 
 					elseif result == Enum.GroupMembershipStatus.None then
-						print("[CustomLoading] Player declined atau tidak eligible")
+						print("[CustomLoading] Pemain menolak atau tidak memenuhi syarat")
 					end
 				else
 					warn("[CustomLoading] PromptJoinAsync gagal:", result)
 				end
 			else
-				-- Sudah member, tetap notify server buat update overhead
+
 				notifyGroupStatus()
 			end
 		end
 	end)
 end
 
--- INPUT SKIP
 UserInputService.InputBegan:Connect(function(input,gp)
 	if gp then return end
 	if canSkip then
@@ -335,7 +298,6 @@ UserInputService.InputBegan:Connect(function(input,gp)
 	end
 end)
 
--- LOADING BAR
 task.spawn(function()
 	for i = 1,100 do
 		if not isLoading then break end

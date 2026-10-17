@@ -1,6 +1,3 @@
--- MODULE: ProductUIModule (FINAL)
--- ========================================
-
 local players            = game:GetService("Players")
 local marketplaceService = game:GetService("MarketplaceService")
 local replicatedStorage  = game:GetService("ReplicatedStorage")
@@ -46,7 +43,7 @@ local function createButton(productData, index, elements, state)
 		isProcessing = false
 
 		if not success then
-			ClientDebug.warn("ERROR", "Purchase prompt error:", err)
+			ClientDebug.warn("KESALAHAN", "Kesalahan prompt pembelian:", err)
 			UIModule.notify("Error", ClientConfig.MESSAGES.PURCHASE_FAILED, ClientConfig.NOTIFICATIONS.DURATION.ERROR)
 		end
 	end)
@@ -126,12 +123,10 @@ function ProductUIModule.loadProducts(elements, state)
 
 		UIModule.showError(elements.container, msg)
 		UIModule.notify("Error", ClientConfig.MESSAGES.LOAD_FAILED, ClientConfig.NOTIFICATIONS.DURATION.ERROR)
-		ClientDebug.warn("ERROR", "Load failed:", products)
+		ClientDebug.warn("KESALAHAN", "Gagal memuat:", products)
 	end
 
 	state.isLoading = false
 end
 
 return ProductUIModule
-
--- ========================================

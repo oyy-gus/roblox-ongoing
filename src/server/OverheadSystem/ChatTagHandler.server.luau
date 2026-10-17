@@ -1,19 +1,9 @@
--- ============================================================
--- ChatTagHandler (SERVER)
--- Menyediakan data tag untuk client
--- Admin+ hanya tampilkan 1 tag tertinggi
--- Place in: ServerScriptService > OverheadSystem > ChatTagHandler
--- ============================================================
-
 local Players           = game:GetService("Players")
 local ServerStorage     = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local RoleSystem = require(ServerStorage.Modules.RoleSystem)
 
--- ============================================================
--- CONFIG CHAT TAGS
--- ============================================================
 local ChatTagConfig = {
 	TagColors = {
 		Owner     = Color3.fromRGB(255, 170, 90),
@@ -43,23 +33,14 @@ local ChatTagConfig = {
 	},
 }
 
--- ============================================================
--- HELPER: Cek apakah role adalah Staff (Admin+)
--- ============================================================
 local function isStaffRole(role)
 	return role == "Owner" or role == "Developer" or role == "Admin"
 end
 
--- ============================================================
--- GET REMOTES (Manual)
--- ============================================================
 local Remotes     = ReplicatedStorage:WaitForChild("Remotes")
 local GetChatTags = Remotes:WaitForChild("GetChatTags")
 local TagsUpdated = Remotes:WaitForChild("TagsUpdated")
 
--- ============================================================
--- HELPER: Kumpulkan tag yang dimiliki pemain
--- ============================================================
 local function getPlayerTags(player)
 	local tags = {}
 
@@ -68,9 +49,6 @@ local function getPlayerTags(player)
 	local hasStreamer = RoleSystem:HasStreamer(player)
 	local hasCreator  = RoleSystem:HasCreator(player)
 
-	-- ========================================
-	-- STAFF ROLE (Admin+): Hanya 1 tag
-	-- ========================================
 	if isStaffRole(role) then
 		return {
 			{
@@ -81,11 +59,6 @@ local function getPlayerTags(player)
 		}
 	end
 
-	-- ========================================
-	-- NON-STAFF: Bisa multiple tags
-	-- ========================================
-
-	-- Streamer
 	if role == "Streamer" or hasStreamer then
 		table.insert(tags, {
 			TagText  = ChatTagConfig.TagText.Streamer,
@@ -94,7 +67,6 @@ local function getPlayerTags(player)
 		})
 	end
 
-	-- Creator
 	if role == "Creator" or hasCreator then
 		table.insert(tags, {
 			TagText  = ChatTagConfig.TagText.Creator,
@@ -103,7 +75,6 @@ local function getPlayerTags(player)
 		})
 	end
 
-	-- VIP
 	if role == "VIP" or hasVIP then
 		table.insert(tags, {
 			TagText  = ChatTagConfig.TagText.VIP,
@@ -112,7 +83,6 @@ local function getPlayerTags(player)
 		})
 	end
 
-	-- Urutkan berdasarkan prioritas
 	table.sort(tags, function(a, b)
 		return a.Priority < b.Priority
 	end)
@@ -120,9 +90,6 @@ local function getPlayerTags(player)
 	return tags
 end
 
--- ============================================================
--- REMOTE FUNCTION: Client request tags untuk UserId
--- ============================================================
 GetChatTags.OnServerInvoke = function(requestingPlayer, targetUserId)
 	local targetPlayer = Players:GetPlayerByUserId(targetUserId)
 	if not targetPlayer then
@@ -131,9 +98,6 @@ GetChatTags.OnServerInvoke = function(requestingPlayer, targetUserId)
 	return getPlayerTags(targetPlayer)
 end
 
--- ============================================================
--- BROADCAST: Notifikasi client saat role berubah
--- ============================================================
 local function broadcastTagUpdate(player)
 	local tags = getPlayerTags(player)
 	TagsUpdated:FireAllClients(player.UserId, tags)

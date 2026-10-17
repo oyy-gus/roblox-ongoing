@@ -1,9 +1,3 @@
--- ============================================================
--- PoseConfig.lua
--- Config daftar animasi Pose (39 animasi)
--- Path: ReplicatedStorage > Emotes > PoseConfig
--- ============================================================
-
 local PoseConfig = {
 	{ name = "2017X Point", animationId = "rbxassetid://93810591156861" },
 	{ name = "Chill Guy", animationId = "rbxassetid://107466254930590" },
@@ -46,7 +40,6 @@ local PoseConfig = {
 	{ name = "Nonchalant Sit", animationId = "rbxassetid://124882373076963" },
 }
 
--- Lookup dictionary by name & aliases
 PoseConfig.Lookup = {}
 for _, item in ipairs(PoseConfig) do
 	item.id = item.animationId
@@ -54,7 +47,6 @@ for _, item in ipairs(PoseConfig) do
 	PoseConfig.Lookup[item.name] = item.animationId
 end
 
--- Support trailing space alias for Cower if referenced from legacy audit
 if PoseConfig["Cower"] then
 	PoseConfig["Cower  "] = PoseConfig["Cower"]
 	PoseConfig.Lookup["Cower  "] = PoseConfig["Cower"]

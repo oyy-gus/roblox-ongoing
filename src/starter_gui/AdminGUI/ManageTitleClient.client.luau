@@ -1,9 +1,3 @@
--- ========================================
--- MANAGE TITLE CLIENT
--- Place in: StarterGui > AdminGUI(ScreenGui) > ManageTitleClient(LocalScript)
--- Inject UI ke ManageTitlePage di admin panel
--- ========================================
-
 local Players           = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TweenService      = game:GetService("TweenService")
@@ -20,19 +14,13 @@ AdminConfig.WaitForGUIReady()
 
 local page = AdminConfig.GUI.ManageTitlePage
 if not page then
-	warn("[ManageTitleClient] ManageTitlePage not found")
+	warn("[ManageTitleClient] Halaman ManageTitle tidak ditemukan")
 	return
 end
 
--- ========================================
--- STATE
--- ========================================
 local currentTitles    = {}
 local selectedPlayer   = ""
 
--- ========================================
--- HELPERS
--- ========================================
 local function makeCorner(parent, radius)
 	local c = Instance.new("UICorner")
 	c.CornerRadius = UDim.new(0, radius)
@@ -64,11 +52,6 @@ local function makeButton(parent, text, gradientName, size, pos)
 	return btn
 end
 
--- ========================================
--- BUILD ROOT UI
--- ========================================
-
--- Main container dengan padding untuk stroke
 local container = Instance.new("Frame")
 container.Name               = "Container"
 container.Size               = UDim2.new(1, 0, 1, 0)
@@ -83,7 +66,6 @@ containerPad.PaddingLeft   = UDim.new(0, 4)
 containerPad.PaddingRight  = UDim.new(0, 4)
 containerPad.Parent        = container
 
--- Header bar
 local headerBar = Instance.new("Frame")
 headerBar.Name             = "HeaderBar"
 headerBar.Size             = UDim2.new(1, 0, 0, 40)
@@ -94,7 +76,6 @@ headerBar.Parent           = container
 makeCorner(headerBar, 8)
 ThemeModule.CreateAnimatedStroke(headerBar, 1, "Primary", 1.2)
 
--- Inner padding untuk header content
 local headerPad = Instance.new("UIPadding")
 headerPad.PaddingTop    = UDim.new(0, 4)
 headerPad.PaddingBottom = UDim.new(0, 4)
@@ -102,13 +83,12 @@ headerPad.PaddingLeft   = UDim.new(0, 6)
 headerPad.PaddingRight  = UDim.new(0, 6)
 headerPad.Parent        = headerBar
 
--- Player dropdown button
 local playerDropBtn = Instance.new("TextButton")
 playerDropBtn.Size             = UDim2.new(0.55, -4, 1, 0)
 playerDropBtn.Position         = UDim2.new(0, 0, 0, 0)
 playerDropBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 playerDropBtn.BorderSizePixel  = 0
-playerDropBtn.Text             = "  Select Player ▼"
+playerDropBtn.Text             = "  Pilih Pemain ▼"
 playerDropBtn.TextColor3       = ThemeModule.Colors.TextMuted
 playerDropBtn.TextSize         = 12
 playerDropBtn.Font             = Enum.Font.GothamMedium
@@ -118,13 +98,12 @@ playerDropBtn.Parent           = headerBar
 makeCorner(playerDropBtn, 6)
 ThemeModule.CreateGradientStroke(playerDropBtn, 1, "Primary", 90)
 
--- Remove All button
 local removeAllBtn = Instance.new("TextButton")
 removeAllBtn.Size             = UDim2.new(0.45, -4, 1, 0)
 removeAllBtn.Position         = UDim2.new(0.55, 4, 0, 0)
 removeAllBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 removeAllBtn.BorderSizePixel  = 0
-removeAllBtn.Text             = "x Remove All"
+removeAllBtn.Text             = "x Hapus Semua"
 removeAllBtn.TextColor3       = ThemeModule.Colors.TextWhite
 removeAllBtn.TextSize         = 11
 removeAllBtn.Font             = Enum.Font.GothamBold
@@ -140,7 +119,6 @@ removeAllBtn.MouseLeave:Connect(function()
 	TweenService:Create(removeAllBtn, TweenInfo.new(0.15), { BackgroundTransparency = 0 }):Play()
 end)
 
--- Dropdown list
 local dropList = Instance.new("ScrollingFrame")
 dropList.Name                 = "DropList"
 dropList.Size                 = UDim2.new(0.55, -4, 0, 0)
@@ -169,7 +147,6 @@ dropPad.PaddingLeft   = UDim.new(0, 4)
 dropPad.PaddingRight  = UDim.new(0, 4)
 dropPad.Parent        = dropList
 
--- Titles scroll list - dengan margin dari header
 local titlesScroll = Instance.new("ScrollingFrame")
 titlesScroll.Name                 = "TitlesScroll"
 titlesScroll.Size                 = UDim2.new(1, 0, 1, -48)
@@ -199,15 +176,12 @@ titlesPad.PaddingLeft   = UDim.new(0, 2)
 titlesPad.PaddingRight  = UDim.new(0, 2)
 titlesPad.Parent        = titlesScroll
 
--- ========================================
--- DROPDOWN LOGIC
--- ========================================
 local currentPlayerList = {}
 
 local function updateDropdown()
 	for _, c in ipairs(dropList:GetChildren()) do
-		if c:IsA("TextButton") or (c:IsA("TextLabel") and c.Name == "EmptyLabel") then 
-			c:Destroy() 
+		if c:IsA("TextButton") or (c:IsA("TextLabel") and c.Name == "EmptyLabel") then
+			c:Destroy()
 		end
 	end
 
@@ -216,7 +190,7 @@ local function updateDropdown()
 		empty.Name               = "EmptyLabel"
 		empty.Size               = UDim2.new(1, -8, 0, 30)
 		empty.BackgroundTransparency = 1
-		empty.Text               = "⚠️ No players online"
+		empty.Text               = "⚠️ Tidak ada pemain online"
 		empty.TextColor3         = ThemeModule.Colors.Error
 		empty.TextSize           = 12
 		empty.Font               = Enum.Font.GothamMedium
@@ -295,9 +269,6 @@ playerDropBtn.MouseButton1Click:Connect(function()
 	updateDropdown()
 end)
 
--- ========================================
--- DISPLAY TITLES
--- ========================================
 local function displayTitles(titles)
 	for _, c in ipairs(titlesScroll:GetChildren()) do
 		if not c:IsA("UIListLayout") and not c:IsA("UIPadding") then
@@ -325,7 +296,7 @@ local function displayTitles(titles)
 		local lbl = Instance.new("TextLabel")
 		lbl.Size                 = UDim2.new(1, 0, 1, 0)
 		lbl.BackgroundTransparency = 1
-		lbl.Text                 = "📭  No custom titles for this player"
+		lbl.Text                 = "📭  Tidak ada gelar khusus untuk pemain ini"
 		lbl.TextColor3           = ThemeModule.Colors.TextGray
 		lbl.TextSize             = 13
 		lbl.Font                 = Enum.Font.GothamMedium
@@ -347,7 +318,6 @@ local function displayTitles(titles)
 		makeCorner(card, 8)
 		ThemeModule.CreateGradientStroke(card, 1, "Primary", 45)
 
-		-- Slot badge
 		local slotBadge = Instance.new("Frame")
 		slotBadge.Size             = UDim2.new(0, 54, 0, 22)
 		slotBadge.Position         = UDim2.new(0, 10, 0, 10)
@@ -366,7 +336,6 @@ local function displayTitles(titles)
 		slotLbl.Font                 = Enum.Font.GothamBold
 		slotLbl.Parent               = slotBadge
 
-		-- Title text
 		local titleLbl = Instance.new("TextLabel")
 		titleLbl.Size             = UDim2.new(1, -140, 0, 26)
 		titleLbl.Position         = UDim2.new(0, 10, 0, 36)
@@ -380,7 +349,6 @@ local function displayTitles(titles)
 		titleLbl.Parent           = card
 		ThemeModule.CreatePrimaryGradient(titleLbl, 90, 1.5)
 
-		-- Info line
 		local infoLbl = Instance.new("TextLabel")
 		infoLbl.Size             = UDim2.new(1, -140, 0, 18)
 		infoLbl.Position         = UDim2.new(0, 10, 0, 64)
@@ -396,14 +364,12 @@ local function displayTitles(titles)
 		infoLbl.TextTruncate     = Enum.TextTruncate.AtEnd
 		infoLbl.Parent           = card
 
-		-- Edit button
-		local editBtn = makeButton(card, "✏️ Edit", "Warning",
+		local editBtn = makeButton(card, "✏️ Ubah", "Warning",
 			UDim2.new(0, 56, 0, 26),
 			UDim2.new(1, -124, 0, 10))
 		editBtn.TextSize = 10
 
-		-- Remove button - dengan x
-		local removeBtn = makeButton(card, "x Delete", "Error",
+		local removeBtn = makeButton(card, "x Hapus", "Error",
 			UDim2.new(0, 54, 0, 26),
 			UDim2.new(1, -64, 0, 10))
 		removeBtn.TextSize = 10
@@ -416,8 +382,8 @@ local function displayTitles(titles)
 		end)
 
 		removeBtn.MouseButton1Click:Connect(function()
-			TweenService:Create(card, TweenInfo.new(0.2), { 
-				BackgroundTransparency = 0.5 
+			TweenService:Create(card, TweenInfo.new(0.2), {
+				BackgroundTransparency = 0.5
 			}):Play()
 			task.wait(0.2)
 			TitleEvent:FireServer("RemoveTitleSlot", selectedPlayer, slotNum)
@@ -427,23 +393,17 @@ local function displayTitles(titles)
 	end
 end
 
--- ========================================
--- REMOVE ALL
--- ========================================
 removeAllBtn.MouseButton1Click:Connect(function()
 	if selectedPlayer == "" then
-		AdminConfig.ShowNotification("Please select a player first", "warning")
+		AdminConfig.ShowNotification("Silakan pilih pemain terlebih dahulu", "warning")
 		return
 	end
 	TitleEvent:FireServer("RemoveAllTitles", selectedPlayer)
-	AdminConfig.ShowNotification("All titles removed for " .. selectedPlayer, "success")
+	AdminConfig.ShowNotification("Seluruh gelar dihapus untuk " .. selectedPlayer, "success")
 	task.wait(0.3)
 	TitleEvent:FireServer("RequestPlayerTitles", selectedPlayer)
 end)
 
--- ========================================
--- SERVER EVENTS
--- ========================================
 TitleEvent.OnClientEvent:Connect(function(action, data)
 	if action == "PlayerList" then
 		currentPlayerList = data or {}
@@ -459,4 +419,4 @@ AdminConfig.Events.OnTabChanged.Event:Connect(function(tabName)
 	end
 end)
 
-print("✅ [ManageTitleClient] Loaded!")
+print("✅ [ManageTitleClient] Berhasil dimuat!")

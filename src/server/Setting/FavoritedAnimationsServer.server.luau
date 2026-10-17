@@ -1,10 +1,10 @@
 local DataStoreService = game:GetService("DataStoreService")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local favoritedAnimationsStore = DataStoreService:GetDataStore("FavoritedAnimations")
-local replicatedStorage = game:GetService("ReplicatedStorage")
-local Events = replicatedStorage:WaitForChild("SyncRemotes")
+local Events = ReplicatedStorage:WaitForChild("SyncRemotes")
 local updateFavoritedAnimationsEvent = Events:WaitForChild("updateFavoritedAnimationsEvent")
 
 Players.PlayerAdded:Connect(function(player)
@@ -13,25 +13,21 @@ Players.PlayerAdded:Connect(function(player)
 	end)
 
 	if success and type(savedData) == "string" then
-		local decodedData = HttpService:JSONDecode(savedData)
-		if type(decodedData) == "table" then
-			player:SetAttribute("SavedFavoritedAnimations", savedData) 
-		else
+		local decodeSuccess, decodedData = pcall(function()
+			return HttpService:JSONDecode(savedData)
+		end)
+		if decodeSuccess and type(decodedData) == "table" then
+			player:SetAttribute("SavedFavoritedAnimations", savedData)
 		end
-	else
 	end
 end)
 
 Players.PlayerRemoving:Connect(function(player)
 	local savedData = player:GetAttribute("SavedFavoritedAnimations")
 	if savedData then
-		local success, errorMessage = pcall(function()
+		pcall(function()
 			favoritedAnimationsStore:SetAsync("Player_" .. player.UserId, savedData)
 		end)
-
-		if not success then
-		else
-		end
 	end
 end)
 
@@ -42,6 +38,5 @@ updateFavoritedAnimationsEvent.OnServerEvent:Connect(function(player, jsonData)
 
 	if success and type(decodedData) == "table" then
 		player:SetAttribute("SavedFavoritedAnimations", jsonData)
-	else
 	end
 end)

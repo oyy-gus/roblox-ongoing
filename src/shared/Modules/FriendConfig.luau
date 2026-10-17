@@ -1,6 +1,3 @@
--- Place in: ReplicatedStorage > Modules > FriendConfig (ModuleScript)
--- ========================================
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local StarterGui = game:GetService("StarterGui")
@@ -9,9 +6,6 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local FriendConfig = {}
 
--- ========================================
--- WARNA FRIEND BUTTON
--- ========================================
 FriendConfig.Colors = {
 	Add         = Color3.fromRGB(59, 130, 246),
 	AddHover    = Color3.fromRGB(79, 150, 255),
@@ -23,9 +17,6 @@ FriendConfig.Colors = {
 	AlreadyHover = Color3.fromRGB(65, 65, 70),
 }
 
--- ========================================
--- STATUS CONFIG
--- ========================================
 FriendConfig.StatusConfig = {
 	[Enum.FriendStatus.Unknown] = {
 		text = "👤 Tambah Teman",
@@ -64,33 +55,21 @@ FriendConfig.StatusConfig = {
 	},
 }
 
--- ========================================
--- POLLING SETTINGS
--- ========================================
 FriendConfig.Polling = {
 	NormalInterval = 3,
 	IntensiveInterval = 0.5,
 	IntensiveDuration = 20,
 }
 
--- ========================================
--- EMOJI INDICATORS
--- ========================================
 FriendConfig.Indicators = {
 	[Enum.FriendStatus.Friend] = " 👥",
 	[Enum.FriendStatus.FriendRequestSent] = " ⏳",
 	[Enum.FriendStatus.FriendRequestReceived] = " ✉️",
 }
 
--- ========================================
--- CACHE
--- ========================================
 local countCache = {}
 local CACHE_DURATION = 60
 
--- ========================================
--- FORMAT NUMBER
--- ========================================
 function FriendConfig.FormatNumber(num)
 	if not num or num == 0 then
 		return "0"
@@ -103,9 +82,6 @@ function FriendConfig.FormatNumber(num)
 	end
 end
 
--- ========================================
--- ★ GET FRIEND COUNT (Client-side via Pages)
--- ========================================
 function FriendConfig.GetFriendCount(userId)
 	if not userId then return 0 end
 
@@ -135,39 +111,33 @@ function FriendConfig.GetFriendCount(userId)
 	end
 end
 
--- ========================================
--- ★ GET FOLLOWER COUNT (Via Server - FIXED)
--- ========================================
 function FriendConfig.GetFollowerCount(userId)
 	if not userId then return 0 end
 
-	-- Check local cache first
 	local cacheKey = "followers_" .. tostring(userId)
 	local cached = countCache[cacheKey]
 	if cached and (tick() - cached.time) < CACHE_DURATION then
 		return cached.count
 	end
 
-	-- Wait for remotes
 	local remotes = ReplicatedStorage:WaitForChild("Remotes", 5)
-	if not remotes then 
+	if not remotes then
 		warn("[FriendConfig] Remotes folder tidak ditemukan")
-		return cached and cached.count or 0 
+		return cached and cached.count or 0
 	end
 
 	local getFollowerCount = remotes:WaitForChild("GetFollowerCount", 5)
-	if not getFollowerCount then 
+	if not getFollowerCount then
 		warn("[FriendConfig] GetFollowerCount remote tidak ditemukan")
-		return cached and cached.count or 0 
+		return cached and cached.count or 0
 	end
 
-	-- Request from server
 	local success, result = pcall(function()
 		return getFollowerCount:InvokeServer(userId)
 	end)
 
 	if success and result then
-		-- Cache locally
+
 		countCache[cacheKey] = { count = result, time = tick() }
 		return result
 	else
@@ -176,9 +146,6 @@ function FriendConfig.GetFollowerCount(userId)
 	end
 end
 
--- ========================================
--- ★ GET FOLLOWING COUNT (Via Server)
--- ========================================
 function FriendConfig.GetFollowingCount(userId)
 	if not userId then return 0 end
 
@@ -206,9 +173,6 @@ function FriendConfig.GetFollowingCount(userId)
 	end
 end
 
--- ========================================
--- ★ GET ALL SOCIAL COUNTS (Async)
--- ========================================
 function FriendConfig.GetSocialCountsAsync(userId, callback)
 	if not callback then return end
 
@@ -217,17 +181,14 @@ function FriendConfig.GetSocialCountsAsync(userId, callback)
 		local followers = 0
 		local following = 0
 
-		-- Get friend count (client-side)
 		pcall(function()
 			friends = FriendConfig.GetFriendCount(userId)
 		end)
 
-		-- Get follower count (server-side)
 		pcall(function()
 			followers = FriendConfig.GetFollowerCount(userId)
 		end)
 
-		-- Get following count (server-side)
 		pcall(function()
 			following = FriendConfig.GetFollowingCount(userId)
 		end)
@@ -240,9 +201,6 @@ function FriendConfig.GetSocialCountsAsync(userId, callback)
 	end)
 end
 
--- ========================================
--- CLEAR CACHE
--- ========================================
 function FriendConfig.ClearCache(userId)
 	if userId then
 		countCache["friends_" .. tostring(userId)] = nil
@@ -253,9 +211,6 @@ function FriendConfig.ClearCache(userId)
 	end
 end
 
--- ========================================
--- FRIEND TRACKER CLASS
--- ========================================
 local FriendTracker = {}
 FriendTracker.__index = FriendTracker
 
@@ -305,8 +260,8 @@ function FriendTracker:IsIntensivePolling()
 end
 
 function FriendTracker:GetPollInterval()
-	return self:IsIntensivePolling() 
-		and FriendConfig.Polling.IntensiveInterval 
+	return self:IsIntensivePolling()
+		and FriendConfig.Polling.IntensiveInterval
 		or FriendConfig.Polling.NormalInterval
 end
 
@@ -412,7 +367,6 @@ function FriendTracker:SendFriendRequest(targetPlayer)
 		return true
 	end
 
-	-- Fallback
 	pcall(function()
 		GuiService:InspectPlayerFromUserId(targetPlayer.UserId)
 	end)
@@ -475,9 +429,6 @@ function FriendTracker:Destroy()
 	self.onStatusChanged = nil
 end
 
--- ========================================
--- EXPORT
--- ========================================
 FriendConfig.FriendTracker = FriendTracker
 
 function FriendConfig.GetFriendStatus(targetPlayer)
@@ -515,6 +466,3 @@ function FriendConfig.CreateTracker()
 end
 
 return FriendConfig
-
--- ========================================
--- MENU CONFIG MODULE

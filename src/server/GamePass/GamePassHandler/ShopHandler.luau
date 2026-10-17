@@ -1,8 +1,3 @@
--- ====================================
--- SHOP HANDLER - VIP ONLY VERSION
--- Place in: StarterScriptService > GamePass(Folder) > GamePassHandler(Script) > ShopHandler(ModuleScript)
--- ====================================
-
 local Config = require(script.Parent.Config)
 local Logger = require(script.Parent.Logger)
 
@@ -39,7 +34,7 @@ function ShopHandler:GetShopData(player)
 		}
 	}
 
-	Logger:Debug(string.format("Shop data retrieved for %s (VIP: %s)", 
+	Logger:Debug(string.format("Shop data retrieved for %s (VIP: %s)",
 		player.Name, tostring(ownership.VIP)))
 
 	return data
@@ -68,7 +63,7 @@ function ShopHandler:PromptPurchase(player, gamepassType)
 		return {success = false, error = "Invalid gamepass configuration"}
 	end
 
-	Logger:Info(string.format("Prompting %s for VIP (ID: %d)", 
+	Logger:Info(string.format("Prompting %s for VIP (ID: %d)",
 		player.Name, gamepassId))
 
 	local success, errorMsg = pcall(function()
@@ -86,7 +81,7 @@ end
 function ShopHandler:HandlePurchaseFinished(player, purchasedPassID, purchaseSuccess)
 	if not self.validationManager:ValidatePlayer(player) then return end
 
-	Logger:Info(string.format("Gamepass Purchase - Player: %s, ID: %d, Success: %s", 
+	Logger:Info(string.format("Gamepass Purchase - Player: %s, ID: %d, Success: %s",
 		player.Name, purchasedPassID, tostring(purchaseSuccess)))
 
 	if not purchaseSuccess then
@@ -94,7 +89,6 @@ function ShopHandler:HandlePurchaseFinished(player, purchasedPassID, purchaseSuc
 		return
 	end
 
-	-- Check if it's VIP
 	local gamepassType = nil
 	local vipIds = self.roleSystem.Config.GamePasses.VIP
 
@@ -138,7 +132,7 @@ function ShopHandler:HandlePurchaseFinished(player, purchasedPassID, purchaseSuc
 end
 
 function ShopHandler:UpdatePlayerRole(player)
-	if not self.validationManager:ValidatePlayer(player) then 
+	if not self.validationManager:ValidatePlayer(player) then
 		return nil
 	end
 

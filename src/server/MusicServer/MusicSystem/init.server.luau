@@ -1,8 +1,3 @@
--- ====================================
--- MUSIC SYSTEM (FIXED) — SERVER SCRIPT
--- Place in: ServerScriptService > MusicServer(Folder) > MusicSystem(Script)
--- ====================================
-
 local ServerStorage     = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players           = game:GetService("Players")
@@ -44,7 +39,7 @@ local CONFIG = {
 	AUTO_PLAYLIST_ENABLED = true,
 
 	SYNC_DEBOUNCE_TIME       = 0.3,
-	PROGRESS_UPDATE_INTERVAL = 3,  -- DIPERBESAR: dari 1 ke 3 detik (client interpolasi sendiri)
+	PROGRESS_UPDATE_INTERVAL = 3,
 	BATCH_UPDATE_DELAY       = 0.1,
 	PRELOAD_TOP_SONGS        = 5,
 	MAX_LOAD_RETRIES         = 2,
@@ -59,9 +54,6 @@ local SystemState = {
 	FailedLoads            = {},
 }
 
--- ====================================
--- REMOTES
--- ====================================
 local remoteFolder = ReplicatedStorage:FindFirstChild("MusicRemotes")
 if not remoteFolder then
 	remoteFolder        = Instance.new("Folder")
@@ -94,23 +86,16 @@ local Remotes = {
 	RequestSync    = requestSync,
 }
 
--- Handler GetPlaylist: kirim cached playlist ke klien
 getPlaylist.OnServerInvoke = function(player)
 	return MusicModule:GetAllMusic()
 end
 
--- ====================================
--- MANAGERS
--- ====================================
 local queueManager      = MusicQueueManager.new(CONFIG)
 local playbackManager   = MusicPlaybackManager.new(CONFIG)
 local validationService = MusicValidationService.new(CONFIG)
 local skipVoteManager   = MusicSkipVoteManager.new(CONFIG, RoleSystem)
 local playlistManager   = MusicPlaylistManager.new(CONFIG)
 
--- ====================================
--- RATE LIMITER
--- ====================================
 local RateLimiter = {}
 RateLimiter.playerLimits = {}
 
@@ -128,9 +113,6 @@ function RateLimiter:Cleanup(userId)
 	self.playerLimits[userId] = nil
 end
 
--- ====================================
--- RETRY TRACKER
--- ====================================
 local RetryTracker = {}
 RetryTracker.playerRetries = {}
 
@@ -160,9 +142,6 @@ function RetryTracker:Cleanup(userId)
 	self.playerRetries[userId] = nil
 end
 
--- ====================================
--- DISPATCHER
--- ====================================
 local Dispatcher = {}
 
 function Dispatcher:SendToClient(player, eventType, payload)
@@ -228,9 +207,6 @@ function Dispatcher:SyncToPlayer(player)
 	end
 end
 
--- ====================================
--- BATCHED SYNC
--- ====================================
 local syncBatch = { queueUpdatePending = false, stateUpdatePending = false }
 
 local function scheduleBatchedSync(syncType)
@@ -251,9 +227,6 @@ local function scheduleBatchedSync(syncType)
 	end
 end
 
--- ====================================
--- LAZY SONG LOADING
--- ====================================
 local function loadSongOnDemand(musicId, musicTitle)
 	if SystemState.LoadingQueue[musicId] then
 		local startWait = workspace:GetServerTimeNow()
@@ -282,9 +255,6 @@ local function loadSongOnDemand(musicId, musicTitle)
 	end
 end
 
--- ====================================
--- PRELOAD NEXT SONG
--- ====================================
 local function preloadNextSong()
 	if not queueManager:IsEmpty() then
 		local queue = queueManager:GetQueue()
@@ -300,9 +270,6 @@ local function preloadNextSong()
 	end
 end
 
--- ====================================
--- PLAYBACK
--- ====================================
 local playNextSong
 local isPlayingNext = false
 
@@ -368,9 +335,6 @@ playNextSong = function()
 	end
 end
 
--- ====================================
--- ACTION HANDLERS
--- ====================================
 local ActionHandlers = {}
 
 function ActionHandlers:ADD_TO_QUEUE(player, data)
@@ -418,12 +382,11 @@ function ActionHandlers:ADD_TO_QUEUE(player, data)
 			musicData = vdata
 		end
 
-		-- Ambil durasi ASLI lagu
 		local sound, cachedDur = MusicStorageHandler:GetSound(musicData.id)
 		if cachedDur and cachedDur > 0 then
 			musicData.Duration = math.round(cachedDur)
 		elseif not musicData.Duration or musicData.Duration <= 0 then
-			-- Muat Sound on-demand untuk membaca TimeLength asli
+
 			local realDur = loadSongOnDemand(musicData.id, musicData.judul)
 			if realDur and realDur > 0 then
 				musicData.Duration = math.round(realDur)
@@ -432,7 +395,6 @@ function ActionHandlers:ADD_TO_QUEUE(player, data)
 			end
 		end
 
-		-- Simpan durasi ke playlist cache agar instan pada panggilan berikutnya
 		if isFromPlaylist and musicData.Duration > 0 then
 			local found = MusicModule:GetMusicById(musicId)
 			if found then found.Duration = musicData.Duration end
@@ -446,13 +408,12 @@ function ActionHandlers:ADD_TO_QUEUE(player, data)
 		local queuePosition = queueManager:GetSize()
 		Dispatcher:Notify(player, string.format("'%s' ditambahkan ke antrean (Posisi: #%d)", musicData.judul, queuePosition))
 
-		-- Jika saat dimasukkan durasi masih berupa fallback 180s (misal karena delay jaringan), perbarui di background
 		if musicData.Duration == CONFIG.DEFAULT_SONG_DURATION then
 			task.spawn(function()
 				local realDur = loadSongOnDemand(musicData.id, musicData.judul)
 				if realDur and realDur > 0 and realDur ~= CONFIG.DEFAULT_SONG_DURATION then
 					musicData.Duration = math.round(realDur)
-					-- Update durasi di dalam entry queue yang sebenarnya
+
 					queueManager:UpdateDuration(musicData.id, realDur)
 					if isFromPlaylist then
 						local found = MusicModule:GetMusicById(musicId)
@@ -477,7 +438,6 @@ function ActionHandlers:CONTROL_NEXT(player, data)
 	local currentSong = playbackManager:GetCurrentSong()
 	if not currentSong then Dispatcher:Notify(player, "Tidak ada lagu yang sedang diputar!"); return end
 
-	-- Admin (roleHierarchy >= 5) bisa langsung skip instan
 	if roleHierarchy >= 5 then
 		if not RateLimiter:CheckLimit(player, "CONTROL_NEXT") then
 			Dispatcher:Notify(player, "Tunggu sebentar sebelum skip lagi!")
@@ -491,7 +451,6 @@ function ActionHandlers:CONTROL_NEXT(player, data)
 		return
 	end
 
-	-- Jika vote skip sudah aktif, jadikan klik ini sebagai vote YES
 	if skipVoteManager:IsActive() then
 		ActionHandlers:SKIP_VOTE_YES(player, data)
 		return
@@ -507,7 +466,7 @@ function ActionHandlers:CONTROL_NEXT(player, data)
 		Dispatcher:Notify(player, msg)
 	else
 		Dispatcher:NotifyAll(string.format("%s memulai vote skip untuk: %s", player.DisplayName, currentSong.judul or "Unknown"))
-		-- Jika langsung lolos (misal hanya 1 pemain di server)
+
 		if not skipVoteManager:IsActive() then
 			task.wait(0.5)
 			playNextSong()
@@ -543,9 +502,6 @@ function ActionHandlers:SKIP_VOTE_NO(player, data)
 	end
 end
 
--- ====================================
--- MAIN DISPATCHER
--- ====================================
 dispatchAction.OnServerEvent:Connect(function(player, action)
 	if not validationService:ValidatePlayer(player) then return end
 	if type(action) ~= "table" or type(action.type) ~= "string" then return end
@@ -562,30 +518,23 @@ dispatchAction.OnServerEvent:Connect(function(player, action)
 	end
 end)
 
--- ====================================
--- REQUEST SYNC (DIPERBAIKI: tanpa notifikasi)
--- ====================================
 requestSync.OnServerEvent:Connect(function(player)
 	if not validationService:ValidatePlayer(player) then return end
 	if not RateLimiter:CheckLimit(player, "REQUEST_SYNC") then
-		return  -- DIHAPUS: notifikasi "Sync terlalu cepat"
+		return
 	end
 	RetryTracker:Track(player)
-	-- DIHAPUS: semua notifikasi sync (Sinkronisasi..., Tersinkron!, dll)
-	-- Langsung sync tanpa delay
+
 	Dispatcher:SyncToPlayer(player)
 	RetryTracker:Reset(player)
 end)
 
--- ====================================
--- PLAYER MANAGEMENT
--- ====================================
 Players.PlayerAdded:Connect(function(player)
 	RoleSystem:InitializePlayer(player)
 	task.wait(0.5)
 	if validationService:ValidatePlayer(player) then
 		Dispatcher:SyncToPlayer(player)
-		-- DIHAPUS: semua notifikasi welcome dan status sistem
+
 	end
 
 	player.CharacterAdded:Connect(function(character)
@@ -594,8 +543,7 @@ Players.PlayerAdded:Connect(function(player)
 		task.wait(0.5)
 		if validationService:ValidatePlayer(player) then
 			Dispatcher:SyncToPlayer(player)
-			-- Verifikasi sync: kirim ulang setelah 1.5 detik untuk memastikan
-			-- client sudah siap dan posisi audio tepat
+
 			task.delay(1.5, function()
 				if validationService:ValidatePlayer(player) then
 					Dispatcher:SyncToPlayer(player)
@@ -603,7 +551,6 @@ Players.PlayerAdded:Connect(function(player)
 			end)
 		end
 	end)
-
 
 	player.Chatted:Connect(function(message)
 		local role = RoleSystem:GetPlayerRole(player)
@@ -662,7 +609,7 @@ Players.PlayerAdded:Connect(function(player)
 						Dispatcher:SyncToPlayer(plr)
 					end
 				end
-				-- DIHAPUS: NotifyAll untuk retryall
+
 				Dispatcher:Notify(player, "Musik semua player telah di-resync!")
 			end
 		end
@@ -678,13 +625,9 @@ Players.PlayerRemoving:Connect(function(player)
 	scheduleBatchedSync("queue")
 end)
 
--- ====================================
--- INITIALIZATION (TANPA NOTIFIKASI)
--- ====================================
 MusicStorageHandler:StartAutoCleanup()
 
 task.spawn(function()
-	-- DIHAPUS: semua Dispatcher:NotifyAll() selama inisialisasi
 
 	local bridge    = require(ServerStorage:WaitForChild("Modules"):WaitForChild("MusicPlaylistBridge"))
 	local fetchList = bridge:WaitUntilReady(30)
@@ -722,7 +665,7 @@ task.spawn(function()
 	end
 
 	SystemState.InitialPreloadComplete = true
-	-- DIHAPUS: Dispatcher:NotifyAll("Sistem musik siap!...")
+
 	print(string.format("[MusicSystem] Sistem musik siap! %d lagu tersedia", #musicList))
 	task.wait(0.5)
 	SystemState.IsReady = true

@@ -1,13 +1,7 @@
--- ============================================================
--- GiveTitleSystem (Main Server Script)
--- Place in: ServerScriptService > GiveSystem(Folder) > GiveTitleSystem(Script)
--- ============================================================
-
 local Players        = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage  = game:GetService("ServerStorage")
 
--- Remote Event
 local TitleEvent = ReplicatedStorage:FindFirstChild("TitleEvent")
 if not TitleEvent then
 	TitleEvent = Instance.new("RemoteEvent")
@@ -15,24 +9,19 @@ if not TitleEvent then
 	TitleEvent.Parent = ReplicatedStorage
 end
 
--- Modules
 local ModulesFolder   = script.Parent:WaitForChild("Title")
 local DataStoreModule = require(ModulesFolder:WaitForChild("DataStoreModule"))
 local TitleRenderer   = require(ModulesFolder:WaitForChild("TitleRenderer"))
 local PlayerManager   = require(ModulesFolder:WaitForChild("PlayerManager"))
 local RoleSystem      = require(ServerStorage.Modules.RoleSystem)
 
--- Cek apakah player adalah admin (Owner / Developer / Admin)
 local function isAdmin(player)
 	local role = RoleSystem:GetPlayerRole(player)
 	return role == "Owner" or role == "Developer" or role == "Admin"
 end
 
--- ============================================================
--- REMOTE EVENT HANDLER
--- ============================================================
 TitleEvent.OnServerEvent:Connect(function(player, action, ...)
-	-- Buka admin panel
+
 	if action == "RequestAdminPanel" then
 		if isAdmin(player) then
 			TitleEvent:FireClient(player, "IsAdmin")
@@ -41,7 +30,6 @@ TitleEvent.OnServerEvent:Connect(function(player, action, ...)
 		return
 	end
 
-	-- Ambil list player online
 	if action == "RequestPlayerList" then
 		if isAdmin(player) then
 			TitleEvent:FireClient(player, "PlayerList", PlayerManager:GetPlayerList())
@@ -49,7 +37,6 @@ TitleEvent.OnServerEvent:Connect(function(player, action, ...)
 		return
 	end
 
-	-- Ambil titles milik player tertentu
 	if action == "RequestPlayerTitles" then
 		if isAdmin(player) then
 			local targetName = ...
@@ -72,10 +59,8 @@ TitleEvent.OnServerEvent:Connect(function(player, action, ...)
 		return
 	end
 
-	-- Semua action di bawah harus admin
 	if not isAdmin(player) then return end
 
-	-- Set / update satu slot title
 	if action == "SetTitleSlot" then
 		local targetName, slot, text, mode, colorTemplate, _, height, fontStyle, distanceLevel = ...
 		slot = math.clamp(tonumber(slot) or 1, 1, 14)
@@ -100,9 +85,8 @@ TitleEvent.OnServerEvent:Connect(function(player, action, ...)
 		local target = Players:FindFirstChild(targetName)
 		if target then apply(target.UserId); return end
 		local id = PlayerManager:ResolveUserIdByName(targetName)
-		if id then apply(id) else warn("[GiveTitleSystem] SetTitleSlot: cannot resolve:", targetName) end
+		if id then apply(id) else warn("[GiveTitleSystem] SetTitleSlot: tidak dapat menemukan:", targetName) end
 
-		-- Hapus satu slot title
 	elseif action == "RemoveTitleSlot" then
 		local targetName, slot = ...
 		slot = math.clamp(tonumber(slot) or 1, 1, 14)
@@ -120,9 +104,8 @@ TitleEvent.OnServerEvent:Connect(function(player, action, ...)
 		local target = Players:FindFirstChild(targetName)
 		if target then remove(target.UserId); return end
 		local id = PlayerManager:ResolveUserIdByName(targetName)
-		if id then remove(id) else warn("[GiveTitleSystem] RemoveTitleSlot: cannot resolve:", targetName) end
+		if id then remove(id) else warn("[GiveTitleSystem] RemoveTitleSlot: tidak dapat menemukan:", targetName) end
 
-		-- Hapus semua titles
 	elseif action == "RemoveAllTitles" then
 		local targetName = ...
 
@@ -137,17 +120,14 @@ TitleEvent.OnServerEvent:Connect(function(player, action, ...)
 		local target = Players:FindFirstChild(targetName)
 		if target then removeAll(target.UserId); return end
 		local id = PlayerManager:ResolveUserIdByName(targetName)
-		if id then removeAll(id) else warn("[GiveTitleSystem] RemoveAllTitles: cannot resolve:", targetName) end
+		if id then removeAll(id) else warn("[GiveTitleSystem] RemoveAllTitles: tidak dapat menemukan:", targetName) end
 	end
 end)
 
--- ============================================================
--- PLAYER MANAGEMENT
--- ============================================================
 local function onPlayerAdded(player)
-	-- Set IsAdmin attribute setelah RoleSystem selesai cache ownership
+
 	task.spawn(function()
-		task.wait(1) -- buffer agar RoleSystem:InitializePlayer selesai lebih dulu
+		task.wait(1)
 		if isAdmin(player) then
 			player:SetAttribute("IsAdmin", true)
 		end
@@ -173,26 +153,17 @@ for _, p in ipairs(Players:GetPlayers()) do
 	task.spawn(onPlayerAdded, p)
 end
 
-print("✅ [GiveTitleSystem] Loaded successfully!")
-
--- ====================================
--- RANK ITEM GIVER SYSTEM - VIP ONLY VERSION
--- Location: ServerScriptService > GiveSystem(Folder) > RankItemGiver(Script)
--- ====================================
+print("✅ [GiveTitleSystem] Berhasil dimuat!")
 
 local ServerStorage = game:GetService("ServerStorage")
 local Players = game:GetService("Players")
 
 local RoleSystem = require(ServerStorage.Modules.RoleSystem)
 
--- ====================================
--- CONFIGURATION
--- ====================================
 local Config = {
 	DebugMode = false,
 	CheckInterval = 5,
 
-	-- ALL ITEMS NOW VIP TIER (MinimumHierarchy = 2)
 	RankItems = {
 		{
 			Name = "Glowstick",
@@ -224,14 +195,14 @@ local Config = {
 			MinimumRank = "VIP",
 			MinimumHierarchy = 2
 		},
-		
+
 		{
 			Name = "SelfieStick",
 			Path = ServerStorage.Items.SelfieStick,
 			MinimumRank = "VIP",
 			MinimumHierarchy = 2
 		},
-		
+
 	}
 }
 
@@ -312,7 +283,7 @@ local function giveItemToPlayer(player, itemConfig)
 
 	if not itemConfig.Path or not itemConfig.Path.Parent then
 		if Config.DebugMode then
-			warn("[ItemGiver] Item source not found:", itemConfig.Name)
+			warn("[ItemGiver] Sumber item tidak ditemukan:", itemConfig.Name)
 		end
 		return
 	end
@@ -328,9 +299,9 @@ local function giveItemToPlayer(player, itemConfig)
 	end
 	playerGivenItems[player.UserId][itemConfig.Name] = true
 
-	debugPrint(string.format("Gave %s to %s (Rank: %s)", 
-		itemConfig.Name, 
-		player.Name, 
+	debugPrint(string.format("Gave %s to %s (Rank: %s)",
+		itemConfig.Name,
+		player.Name,
 		RoleSystem:GetPlayerRole(player)
 		))
 end
@@ -360,8 +331,8 @@ local function checkAndGiveItems(player)
 			if hasItem(player, itemConfig.Name) then
 				cleanAllDuplicates(player, itemConfig.Name)
 				playerGivenItems[player.UserId][itemConfig.Name] = nil
-				debugPrint(string.format("Removed %s from %s (Insufficient rank)", 
-					itemConfig.Name, 
+				debugPrint(string.format("Removed %s from %s (Insufficient rank)",
+					itemConfig.Name,
 					player.Name
 					))
 			end
@@ -424,9 +395,9 @@ local function onPlayerRemoving(player)
 end
 
 RoleSystem.RoleChanged:Connect(function(player, oldRole, newRole)
-	debugPrint(string.format("Role changed: %s (%s -> %s)", 
-		player.Name, 
-		oldRole, 
+	debugPrint(string.format("Role changed: %s (%s -> %s)",
+		player.Name,
+		oldRole,
 		newRole
 		))
 

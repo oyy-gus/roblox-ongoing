@@ -1,10 +1,5 @@
--- Place in: StarterScriptService > MessageSystem(Folder) > MessageServer(Script) > MessageConfig(ModuleScript)
-
 local MessageConfig = {}
 
--- ====================================
--- ACCESS CONFIGURATION
--- ====================================
 MessageConfig.Access = {
 	MinimumRole = "Admin",
 
@@ -19,9 +14,6 @@ MessageConfig.Access = {
 	}
 }
 
--- ====================================
--- ROLE DISPLAY CONFIGURATION
--- ====================================
 MessageConfig.RoleDisplay = {
 	Owner = {
 		Text = "Owner",
@@ -37,15 +29,15 @@ MessageConfig.RoleDisplay = {
 	},
 	Streamer = {
 		Text = "Streamer",
-		Color = Color3.fromRGB(170, 140, 255), 
+		Color = Color3.fromRGB(170, 140, 255),
 	},
 	Creator = {
 		Text = "Creator",
-		Color = Color3.fromRGB(120, 220, 220), 
+		Color = Color3.fromRGB(120, 220, 220),
 	},
 	VIP = {
 		Text = "VIP",
-		Color = Color3.fromRGB(255, 210, 120), 
+		Color = Color3.fromRGB(255, 210, 120),
 	},
 	Player = {
 		Text = "Player",
@@ -53,9 +45,6 @@ MessageConfig.RoleDisplay = {
 	}
 }
 
--- ====================================
--- NOTIFICATION CONFIGURATION
--- ====================================
 MessageConfig.Notification = {
 	Duration = 5,
 	MaxVisible = 3,
@@ -75,9 +64,6 @@ MessageConfig.Notification = {
 	}
 }
 
--- ====================================
--- MESSAGE VALIDATION
--- ====================================
 MessageConfig.Validation = {
 	MinLength = 1,
 	MaxLength = 200,
@@ -86,9 +72,6 @@ MessageConfig.Validation = {
 	MaxMessagesPerMinute = 10
 }
 
--- ====================================
--- UI CONFIGURATION
--- ====================================
 MessageConfig.UI = {
 	Icon = {
 		Image = "rbxassetid://7733992901",

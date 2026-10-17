@@ -1,7 +1,3 @@
--- Letakkan di ScreenGui
--- GUI sekarang dibangun otomatis oleh GUIBuilder
--- ========================================
-
 local players           = game:GetService("Players")
 local marketplaceService = game:GetService("MarketplaceService")
 local replicatedStorage = game:GetService("ReplicatedStorage")
@@ -15,18 +11,12 @@ local MessageUIModule   = require(script.MessageUIModule)
 local NotificationModule = require(script.NotificationModule)
 local BroadcastListenerModule = require(script.BroadcastListenerModule)
 
--- ============================================
--- 🏗️ BUILD GUI OTOMATIS
--- ============================================
 local gui      = script.Parent
 if gui:IsA("ScreenGui") then
 	gui.DisplayOrder = 100
 end
 local elements = GUIBuilder.build(gui)
 
--- ============================================
--- 🔧 STATE
--- ============================================
 local player = players.LocalPlayer
 local state = {
 	isLoading          = false,
@@ -37,41 +27,35 @@ local state = {
 	lastMessageTime    = 0,
 }
 
--- ============================================
--- 🚀 INITIALIZATION
--- ============================================
-
 UIModule.initializeUI(elements)
 
--- Buka / tutup UI donasi via TopbarPlus icon
+local PanelAnimationController = require(replicatedStorage:WaitForChild("Modules"):WaitForChild("PanelAnimationController"))
+local mainPanelAnim = PanelAnimationController.new(elements.mainframe, { CollapsedHeight = 44 })
+
 elements.donateBtn.selected:Connect(function()
-	elements.mainframe.Visible = true
-	ClientDebug.log("UI", "Donation UI opened (topbar)")
+	mainPanelAnim:Open(420)
+	ClientDebug.log("UI", "Donasi UI dibuka (topbar)")
 	if not state.productsLoaded then
 		ProductUIModule.loadProducts(elements, state)
 	end
 end)
 
 elements.donateBtn.deselected:Connect(function()
-	elements.mainframe.Visible = false
-	ClientDebug.log("UI", "Donation UI closed (topbar deselected)")
+	mainPanelAnim:Close()
+	ClientDebug.log("UI", "Donasi UI ditutup (topbar deselected)")
 end)
 
--- Tutup MainFrame via tombol ✕ header
 elements.mainframe:WaitForChild("Header"):WaitForChild("CloseBtn").MouseButton1Click:Connect(function()
-	elements.mainframe.Visible = false
+	mainPanelAnim:Close()
 	elements.donateBtn:deselect()
-	ClientDebug.log("UI", "Donation UI closed via header CloseBtn")
+	ClientDebug.log("UI", "Donasi UI ditutup via header CloseBtn")
 end)
 
--- Setup MessageFrame
 MessageUIModule.setupMessageFrame(elements, state)
 
--- Setup notifikasi & broadcast
 NotificationModule.initialize(elements.notificationframe)
 BroadcastListenerModule.setupListener(elements.notificationframe)
 
--- Handler selesai beli
 marketplaceService.PromptProductPurchaseFinished:Connect(function(userId, productId, isPurchased)
 	if userId == player.UserId and isPurchased then
 		ClientDebug.log("PURCHASE", "Purchase successful:", productId)
@@ -85,7 +69,6 @@ marketplaceService.PromptProductPurchaseFinished:Connect(function(userId, produc
 	end
 end)
 
--- Cleanup saat player keluar
 players.PlayerRemoving:Connect(function(removedPlayer)
 	if removedPlayer == player then
 		NotificationModule.cleanup()
@@ -94,5 +77,3 @@ players.PlayerRemoving:Connect(function(removedPlayer)
 end)
 
 ClientDebug.log("UI", "✅ Donation Client Handler (Auto GUI) initialized!")
-
--- ========================================

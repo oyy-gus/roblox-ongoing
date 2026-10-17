@@ -1,6 +1,3 @@
--- MODULE: ClientConfig (FINAL)
--- ========================================
-
 local ClientConfig = {}
 
 ClientConfig.DEBUG = {
@@ -16,7 +13,7 @@ ClientConfig.UI = {
 	BUTTON_SPACING = 5,
 	BUTTON_CREATE_DELAY = 0.03,
 	LOADING_TEXT = "Memuat produk...",
-	PROCESSING_TEXT = "Processing...",
+	PROCESSING_TEXT = "Sedang memproses...",
 }
 
 ClientConfig.NOTIFICATIONS = {
@@ -70,11 +67,9 @@ ClientConfig.MESSAGES = {
 	PURCHASE_SUCCESS_DESC = "Donasi berhasil!",
 	LOAD_SUCCESS = "Berhasil!",
 	MESSAGE_SENT = "Pesan Terkirim!",
-	MESSAGE_SENT_DESC = "Pesan Anda telah dikirim ke semua player",
+	MESSAGE_SENT_DESC = "Pesan Anda telah dikirim ke semua pemain",
 	MESSAGE_TOO_SHORT = "Pesan terlalu pendek!",
 	MESSAGE_TOO_LONG = "Pesan terlalu panjang! (Maks 200 karakter)",
 }
 
 return ClientConfig
-
--- ========================================

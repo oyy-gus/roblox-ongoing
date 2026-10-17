@@ -1,9 +1,7 @@
 local hasBecomeOldTheme = false
 local previousInsetHeight = 0
 return function(Icon)
-	
-	-- Has to be included for the time being due to this bug mentioned here:
-	-- https://devforum.roblox.com/t/bug/2973508/7
+
 	local GuiService = game:GetService("GuiService")
 	local Players =  game:GetService("Players")
 	local UserInputService = game:GetService("UserInputService")
@@ -20,11 +18,7 @@ return function(Icon)
 	local function checkInset(status)
 		local currentHeight = GuiService.TopbarInset.Height
 		local isOldTopbar = currentHeight <= 36
-		
 
-		-- These additional checks are needed to ensure *it is actually* the old topbar
-		-- and not a client which takes a really long time to load
-		-- There's unfortunately no APIs to do this a prettier way
 		isConsoleScreen = GuiService:IsTenFootInterface()
 		isUsingVR = UserInputService.VREnabled
 		Icon.isOldTopbar = isOldTopbar
@@ -44,16 +38,14 @@ return function(Icon)
 			end)
 		end
 
-		-- Conver to old theme if verified
 		if Icon.isOldTopbar and not isConsoleScreen and not isUsingVR and hasBecomeOldTheme == false and (currentHeight ~= 0 or status == "ForceConvertToOld") then
 			hasBecomeOldTheme = true
 			task.defer(function()
-				-- If oldtopbar, apply the Classic theme
+
 				local themes = script.Parent.Parent.Features.Themes
 				local Classic = require(themes.Classic)
 				Icon.modifyBaseTheme(Classic)
 
-				-- Also configure the oldtopbar correctly
 				local function decideToHideTopbar()
 					if GuiService.MenuIsOpen then
 						Icon.setTopbarEnabled(false, true)
@@ -66,21 +58,19 @@ return function(Icon)
 			end)
 		end
 
-		-- Modify the offsets slightly depending on device type
 		guiInset = GuiService:GetGuiInset()
 		startInset = if isOldTopbar then 12 else guiInset.Y - 50
-		yDownOffset = if isOldTopbar then 2 else 0 --if isOldTopbar then 2 else 0 
+		yDownOffset = if isOldTopbar then 2 else 0
 		ySizeOffset = -2
 		if isConsoleScreen then
 			startInset = 10
-			yDownOffset = 0 ---9
+			yDownOffset = 0
 		end
 		if GuiService.TopbarInset.Height == 0 and not hasBecomeOldTheme then
 			yDownOffset += 13
 			ySizeOffset = 50
 		end
 
-		-- Now inform other areas of the change
 		insetChanged:Fire(guiInset)
 		local insetHeight = guiInset.Y
 		if insetHeight ~= previousInsetHeight then
@@ -89,7 +79,7 @@ return function(Icon)
 				Icon.insetHeightChanged:Fire(insetHeight)
 			end)
 		end
-		
+
 	end
 	GuiService:GetPropertyChangedSignal("TopbarInset"):Connect(checkInset)
 	checkInset("FirstTime")
@@ -122,7 +112,7 @@ return function(Icon)
 	holders.Visible = true
 	holders.ZIndex = 1
 	holders.Parent = screenGui
-	
+
 	local screenGuiCenter = screenGui:Clone()
 	local holdersCenter = screenGuiCenter.Holders
 	local function updateCenteredHoldersHeight()
@@ -135,10 +125,10 @@ return function(Icon)
 		screenGuiCenter.DisplayOrder = Icon.baseDisplayOrder
 	end)
 	container[screenGuiCenter.Name] = screenGuiCenter
-	
+
 	insetChanged:Connect(updateCenteredHoldersHeight)
 	updateCenteredHoldersHeight()
-	
+
 	local screenGuiClipped = screenGui:Clone()
 	screenGuiClipped.Name = screenGuiClipped.Name.."Clipped"
 	screenGuiClipped.DisplayOrder = (Icon.baseDisplayOrder + 1)
@@ -146,7 +136,7 @@ return function(Icon)
 		screenGuiClipped.DisplayOrder = (Icon.baseDisplayOrder + 1)
 	end)
 	container[screenGuiClipped.Name] = screenGuiClipped
-	
+
 	local screenGuiCenterClipped = screenGuiCenter:Clone()
 	screenGuiCenterClipped.Name = screenGuiCenterClipped.Name.."Clipped"
 	screenGuiCenterClipped.DisplayOrder = (Icon.baseDisplayOrder + 1)
@@ -154,7 +144,7 @@ return function(Icon)
 		screenGuiCenterClipped.DisplayOrder = (Icon.baseDisplayOrder + 1)
 	end)
 	container[screenGuiCenterClipped.Name] = screenGuiCenterClipped
-	
+
 	local holderReduction = -24
 	local left = Instance.new("ScrollingFrame")
 	left:SetAttribute("IsAHolder", true)
@@ -169,16 +159,16 @@ return function(Icon)
 	left.Active = false
 	left.ClipsDescendants = true
 	left.HorizontalScrollBarInset = Enum.ScrollBarInset.None
-	left.CanvasSize = UDim2.new(0, 0, 1, -1) -- This -1 prevents a dropdown scrolling appearance bug
+	left.CanvasSize = UDim2.new(0, 0, 1, -1)
 	left.AutomaticCanvasSize = Enum.AutomaticSize.X
 	left.ScrollingDirection = Enum.ScrollingDirection.X
 	left.ScrollBarThickness = 0
 	left.BorderSizePixel = 0
 	left.Selectable = false
-	left.ScrollingEnabled = false--true
+	left.ScrollingEnabled = false
 	left.ElasticBehavior = Enum.ElasticBehavior.Never
 	left.Parent = holders
-	
+
 	local UIListLayout = Instance.new("UIListLayout")
 	insetChanged:Connect(function()
 		UIListLayout.Padding = UDim.new(0, startInset)
@@ -188,7 +178,7 @@ return function(Icon)
 	UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
 	UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 	UIListLayout.Parent = left
-	
+
 	local center = left:Clone()
 	insetChanged:Connect(function()
 		center.UIListLayout.Padding = UDim.new(0, startInset)
@@ -197,7 +187,7 @@ return function(Icon)
 	center.UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 	center.Name = "Center"
 	center.Parent = holdersCenter
-	
+
 	local right = left:Clone()
 	insetChanged:Connect(function()
 		right.UIListLayout.Padding = UDim.new(0, startInset)
@@ -208,7 +198,6 @@ return function(Icon)
 	right.Position = UDim2.new(1, -12, 0, 0)
 	right.Parent = holders
 
-	-- This is important so that all elements update instantly
 	insetChanged:Fire(guiInset)
 
 	return container

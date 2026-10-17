@@ -1,33 +1,19 @@
--- ========================================
--- PLAYER CLIENT - Daftar Pemain
--- Place in: StarterGui > MenuGUI(ScreenGui) > PlayerClient(LocalScript)
--- ========================================
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
--- Load Modules
 local Modules = ReplicatedStorage:WaitForChild("Modules")
 local MenuConfig = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
 
--- Tunggu GUI siap
 MenuConfig.WaitForGUIReady(15)
 
--- Pastikan PlayersPage sudah ada
 repeat task.wait() until MenuConfig.GUI.PlayersPage
 
--- ========================================
--- REFERENSI
--- ========================================
 local playersPage = MenuConfig.GUI.PlayersPage
 local localPlayer = Players.LocalPlayer
 local CONFIG = MenuConfig.GetConfig()
 
--- ========================================
--- FUNGSI PEMBANTU INFO LAYAR
--- ========================================
 local function getScreenParams()
 	local screenInfo = MenuConfig.GetScreenInfo()
 	return {
@@ -38,9 +24,6 @@ local function getScreenParams()
 	}
 end
 
--- ========================================
--- FUNGSI PEMBANTU UKURAN SKALA
--- ========================================
 local function getPlayerItemHeight()
 	local screenInfo = MenuConfig.GetScreenInfo()
 	if screenInfo.isMobile and screenInfo.isLandscape then
@@ -81,16 +64,10 @@ local function getTextSize(textType)
 	return math.floor(MenuConfig.GetScaledValue(sizeConfig.base * scaleFactor, sizeConfig.min, sizeConfig.max))
 end
 
--- ========================================
--- WARNA
--- ========================================
 local PROFILE_COLORS = {
 	Background = CONFIG.Colors.PlayerList.ProfileBg or Color3.fromRGB(40, 45, 55),
 }
 
--- ========================================
--- FUNGSI HELPER
--- ========================================
 local function getFriendsInServer()
 	local friendsInServer = {}
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -106,9 +83,6 @@ local function getFriendsInServer()
 	return friendsInServer
 end
 
--- ========================================
--- SCROLL PEMAIN
--- ========================================
 local playersScroll = Instance.new("ScrollingFrame")
 playersScroll.Name = "PlayersScroll"
 playersScroll.Size = UDim2.new(1, 0, 1, 0)
@@ -121,7 +95,7 @@ playersScroll.ScrollingEnabled = true
 playersScroll.Active = true
 playersScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 playersScroll.ScrollingDirection = Enum.ScrollingDirection.Y
-playersScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y  -- Auto resize canvas
+playersScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 playersScroll.VerticalScrollBarInset = Enum.ScrollBarInset.None
 playersScroll.HorizontalScrollBarInset = Enum.ScrollBarInset.None
 playersScroll.Parent = playersPage
@@ -138,9 +112,6 @@ local playersListLayout = Instance.new("UIListLayout", playersScroll)
 playersListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 playersListLayout.Padding = UDim.new(0, 8)
 
--- ========================================
--- FUNGSI BUAT HEADER BAGIAN (dengan gradient)
--- ========================================
 local function createSectionHeader(name, text, layoutOrder)
 	local header = Instance.new("TextLabel")
 	header.Name = name
@@ -154,20 +125,16 @@ local function createSectionHeader(name, text, layoutOrder)
 	header.TextColor3 = Color3.new(1, 1, 1)
 	header.Parent = playersScroll
 
-	-- Apply gradient dari ThemeModule
 	ThemeModule.CreatePrimaryGradient(header, 0, 1)
 
 	Instance.new("UITextSizeConstraint", header).MaxTextSize = getTextSize("header")
 	return header
 end
 
--- ========================================
--- FUNGSI BUAT PROFIL SAYA
--- ========================================
 local function createMyProfile(layoutOrder)
 	local profileHeight = getMyProfileHeight()
 
-	local profileFrame = Instance.new("TextButton")  -- Ubah ke TextButton langsung
+	local profileFrame = Instance.new("TextButton")
 	profileFrame.Name = "MyProfile"
 	profileFrame.Size = UDim2.new(1, 0, 0, profileHeight)
 	profileFrame.BackgroundColor3 = PROFILE_COLORS.Background
@@ -179,7 +146,6 @@ local function createMyProfile(layoutOrder)
 
 	ThemeModule.CreateCorner(profileFrame, CONFIG.Layout.ButtonCorner)
 
-	-- Stroke dengan gradient dari ThemeModule
 	local profileStroke, profileStrokeGradient = ThemeModule.CreateAnimatedStroke(profileFrame, 2, "Primary", 1.2)
 	profileStroke.Name = "ProfileBorder"
 	profileStroke.Transparency = 0.2
@@ -205,7 +171,6 @@ local function createMyProfile(layoutOrder)
 		end
 	end)
 
-	-- Container untuk nama
 	local infoContainer = Instance.new("Frame")
 	infoContainer.Name = "InfoContainer"
 	infoContainer.Size = UDim2.new(1, -avatarSize - 24, 0, avatarSize)
@@ -228,7 +193,6 @@ local function createMyProfile(layoutOrder)
 	displayName.TextTruncate = Enum.TextTruncate.AtEnd
 	displayName.Parent = infoContainer
 
-	-- Gradient untuk display name
 	ThemeModule.CreatePrimaryGradient(displayName, 0, 1)
 
 	Instance.new("UITextSizeConstraint", displayName).MaxTextSize = getTextSize("profileName")
@@ -251,7 +215,6 @@ local function createMyProfile(layoutOrder)
 
 	profileFrame:SetAttribute("IsMyProfile", true)
 
-	-- Event handlers langsung di profileFrame
 	profileFrame.MouseButton1Click:Connect(function()
 		if MenuConfig.OpenProfileCard then
 			MenuConfig.OpenProfileCard(localPlayer)
@@ -268,13 +231,10 @@ local function createMyProfile(layoutOrder)
 	return profileFrame
 end
 
--- ========================================
--- FUNGSI BUAT ITEM PEMAIN
--- ========================================
 local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSection)
 	local itemHeight = getPlayerItemHeight()
 
-	local playerItem = Instance.new("TextButton")  -- Ubah ke TextButton langsung
+	local playerItem = Instance.new("TextButton")
 	playerItem.Name = "Player_" .. plr.Name
 	playerItem.Size = UDim2.new(1, 0, 0, itemHeight)
 	playerItem.BackgroundColor3 = CONFIG.Colors.PlayerList.ItemBg
@@ -287,7 +247,6 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 
 	ThemeModule.CreateCorner(playerItem, CONFIG.Layout.SmallCorner)
 
-	-- Stroke untuk Connection section dengan gradient
 	if isInConnectionSection then
 		local connectionStroke, connectionGradient = ThemeModule.CreateAnimatedStroke(playerItem, 1.5, "Primary", 1)
 		connectionStroke.Transparency = 0.4
@@ -313,7 +272,6 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 		end
 	end)
 
-	-- Info container
 	local infoContainer = Instance.new("Frame")
 	infoContainer.Size = UDim2.new(1, -avatarSize - 18, 0, avatarSize)
 	infoContainer.Position = UDim2.new(0, avatarSize + 12, 0.5, 0)
@@ -334,7 +292,6 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 	displayName.TextTruncate = Enum.TextTruncate.AtEnd
 	displayName.Parent = infoContainer
 
-	-- Gradient untuk nama di connection section
 	if isInConnectionSection then
 		displayName.TextColor3 = Color3.new(1, 1, 1)
 		ThemeModule.CreatePrimaryGradient(displayName, 0, 1)
@@ -360,7 +317,6 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 	local originalBgTransparency = playerItem.BackgroundTransparency
 	local originalBgColor = playerItem.BackgroundColor3
 
-	-- Event handlers langsung di playerItem
 	playerItem.MouseButton1Click:Connect(function()
 		if MenuConfig.OpenProfileCard then
 			MenuConfig.OpenProfileCard(plr)
@@ -369,7 +325,7 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 
 	playerItem.MouseEnter:Connect(function()
 		TweenService:Create(playerItem, TweenInfo.new(0.15), {
-			BackgroundTransparency = 0, 
+			BackgroundTransparency = 0,
 			BackgroundColor3 = CONFIG.Colors.PlayerList.ItemHover
 		}):Play()
 	end)
@@ -384,9 +340,6 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 	return playerItem
 end
 
--- ========================================
--- BUAT PEMBATAS & SPASI
--- ========================================
 local function createDivider(layoutOrder)
 	local dividerContainer = Instance.new("Frame")
 	dividerContainer.Name = "Divider"
@@ -417,11 +370,8 @@ local function createSpacer(layoutOrder, height)
 	return spacer
 end
 
--- ========================================
--- FUNGSI UPDATE DAFTAR PEMAIN
--- ========================================
 local function updatePlayerList()
-	-- Hapus semua children kecuali UIListLayout, UICorner, UIPadding
+
 	for _, child in pairs(playersScroll:GetChildren()) do
 		if not child:IsA("UIListLayout") and not child:IsA("UICorner") and not child:IsA("UIPadding") then
 			child:Destroy()
@@ -437,7 +387,6 @@ local function updatePlayerList()
 		friendIds[friend.UserId] = true
 	end
 
-	-- PROFIL SAYA
 	createSectionHeader("ProfileHeader", "👤 Profil Saya", layoutOrder)
 	layoutOrder = layoutOrder + 1
 	createSpacer(layoutOrder, 4)
@@ -451,7 +400,6 @@ local function updatePlayerList()
 	createSpacer(layoutOrder, 8)
 	layoutOrder = layoutOrder + 1
 
-	-- KONEKSI (Teman)
 	if #friendsInServer > 0 then
 		createSectionHeader("ConnectionHeader", "🔗 Koneksi (" .. #friendsInServer .. " teman)", layoutOrder)
 		layoutOrder = layoutOrder + 1
@@ -469,7 +417,6 @@ local function updatePlayerList()
 		layoutOrder = layoutOrder + 1
 	end
 
-	-- SEMUA PEMAIN
 	createSectionHeader("AllPlayerHeader", "👥 Semua Pemain (" .. #allPlayers .. ")", layoutOrder)
 	layoutOrder = layoutOrder + 1
 	createSpacer(layoutOrder, 4)
@@ -480,22 +427,15 @@ local function updatePlayerList()
 		layoutOrder = layoutOrder + 1
 	end
 
-	-- Tambah spacer di akhir untuk padding bawah
 	createSpacer(layoutOrder, 12)
 end
 
--- ========================================
--- FUNGSI UPDATE TATA LETAK
--- ========================================
 local function updatePlayersLayout()
 	if MenuConfig.State.isMenuOpen and MenuConfig.State.currentMainTab == "Pemain" then
 		updatePlayerList()
 	end
 end
 
--- ========================================
--- EVENT LISTENERS
--- ========================================
 MenuConfig.Events.OnScreenResized.Event:Connect(function()
 	updatePlayersLayout()
 end)
@@ -537,9 +477,6 @@ Players.PlayerRemoving:Connect(function(leavingPlayer)
 	end
 end)
 
--- ========================================
--- PEMUATAN AWAL
--- ========================================
 task.spawn(function()
 	task.wait(0.5)
 	if MenuConfig.State.isMenuOpen and MenuConfig.State.currentMainTab == "Pemain" then

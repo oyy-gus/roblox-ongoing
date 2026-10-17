@@ -1,10 +1,3 @@
--- ====================================
--- MUSIC VALIDATION SERVICE (IMPROVED)
--- Place in: ServerScriptService > MusicServer(Folder) > MusicSystem(Script) > MusicValidationService(ModuleScript)
--- ====================================
--- Changes:
---   ✅ tick() → workspace:GetServerTimeNow()
-
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players            = game:GetService("Players")
 
@@ -20,10 +13,6 @@ function MusicValidationService.new(config)
 	self.playerLastAction = {}
 	return self
 end
-
--- ====================================
--- MUSIC ID VALIDATION
--- ====================================
 
 function MusicValidationService:ValidateMusicId(musicId)
 	if type(musicId) ~= "string" then
@@ -73,10 +62,6 @@ function MusicValidationService:ValidateMusicId(musicId)
 	end
 end
 
--- ====================================
--- SPAM PROTECTION
--- ====================================
-
 function MusicValidationService:CheckSpamProtection(player)
 	local userId      = player.UserId
 	local currentTime = workspace:GetServerTimeNow()
@@ -103,10 +88,6 @@ function MusicValidationService:CheckSpamProtection(player)
 	table.insert(self.playerLastAction[userId], currentTime)
 	return true, nil
 end
-
--- ====================================
--- COOLDOWN SYSTEM
--- ====================================
 
 function MusicValidationService:CheckCooldown(player, roleCooldowns)
 	local userId   = player.UserId
@@ -137,26 +118,14 @@ function MusicValidationService:UpdateCooldown(player)
 	self.playerCooldowns[player.UserId] = workspace:GetServerTimeNow()
 end
 
--- ====================================
--- PLAYER VALIDATION
--- ====================================
-
 function MusicValidationService:ValidatePlayer(player)
 	return player and player:IsDescendantOf(Players)
 end
-
--- ====================================
--- CLEANUP
--- ====================================
 
 function MusicValidationService:CleanupPlayer(userId)
 	self.playerCooldowns[userId]  = nil
 	self.playerLastAction[userId] = nil
 end
-
--- ====================================
--- CACHE MANAGEMENT
--- ====================================
 
 function MusicValidationService:ClearCache()
 	self.musicIdCache = {}
