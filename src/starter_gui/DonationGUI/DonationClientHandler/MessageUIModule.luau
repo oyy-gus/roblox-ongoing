@@ -104,3 +104,4 @@ function MessageUIModule.setupMessageFrame(elements, state)
 end
 
 return MessageUIModule
+ 

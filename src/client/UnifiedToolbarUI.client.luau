@@ -368,16 +368,16 @@ local function buildVIP()
 	end
 
 	local inCard = make("Frame", {
-		Size             = UDim2.new(1, 0, 0, 40),
+		Size             = UDim2.new(1, 0, 0, 42),
 		BackgroundColor3 = T.Card,
 		LayoutOrder      = 1,
 	}, vipScroll)
 	crn(8, inCard)
-	sk(T.Accent, 1.5, 0.3, inCard)
+	sk(T.Border, 1.5, 0.3, inCard)
 
 	local inBox = make("TextBox", {
-		Size              = UDim2.new(1, -60, 0, 28),
-		Position          = UDim2.new(0, 6, 0.5, 0),
+		Size              = UDim2.new(1, -90, 0, 30),
+		Position          = UDim2.new(0, 8, 0.5, 0),
 		AnchorPoint       = Vector2.new(0, 0.5),
 		BackgroundColor3  = T.Bg,
 		Text              = "",
@@ -395,18 +395,18 @@ local function buildVIP()
 	}, inBox)
 
 	local runBtn = make("TextButton", {
-		Size             = UDim2.new(0, 46, 0, 28),
-		Position         = UDim2.new(1, -52, 0.5, 0),
-		AnchorPoint      = Vector2.new(0, 0.5),
+		Size             = UDim2.new(0, 72, 0, 30),
+		Position         = UDim2.new(1, -6, 0.5, 0),
+		AnchorPoint      = Vector2.new(1, 0.5),
 		BackgroundColor3 = T.Accent,
 		Text             = "▶ Jalankan",
 		Font             = Enum.Font.GothamBold,
 		TextSize         = 11,
-		TextColor3       = Color3.fromRGB(30,30,30),
+		TextColor3       = Color3.fromRGB(17,17,17),
 		AutoButtonColor  = false,
 	}, inCard)
 	crn(6, runBtn)
-	addGrad(runBtn, 45, false)
+	addGrad(runBtn, 45, true)
 
 	local function resetAvatar()
 		if RE.ResetAvatar then RE.ResetAvatar:FireServer() end

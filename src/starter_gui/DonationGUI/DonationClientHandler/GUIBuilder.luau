@@ -172,7 +172,7 @@ local function buildProductTemplate(container, zBase)
 		Parent       = borderFrame,
 	})
 
-	makeButton({
+	local btn = makeButton({
 		Name         = "TemplateBtn",
 		Size         = UDim2.new(1, -12, 1, -8),
 		Position     = UDim2.new(0, 6, 0, 4),
@@ -184,6 +184,7 @@ local function buildProductTemplate(container, zBase)
 		ZIndex       = zBase + 2,
 		Parent       = productCard,
 	})
+	ThemeModule.CreateAnimatedGradient(btn, "Primary", 0, 1.2)
 
 	return borderFrame
 end
@@ -337,7 +338,7 @@ local function buildMessageFrame(gui)
 		ZIndex       = 21,
 		Parent       = frame,
 	})
-	ThemeModule.CreateStaticGradient(sendBtn, "Primary", 90)
+	ThemeModule.CreateAnimatedGradient(sendBtn, "Primary", 45, 1.2)
 	sendBtn.MouseEnter:Connect(function() sendBtn.BackgroundColor3 = C.Primary1 end)
 	sendBtn.MouseLeave:Connect(function() sendBtn.BackgroundColor3 = C.Primary2 end)
 
@@ -391,7 +392,7 @@ local function buildNotificationFrame(gui)
 		ZIndex       = 31,
 		Parent       = frame,
 	})
-	ThemeModule.CreateStaticGradient(accentBar, "Primary", 90)
+	ThemeModule.CreateAnimatedGradient(accentBar, "Primary", 90, 1.2)
 
 	local avatarStartX = PADDING + ACCENT_W + 10
 	local avatarBorder = makeFrame({
@@ -543,7 +544,7 @@ local function buildNotificationFrame(gui)
 		ZIndex       = 32,
 		Parent       = frame,
 	})
-	ThemeModule.CreateStaticGradient(tierBadge, "Primary", 90)
+	ThemeModule.CreateAnimatedGradient(tierBadge, "Primary", 45, 1.2)
 
 	makeLabel({
 		Name     = "TierText",

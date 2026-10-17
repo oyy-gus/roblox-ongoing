@@ -205,7 +205,7 @@ headerLabel.Font             = Enum.Font.GothamBold
 headerLabel.TextXAlignment   = Enum.TextXAlignment.Center
 headerLabel.TextYAlignment   = Enum.TextYAlignment.Center
 headerLabel.Parent           = headerFrame
-gradient(headerLabel, G.Primary, 0)
+ThemeModule.CreatePrimaryGradient(headerLabel, 0, 1.2)
 
 local closeBtn = Instance.new("TextButton")
 closeBtn.Name                   = "CloseBtn"
@@ -350,7 +350,7 @@ local favoriteBtn = makeTabBtn("Favorite", UIStrings.Emote.TabFavorite,   3)
 local function attachTabGradient(btn)
 	local g = Instance.new("UIGradient")
 	g.Color = G.Primary
-	g.Rotation = 90
+	g.Rotation = 45
 	g.Enabled = false
 	g.Parent = btn
 	return g
@@ -473,7 +473,7 @@ speedtext.TextColor3 = C.Primary1
 speedtext.TextSize = 12
 speedtext.Font = Enum.Font.GothamBold
 speedtext.Parent = speedFrame
-gradient(speedtext, G.Primary, 0)
+ThemeModule.CreatePrimaryGradient(speedtext, 0, 1.2)
 
 local speedBar = Instance.new("Frame")
 speedBar.Name = "speedBar"
@@ -491,7 +491,7 @@ speedFill.BackgroundColor3 = C.Primary1
 speedFill.BorderSizePixel = 0
 speedFill.Parent = speedBar
 corner(speedFill, 3)
-gradient(speedFill, G.Primary, 0)
+ThemeModule.CreatePrimaryGradient(speedFill, 0, 1.2)
 
 local speedSlider = Instance.new("Frame")
 speedSlider.Name = "speedPosition"
@@ -501,7 +501,7 @@ speedSlider.BackgroundColor3 = C.Primary1
 speedSlider.BorderSizePixel = 0
 speedSlider.Parent = speedBar
 corner(speedSlider, 99)
-gradient(speedSlider, G.Primary, 135)
+ThemeModule.CreatePrimaryGradient(speedSlider, 135, 1.2)
 ThemeModule.CreateStaticStroke(speedSlider, 1, Color3.fromRGB(255, 255, 200), 0.5)
 
 local speedButton = Instance.new("TextButton")
@@ -1069,7 +1069,7 @@ local function createEmoteButton(animation, category)
 	buttonsByName[animation.Name] = buttonData
 
 	if tBtn then
-		local btnGrad = ThemeModule.CreatePrimaryGradient(nb, 90, 1)
+		local btnGrad = ThemeModule.CreatePrimaryGradient(nb, 45, 1)
 		btnGrad.Enabled = false
 
 		tBtn.MouseButton1Click:Connect(function()

@@ -84,3 +84,4 @@ function UIModule.setLoading(container, show)
 end
 
 return UIModule
+ 

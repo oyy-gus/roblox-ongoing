@@ -5,6 +5,7 @@ local replicatedStorage  = game:GetService("ReplicatedStorage")
 local ClientConfig  = require(script.Parent.ClientConfig)
 local ClientDebug   = require(script.Parent.ClientDebug)
 local UIModule      = require(script.Parent.UIModule)
+local ThemeModule   = require(replicatedStorage:WaitForChild("Modules"):WaitForChild("ThemeModule"))
 
 local ProductUIModule = {}
 local player = players.LocalPlayer
@@ -14,6 +15,16 @@ local function createButton(productData, index, elements, state)
 	borderFrame.Name    = "Product_" .. productData.Id
 	borderFrame.Visible = true
 	borderFrame.Parent  = elements.container
+
+	for _, desc in ipairs(borderFrame:GetDescendants()) do
+		if desc:IsA("UIGradient") then
+			ThemeModule.GradientSystem.Register(desc, 1.2)
+		end
+	end
+	local rootGrad = borderFrame:FindFirstChildOfClass("UIGradient")
+	if rootGrad then
+		ThemeModule.GradientSystem.Register(rootGrad, 1.2)
+	end
 
 	local card = borderFrame:WaitForChild("ProductCard")
 	local btn  = card:WaitForChild("TemplateBtn")
@@ -64,6 +75,15 @@ end
 local function clearButtons(state, elements)
 	for _, btn in ipairs(state.currentButtons) do
 		if btn and btn.Parent then
+			for _, desc in ipairs(btn:GetDescendants()) do
+				if desc:IsA("UIGradient") then
+					ThemeModule.GradientSystem.Unregister(desc)
+				end
+			end
+			local rootGrad = btn:FindFirstChildOfClass("UIGradient")
+			if rootGrad then
+				ThemeModule.GradientSystem.Unregister(rootGrad)
+			end
 			btn:Destroy()
 		end
 	end
