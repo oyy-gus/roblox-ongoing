@@ -1,232 +1,165 @@
 <div align="center">
 
-# 🎮 Roblox Ongoing
+# 👑 Royal Dream
 
 <p>
-  <img src="https://img.shields.io/badge/ROBLOX-ONGOING-111827?style=for-the-badge&logo=roblox&logoColor=white" alt="Roblox Ongoing">
+  <img src="https://img.shields.io/badge/ROBLOX-ROYAL%20DREAM-0A0D18?style=for-the-badge&logo=roblox&logoColor=white" alt="Roblox Royal Dream">
+  <img src="https://img.shields.io/badge/THEME-MONOCHROME%20LUXURY-111827?style=for-the-badge" alt="Theme: Monochrome Luxury">
   <img src="https://img.shields.io/badge/LANGUAGE-Luau-2563EB?style=for-the-badge" alt="Language: Luau">
   <img src="https://img.shields.io/badge/WORKFLOW-Rojo-7C3AED?style=for-the-badge" alt="Workflow: Rojo">
 </p>
 
-<p><em>Proyek map Roblox dengan sistem musik global dan berbagai fitur terintegrasi.</em></p>
+<p><em>Pengalaman roleplay, musik global tersinkronisasi, dan nongkrong eksklusif di Roblox dengan antarmuka monokrom modern dan animasi gradasi reaktif terhadap musik.</em></p>
 
 </div>
 
 <div align="center">
 
-<img src="https://img.shields.io/badge/⚠️%20PERINGATAN-MASIH%20DALAM%20PENGEMBANGAN-DC2626?style=for-the-badge" alt="Peringatan: masih dalam pengembangan">
+<img src="https://img.shields.io/badge/STATUS-PENGEMBANGAN%20AKTIF-0D9488?style=for-the-badge" alt="Status: Pengembangan Aktif">
 
 </div>
 
-> [!WARNING]
-> 🚨 **PERINGATAN — PROYEK MASIH DALAM TAHAP PENGEMBANGAN**
->
-> 🔴 Proyek ini masih aktif dikembangkan (*Work in Progress*). Beberapa fitur mungkin belum selesai, belum stabil, atau masih mengalami perubahan. Bug, error, masalah performa, maupun perilaku yang tidak terduga dapat terjadi sewaktu-waktu.
->
-> ⚠️ **Gunakan dengan risiko sendiri.** Belum semua sistem dijamin berfungsi dengan sempurna. Perbaikan, pengujian, dan penyempurnaan akan dilakukan secara bertahap seiring perkembangan proyek.
-
-Proyek Roblox berbasis **Rojo** untuk map lagu dengan berbagai sistem terintegrasi. Semua skrip dikelola via Rojo, ditulis dalam **Luau**, dan dipetakan ke Roblox Studio secara langsung.
+> [!NOTE]
+> Proyek ini dikelola secara modern menggunakan **Rojo**, ditulis murni dalam bahasa **Luau**, dan dipetakan secara langsung ke Roblox Studio. Seluruh antarmuka grafis (GUI) mengikuti standar visual monokrom premium dengan sistem animasi gradasi terpusat.
 
 ---
 
-## 📁 Struktur Proyek
-
-![Struktur Proyek](https://img.shields.io/badge/PROJECT-STRUCTURE-0F766E?style=flat-square)
+## 📁 Struktur Direktori Proyek
 
 ```text
 src/
 ├── client/                          # StarterPlayerScripts
-│   ├── ChatTagClient.client.luau
-│   ├── DeviceDetectorClient.client.luau
-│   └── UnifiedToolbarUI.client.luau
+│   ├── ChatTagClient.client.luau    # Tag chat kustom
+│   ├── DeviceDetectorClient.client.luau # Deteksi perangkat input
+│   └── UnifiedToolbarUI.client.luau # Bilah alat terpadu & GUI perintah VIP
 │
 ├── server/                          # ServerScriptService
-│   ├── CarryServer.server.luau
-│   ├── FriendServer.server.luau
-│   ├── MusicFetcher.server.luau
-│   ├── DonationBroadcastHandler/
-│   ├── DonationServerHandler/
-│   ├── GamePass/GamePassHandler/
-│   ├── GiveSystem/
-│   ├── MessageSystem/MessageServer/
-│   ├── MusicServer/MusicSystem/
-│   ├── OverheadSystem/
-│   ├── Setting/
-│   ├── VIPBanefit/
-│   └── VIPZoneServer/
+│   ├── CarryServer.server.luau      # Logika server sistem carry / gendong
+│   ├── FriendServer.server.luau     # Integrasi sistem pertemanan
+│   ├── MusicFetcher.server.luau     # Fetch playlist musik dari API eksternal
+│   ├── DonationBroadcastHandler/    # Siaran pengumuman donasi ke seluruh server
+│   ├── DonationServerHandler/       # Pemrosesan pembelian Developer Product donasi
+│   ├── GamePass/GamePassHandler/    # Validasi & pemberian manfaat Game Pass
+│   ├── GiveSystem/                  # Sistem pemberian role, title, dan item
+│   ├── MessageSystem/MessageServer/ # Sistem broadcast pesan global
+│   ├── MusicServer/MusicSystem/     # Orkestrasi pemutaran, antrean & voting skip lagu
+│   ├── OverheadSystem/              # UI overhead rank, status, dan title di atas kepala
+│   ├── Setting/                     # Konfigurasi server & animasi
+│   ├── VIPBanefit/                  # Fasilitas dan benefit pemain VIP
+│   └── VIPZoneServer/               # Pintu masuk dan pembatas area khusus VIP
 │
 ├── server_storage/                  # ServerStorage
 │   └── Modules/
-│       ├── MusicPlaylistBridge.luau
-│       ├── RoleSystem.luau
-│       └── VIPZoneModule.luau
+│       ├── MusicPlaylistBridge.luau # Penghubung data playlist server
+│       ├── RoleSystem.luau          # Manajemen peran & hierarki izin
+│       └── VIPZoneModule.luau       # Logika proteksi zona VIP
 │
 ├── shared/                          # ReplicatedStorage
-│   ├── AutoScaleSystem/
-│   ├── BridgeNet/
-│   ├── ContextModule/
-│   ├── Emotes/
-│   ├── GiveModule/
-│   ├── Icon/                        # TopbarPlus v3
+│   ├── AutoScaleSystem/             # Sistem penskalaan UI responsif multi-resolusi
+│   ├── BridgeNet/                   # Jaringan komunikasi remote berkinerja tinggi
+│   ├── ContextModule/               # Modul manajemen konteks UI
+│   ├── GiveModule/                  # Modul bersama transaksi give
+│   ├── Icon/                        # TopbarPlus v3 terintegrasi
 │   ├── Modules/
-│   │   ├── AdminConfig.luau
-│   │   ├── BugReportConfig.luau
-│   │   ├── CarryConfig.luau
-│   │   ├── FriendConfig.luau
-│   │   ├── MenuConfig.luau
-│   │   ├── MusicModule.luau
-│   │   ├── MusicStorageHandler.luau
-│   │   ├── NotifModule.luau
-│   │   ├── PanelAnimationController.luau
-│   │   ├── ThemeModule.luau
-│   │   └── CountryService/
+│   │   ├── AdminConfig.luau         # Konfigurasi panel admin
+│   │   ├── BugReportConfig.luau     # Konfigurasi laporan bug
+│   │   ├── CarryConfig.luau         # Konfigurasi jarak & animasi gendong
+│   │   ├── FriendConfig.luau        # Konfigurasi interaksi pertemanan
+│   │   ├── MenuConfig.luau          # Konfigurasi halaman menu utama
+│   │   ├── MusicModule.luau         # Konstanta & struktur data sistem musik
+│   │   ├── MusicStorageHandler.luau # Penyimpanan lokal status musik
+│   │   ├── NotifModule.luau         # Sistem notifikasi toast terpusat
+│   │   ├── PanelAnimationController.luau # Controller animasi buka/tutup panel
+│   │   ├── ThemeModule.luau         # Sistem tema monokrom & beat-reactive gradient
+│   │   └── CountryService/          # Deteksi bendera & negara pemain
+│   └── Emotes/                      # Konfigurasi animasi dansa & emote
 │
 └── starter_gui/                     # StarterGui
-    ├── AdminGUI/
-    ├── CarryGui/
-    ├── CustomInventory/
-    ├── DonationDisplayGUI/
-    ├── DonationGUI/
-    ├── EmoteGui/
-    ├── LoadingScreen/
-    └── MenuGUI/
+    ├── AdminGUI/                    # Panel admin & pengelola title
+    ├── CarryGui/                    # Prompt interaksi & indikator gendong
+    ├── CustomInventory/             # Backpack & inventaris kustom
+    ├── DonationDisplayGUI/          # Billboard peringkat donatur teratas
+    ├── DonationGUI/                 # Antarmuka donasi & penulisan pesan siaran
+    ├── EmoteGui/                    # Menu emote dengan pencarian & kontrol kecepatan
+    ├── LoadingScreen/               # Layar pemuatan sinematik layar penuh
+    └── MenuGUI/                     # Halaman menu (Musik, Profil, Pengaturan, Toko, Lapor)
 ```
 
 ---
 
-## 🎵 Sistem Musik
+## 🎨 Sistem Desain & Visual (ThemeModule)
 
-![Global Music](https://img.shields.io/badge/GLOBAL-MUSIC-7C3AED?style=flat-square)
+Proyek ini menerapkan sistem desain monokrom mewah terpusat pada `ReplicatedStorage > Modules > ThemeModule.luau`:
 
-Sistem musik sinkronisasi global — semua pemain mendengarkan **lagu yang sama pada waktu pemutaran yang sama**.
-
-### Cara Kerja
-
-1. **Server** mengambil (*fetch*) playlist dari API menggunakan `HttpService:GetAsync()`.
-2. `MusicPlaylistBridge` di `ServerStorage` menyediakan data playlist untuk server.
-3. `MusicServer/MusicSystem` mengelola pemutaran, antrean, voting skip, dan validasi.
-4. Status musik (*music state*) dikirim ke semua klien secara berkala.
-5. **Klien** menerima status musik, mengompensasi latensi, dan memperbarui GUI musik.
-
-### Komponen Musik
-
-| File | Lokasi | Fungsi |
-|---|---|---|
-| `MusicFetcher.server.luau` | `ServerScriptService` | Mengambil dan menginisialisasi playlist dari API |
-| `MusicSystem/init.server.luau` | `ServerScriptService` | Orkestrasi sistem musik server |
-| `MusicPlaybackManager.luau` | `ServerScriptService` | Mengelola logika pemutaran lagu |
-| `MusicQueueManager.luau` | `ServerScriptService` | Mengelola antrean lagu |
-| `MusicSkipVoteManager.luau` | `ServerScriptService` | Mengelola voting skip |
-| `MusicPlaylistBridge.luau` | `ServerStorage` | Penghubung pengambilan playlist |
-| `MusicModule.luau` | `ReplicatedStorage` | Konfigurasi dan konstanta bersama |
-| `MusicClient.client.luau` | `StarterGui/MenuGUI` | GUI musik di sisi klien |
+| Fitur Tema | Deskripsi |
+|---|---|
+| **Palet Warna Monokrom** | Palet hitam murni (`#080808`), graphite (`#151515`, `#1C1C1C`), dan putih platinum (`#FFFFFF`) tanpa warna aksen yang mengganggu. |
+| **Beat-Reactive Gradients** | Sistem `GradientSystem` mendeteksi intensitas audio (`PlaybackLoudness`) dari lagu yang sedang berputar di `ServerMusicSound` secara real-time, secara dinamis meningkatkan kecepatan dan amplitudo gradasi pada seluruh UI game saat beat musik memuncak. |
+| **Animasi Terkoordinasi** | Menghubungkan seluruh elemen `UIGradient` dan `UIStroke` ke dalam loop animasi terpusat berbasis `RunService.Heartbeat`. |
+| **Konsistensi UI** | Seluruh sub-halaman Menu (Pengaturan, Pemain, Toko, Lapor Bug) dan panel tools VIP terikat pada token warna dan gaya yang sama. |
 
 ---
 
-## 🛠️ Sistem Lainnya
+## 🚀 Layar Pemuatan Sinematik (Loading Screen)
 
-![Features](https://img.shields.io/badge/FEATURES-INTEGRATED-2563EB?style=flat-square)
+Layar pemuatan pada `CustomLoading.client.luau` dirancang dengan konsep **AAA Widescreen Cinematic HUD**:
 
-| Sistem | Lokasi | Keterangan |
-|---|---|---|
-| **Admin GUI** | `StarterGui/AdminGUI` | Panel admin, broadcast, dan pengelolaan title |
-| **Carry System** | `StarterGui/CarryGui` + server | Sistem mengangkat pemain |
-| **Donation** | `StarterGui/DonationGUI` + server | Tampilan dan handler donasi |
-| **Emote** | `StarterGui/EmoteGui` | Sistem emote karakter |
-| **GamePass** | `ServerScriptService/GamePass` | Handler Game Pass dan manfaatnya |
-| **Give System** | `ServerScriptService/GiveSystem` | Pemberian role dan title |
-| **Loading Screen** | `StarterGui/LoadingScreen` | Layar loading kustom |
-| **Menu GUI** | `StarterGui/MenuGUI` | Menu utama menggunakan TopbarPlus |
-| **Message System** | `ServerScriptService/MessageSystem` | Sistem pesan server kustom |
-| **Overhead System** | `ServerScriptService/OverheadSystem` | Tag nama dan UI overhead |
-| **Role System** | `ServerStorage/Modules` | Manajemen role pemain |
-| **Setting** | `ServerScriptService/Setting` | Konfigurasi dan animasi server |
-| **VIP Zone** | Server dan `server_storage` | Zona khusus VIP |
+- **Kanvas Layar Penuh Bebas Kotak**: Menghilangkan tampilan kotak dialog kaku dan memanfaatkan seluruh bidang layar.
+- **Efek 3D Parallax Interaktif**: Sudut pandang panggung tengah merespons pergerakan kursor mouse pemain secara mulus.
+- **Audio Spectrum Waveform**: 17 bilah visualizer frekuensi equalizer yang menari selaras dengan irama musik latar.
+- **Teks Penyambutan Bergantian**: Teks sub-judul di bawah judul **ROYAL DREAM** berganti secara halus (*slide & cross-fade*) menampilkan pesan penyambutan, menikmati musik, dan bersenang-senang.
+- **Laser Progress Bar Ramping**: Batang pemuatan 6px dengan titik cahaya berkilau (*glow spark tip*) dan halo denyut aktif.
+- **Tombol Lewati Cepat**: Tombol lewati interaktif muncul pada 40% pemuatan untuk pemain yang ingin langsung masuk ke permainan.
 
 ---
 
-## 🌐 Topbar & UI
+## 🎵 Sistem Musik Sinkronisasi Global
 
-![Interface](https://img.shields.io/badge/INTERFACE-RESPONSIVE-DB2777?style=flat-square)
+Semua pemain dalam server mendengarkan **lagu yang sama pada detik yang sama secara sinkron**.
 
-- Menggunakan **TopbarPlus v3** yang tersedia di `ReplicatedStorage > Icon`.
-- Satu ikon topbar digunakan untuk membuka menu utama.
-- Menu utama menyediakan navigasi ke Musik, Profil, Pengaturan, Game Pass, dan fitur lainnya.
-- UI dirancang responsif menggunakan `AutoScaleSystem` untuk berbagai ukuran layar.
+1. **Pengambilan Playlist**: `MusicFetcher` mengambil playlist terverifikasi dari endpoint API eksternal.
+2. **Sinkronisasi Waktu Nyata**: `MusicPlaybackManager` mengontrol *time position* dan mengoreksi latensi jaringan setiap pemain.
+3. **Voting Skip & Antrean**: Pemain dapat mengajukan lagu dan memberikan suara untuk melewati lagu yang sedang diputar.
+4. **Visualizer & Kontrol**: Menu musik klien menyediakan kontrol volume lokal, bilah progres lagu, dan tampilan daftar putar.
 
 ---
 
-## ⚙️ Konfigurasi & Setup
+## 💎 Fitur & Sistem Permainan Lainnya
 
-![Setup](https://img.shields.io/badge/SETUP-GUIDE-0D9488?style=flat-square)
+- **VIP Commands & Unified Toolbar**: Bilah alat terintegrasi untuk mengakses fitur eksklusif VIP (terbang, tongkat cahaya, topi, kecepatan, dan efek visual).
+- **Donation & Broadcast System**: Pembelian Developer Product dengan border bergradasi aktif serta pengumuman global nama dan pesan donatur ke seluruh server.
+- **Emote & Synchronized Dance**: Menu ratusan gerakan tarian dengan pengaturan kecepatan (0.5x - 2.0x), pencarian instan, dan sinkronisasi gerakan antar pemain.
+- **Carry System**: Fitur menggendong pemain lain dengan sistem izin (*permission prompt*) dan penyesuaian fisika ragdoll yang aman.
+- **Custom Inventory**: Pengganti backpack bawaan Roblox dengan penataan slot modern bertema monokrom.
+
+---
+
+## ⚙️ Panduan Setup & Eksekusi
 
 ### Prasyarat
+- [Aftman](https://github.com/LPGhatguy/aftman) — Pengelola toolchain.
+- [Rojo](https://rojo.space/) — Alat sinkronisasi file sistem dengan Roblox Studio.
+- Roblox Studio dengan pengaturan **Allow HTTP Requests** diaktifkan.
 
-- [Rojo](https://rojo.space/) — untuk sinkronisasi file dengan Roblox Studio.
-- Roblox Studio dengan **Allow HTTP Requests** diaktifkan.
-
-### Menjalankan Rojo
-
-Jalankan perintah berikut dari direktori proyek:
-
+### Menjalankan Sinkronisasi (Rojo)
 ```bash
-rojo serve
-```
-
-Kemudian, di Roblox Studio, gunakan plugin Rojo untuk memilih **Connect**.
-
-### Pengaturan Game yang Diperlukan
-
-- `HttpService` → **Allow HTTP Requests**: aktif.
-- `SoundService` → `RespectFilteringEnabled`: `true`.
-- `Workspace` → `FilteringEnabled`: catatan: pengaturan ini sudah diterapkan secara otomatis oleh Roblox pada pengalaman modern dan mungkin tidak tersedia sebagai opsi yang dapat diubah.
-
----
-
-## 🔧 Tooling
-
-![Toolchain](https://img.shields.io/badge/TOOLCHAIN-READY-4F46E5?style=flat-square)
-
-| Tool | Versi | Fungsi |
-|---|---|---|
-| [Rojo](https://rojo.space/) | Lihat `aftman.toml` | Sinkronisasi berkas proyek dengan Roblox Studio |
-| [Aftman](https://github.com/LPGhatguy/aftman) | — | Pengelola toolchain |
-
-Instal toolchain dengan perintah:
-
-```bash
+# Instalasi toolchain
 aftman install
+
+# Memulai server sinkronisasi
+rojo serve default.project.json
 ```
+Di Roblox Studio, buka plugin Rojo dan klik **Connect**.
 
----
-
-## 📡 API Musik
-
-![API](https://img.shields.io/badge/PLAYLIST-API-F59E0B?style=flat-square)
-
-Playlist diambil dari endpoint berikut:
-
-```text
-https://oyy-gus.github.io/api/v2/roblox/music/playlist.json
+### Membangun File Proyek (.rbxlx)
+```bash
+rojo build default.project.json --output RoyalDream.rbxlx
 ```
-
----
-
-## 📝 Lisensi
-
-![License](https://img.shields.io/badge/LICENSE-PERSONAL-6B7280?style=flat-square)
-
-Proyek pribadi — tidak untuk didistribusikan.
 
 ---
 
 <div align="center">
 
-**Dibangun dengan**  
-![Roblox](https://img.shields.io/badge/Roblox-111827?style=flat-square&logo=roblox&logoColor=white)
-![Luau](https://img.shields.io/badge/Luau-2563EB?style=flat-square)
-![Rojo](https://img.shields.io/badge/Rojo-7C3AED?style=flat-square)
-
-<sub>Roblox Ongoing · Proyek dalam pengembangan aktif</sub>
+<sub>Royal Dream · Dikembangkan dengan standar Luau modern & Rojo workflow</sub>
 
 </div>
