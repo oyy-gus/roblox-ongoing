@@ -86,33 +86,6 @@ src/
 ```
 
 ---
-
-## 🎨 Sistem Desain & Visual (ThemeModule)
-
-Proyek ini menerapkan sistem desain monokrom mewah terpusat pada `ReplicatedStorage > Modules > ThemeModule.luau`:
-
-| Fitur Tema | Deskripsi |
-|---|---|
-| **Palet Warna Monokrom** | Palet hitam murni (`#080808`), graphite (`#151515`, `#1C1C1C`), dan putih platinum (`#FFFFFF`) tanpa warna aksen yang mengganggu. |
-| **Beat-Reactive Gradients** | Sistem `GradientSystem` mendeteksi intensitas audio (`PlaybackLoudness`) dari lagu yang sedang berputar di `ServerMusicSound` secara real-time, secara dinamis meningkatkan kecepatan dan amplitudo gradasi pada seluruh UI game saat beat musik memuncak. |
-| **Animasi Terkoordinasi** | Menghubungkan seluruh elemen `UIGradient` dan `UIStroke` ke dalam loop animasi terpusat berbasis `RunService.Heartbeat`. |
-| **Konsistensi UI** | Seluruh sub-halaman Menu (Pengaturan, Pemain, Toko, Lapor Bug) dan panel tools VIP terikat pada token warna dan gaya yang sama. |
-
----
-
-## 🚀 Layar Pemuatan Sinematik (Loading Screen)
-
-Layar pemuatan pada `CustomLoading.client.luau` dirancang dengan konsep **AAA Widescreen Cinematic HUD**:
-
-- **Kanvas Layar Penuh Bebas Kotak**: Menghilangkan tampilan kotak dialog kaku dan memanfaatkan seluruh bidang layar.
-- **Efek 3D Parallax Interaktif**: Sudut pandang panggung tengah merespons pergerakan kursor mouse pemain secara mulus.
-- **Audio Spectrum Waveform**: 17 bilah visualizer frekuensi equalizer yang menari selaras dengan irama musik latar.
-- **Teks Penyambutan Bergantian**: Teks sub-judul di bawah judul **ROYAL DREAM** berganti secara halus (*slide & cross-fade*) menampilkan pesan penyambutan, menikmati musik, dan bersenang-senang.
-- **Laser Progress Bar Ramping**: Batang pemuatan 6px dengan titik cahaya berkilau (*glow spark tip*) dan halo denyut aktif.
-- **Tombol Lewati Cepat**: Tombol lewati interaktif muncul pada 40% pemuatan untuk pemain yang ingin langsung masuk ke permainan.
-
----
-
 ## 🎵 Sistem Musik Sinkronisasi Global
 
 Semua pemain dalam server mendengarkan **lagu yang sama pada detik yang sama secara sinkron**.
