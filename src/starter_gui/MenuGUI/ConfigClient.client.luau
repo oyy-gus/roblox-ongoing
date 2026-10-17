@@ -188,7 +188,7 @@ local function saveSetting(settingKey, value)
 end
 
 local function getMusicGroup()
-	return SoundService:FindFirstChild("MusicGroup") or SoundService:FindFirstChild("ServerMusicSound")
+	return SoundService:FindFirstChild("mainEffects") or SoundService:FindFirstChild("MusicGroup") or SoundService:FindFirstChild("ServerMusicSound")
 end
 
 local function setMusicMuted(muted)
@@ -198,7 +198,7 @@ local function setMusicMuted(muted)
 		if muted then
 			musicGroup.Volume = 0
 		else
-			musicGroup.Volume = (userSettings.musicVolume or 100) / 100
+			musicGroup.Volume = ((userSettings.musicVolume or 100) / 100) * 0.5
 		end
 	end
 end
@@ -207,7 +207,7 @@ local function setMusicVolume(volume)
 	userSettings.musicVolume = volume
 	local musicGroup = getMusicGroup()
 	if musicGroup and not userSettings.muteMusic then
-		musicGroup.Volume = volume / 100
+		musicGroup.Volume = (volume / 100) * 0.5
 	end
 end
 

@@ -387,7 +387,7 @@ local voteSkipState = {
 }
 
 local isMuted    = false
-local userVolume = 1.0
+local userVolume = 0.5
 local currentFadeTween = nil
 
 local function cancelClientFade()
@@ -431,9 +431,13 @@ pcall(function()
 	SoundService:SetListener(Enum.ListenerType.Camera)
 end)
 
+local function getMusicGroup()
+	return SoundService:FindFirstChild("mainEffects") or SoundService:FindFirstChild("MusicGroup")
+end
+
 local function applyVolume()
 	cancelClientFade()
-	local musicGroup = SoundService:FindFirstChild("MusicGroup")
+	local musicGroup = getMusicGroup()
 	if musicGroup and musicGroup:IsA("SoundGroup") then
 		musicGroup.Volume = isMuted and 0 or userVolume
 	end
@@ -442,7 +446,7 @@ end
 local function clientFadeIn(duration)
 	if isMuted then return end
 	cancelClientFade()
-	local musicGroup = SoundService:FindFirstChild("MusicGroup")
+	local musicGroup = getMusicGroup()
 	if not musicGroup or not musicGroup:IsA("SoundGroup") then return end
 	musicGroup.Volume = 0
 	local tween = TweenService:Create(
@@ -456,7 +460,7 @@ end
 
 local function clientFadeOut(duration)
 	cancelClientFade()
-	local musicGroup = SoundService:FindFirstChild("MusicGroup")
+	local musicGroup = getMusicGroup()
 	if not musicGroup or not musicGroup:IsA("SoundGroup") then return end
 	local tween = TweenService:Create(
 		musicGroup,
@@ -483,7 +487,7 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 	local mySyncId = currentSyncId
 	syncInProgress = true
 
-	local musicGroup = SoundService:FindFirstChild("MusicGroup")
+	local musicGroup = getMusicGroup()
 	if musicGroup and musicGroup:IsA("SoundGroup") then
 		cancelClientFade()
 		musicGroup.Volume = 0
@@ -2711,7 +2715,7 @@ end)
 if MenuConfig.Events and MenuConfig.Events.OnSettingChanged then
 	MenuConfig.Events.OnSettingChanged.Event:Connect(function(key, value)
 		if key == "muteMusic" then isMuted = value; applyVolume()
-		elseif key == "musicVolume" then userVolume = value/100; if not isMuted then applyVolume() end end
+		elseif key == "musicVolume" then userVolume = (value/100) * 0.5; if not isMuted then applyVolume() end end
 	end)
 end
 
@@ -2757,7 +2761,7 @@ task.spawn(function()
 	task.wait(1)
 	loadFavorites()
 	isMuted    = MenuConfig.UserSettings and MenuConfig.UserSettings.muteMusic or false
-	userVolume = (MenuConfig.UserSettings and MenuConfig.UserSettings.musicVolume or 100) / 100
+	userVolume = ((MenuConfig.UserSettings and MenuConfig.UserSettings.musicVolume or 100) / 100) * 0.5
 	refreshRoleUI()
 	requestSync:FireServer()
 	defaultSongs = MusicModule:GetAllMusic()

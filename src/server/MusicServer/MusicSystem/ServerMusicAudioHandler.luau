@@ -6,19 +6,19 @@ ServerMusicAudioHandler.__index = ServerMusicAudioHandler
 
 local CONFIG = {
 	Audio = {
-		DefaultVolume   = 1.0,
+		DefaultVolume   = 0.5,
 		FadeInDuration  = 1.2,
 		FadeOutDuration = 1.0,
 
-		EQ_LowGain      = 2.8,
-		EQ_MidGain      = 1.0,
-		EQ_HighGain     = 1.5,
+		EQ_LowGain      = 10,
+		EQ_MidGain      = -10,
+		EQ_HighGain     = 10,
 
-		Reverb_DecayTime = 1.05,
-		Reverb_Density   = 0.72,
-		Reverb_Diffusion = 0.8,
+		Reverb_DecayTime = 1.5,
+		Reverb_Density   = 1,
+		Reverb_Diffusion = 1,
 		Reverb_DryLevel  = 0,
-		Reverb_WetLevel  = -14.5,
+		Reverb_WetLevel  = -20,
 	},
 }
 
@@ -63,14 +63,44 @@ function ServerMusicAudioHandler:CleanupUnusedNodes()
 end
 
 function ServerMusicAudioHandler:CreateSoundGroup()
-	local musicGroup = SoundService:FindFirstChild("MusicGroup")
+	local musicGroup = SoundService:FindFirstChild("mainEffects") or SoundService:FindFirstChild("MusicGroup")
 	if not musicGroup then
 		musicGroup        = Instance.new("SoundGroup")
-		musicGroup.Name   = "MusicGroup"
+		musicGroup.Name   = "mainEffects"
 		musicGroup.Parent = SoundService
-		musicGroup.Volume = 1
+		musicGroup.Volume = 0.5
+	else
+		musicGroup.Name   = "mainEffects"
+		musicGroup.Volume = 0.5
 	end
 	self.musicGroup = musicGroup
+
+	local eq = musicGroup:FindFirstChild("AudioEqualizer") or musicGroup:FindFirstChild("FiestaEqualizer") or musicGroup:FindFirstChildWhichIsA("EqualizerSoundEffect")
+	if not eq then
+		eq = Instance.new("EqualizerSoundEffect")
+		eq.Name   = "AudioEqualizer"
+		eq.Parent = musicGroup
+	else
+		eq.Name   = "AudioEqualizer"
+	end
+	eq.LowGain  = CONFIG.Audio.EQ_LowGain
+	eq.MidGain  = CONFIG.Audio.EQ_MidGain
+	eq.HighGain = CONFIG.Audio.EQ_HighGain
+
+	local reverb = musicGroup:FindFirstChild("ReverbSoundEffect") or musicGroup:FindFirstChild("FiestaReverb") or musicGroup:FindFirstChildWhichIsA("ReverbSoundEffect")
+	if not reverb then
+		reverb = Instance.new("ReverbSoundEffect")
+		reverb.Name   = "ReverbSoundEffect"
+		reverb.Parent = musicGroup
+	else
+		reverb.Name   = "ReverbSoundEffect"
+	end
+	reverb.DecayTime = CONFIG.Audio.Reverb_DecayTime
+	reverb.Density   = CONFIG.Audio.Reverb_Density
+	reverb.Diffusion = CONFIG.Audio.Reverb_Diffusion
+	reverb.DryLevel  = CONFIG.Audio.Reverb_DryLevel
+	reverb.WetLevel  = CONFIG.Audio.Reverb_WetLevel
+
 	return musicGroup
 end
 
@@ -102,27 +132,12 @@ function ServerMusicAudioHandler:CreateServerSound()
 
 	self.serverSound.SoundGroup = self.musicGroup
 
-	local eq = self.serverSound:FindFirstChild("FiestaEqualizer")
-	if not eq or not eq:IsA("EqualizerSoundEffect") then
-		eq = Instance.new("EqualizerSoundEffect")
-		eq.Name   = "FiestaEqualizer"
-		eq.Parent = self.serverSound
-	end
-	eq.LowGain  = CONFIG.Audio.EQ_LowGain
-	eq.MidGain  = CONFIG.Audio.EQ_MidGain
-	eq.HighGain = CONFIG.Audio.EQ_HighGain
+	-- Clean up legacy effects directly on Sound instance so effects only reside in SoundGroup
+	local legacyEq = self.serverSound:FindFirstChild("FiestaEqualizer") or self.serverSound:FindFirstChildWhichIsA("EqualizerSoundEffect")
+	if legacyEq then pcall(function() legacyEq:Destroy() end) end
 
-	local reverb = self.serverSound:FindFirstChild("FiestaReverb")
-	if not reverb or not reverb:IsA("ReverbSoundEffect") then
-		reverb = Instance.new("ReverbSoundEffect")
-		reverb.Name   = "FiestaReverb"
-		reverb.Parent = self.serverSound
-	end
-	reverb.DecayTime = CONFIG.Audio.Reverb_DecayTime
-	reverb.Density   = CONFIG.Audio.Reverb_Density
-	reverb.Diffusion = CONFIG.Audio.Reverb_Diffusion
-	reverb.DryLevel  = CONFIG.Audio.Reverb_DryLevel
-	reverb.WetLevel  = CONFIG.Audio.Reverb_WetLevel
+	local legacyReverb = self.serverSound:FindFirstChild("FiestaReverb") or self.serverSound:FindFirstChildWhichIsA("ReverbSoundEffect")
+	if legacyReverb then pcall(function() legacyReverb:Destroy() end) end
 
 	local comp = self.serverSound:FindFirstChild("FiestaCompressor")
 	if comp then
@@ -195,21 +210,24 @@ function ServerMusicAudioHandler:Play(soundId, timePosition)
 	self.serverSound.Volume       = 0
 	self.serverSound.SoundId      = "rbxassetid://" .. tostring(soundId)
 	self.serverSound.TimePosition = timePosition or 0
+	self.serverSound.SoundGroup   = self.musicGroup
 
-	local eq = self.serverSound:FindFirstChild("FiestaEqualizer")
-	if eq and eq:IsA("EqualizerSoundEffect") then
-		eq.LowGain  = CONFIG.Audio.EQ_LowGain
-		eq.MidGain  = CONFIG.Audio.EQ_MidGain
-		eq.HighGain = CONFIG.Audio.EQ_HighGain
-	end
+	if self.musicGroup then
+		local eq = self.musicGroup:FindFirstChild("AudioEqualizer") or self.musicGroup:FindFirstChild("FiestaEqualizer") or self.musicGroup:FindFirstChildWhichIsA("EqualizerSoundEffect")
+		if eq then
+			eq.LowGain  = CONFIG.Audio.EQ_LowGain
+			eq.MidGain  = CONFIG.Audio.EQ_MidGain
+			eq.HighGain = CONFIG.Audio.EQ_HighGain
+		end
 
-	local reverb = self.serverSound:FindFirstChild("FiestaReverb")
-	if reverb and reverb:IsA("ReverbSoundEffect") then
-		reverb.DecayTime = CONFIG.Audio.Reverb_DecayTime
-		reverb.Density   = CONFIG.Audio.Reverb_Density
-		reverb.Diffusion = CONFIG.Audio.Reverb_Diffusion
-		reverb.DryLevel  = CONFIG.Audio.Reverb_DryLevel
-		reverb.WetLevel  = CONFIG.Audio.Reverb_WetLevel
+		local reverb = self.musicGroup:FindFirstChild("ReverbSoundEffect") or self.musicGroup:FindFirstChild("FiestaReverb") or self.musicGroup:FindFirstChildWhichIsA("ReverbSoundEffect")
+		if reverb then
+			reverb.DecayTime = CONFIG.Audio.Reverb_DecayTime
+			reverb.Density   = CONFIG.Audio.Reverb_Density
+			reverb.Diffusion = CONFIG.Audio.Reverb_Diffusion
+			reverb.DryLevel  = CONFIG.Audio.Reverb_DryLevel
+			reverb.WetLevel  = CONFIG.Audio.Reverb_WetLevel
+		end
 	end
 
 	local comp = self.serverSound:FindFirstChild("FiestaCompressor")
