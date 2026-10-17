@@ -212,7 +212,7 @@ heroTitleGlow.Size = UDim2.new(1, 0, 0, 64)
 heroTitleGlow.Position = UDim2.new(0.5, 0, 0, 36)
 heroTitleGlow.AnchorPoint = Vector2.new(0.5, 0)
 heroTitleGlow.BackgroundTransparency = 1
-heroTitleGlow.Text = "MAXI STRONG"
+heroTitleGlow.Text = "ROYAL DREAM"
 heroTitleGlow.Font = Enum.Font.GothamBlack
 heroTitleGlow.TextSize = 54
 heroTitleGlow.TextColor3 = Color3.fromHex("#4A5884")
@@ -225,7 +225,7 @@ heroTitle.Size = UDim2.new(1, 0, 0, 64)
 heroTitle.Position = UDim2.new(0.5, 0, 0, 34)
 heroTitle.AnchorPoint = Vector2.new(0.5, 0)
 heroTitle.BackgroundTransparency = 1
-heroTitle.Text = "MAXI STRONG"
+heroTitle.Text = "ROYAL DREAM"
 heroTitle.Font = Enum.Font.GothamBlack
 heroTitle.TextSize = 54
 heroTitle.TextColor3 = Color3.fromHex("#FFFFFF")
@@ -246,10 +246,10 @@ heroSubtitle.Size = UDim2.new(1, 0, 0, 20)
 heroSubtitle.Position = UDim2.new(0.5, 0, 0, 102)
 heroSubtitle.AnchorPoint = Vector2.new(0.5, 0)
 heroSubtitle.BackgroundTransparency = 1
-heroSubtitle.Text = "SELAMAT DATANG, NIKMATI MUSIK & BERSENANG-SENANG"
-heroSubtitle.Font = Enum.Font.GothamMedium
-heroSubtitle.TextSize = 11
-heroSubtitle.TextColor3 = Color3.fromHex("#8492A6")
+heroSubtitle.Text = "SELAMAT DATANG"
+heroSubtitle.Font = Enum.Font.GothamBold
+heroSubtitle.TextSize = 12
+heroSubtitle.TextColor3 = Color3.fromHex("#94A3B8")
 heroSubtitle.ZIndex = 6
 heroSubtitle.Parent = centerStage
 
@@ -482,6 +482,44 @@ task.spawn(function()
 		task.wait(4.8)
 		if not isLoading then break end
 		lightRay.Position = UDim2.new(-0.8, 0, -0.6, 0)
+	end
+end)
+
+local subtitleList = {
+	"SELAMAT DATANG DI TEMPAT BERKUMPULNYA PARA PECINTA MUSIK",
+	"SATUKAN IRAMA, LEPASKAN PENAT, DAN CIPTAKAN KESERUAN BERSAMA",
+	"TEMPATNYA BERSANTAI, MENIKMATI MUSIK, DAN BERBAGI KESERUAN TANPA BATAS",
+	"NAIKKAN SEMANGATMU, IKUTI IRAMANYA, DAN NIKMATI SETIAP MOMEN",
+	"SELAMAT BERSENANG-SENANG, SEMOGA SETIAP LAGU MEMBAWA KEBAHAGIAAN",
+	"BIARKAN MUSIK BERBICARA, BIARKAN IRAMA MENYATUKAN KITA",
+}
+task.spawn(function()
+	local currentSubIdx = 1
+	heroSubtitle.Text = subtitleList[1]
+	heroSubtitle.TextTransparency = 0
+
+	while isLoading do
+		task.wait(1.2)
+		if not isLoading then break end
+
+		local fadeOut = TweenService:Create(heroSubtitle, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			TextTransparency = 1,
+			Position = UDim2.new(0.5, 0, 0, 97)
+		})
+		fadeOut:Play()
+		fadeOut.Completed:Wait()
+
+		if not isLoading then break end
+
+		currentSubIdx = (currentSubIdx % #subtitleList) + 1
+		heroSubtitle.Text = subtitleList[currentSubIdx]
+		heroSubtitle.Position = UDim2.new(0.5, 0, 0, 107)
+
+		local fadeIn = TweenService:Create(heroSubtitle, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			TextTransparency = 0,
+			Position = UDim2.new(0.5, 0, 0, 102)
+		})
+		fadeIn:Play()
 	end
 end)
 
