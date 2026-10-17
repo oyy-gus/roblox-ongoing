@@ -26,4 +26,3 @@ function ClientDebug.warn(category, ...)
 end
 
 return ClientDebug
- 

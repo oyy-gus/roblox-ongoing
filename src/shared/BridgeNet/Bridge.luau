@@ -18,4 +18,3 @@ return function(config: config?)
 		replicationrate = config["ReplicationRate"],
 	}
 end
- 

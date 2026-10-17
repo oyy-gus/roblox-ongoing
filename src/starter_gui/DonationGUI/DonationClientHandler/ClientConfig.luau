@@ -73,4 +73,3 @@ ClientConfig.MESSAGES = {
 }
 
 return ClientConfig
- 

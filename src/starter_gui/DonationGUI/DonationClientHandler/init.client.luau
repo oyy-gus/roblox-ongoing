@@ -77,4 +77,3 @@ players.PlayerRemoving:Connect(function(removedPlayer)
 end)
 
 ClientDebug.log("UI", "✅ Donation Client Handler (Auto GUI) initialized!")
- 
