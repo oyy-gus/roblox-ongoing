@@ -2,29 +2,23 @@
   "name": "roblox-ongoing",
   "tree": {
     "$className": "DataModel",
-
     "ReplicatedStorage": {
       "$path": "src/shared"
     },
-
     "ServerScriptService": {
       "$path": "src/server"
     },
-
     "ServerStorage": {
       "$path": "src/server_storage"
     },
-
     "StarterGui": {
       "$path": "src/starter_gui"
     },
-
     "StarterPlayer": {
       "StarterPlayerScripts": {
         "$path": "src/client"
       }
     },
-
     "Workspace": {
       "$properties": {
         "FilteringEnabled": true

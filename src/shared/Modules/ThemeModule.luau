@@ -221,11 +221,7 @@ function ThemeModule.GradientSystem.Start()
 			if g and g.Parent then
 				pcall(function()
 					local rawOffset = math.sin(ThemeModule.GradientSystem.Time * data.speed) * amp
-					local rot = (g.Rotation or 0) % 360
-					local rad = math.rad(rot)
-					local offX = rawOffset * math.cos(rad)
-					local offY = rawOffset * math.sin(rad)
-					g.Offset = Vector2.new(offX, offY)
+					g.Offset = Vector2.new(rawOffset, 0)
 				end)
 			else
 				table.remove(ThemeModule.GradientSystem.Gradients, i)

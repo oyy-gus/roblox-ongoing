@@ -67,22 +67,22 @@ local SIZES = {
 }
 
 local COLORS = {
-	BG          = Color3.fromRGB(30, 30, 40),
-	PANEL       = Color3.fromRGB(40, 40, 55),
-	PANEL2      = Color3.fromRGB(35, 35, 50),
-	INPUT_BG    = Color3.fromRGB(25, 25, 35),
-	ACCENT      = Color3.fromRGB(255, 215, 0),
-	TEXT        = Color3.fromRGB(255, 255, 255),
-	TEXT_DIM    = Color3.fromRGB(150, 150, 165),
-	TEXT_HINT   = Color3.fromRGB(100, 100, 115),
-	SUCCESS     = Color3.fromRGB(60, 200, 100),
-	ERROR       = Color3.fromRGB(220, 80, 80),
-	WARNING     = Color3.fromRGB(255, 170, 50),
-	CHIP_NORMAL = Color3.fromRGB(45, 45, 62),
-	CHIP_SEL    = Color3.fromRGB(60, 55, 30),
-	SUBMIT      = Color3.fromRGB(50, 130, 220),
-	SUBMIT_HOV  = Color3.fromRGB(70, 150, 240),
-	BOTTOM_BG   = Color3.fromRGB(28, 28, 40),
+	BG          = ThemeModule.Colors.BackgroundDark,
+	PANEL       = ThemeModule.Colors.BackgroundMedium,
+	PANEL2      = ThemeModule.Colors.BackgroundLight,
+	INPUT_BG    = ThemeModule.Colors.BackgroundDark,
+	ACCENT      = ThemeModule.Colors.Primary1,
+	TEXT        = ThemeModule.Colors.TextWhite,
+	TEXT_DIM    = ThemeModule.Colors.TextGray,
+	TEXT_HINT   = ThemeModule.Colors.TextMuted,
+	SUCCESS     = ThemeModule.Colors.Success,
+	ERROR       = ThemeModule.Colors.Error,
+	WARNING     = ThemeModule.Colors.Warning,
+	CHIP_NORMAL = ThemeModule.Colors.BackgroundLight,
+	CHIP_SEL    = ThemeModule.Colors.BackgroundLighter,
+	SUBMIT      = ThemeModule.Colors.ButtonPrimaryBg,
+	SUBMIT_HOV  = Color3.fromRGB(225, 225, 225),
+	BOTTOM_BG   = ThemeModule.Colors.BackgroundDark,
 }
 
 local function mk(cls, props, parent)
@@ -120,9 +120,10 @@ local function addGradient(label, animated, speed)
 end
 
 local function addStroke(parent, thickness, color, transparency)
+	local sColor = color or ThemeModule.Colors.Border
 	return mk("UIStroke", {
 		Thickness       = thickness or 1,
-		Color           = color or Color3.fromRGB(80, 80, 100),
+		Color           = sColor,
 		Transparency    = transparency or 0,
 		ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 	}, parent)
@@ -174,7 +175,7 @@ mk("Frame", {
 	Name             = "Separator",
 	Size             = UDim2.new(1, 0, 0, 1),
 	Position         = UDim2.new(0, 0, 0, 0),
-	BackgroundColor3 = Color3.fromRGB(60, 60, 80),
+	BackgroundColor3 = ThemeModule.Colors.Border,
 	BorderSizePixel  = 0,
 	ZIndex           = 101,
 }, bottomBar)
@@ -186,14 +187,14 @@ local submitBtn = mk("TextButton", {
 	BackgroundColor3 = COLORS.SUBMIT,
 	BorderSizePixel  = 0,
 	Text             = "📤 Kirim Laporan Bug",
-	TextColor3       = Color3.fromRGB(255, 255, 255),
+	TextColor3       = ThemeModule.Colors.ButtonPrimaryText,
 	TextSize         = 13,
 	Font             = Enum.Font.GothamBold,
 	AutoButtonColor  = false,
 	ZIndex           = 102,
 }, bottomBar)
 crn(SIZES.CORNER_SM, submitBtn)
-addStroke(submitBtn, 1.5, Color3.fromRGB(30, 100, 190), 0)
+ThemeModule.CreateAnimatedStroke(submitBtn, 1.2, "Primary", 1.2)
 
 local submitLabel = submitBtn
 local submitFrame = submitBtn
@@ -202,17 +203,17 @@ local resetBtn = mk("TextButton", {
 	Name             = "ResetBtn",
 	Size             = UDim2.new(0, RESET_W, 0, BTN_H),
 	Position         = UDim2.new(1, -(RESET_W + BTN_MARGIN), 0, BTN_MARGIN),
-	BackgroundColor3 = COLORS.PANEL2,
+	BackgroundColor3 = ThemeModule.Colors.CloseRed,
 	BorderSizePixel  = 0,
 	Text             = "🔄 Reset Form",
-	TextColor3       = COLORS.TEXT_DIM,
+	TextColor3       = ThemeModule.Colors.TextWhite,
 	TextSize         = 12,
 	Font             = Enum.Font.GothamSemibold,
 	AutoButtonColor  = false,
 	ZIndex           = 102,
 }, bottomBar)
 crn(SIZES.CORNER_SM, resetBtn)
-addStroke(resetBtn, 1.5, Color3.fromRGB(70, 70, 90), 0)
+addStroke(resetBtn, 1, ThemeModule.Colors.Border, 0)
 
 local resetLabel = resetBtn
 local resetFrame = resetBtn
@@ -326,7 +327,7 @@ local function makeSection(title, layoutOrder, contentHeight)
 		ZIndex           = 6,
 	}, rootScroll)
 	crn(SIZES.CORNER_LG, frame)
-	addStroke(frame, 1, Color3.fromRGB(70, 70, 90), 0)
+	addStroke(frame, 1, ThemeModule.Colors.Border, 0)
 
 	local titleLabel = mk("TextLabel", {
 		Name                   = "SectionTitle",
@@ -347,7 +348,7 @@ local function makeSection(title, layoutOrder, contentHeight)
 		Name             = "Divider",
 		Size             = UDim2.new(1, -20, 0, 1),
 		Position         = UDim2.new(0, 10, 0, 26),
-		BackgroundColor3 = Color3.fromRGB(60, 60, 80),
+		BackgroundColor3 = ThemeModule.Colors.Border,
 		BorderSizePixel  = 0,
 		ZIndex           = 7,
 	}, frame)
@@ -387,7 +388,7 @@ local function makeInput(parent, placeholder, yPos, height, multiline)
 		ZIndex           = 8,
 	}, parent)
 	crn(SIZES.CORNER_SM, bg)
-	local stroke = addStroke(bg, 1, Color3.fromRGB(65, 65, 85), 0)
+	local stroke = addStroke(bg, 1, ThemeModule.Colors.Border, 0)
 
 	local inputBox = mk("TextBox", {
 		Size              = UDim2.new(1, -16, 1, -8),
@@ -411,10 +412,10 @@ local function makeInput(parent, placeholder, yPos, height, multiline)
 
 	inputBox.Focused:Connect(function()
 		tw(stroke, { Color = COLORS.ACCENT }, 0.2)
-		tw(bg, { BackgroundColor3 = Color3.fromRGB(30, 30, 45) }, 0.2)
+		tw(bg, { BackgroundColor3 = ThemeModule.Colors.BackgroundLight }, 0.2)
 	end)
 	inputBox.FocusLost:Connect(function()
-		tw(stroke, { Color = Color3.fromRGB(65, 65, 85) }, 0.2)
+		tw(stroke, { Color = ThemeModule.Colors.Border }, 0.2)
 		tw(bg, { BackgroundColor3 = COLORS.INPUT_BG }, 0.2)
 	end)
 
@@ -474,7 +475,7 @@ local function makeChipGroup(parent, items, groupName, onSelect)
 			ZIndex           = 9,
 		}, wrapFrame)
 		crn(SIZES.CHIP_H / 2, chip)
-		local chipStroke = addStroke(chip, 1, Color3.fromRGB(70, 70, 90), 0)
+		local chipStroke = addStroke(chip, 1, ThemeModule.Colors.Border, 0)
 
 		mk("TextLabel", {
 			Name                   = "ChipLabel",
@@ -503,7 +504,7 @@ local function makeChipGroup(parent, items, groupName, onSelect)
 				end
 			else
 				tw(chip,       { BackgroundColor3 = COLORS.CHIP_NORMAL }, 0.15)
-				tw(chipStroke, { Color = Color3.fromRGB(70, 70, 90) }, 0.15)
+				tw(chipStroke, { Color = ThemeModule.Colors.Border }, 0.15)
 				if lbl then
 					lbl.TextColor3 = COLORS.TEXT_DIM
 					lbl.Font       = Enum.Font.GothamSemibold

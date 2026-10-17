@@ -524,7 +524,7 @@ local configScroll = mk("ScrollingFrame", {
 	Name = "ConfigScroll",
 	Size = UDim2.new(1, 0, 1, 0),
 	Position = UDim2.new(0, 0, 0, 0),
-	BackgroundColor3 = Color3.fromRGB(30, 30, 40),
+	BackgroundColor3 = ThemeModule.Colors.BackgroundDark,
 	BorderSizePixel = 0,
 	ScrollBarThickness = 0,
 	ScrollBarImageTransparency = 1,
@@ -594,7 +594,7 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 	local item = mk("Frame", {
 		Name = "Toggle_" .. settingKey,
 		Size = UDim2.new(1, 0, 0, SIZES.TOGGLE_H),
-		BackgroundColor3 = Color3.fromRGB(40, 40, 50),
+		BackgroundColor3 = ThemeModule.Colors.BackgroundMedium,
 		BorderSizePixel = 0,
 		LayoutOrder = layoutOrder,
 		ClipsDescendants = true,
@@ -637,7 +637,7 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 			Size = UDim2.new(1, -20, 0, descHeight),
 			Position = UDim2.new(0, SIZES.ITEM_PAD, 0, descYPos),
 			BackgroundTransparency = 1,
-			TextColor3 = Color3.fromRGB(140, 140, 150),
+			TextColor3 = ThemeModule.Colors.TextGray,
 			TextSize = SIZES.TOGGLE_DESC_TEXT,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextYAlignment = Enum.TextYAlignment.Top,
@@ -653,7 +653,7 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 		Name = "ToggleBg",
 		Size = UDim2.new(0, SIZES.TOGGLE_WIDTH, 0, SIZES.TOGGLE_HEIGHT),
 		Position = UDim2.new(1, -(SIZES.TOGGLE_WIDTH + SIZES.ITEM_PAD), 0.5, -SIZES.TOGGLE_HEIGHT/2),
-		BackgroundColor3 = isOn and ThemeModule.Colors.Primary1 or Color3.fromRGB(80, 80, 90),
+		BackgroundColor3 = isOn and ThemeModule.Colors.Primary1 or ThemeModule.Colors.Disabled,
 		BorderSizePixel = 0,
 	}, item)
 	crn(SIZES.TOGGLE_HEIGHT/2, toggleBg)
@@ -709,7 +709,7 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 				existingGradient:Destroy()
 			end
 			TweenService:Create(toggleBg, TweenInfo.new(0.2, Enum.EasingStyle.Quad), {
-				BackgroundColor3 = Color3.fromRGB(80, 80, 90)
+				BackgroundColor3 = ThemeModule.Colors.Disabled
 			}):Play()
 		end
 
@@ -730,7 +730,7 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 	item.InputBegan:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseMovement then
 			TweenService:Create(item, TweenInfo.new(0.15), {
-				BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+				BackgroundColor3 = ThemeModule.Colors.BackgroundLight
 			}):Play()
 		end
 	end)
@@ -738,7 +738,7 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 	item.InputEnded:Connect(function(input)
 		if input.UserInputType == Enum.UserInputType.MouseMovement then
 			TweenService:Create(item, TweenInfo.new(0.15), {
-				BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+				BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 			}):Play()
 		end
 	end)
@@ -753,7 +753,7 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 	local item = mk("Frame", {
 		Name = "Slider_" .. settingKey,
 		Size = UDim2.new(1, 0, 0, SIZES.SLIDER_H),
-		BackgroundColor3 = Color3.fromRGB(40, 40, 50),
+		BackgroundColor3 = ThemeModule.Colors.BackgroundMedium,
 		BorderSizePixel = 0,
 		LayoutOrder = layoutOrder,
 		ClipsDescendants = true,
@@ -803,7 +803,7 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 		Name = "SliderBg",
 		Size = UDim2.new(1, 0, 0, SIZES.SLIDER_BAR_H),
 		Position = UDim2.new(0, 0, 0.5, -SIZES.SLIDER_BAR_H / 2),
-		BackgroundColor3 = Color3.fromRGB(60, 60, 70),
+		BackgroundColor3 = ThemeModule.Colors.Disabled,
 		BorderSizePixel = 0,
 	}, sliderContainer)
 	crn(SIZES.SLIDER_BAR_H / 2, sliderBg)
@@ -1041,15 +1041,16 @@ local function createResetButton(layoutOrder)
 		Name = "ResetButton",
 		Text = "🔄 RESET PENGATURAN",
 		Size = UDim2.new(1, 0, 0, SIZES.BUTTON_H),
-		BackgroundColor3 = Color3.fromRGB(200, 80, 80),
+		BackgroundColor3 = ThemeModule.Colors.CloseRed,
 		BorderSizePixel = 0,
-		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextColor3 = ThemeModule.Colors.TextWhite,
 		TextSize = SIZES.BUTTON_TEXT,
 		Font = Enum.Font.GothamBold,
 		LayoutOrder = layoutOrder,
 		ClipsDescendants = true,
 	}, configScroll)
 	crn(SIZES.CORNER_MD, btn)
+	ThemeModule.CreateAnimatedStroke(btn, 1.2, "Primary", 1.2)
 
 	table.insert(UIElements.buttons, {
 		element = btn,
@@ -1074,13 +1075,13 @@ local function createResetButton(layoutOrder)
 
 	btn.MouseEnter:Connect(function()
 		TweenService:Create(btn, TweenInfo.new(0.15), {
-			BackgroundColor3 = Color3.fromRGB(220, 100, 100)
+			BackgroundColor3 = ThemeModule.Colors.CloseRedHover
 		}):Play()
 	end)
 
 	btn.MouseLeave:Connect(function()
 		TweenService:Create(btn, TweenInfo.new(0.15), {
-			BackgroundColor3 = Color3.fromRGB(200, 80, 80)
+			BackgroundColor3 = ThemeModule.Colors.CloseRed
 		}):Play()
 	end)
 

@@ -147,42 +147,46 @@ end
 
 local COLORS = {
 	VIP = {
-		Primary   = getThemeColor("Primary1", Color3.fromRGB(255, 215, 0)),
-		Secondary = getThemeColor("Primary2", Color3.fromRGB(255, 140, 0)),
-		Glow      = Color3.fromRGB(255, 200, 50)
+		Primary   = getThemeColor("Primary1", Color3.fromHex("#FFFFFF")),
+		Secondary = getThemeColor("Primary2", Color3.fromHex("#888888")),
+		Glow      = ThemeModule.Colors.Border
 	},
 	Button = {
-		Buy     = getThemeColor("Success", Color3.fromRGB(46, 204, 113)),
-		Owned   = Color3.fromRGB(100, 100, 120),
-		Loading = getThemeColor("Info", Color3.fromRGB(52, 152, 219)),
-		Error   = getThemeColor("Error", Color3.fromRGB(231, 76, 60))
+		Buy     = ThemeModule.Colors.ButtonPrimaryBg,
+		Owned   = ThemeModule.Colors.BackgroundLight,
+		Loading = ThemeModule.Colors.BackgroundLighter,
+		Error   = ThemeModule.Colors.CloseRed
 	},
 	Text = {
-		Primary   = Color3.fromRGB(255, 255, 255),
-		Secondary = Color3.fromRGB(200, 200, 220),
-		Gold      = getThemeColor("Primary1", Color3.fromRGB(255, 215, 0))
+		Primary   = ThemeModule.Colors.TextWhite,
+		Secondary = ThemeModule.Colors.TextGray,
+		Gold      = ThemeModule.Colors.Primary1
 	}
 }
 
 local ButtonStates = {
 	Loading = {
 		Text            = "⏳ Memuat...",
-		BackgroundColor = COLORS.Button.Loading,
+		BackgroundColor = ThemeModule.Colors.BackgroundLighter,
+		TextColor       = ThemeModule.Colors.TextGray,
 		Enabled         = false
 	},
 	Buy = {
 		Text            = "🛒 BELI SEKARANG",
-		BackgroundColor = COLORS.Button.Buy,
+		BackgroundColor = ThemeModule.Colors.ButtonPrimaryBg,
+		TextColor       = ThemeModule.Colors.ButtonPrimaryText,
 		Enabled         = true
 	},
 	Owned = {
 		Text            = "✅ SUDAH DIMILIKI",
-		BackgroundColor = COLORS.Button.Owned,
+		BackgroundColor = ThemeModule.Colors.BackgroundLight,
+		TextColor       = ThemeModule.Colors.TextMuted,
 		Enabled         = false
 	},
 	Error = {
 		Text            = "❌ Kesalahan",
-		BackgroundColor = COLORS.Button.Error,
+		BackgroundColor = ThemeModule.Colors.CloseRed,
+		TextColor       = ThemeModule.Colors.TextWhite,
 		Enabled         = false
 	}
 }
@@ -263,6 +267,9 @@ local function setButtonState(passType, state)
 	data.Button.Text            = stateConfig.Text
 	data.Button.Active          = stateConfig.Enabled
 	data.Button.AutoButtonColor = stateConfig.Enabled
+	if stateConfig.TextColor then
+		data.Button.TextColor3 = stateConfig.TextColor
+	end
 
 	TweenService:Create(data.Button, TweenInfo.new(0.3), {
 		BackgroundColor3 = stateConfig.BackgroundColor
@@ -306,19 +313,19 @@ local function createGamePassCard(passType, passData, colors, parent)
 	local card = mk("Frame", {
 		Name                = passType .. "Card",
 		Size                = UDim2.new(1, 0, 0, SIZES.CARD_H),
-		BackgroundColor3    = Color3.fromRGB(30, 30, 45),
+		BackgroundColor3    = ThemeModule.Colors.BackgroundMedium,
 		BorderSizePixel     = 0,
 		LayoutOrder         = 1,
 		ClipsDescendants    = true,
 	}, parent)
 	crn(SIZES.CARD_CORNER, card)
 
-	addAnimatedStrokeGradient(card, 2.5, 1.5)
+	addAnimatedStrokeGradient(card, 2, 1.2)
 
 	mk("UIGradient", {
 		Color = ColorSequence.new({
-			ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 35, 55)),
-			ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 40))
+			ColorSequenceKeypoint.new(0, ThemeModule.Colors.BackgroundLight),
+			ColorSequenceKeypoint.new(1, ThemeModule.Colors.BackgroundDark)
 		}),
 		Rotation = 135,
 	}, card)
@@ -366,15 +373,15 @@ local function createGamePassCard(passType, passData, colors, parent)
 		Size                = UDim2.new(0, SIZES.ICON_SIZE, 0, SIZES.ICON_SIZE),
 		Position            = UDim2.new(0.5, 0, 0, 20),
 		AnchorPoint         = Vector2.new(0.5, 0),
-		BackgroundColor3    = colors.Primary,
-		BackgroundTransparency = 0.2,
+		BackgroundColor3    = ThemeModule.Colors.BackgroundLight,
+		BackgroundTransparency = 0,
 	}, leftSection)
 	crn(SIZES.ICON_SIZE / 2, iconContainer)
 
 	mk("UIStroke", {
-		Thickness   = 4,
-		Color       = colors.Glow,
-		Transparency = 0.4,
+		Thickness   = 2,
+		Color       = ThemeModule.Colors.Border,
+		Transparency = 0.2,
 	}, iconContainer)
 
 	mk("TextLabel", {
