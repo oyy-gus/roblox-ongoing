@@ -7,6 +7,7 @@ local Modules = ReplicatedStorage:WaitForChild("Modules")
 local MenuConfig  = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
 local NotifModule = require(Modules:WaitForChild("NotifModule"))
+local PanelAnimationController = require(Modules:WaitForChild("PanelAnimationController"))
 
 local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -433,73 +434,55 @@ workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(functio
 end)
 
 local panelVisible = false
-local isAnimating  = false
 local panelIcon    = nil
 
+local panelController = PanelAnimationController.new(mainPanel, {
+	Mode = "CanvasGroup",
+	Container = panelContainer,
+	UIScale = panelUIScale,
+	Stroke = mainStroke,
+	OpenDuration = ANIMATION_CONFIG.OpenDuration,
+	CloseDuration = ANIMATION_CONFIG.CloseDuration,
+	OpenEasingStyle = ANIMATION_CONFIG.OpenEaseStyle,
+	OpenEasingDirection = ANIMATION_CONFIG.OpenEaseDirection,
+	CloseEasingStyle = ANIMATION_CONFIG.CloseEaseStyle,
+	CloseEasingDirection = ANIMATION_CONFIG.CloseEaseDirection,
+	ScaleStart = ANIMATION_CONFIG.ScaleStart,
+	ScaleEnd = ANIMATION_CONFIG.ScaleEnd,
+	SlideOffsetY = ANIMATION_CONFIG.SlideOffsetY,
+	GetResetPosition = function()
+		local offsetX, offsetY = getDefaultPanelOffset()
+		return UDim2.new(0.5, offsetX, 0.5, offsetY)
+	end,
+})
+
+panelController.OnStateChanged.Event:Connect(function(newState)
+	if newState == PanelAnimationController.State.Opening or newState == PanelAnimationController.State.Open then
+		panelVisible = true
+		MenuConfig.State.isMenuOpen = true
+		MenuConfig.Events.OnMenuToggled:Fire(true)
+	elseif newState == PanelAnimationController.State.Closed then
+		panelVisible = false
+		MenuConfig.State.isMenuOpen = false
+		MenuConfig.Events.OnMenuToggled:Fire(false)
+	end
+end)
+
 local function openPanel()
-	if isAnimating then return end
-	isAnimating  = true
-	panelVisible = true
-	MenuConfig.State.isMenuOpen = true
-
-	local offsetX, offsetY = getDefaultPanelOffset()
-	resetPanelPosition()
-	panelContainer.Visible      = true
-	mainPanel.GroupTransparency = 1
-	mainStroke.Transparency     = 1
-	panelUIScale.Scale          = ANIMATION_CONFIG.ScaleStart
-	mainPanel.Position          = UDim2.new(0.5, offsetX, 0.5, offsetY - ANIMATION_CONFIG.SlideOffsetY)
-
-	local openInfo = TweenInfo.new(ANIMATION_CONFIG.OpenDuration, ANIMATION_CONFIG.OpenEaseStyle, ANIMATION_CONFIG.OpenEaseDirection)
-	local fadeInfo = TweenInfo.new(ANIMATION_CONFIG.OpenDuration * 0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-	TweenService:Create(panelUIScale, openInfo, { Scale = ANIMATION_CONFIG.ScaleEnd }):Play()
-	TweenService:Create(mainPanel,    openInfo, { Position = UDim2.new(0.5, offsetX, 0.5, offsetY) }):Play()
-	TweenService:Create(mainPanel,    fadeInfo, { GroupTransparency = 0 }):Play()
-	TweenService:Create(mainStroke,   fadeInfo, { Transparency = 0 }):Play()
-	task.delay(ANIMATION_CONFIG.OpenDuration, function() isAnimating = false end)
-	MenuConfig.Events.OnMenuToggled:Fire(true)
+	panelController:Open()
 end
 
 local function closePanel()
-	if isAnimating then return end
-	isAnimating  = true
-	panelVisible = false
-	MenuConfig.State.isMenuOpen = false
-
-	local pos            = mainPanel.Position
-	local closeTweenInfo = TweenInfo.new(ANIMATION_CONFIG.CloseDuration, ANIMATION_CONFIG.CloseEaseStyle, ANIMATION_CONFIG.CloseEaseDirection)
-	TweenService:Create(panelUIScale, closeTweenInfo, { Scale = ANIMATION_CONFIG.ScaleStart }):Play()
-	TweenService:Create(mainPanel,    closeTweenInfo, {
-		Position = UDim2.new(pos.X.Scale, pos.X.Offset, pos.Y.Scale, pos.Y.Offset - ANIMATION_CONFIG.SlideOffsetY)
-	}):Play()
-	TweenService:Create(mainPanel,    closeTweenInfo, { GroupTransparency = 1 }):Play()
-	TweenService:Create(mainStroke,   closeTweenInfo, { Transparency = 1 }):Play()
-	task.delay(ANIMATION_CONFIG.CloseDuration, function()
-		panelContainer.Visible      = false
-		isAnimating                 = false
-		panelUIScale.Scale          = ANIMATION_CONFIG.ScaleEnd
-		mainPanel.GroupTransparency = 0
-		mainStroke.Transparency     = 0
-		resetPanelPosition()
-	end)
-	MenuConfig.Events.OnMenuToggled:Fire(false)
+	panelController:Close()
 end
 
 local function togglePanel()
-	if isAnimating then return end
 	SoundSystem.PlayClick()
-	if panelVisible then closePanel() else openPanel() end
+	panelController:Toggle()
 end
 
 local function forceClosePanel()
-	panelVisible                = false
-	isAnimating                 = false
-	MenuConfig.State.isMenuOpen = false
-	panelContainer.Visible      = false
-	panelUIScale.Scale          = ANIMATION_CONFIG.ScaleEnd
-	mainPanel.GroupTransparency = 0
-	mainStroke.Transparency     = 0
-	resetPanelPosition()
+	panelController:ForceClose()
 end
 
 MenuConfig.OpenPanel          = openPanel
@@ -553,15 +536,15 @@ panelIcon:setCaption("MENU")
 panelIcon:setRight()
 panelIcon:setOrder(6)
 
-panelIcon.selected:Connect(function()   SoundSystem.PlayClick(); openPanel()  end)
-panelIcon.deselected:Connect(function() SoundSystem.PlayClick(); closePanel() end)
+panelController:BindTopbarIcon(panelIcon)
+panelIcon.selected:Connect(function()   SoundSystem.PlayClick() end)
+panelIcon.deselected:Connect(function() SoundSystem.PlayClick() end)
 
 MenuConfig.GUI.PanelIcon = panelIcon
 
 local function onCharacterAdded()
 	task.defer(function()
 		forceClosePanel()
-		if panelIcon then panelIcon:deselect() end
 	end)
 end
 
@@ -570,16 +553,12 @@ player.CharacterAdded:Connect(onCharacterAdded)
 closeButton.MouseButton1Click:Connect(function()
 	SoundSystem.PlayClick()
 	closePanel()
-	if panelIcon then panelIcon:deselect() end
 end)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed then return end
 	if input.KeyCode == Config.ToggleKey then
 		togglePanel()
-		if panelIcon then
-			if panelVisible then panelIcon:select() else panelIcon:deselect() end
-		end
 	end
 end)
 
@@ -588,6 +567,7 @@ gui.Destroying:Connect(function()
 	ThemeModule.GradientSystem.Unregister(mainStrokeGradient)
 	for _, gradient in pairs(tabGradients) do ThemeModule.GradientSystem.Unregister(gradient) end
 	for _, tween   in pairs(tabHoverTweens) do if tween then tween:Cancel() end end
+	if panelController then panelController:Destroy(); panelController = nil end
 	if panelIcon then panelIcon:destroy(); panelIcon = nil end
 end)
 

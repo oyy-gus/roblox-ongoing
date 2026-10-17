@@ -3,19 +3,22 @@ local NotifModule = {}
 local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local ThemeModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("ThemeModule"))
 
 local CONFIG = {
 	MaxNotifications = 5,
-	Spacing = 5,
-	Padding = 8,
-	Width = 180,
-	MinHeight = 44,
+	Spacing = 6,
+	Padding = 12,
+	Width = 200,
+	MinHeight = 48,
 	IconSize = 14,
 	SlideDistance = 40,
 	AnimationDuration = 0.25,
 	DefaultDuration = 3,
-	CornerRadius = 5,
-	BackgroundTransparency = 0.15,
+	CornerRadius = 8,
+	BackgroundTransparency = 0.08,
 	EnableSounds = true,
 	SoundVolume = 0.4,
 	ProgressBarHeight = 2,
@@ -25,32 +28,32 @@ local CONFIG = {
 local NOTIFICATION_TYPES = {
 	Success = {
 		Icon = "✓",
-		PrimaryColor = Color3.fromRGB(46, 204, 113),
+		PrimaryColor = Color3.fromHex("#4ADE80"),
 		SoundId = "rbxassetid://6026984224",
 	},
 	Error = {
 		Icon = "X",
-		PrimaryColor = Color3.fromRGB(231, 76, 60),
+		PrimaryColor = Color3.fromHex("#EF4444"),
 		SoundId = "rbxassetid://5856649781",
 	},
 	Warning = {
 		Icon = "!",
-		PrimaryColor = Color3.fromRGB(241, 196, 15),
+		PrimaryColor = Color3.fromHex("#F59E0B"),
 		SoundId = "rbxassetid://9116840890",
 	},
 	Info = {
 		Icon = "i",
-		PrimaryColor = Color3.fromRGB(52, 152, 219),
+		PrimaryColor = Color3.fromHex("#3B82F6"),
 		SoundId = "rbxassetid://6026984224",
 	},
 	Settings = {
 		Icon = "⚙",
-		PrimaryColor = Color3.fromRGB(149, 165, 166),
+		PrimaryColor = ThemeModule.Colors.TextGray,
 		SoundId = "rbxassetid://139658322785649",
 	},
 	Notification = {
 		Icon = "●",
-		PrimaryColor = Color3.fromRGB(155, 89, 182),
+		PrimaryColor = ThemeModule.Colors.Primary1,
 		SoundId = "rbxassetid://6026984224",
 	},
 }
@@ -175,7 +178,7 @@ local function createNotifFrame(options)
 	local mainFrame = Instance.new("Frame")
 	mainFrame.Name = "Notification"
 	mainFrame.Size = UDim2.new(1, 0, 0, CONFIG.MinHeight)
-	mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+	mainFrame.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
 	mainFrame.BackgroundTransparency = CONFIG.BackgroundTransparency
 	mainFrame.BorderSizePixel = 0
 	mainFrame.ClipsDescendants = true
@@ -185,72 +188,75 @@ local function createNotifFrame(options)
 	mainCorner.CornerRadius = UDim.new(0, CONFIG.CornerRadius)
 	mainCorner.Parent = mainFrame
 
+	local stroke, strokeGrad = ThemeModule.CreateAnimatedStroke(mainFrame, 1, "Primary", 1.2)
+
 	local accentBar = Instance.new("Frame")
-	accentBar.Size = UDim2.new(0, 3, 1, -6)
-	accentBar.Position = UDim2.new(0, 3, 0, 3)
+	accentBar.Size = UDim2.new(0, 3, 1, -8)
+	accentBar.Position = UDim2.new(0, 4, 0, 4)
 	accentBar.BackgroundColor3 = primaryColor
 	accentBar.BorderSizePixel = 0
 	accentBar.ZIndex = 999999 + 1
 	accentBar.Parent = mainFrame
 
 	Instance.new("UICorner", accentBar).CornerRadius = UDim.new(0, 2)
+	local accentGrad = ThemeModule.CreateAnimatedGradient(accentBar, "Primary", 90, 1.2)
 
 	local iconLabel = Instance.new("TextLabel")
 	iconLabel.Size = UDim2.new(0, CONFIG.IconSize, 0, CONFIG.IconSize)
-	iconLabel.Position = UDim2.new(0, 10, 0, 6)
+	iconLabel.Position = UDim2.new(0, 12, 0, 8)
 	iconLabel.BackgroundTransparency = 1
 	iconLabel.Text = options.Icon or notifType.Icon
 	iconLabel.TextColor3 = primaryColor
 	iconLabel.TextScaled = true
-	iconLabel.Font = Enum.Font.GothamBold
+	iconLabel.Font = ThemeModule.Fonts.BodyBold
 	iconLabel.ZIndex = 999999 + 1
 	iconLabel.Parent = mainFrame
 
-	local textX = 10 + CONFIG.IconSize + 4
-	local closeBtnSpace = 18
+	local textX = 12 + CONFIG.IconSize + 6
+	local closeBtnSpace = 20
 	local textW = CONFIG.Width - textX - closeBtnSpace
 
 	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(0, textW, 0, 12)
-	title.Position = UDim2.new(0, textX, 0, 5)
+	title.Size = UDim2.new(0, textW, 0, 14)
+	title.Position = UDim2.new(0, textX, 0, 6)
 	title.BackgroundTransparency = 1
-	title.Text = options.Title or "Notif"
-	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	title.Text = options.Title or "Notifikasi"
+	title.TextColor3 = ThemeModule.Colors.TextWhite
 	title.TextScaled = true
 	title.TextXAlignment = Enum.TextXAlignment.Left
 	title.TextTruncate = Enum.TextTruncate.AtEnd
-	title.Font = Enum.Font.GothamBold
+	title.Font = ThemeModule.Fonts.Title
 	title.ZIndex = 999999 + 1
 	title.Parent = mainFrame
 
 	local titleConstraint = Instance.new("UITextSizeConstraint")
-	titleConstraint.MaxTextSize = 10
-	titleConstraint.MinTextSize = 7
+	titleConstraint.MaxTextSize = 11
+	titleConstraint.MinTextSize = 8
 	titleConstraint.Parent = title
 
 	local message = Instance.new("TextLabel")
-	message.Size = UDim2.new(0, textW, 0, 11)
-	message.Position = UDim2.new(0, textX, 0, 18)
+	message.Size = UDim2.new(0, textW, 0, 12)
+	message.Position = UDim2.new(0, textX, 0, 20)
 	message.BackgroundTransparency = 1
 	message.Text = options.Text or ""
-	message.TextColor3 = Color3.fromRGB(170, 170, 180)
+	message.TextColor3 = ThemeModule.Colors.TextGray
 	message.TextScaled = true
 	message.TextXAlignment = Enum.TextXAlignment.Left
 	message.TextTruncate = Enum.TextTruncate.AtEnd
-	message.Font = Enum.Font.Gotham
+	message.Font = ThemeModule.Fonts.Body
 	message.ZIndex = 999999 + 1
 	message.Parent = mainFrame
 
 	local msgConstraint = Instance.new("UITextSizeConstraint")
-	msgConstraint.MaxTextSize = 9
+	msgConstraint.MaxTextSize = 10
 	msgConstraint.MinTextSize = 7
 	msgConstraint.Parent = message
 
 	local progressBg = Instance.new("Frame")
-	progressBg.Size = UDim2.new(1, -12, 0, CONFIG.ProgressBarHeight)
-	progressBg.Position = UDim2.new(0, 6, 1, -(CONFIG.ProgressBarHeight + 4))
-	progressBg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-	progressBg.BackgroundTransparency = 0.5
+	progressBg.Size = UDim2.new(1, -16, 0, CONFIG.ProgressBarHeight)
+	progressBg.Position = UDim2.new(0, 8, 1, -(CONFIG.ProgressBarHeight + 4))
+	progressBg.BackgroundColor3 = ThemeModule.Colors.BackgroundLight
+	progressBg.BackgroundTransparency = 0.4
 	progressBg.BorderSizePixel = 0
 	progressBg.ZIndex = 999999 + 1
 	progressBg.Parent = mainFrame
@@ -268,14 +274,14 @@ local function createNotifFrame(options)
 
 	local closeBtn = Instance.new("TextButton")
 	closeBtn.Name = "CloseButton"
-	closeBtn.Size = UDim2.new(0, 16, 0, 16)
-	closeBtn.Position = UDim2.new(1, -19, 0, 4)
-	closeBtn.BackgroundColor3 = Color3.fromHex("#2A2A2A")
+	closeBtn.Size = UDim2.new(0, 18, 0, 18)
+	closeBtn.Position = UDim2.new(1, -22, 0, 5)
+	closeBtn.BackgroundColor3 = ThemeModule.Colors.CloseRed
 	closeBtn.BackgroundTransparency = 0
 	closeBtn.Text = "x"
-	closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	closeBtn.TextColor3 = ThemeModule.Colors.TextWhite
 	closeBtn.TextSize = 11
-	closeBtn.Font = Enum.Font.GothamBold
+	closeBtn.Font = ThemeModule.Fonts.BodyBold
 	closeBtn.AutoButtonColor = false
 	closeBtn.BorderSizePixel = 0
 	closeBtn.ZIndex = 999999 + 3
@@ -287,13 +293,13 @@ local function createNotifFrame(options)
 
 	closeBtn.MouseEnter:Connect(function()
 		TweenService:Create(closeBtn, TweenInfo.new(0.1), {
-			BackgroundColor3 = Color3.fromHex("#404040"),
+			BackgroundColor3 = ThemeModule.Colors.CloseRedHover,
 		}):Play()
 	end)
 
 	closeBtn.MouseLeave:Connect(function()
 		TweenService:Create(closeBtn, TweenInfo.new(0.1), {
-			BackgroundColor3 = Color3.fromHex("#2A2A2A"),
+			BackgroundColor3 = ThemeModule.Colors.CloseRed,
 		}):Play()
 	end)
 
@@ -302,6 +308,8 @@ local function createNotifFrame(options)
 		closeBtn = closeBtn,
 		progressFill = progressFill,
 		primaryColor = primaryColor,
+		strokeGrad = strokeGrad,
+		accentGrad = accentGrad,
 	}
 end
 
@@ -378,6 +386,12 @@ function NotifModule.Dismiss(notifData)
 	})
 
 	tween.Completed:Connect(function()
+		if notifData.strokeGrad then
+			ThemeModule.GradientSystem.Unregister(notifData.strokeGrad)
+		end
+		if notifData.accentGrad then
+			ThemeModule.GradientSystem.Unregister(notifData.accentGrad)
+		end
 		pcall(function() notifData.frame:Destroy() end)
 		for i, n in ipairs(activeNotifications) do
 			if n == notifData then table.remove(activeNotifications, i) break end

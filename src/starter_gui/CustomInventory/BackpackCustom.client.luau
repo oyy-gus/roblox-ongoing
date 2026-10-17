@@ -4,6 +4,8 @@ local UserInputService = game:GetService("UserInputService")
 local ContextActionService = game:GetService("ContextActionService")
 local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ThemeModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("ThemeModule"))
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -91,6 +93,7 @@ local function addGradient(parent, color1, color2, rotation)
 	})
 	gradient.Rotation = rotation or 90
 	gradient.Parent = parent
+	ThemeModule.GradientSystem.Register(gradient, 1)
 	return gradient
 end
 

@@ -1,6 +1,12 @@
 local ThemeModule = {}
 
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+
+local lastExternalBeat = 0
+local lastInternalBeat = 0
+local loudnessAvg = 0
+local cachedServerSound = nil
 
 ThemeModule.Colors = {
 	Primary1 = Color3.fromHex("#FFFFFF"),
@@ -141,7 +147,8 @@ ThemeModule.GradientSystem = {
 }
 
 function ThemeModule.GradientSystem.SetBeat(multiplier)
-	ThemeModule.GradientSystem.BeatMultiplier = math.clamp(multiplier or 1.0, 0.5, 3.0)
+	lastExternalBeat = os.clock()
+	ThemeModule.GradientSystem.BeatMultiplier = math.clamp(multiplier or 1.0, 0.5, 3.5)
 end
 
 function ThemeModule.GradientSystem.Register(gradient, speed)
@@ -158,6 +165,10 @@ function ThemeModule.GradientSystem.Register(gradient, speed)
 		gradient = gradient,
 		speed = speed or 1
 	})
+
+	if not ThemeModule.GradientSystem.IsRunning or not ThemeModule.GradientSystem.Connection then
+		ThemeModule.GradientSystem.Start()
+	end
 end
 
 function ThemeModule.GradientSystem.Unregister(gradient)
@@ -174,18 +185,48 @@ function ThemeModule.GradientSystem.Start()
 
 	ThemeModule.GradientSystem.IsRunning = true
 	ThemeModule.GradientSystem.Connection = RunService.Heartbeat:Connect(function(dt)
+		local now = os.clock()
+
+		if (now - lastExternalBeat) > 0.35 then
+			if not cachedServerSound or not cachedServerSound.Parent then
+				cachedServerSound = SoundService:FindFirstChild("ServerMusicSound") or workspace:FindFirstChild("ServerMusicSound", true)
+			end
+			if cachedServerSound and cachedServerSound.IsPlaying then
+				local ok, loudness = pcall(function() return cachedServerSound.PlaybackLoudness end)
+				if ok and type(loudness) == "number" and loudness > 5 then
+					loudnessAvg = (loudnessAvg * 0.92) + (loudness * 0.08)
+					local threshold = math.max(loudnessAvg * 1.30, 95)
+					if loudness > threshold and (now - lastInternalBeat) > 0.16 then
+						lastInternalBeat = now
+						local hit = math.clamp((loudness - threshold) / 200, 0.4, 1.0)
+						ThemeModule.GradientSystem.BeatMultiplier = math.max(ThemeModule.GradientSystem.BeatMultiplier, 1.0 + (hit * 1.8))
+					end
+				end
+			end
+		end
+
 		local currentSpeed = ThemeModule.GradientSystem.Speed * ThemeModule.GradientSystem.BeatMultiplier
 		ThemeModule.GradientSystem.Time = ThemeModule.GradientSystem.Time + dt * currentSpeed
 
 		if ThemeModule.GradientSystem.BeatMultiplier > 1.0 then
-			ThemeModule.GradientSystem.BeatMultiplier = math.max(1.0, ThemeModule.GradientSystem.BeatMultiplier - dt * 2.0)
+			ThemeModule.GradientSystem.BeatMultiplier = math.max(1.0, ThemeModule.GradientSystem.BeatMultiplier - dt * 2.5)
 		end
+
+		local beatPulse = (ThemeModule.GradientSystem.BeatMultiplier - 1.0) * 0.25
+		local amp = 0.5 + beatPulse
 
 		for i = #ThemeModule.GradientSystem.Gradients, 1, -1 do
 			local data = ThemeModule.GradientSystem.Gradients[i]
-			if data.gradient and data.gradient.Parent then
-				local offset = math.sin(ThemeModule.GradientSystem.Time * data.speed) * 0.5
-				data.gradient.Offset = Vector2.new(offset, 0)
+			local g = data and data.gradient
+			if g and g.Parent then
+				pcall(function()
+					local rawOffset = math.sin(ThemeModule.GradientSystem.Time * data.speed) * amp
+					local rot = (g.Rotation or 0) % 360
+					local rad = math.rad(rot)
+					local offX = rawOffset * math.cos(rad)
+					local offY = rawOffset * math.sin(rad)
+					g.Offset = Vector2.new(offX, offY)
+				end)
 			else
 				table.remove(ThemeModule.GradientSystem.Gradients, i)
 			end
@@ -202,10 +243,12 @@ function ThemeModule.GradientSystem.Stop()
 end
 
 function ThemeModule.GradientSystem.Clear()
-	ThemeModule.GradientSystem.Stop()
-	ThemeModule.GradientSystem.Gradients = {}
-	ThemeModule.GradientSystem.Time = 0
-	ThemeModule.GradientSystem.BeatMultiplier = 1.0
+	for i = #ThemeModule.GradientSystem.Gradients, 1, -1 do
+		local data = ThemeModule.GradientSystem.Gradients[i]
+		if not data.gradient or not data.gradient.Parent then
+			table.remove(ThemeModule.GradientSystem.Gradients, i)
+		end
+	end
 end
 
 function ThemeModule.GradientSystem.SetSpeed(speed)

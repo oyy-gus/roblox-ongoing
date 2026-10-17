@@ -11,6 +11,7 @@ repeat task.wait() until player.Character
 task.wait(1)
 
 local CarryConfig = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("CarryConfig"))
+local ThemeModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("ThemeModule"))
 
 local AutoScaleSystem = ReplicatedStorage:WaitForChild("AutoScaleSystem")
 local ScaleSystem = require(AutoScaleSystem:WaitForChild("ScaleSystem"))
@@ -461,18 +462,12 @@ notificationFrame.Name = "NotificationFrame"
 notificationFrame.Size = UDim2.new(0, 350, 0, 120)
 notificationFrame.Position = UDim2.new(0.5, 0, 0.3, 0)
 notificationFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-notificationFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+notificationFrame.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
 notificationFrame.Visible = false
 notificationFrame.ZIndex = 50
 notificationFrame.Parent = gui
 corner(notificationFrame, 16)
-stroke(notificationFrame, 2, Theme.AccentGold, 0.3)
-
-createGradient(notificationFrame,
-	Color3.fromRGB(30, 30, 45),
-	Color3.fromRGB(15, 15, 25),
-	135
-)
+ThemeModule.CreateAnimatedStroke(notificationFrame, 1.5, "Primary", 1.2)
 
 local notifTitle = Instance.new("TextLabel")
 notifTitle.Name = "Title"
@@ -482,7 +477,7 @@ notifTitle.BackgroundTransparency = 1
 notifTitle.Text = "📩 PERMINTAAN GENDONG"
 notifTitle.TextSize = 14
 notifTitle.Font = Enum.Font.GothamBold
-notifTitle.TextColor3 = Theme.AccentGold
+notifTitle.TextColor3 = ThemeModule.Colors.Primary1
 notifTitle.TextXAlignment = Enum.TextXAlignment.Left
 notifTitle.ZIndex = 51
 notifTitle.Parent = notificationFrame
@@ -495,7 +490,7 @@ notifLabel.BackgroundTransparency = 1
 notifLabel.Text = "Pemain ingin menggendong Anda"
 notifLabel.TextSize = 13
 notifLabel.Font = Enum.Font.Gotham
-notifLabel.TextColor3 = Theme.TextWhite
+notifLabel.TextColor3 = ThemeModule.Colors.TextGray
 notifLabel.TextWrapped = true
 notifLabel.TextXAlignment = Enum.TextXAlignment.Left
 notifLabel.ZIndex = 51
@@ -517,11 +512,11 @@ notifBtnLayout.Parent = notifBtnContainer
 local acceptBtn = Instance.new("TextButton")
 acceptBtn.Name = "AcceptBtn"
 acceptBtn.Size = UDim2.new(0, 120, 0, 35)
-acceptBtn.BackgroundColor3 = Theme.AccentGreen
+acceptBtn.BackgroundColor3 = ThemeModule.Colors.ButtonPrimaryBg
 acceptBtn.Text = "✓ Terima"
 acceptBtn.TextSize = 13
 acceptBtn.Font = Enum.Font.GothamBold
-acceptBtn.TextColor3 = Theme.TextWhite
+acceptBtn.TextColor3 = ThemeModule.Colors.ButtonPrimaryText
 acceptBtn.ZIndex = 52
 acceptBtn.Parent = notifBtnContainer
 corner(acceptBtn, 8)
@@ -529,11 +524,11 @@ corner(acceptBtn, 8)
 local rejectBtn = Instance.new("TextButton")
 rejectBtn.Name = "RejectBtn"
 rejectBtn.Size = UDim2.new(0, 120, 0, 35)
-rejectBtn.BackgroundColor3 = Theme.AccentRed
+rejectBtn.BackgroundColor3 = ThemeModule.Colors.CloseRed
 rejectBtn.Text = "✖️ Tolak"
 rejectBtn.TextSize = 13
 rejectBtn.Font = Enum.Font.GothamBold
-rejectBtn.TextColor3 = Theme.TextWhite
+rejectBtn.TextColor3 = ThemeModule.Colors.TextWhite
 rejectBtn.ZIndex = 52
 rejectBtn.Parent = notifBtnContainer
 corner(rejectBtn, 8)
@@ -543,22 +538,16 @@ getDownBtn.Name = "GetDownBtn"
 getDownBtn.Size = UDim2.new(0, 180, 0, 50)
 getDownBtn.Position = UDim2.new(0.5, 0, 0.85, 0)
 getDownBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-getDownBtn.BackgroundColor3 = Theme.AccentRed
+getDownBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
 getDownBtn.Text = "🚫 TURUN"
 getDownBtn.TextSize = 16
 getDownBtn.Font = Enum.Font.GothamBold
-getDownBtn.TextColor3 = Theme.TextWhite
+getDownBtn.TextColor3 = ThemeModule.Colors.TextWhite
 getDownBtn.Visible = false
 getDownBtn.ZIndex = 100
 getDownBtn.Parent = gui
 corner(getDownBtn, 12)
-stroke(getDownBtn, 2, Color3.fromRGB(180, 40, 40), 0)
-
-createGradient(getDownBtn,
-	Color3.fromRGB(220, 70, 70),
-	Color3.fromRGB(160, 40, 40),
-	90
-)
+ThemeModule.CreateAnimatedStroke(getDownBtn, 2, "Primary", 1.2)
 
 local currentState = "idle"
 local selectedTarget = nil
@@ -680,7 +669,23 @@ local function resetAllDividers()
 	end
 end
 
+local menuAnimToken = 0
+local activeMenuTweens = {}
+local notifAnimToken = 0
+local getDownAnimToken = 0
+
+local function cancelMenuTweens()
+	menuAnimToken += 1
+	for _, tw in ipairs(activeMenuTweens) do
+		pcall(function() tw:Cancel() end)
+	end
+	table.clear(activeMenuTweens)
+end
+
 local function animateMenuOpen()
+	cancelMenuTweens()
+	local token = menuAnimToken
+
 	menuContainer.Visible = true
 	menuContainer.Size = UDim2.new(0, 0, 0, 0)
 	outerRing.BackgroundTransparency = 1
@@ -694,10 +699,12 @@ local function animateMenuOpen()
 	local scaleTween = TweenService:Create(menuContainer, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 		Size = UDim2.new(0, MENU_SIZE, 0, MENU_SIZE)
 	})
+	table.insert(activeMenuTweens, scaleTween)
 
 	local fadeTween = TweenService:Create(outerRing, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
 		BackgroundTransparency = Theme.MenuBgTransparency
 	})
+	table.insert(activeMenuTweens, fadeTween)
 
 	scaleTween:Play()
 	fadeTween:Play()
@@ -712,84 +719,106 @@ local function animateMenuOpen()
 		local targetY = math.sin(angle) * radius
 
 		task.delay(0.05 * i, function()
-			TweenService:Create(frame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+			if menuAnimToken ~= token then return end
+			local segTween = TweenService:Create(frame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
 				Position = UDim2.new(0.5, targetX, 0.5, targetY)
-			}):Play()
+			})
+			table.insert(activeMenuTweens, segTween)
+			segTween:Play()
 		end)
 	end
 
 	task.delay(0.25, function()
+		if menuAnimToken ~= token then return end
 		for i, divData in ipairs(dividerLines) do
 			task.delay(0.04 * i, function()
-				TweenService:Create(divData.frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				if menuAnimToken ~= token then return end
+				local divTween = TweenService:Create(divData.frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 					BackgroundTransparency = 0.2,
 					Size = UDim2.new(0, 2, 0, DIVIDER_OUTER - DIVIDER_INNER)
-				}):Play()
+				})
+				table.insert(activeMenuTweens, divTween)
+				divTween:Play()
 			end)
 		end
 	end)
 
 	task.spawn(function()
-		while menuContainer.Visible do
-			TweenService:Create(glowStroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+		while menuContainer.Visible and menuAnimToken == token do
+			local g1 = TweenService:Create(glowStroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
 				Transparency = 0.3
-			}):Play()
+			})
+			table.insert(activeMenuTweens, g1)
+			g1:Play()
 			task.wait(1.5)
-			if not menuContainer.Visible then break end
-			TweenService:Create(glowStroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+			if not menuContainer.Visible or menuAnimToken ~= token then break end
+			local g2 = TweenService:Create(glowStroke, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
 				Transparency = 0.8
-			}):Play()
+			})
+			table.insert(activeMenuTweens, g2)
+			g2:Play()
 			task.wait(1.5)
 		end
 	end)
 end
 
 local function animateMenuClose(callback)
+	cancelMenuTweens()
+	local token = menuAnimToken
 	hoverInfoFrame.Visible = false
 
 	for _, divData in ipairs(dividerLines) do
-		TweenService:Create(divData.frame, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+		local tw = TweenService:Create(divData.frame, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
 			BackgroundTransparency = 1,
 			Size = UDim2.new(0, 2, 0, 0)
-		}):Play()
+		})
+		table.insert(activeMenuTweens, tw)
+		tw:Play()
 	end
 
 	for i, frame in ipairs(segmentFrames) do
-		TweenService:Create(frame, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+		local tw = TweenService:Create(frame, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
 			Position = UDim2.new(0.5, 0, 0.5, 0)
-		}):Play()
+		})
+		table.insert(activeMenuTweens, tw)
+		tw:Play()
 	end
 
-	task.wait(0.15)
+	task.delay(0.15, function()
+		if menuAnimToken ~= token then return end
 
-	local scaleTween = TweenService:Create(menuContainer, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-		Size = UDim2.new(0, 0, 0, 0)
-	})
+		local scaleTween = TweenService:Create(menuContainer, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+			Size = UDim2.new(0, 0, 0, 0)
+		})
+		table.insert(activeMenuTweens, scaleTween)
 
-	scaleTween.Completed:Connect(function()
-		menuContainer.Visible = false
-		menuContainer.Size = UDim2.new(0, MENU_SIZE, 0, MENU_SIZE)
+		scaleTween.Completed:Connect(function()
+			if menuAnimToken ~= token then return end
+			menuContainer.Visible = false
+			menuContainer.Size = UDim2.new(0, MENU_SIZE, 0, MENU_SIZE)
 
-		for i, frame in ipairs(segmentFrames) do
-			local styleData = CarryStyles[i]
-			local angle = math.rad(styleData.angle - 90)
-			local radius = LABEL_OFFSET
-			frame.Position = UDim2.new(0.5, math.cos(angle) * radius, 0.5, math.sin(angle) * radius)
-		end
+			for i, frame in ipairs(segmentFrames) do
+				local styleData = CarryStyles[i]
+				local angle = math.rad(styleData.angle - 90)
+				local radius = LABEL_OFFSET
+				frame.Position = UDim2.new(0.5, math.cos(angle) * radius, 0.5, math.sin(angle) * radius)
+			end
 
-		for _, divData in ipairs(dividerLines) do
-			divData.frame.BackgroundTransparency = 0.2
-			divData.frame.BackgroundColor3 = Theme.DividerColor
-			divData.frame.Size = UDim2.new(0, 2, 0, DIVIDER_OUTER - DIVIDER_INNER)
-		end
+			for _, divData in ipairs(dividerLines) do
+				divData.frame.BackgroundTransparency = 0.2
+				divData.frame.BackgroundColor3 = Theme.DividerColor
+				divData.frame.Size = UDim2.new(0, 2, 0, DIVIDER_OUTER - DIVIDER_INNER)
+			end
 
-		if callback then callback() end
+			if callback then callback() end
+		end)
+
+		scaleTween:Play()
 	end)
-
-	scaleTween:Play()
 end
 
 local function animateNotificationIn()
+	notifAnimToken += 1
 	notificationFrame.Visible = true
 	notificationFrame.Position = UDim2.new(0.5, 0, -0.2, 0)
 
@@ -799,11 +828,14 @@ local function animateNotificationIn()
 end
 
 local function animateNotificationOut(callback)
+	notifAnimToken += 1
+	local token = notifAnimToken
 	TweenService:Create(notificationFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
 		Position = UDim2.new(0.5, 0, -0.2, 0)
 	}):Play()
 
 	task.delay(0.3, function()
+		if notifAnimToken ~= token then return end
 		notificationFrame.Visible = false
 		notificationFrame.Position = UDim2.new(0.5, 0, 0.3, 0)
 		if callback then callback() end
@@ -811,6 +843,7 @@ local function animateNotificationOut(callback)
 end
 
 local function animateGetDownIn()
+	getDownAnimToken += 1
 	getDownBtn.Visible = true
 	getDownBtn.Size = UDim2.new(0, 0, 0, 0)
 
@@ -820,11 +853,14 @@ local function animateGetDownIn()
 end
 
 local function animateGetDownOut(callback)
+	getDownAnimToken += 1
+	local token = getDownAnimToken
 	TweenService:Create(getDownBtn, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
 		Size = UDim2.new(0, 0, 0, 0)
 	}):Play()
 
 	task.delay(0.2, function()
+		if getDownAnimToken ~= token then return end
 		getDownBtn.Visible = false
 		getDownBtn.Size = UDim2.new(0, 180, 0, 50)
 		if callback then callback() end
@@ -1000,6 +1036,9 @@ local function showCarryNotification(carrierId, carrierName, style)
 
 	notifLabel.Text = string.format("%s %s ingin menggendong Anda\nGaya: %s", styleIcon, carrierName, styleName)
 
+	acceptBtn.BackgroundColor3 = ThemeModule.Colors.ButtonPrimaryBg
+	rejectBtn.BackgroundColor3 = ThemeModule.Colors.CloseRed
+
 	task.wait(0.05)
 	animateNotificationIn()
 end
@@ -1091,7 +1130,7 @@ acceptBtn.MouseButton1Click:Connect(function()
 	CarryConfig.debugPrint("UI", "Accepted carry request")
 
 	TweenService:Create(acceptBtn, TweenInfo.new(0.1), {
-		BackgroundColor3 = Color3.fromRGB(60, 180, 60)
+		BackgroundColor3 = ThemeModule.Colors.ButtonPressedBg
 	}):Play()
 
 	task.wait(0.15)
@@ -1112,7 +1151,7 @@ rejectBtn.MouseButton1Click:Connect(function()
 	CarryConfig.debugPrint("UI", "Rejected carry request")
 
 	TweenService:Create(rejectBtn, TweenInfo.new(0.1), {
-		BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+		BackgroundColor3 = ThemeModule.Colors.ButtonPressedBg
 	}):Play()
 
 	task.wait(0.15)
@@ -1128,23 +1167,23 @@ end)
 
 acceptBtn.MouseEnter:Connect(function()
 	TweenService:Create(acceptBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromRGB(100, 220, 100)
+		BackgroundColor3 = Color3.fromRGB(225, 225, 225)
 	}):Play()
 end)
 acceptBtn.MouseLeave:Connect(function()
 	TweenService:Create(acceptBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Theme.AccentGreen
+		BackgroundColor3 = ThemeModule.Colors.ButtonPrimaryBg
 	}):Play()
 end)
 
 rejectBtn.MouseEnter:Connect(function()
 	TweenService:Create(rejectBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+		BackgroundColor3 = ThemeModule.Colors.CloseRedHover
 	}):Play()
 end)
 rejectBtn.MouseLeave:Connect(function()
 	TweenService:Create(rejectBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Theme.AccentRed
+		BackgroundColor3 = ThemeModule.Colors.CloseRed
 	}):Play()
 end)
 

@@ -373,9 +373,12 @@ local function closeSheet(instant)
 
 	removeCharacterHighlight(instant)
 
+	local sheetToDestroy = currentSheet
 	local function destroy()
-		if currentSheet then
-			currentSheet:Destroy()
+		if sheetToDestroy and sheetToDestroy.Parent then
+			sheetToDestroy:Destroy()
+		end
+		if currentSheet == sheetToDestroy then
 			currentSheet = nil
 		end
 		isAnimating = false
@@ -386,17 +389,17 @@ local function closeSheet(instant)
 		return
 	end
 
-	local pos = currentSheet.Position
+	local pos = sheetToDestroy.Position
 	local closeTweenInfo = TweenInfo.new(
 		ANIMATION_CONFIG.CloseDuration,
 		ANIMATION_CONFIG.CloseEaseStyle,
 		ANIMATION_CONFIG.CloseEaseDirection
 	)
 
-	TweenService:Create(currentSheet, closeTweenInfo, {
+	TweenService:Create(sheetToDestroy, closeTweenInfo, {
 		Position = UDim2.new(pos.X.Scale, pos.X.Offset, pos.Y.Scale, pos.Y.Offset - BASE.SLIDE_OFFSET_Y)
 	}):Play()
-	TweenService:Create(currentSheet, closeTweenInfo, {GroupTransparency = 1}):Play()
+	TweenService:Create(sheetToDestroy, closeTweenInfo, {GroupTransparency = 1}):Play()
 
 	task.delay(ANIMATION_CONFIG.CloseDuration + 0.05, destroy)
 
@@ -406,13 +409,11 @@ local function closeSheet(instant)
 end
 
 local function openSheet(player)
-	if isSheetOpen then
+	if isSheetOpen or currentSheet then
 		closeSheet(true)
-		task.wait(0.05)
 	end
 
 	if not player or not player.Parent then return end
-	if isAnimating then return end
 
 	isAnimating  = true
 	isSheetOpen  = true

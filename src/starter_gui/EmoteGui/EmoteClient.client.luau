@@ -1355,7 +1355,9 @@ Players.PlayerRemoving:Connect(function(rp)
 		pcall(function() emoteIcon:destroy() end)
 	end
 
-	ThemeModule.GradientSystem.Clear()
+	if danceGrad then ThemeModule.GradientSystem.Unregister(danceGrad) end
+	if poseGrad then ThemeModule.GradientSystem.Unregister(poseGrad) end
+	if favoriteGrad then ThemeModule.GradientSystem.Unregister(favoriteGrad) end
 
 	if scaler then
 		scaler:Destroy()
@@ -1378,7 +1380,9 @@ script.Destroying:Connect(function()
 		currentDanceConnection:Disconnect()
 	end
 
-	ThemeModule.GradientSystem.Clear()
+	if danceGrad then ThemeModule.GradientSystem.Unregister(danceGrad) end
+	if poseGrad then ThemeModule.GradientSystem.Unregister(poseGrad) end
+	if favoriteGrad then ThemeModule.GradientSystem.Unregister(favoriteGrad) end
 
 	if scaler then
 		scaler:Destroy()
