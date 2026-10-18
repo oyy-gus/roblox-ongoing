@@ -133,7 +133,6 @@ function ServerMusicAudioHandler:CreateServerSound()
 
 	self.serverSound.SoundGroup = self.musicGroup
 
-	-- Clean up legacy effects directly on Sound instance so effects only reside in SoundGroup
 	local legacyEq = self.serverSound:FindFirstChild("FiestaEqualizer") or self.serverSound:FindFirstChildWhichIsA("EqualizerSoundEffect")
 	if legacyEq then pcall(function() legacyEq:Destroy() end) end
 
@@ -237,7 +236,6 @@ function ServerMusicAudioHandler:Play(soundId, timePosition)
 		pcall(function() comp:Destroy() end)
 	end
 
-	-- Tunggu asset ter-load di server agar songStartTime = waktu mulai sebenarnya
 	local loadStart = os.clock()
 	while not self.serverSound.IsLoaded and (os.clock() - loadStart) < 4 do
 		task.wait(0.03)

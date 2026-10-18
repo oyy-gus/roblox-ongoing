@@ -25,6 +25,7 @@ local dispatchEvent  = remoteFolder:WaitForChild("DispatchEvent",  10)
 local musicBroadcast = remoteFolder:WaitForChild("MusicBroadcast", 10)
 local musicUpdate    = remoteFolder:WaitForChild("MusicUpdate",    10)
 local requestSync    = remoteFolder:WaitForChild("RequestSync",    10)
+local getFavorites   = remoteFolder:WaitForChild("GetFavorites",   10)
 
 if not (dispatchAction and dispatchEvent and musicBroadcast) then
 	warn("❌ MusicClient: Remote penting tidak ditemukan!"); return
@@ -126,11 +127,11 @@ local T = {
 	StatusLive        = "● LIVE BEAT-REACTIVE",
 	StatusIdle        = "○ GLOBAL MUSIC IDLE",
 	VoteYes           = "✓  Ya",
-	VoteNo            = "✕  Tidak",
+	VoteNo            = "X  Tidak",
 	AddFavorite       = "★",
 	AddToQueue        = "+ Antre",
 	SongIDPlaceholder = "🎵  Masukkan ID lagu Roblox (cth: 1843404007)...",
-	Remove            = "✕",
+	Remove            = "x",
 	SuccessTitle      = "Sukses",
 	ErrorTitle        = "Error",
 	WarningTitle      = "Peringatan",
@@ -348,6 +349,25 @@ local clientState = {
 	serverStartTime = 0,
 }
 
+local function cleanMusicId(raw)
+	if not raw then return "" end
+	local s = tostring(raw):gsub("%s+", "")
+	return s:match("%d+") or s
+end
+
+local function isSongInQueue(targetId)
+	local cleanTarget = cleanMusicId(targetId)
+	if cleanTarget == "" then return false end
+	for _, item in ipairs(clientState.queue or {}) do
+		local mData = item.musicData or item
+		local rawId = mData and (mData.id or mData.sound_id)
+		if rawId and cleanMusicId(rawId) == cleanTarget then
+			return true
+		end
+	end
+	return false
+end
+
 local currentSubTab      = "player"
 local currentTimePos     = 0
 local currentTimeLen     = 0
@@ -522,7 +542,6 @@ local function gentleDriftCorrect(serverStartTime, duration)
 	local actualPos = serverSound.TimePosition
 	local drift = math.abs(expectedPos - actualPos)
 
-	-- Koreksi jika drift > 0.5s (jarang terjadi setelah align awal per lagu)
 	if drift > 0.5 then
 		local maxLen = (serverSound.TimeLength > 0) and serverSound.TimeLength or duration
 		if expectedPos > 0 and (maxLen <= 0 or expectedPos < maxLen - 0.5) then
@@ -555,7 +574,6 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 	local curDuration = clientState.duration or duration or currentTimeLen or 0
 	local targetSoundId = expectedSoundId and ("rbxassetid://" .. tostring(expectedSoundId))
 
-	-- Sudah lagu yang sama, sedang main, dan drift kecil -> jangan ganggu audio
 	if not isNewSong and hasInitialSynced and ss.IsPlaying and ss.IsLoaded
 		and (not targetSoundId or ss.SoundId == targetSoundId) and curStartTime > 0 then
 		local expectedPos = workspace:GetServerTimeNow() - curStartTime
@@ -568,9 +586,6 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 	currentSyncId = currentSyncId + 1
 	local mySyncId = currentSyncId
 
-	-- Sound replikasi Roblox mulai diputar di tiap device SETELAH asset selesai di-load,
-	-- jadi HP yang load-nya lambat akan tertinggal. Solusinya: tiap lagu, setelah load,
-	-- samakan TimePosition ke jam server (GetServerTimeNow sama di semua client) dalam kondisi senyap.
 	isSyncing = true
 	cancelClientFade()
 	if musicGroup and musicGroup:IsA("SoundGroup") then
@@ -594,7 +609,6 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 			end
 		end)
 
-		-- 1. Tunggu SoundId dari server tereplikasi (JANGAN set dari client)
 		if targetSoundId then
 			local t0 = os.clock()
 			while ss.SoundId ~= targetSoundId and (os.clock() - t0) < 3.0 do
@@ -603,7 +617,6 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 			end
 		end
 
-		-- 2. Tunggu asset ter-load dan sound mulai main di device ini
 		local t1 = os.clock()
 		while (not ss.IsLoaded or ss.TimeLength <= 0 or not ss.IsPlaying) and (os.clock() - t1) < 5.0 do
 			task.wait(0.03)
@@ -622,7 +635,6 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 			pcall(function() ss:Play() end)
 		end
 
-		-- 3. Align sekali ke jam server (masih volume 0, tidak terdengar loncat)
 		local startT = clientState.serverStartTime or serverStartTime or curStartTime or 0
 		if startT > 0 then
 			local realMax = (ss.TimeLength > 0) and ss.TimeLength or curDuration
@@ -630,7 +642,7 @@ local function syncServerSoundPosition(expectedSoundId, serverStartTime, duratio
 			if expectedPos >= 0 and (realMax <= 0 or expectedPos < realMax - 0.5) then
 				if math.abs(ss.TimePosition - expectedPos) > 0.08 then
 					pcall(function()
-						-- +0.05 kompensasi latensi seek decoder
+
 						ss.TimePosition = expectedPos + 0.05
 					end)
 					task.wait(0.08)
@@ -1043,22 +1055,30 @@ local function updateSongsTitle(searching, count, query)
 	end
 end
 
-local FAVORITES_KEY = "MusicFavorites_"..tostring(player.UserId)
 local function saveFavorites()
-	pcall(function()
-		player.PlayerGui:SetAttribute(FAVORITES_KEY, game:GetService("HttpService"):JSONEncode(userFavorites))
-	end)
+	dispatch("SAVE_FAVORITES", { favorites = userFavorites })
 end
+
 local function loadFavorites()
-	local ok, result = pcall(function()
-		local raw = player.PlayerGui:GetAttribute(FAVORITES_KEY)
-		if raw then return game:GetService("HttpService"):JSONDecode(raw) end
-		return {}
-	end)
-	userFavorites = (ok and result) or {}
+	local data = nil
+	if getFavorites then
+		local ok, res = pcall(function() return getFavorites:InvokeServer() end)
+		if ok and type(res) == "table" and #res > 0 then
+			data = res
+		end
+	end
+	if not data then
+		local raw = player:GetAttribute("MusicFavorites")
+		if raw and type(raw) == "string" then
+			local ok, res = pcall(function() return game:GetService("HttpService"):JSONDecode(raw) end)
+			if ok and type(res) == "table" then data = res end
+		end
+	end
+	userFavorites = data or {}
 	if UI.favSubLbl then
 		UI.favSubLbl.Text = canFavorite and string.format("%d Lagu Favorit", #userFavorites) or "Fitur Khusus VIP+"
 	end
+	updateFavoriteUI()
 end
 
 local function updateSongs(list)
@@ -1200,6 +1220,18 @@ local function updateSongs(list)
 		local capSong = song
 		pb.MouseButton1Click:Connect(function()
 			if not isVIPPlus() then notifyWarning(T.VIPRequired, "Minimum rank VIP untuk menambah lagu!"); return end
+			local targetId = cleanMusicId(capSong.id or capSong.sound_id)
+			if clientState.currentSong then
+				local curId = cleanMusicId(clientState.currentSong.id or clientState.currentSong.sound_id)
+				if curId ~= "" and curId == targetId then
+					notifyWarning(T.WarningTitle, "Lagu ini sedang diputar!")
+					return
+				end
+			end
+			if isSongInQueue(targetId) then
+				notifyWarning(T.WarningTitle, "Lagu ini sudah ada di antrean!")
+				return
+			end
 			dispatch("ADD_TO_QUEUE", { musicId = tostring(capSong.id or capSong.sound_id), isFromPlaylist = true })
 		end)
 
@@ -1659,7 +1691,7 @@ local function buildNowPlaying()
 
 	local voteNo = Instance.new("TextButton")
 	voteNo.Name = "VoteNoBtn"
-	voteNo.Text = "✕ Tidak"
+	voteNo.Text = "X Tidak"
 	voteNo.Size = UDim2.new(0, 48, 0, 22)
 	voteNo.Position = UDim2.new(1, -54, 0.5, -11)
 	voteNo.BackgroundColor3 = Color3.fromHex("#262626")
@@ -1797,10 +1829,22 @@ local function buildQueueSection()
 	end)
 
 	local function submitSongReq()
-		local id = reqInput.Text:gsub("%s+", "")
-		if id ~= "" and id:match("^%d+$") then
+		local rawText = reqInput.Text:gsub("%s+", "")
+		local id = rawText:match("%d+")
+		if id and id ~= "" then
 			if not isVIPPlus() then
 				notifyWarning(T.VIPRequired, "Minimum rank VIP untuk menambah lagu!")
+				return
+			end
+			if clientState.currentSong then
+				local curId = cleanMusicId(clientState.currentSong.id or clientState.currentSong.sound_id)
+				if curId ~= "" and curId == id then
+					notifyWarning(T.WarningTitle, "Lagu ini sedang diputar!")
+					return
+				end
+			end
+			if isSongInQueue(id) then
+				notifyWarning(T.WarningTitle, "Lagu ini sudah ada di antrean!")
 				return
 			end
 			dispatch("ADD_TO_QUEUE", { musicId = id, isFromPlaylist = false })
@@ -2281,7 +2325,7 @@ local function buildSearchSection()
 
 	local clearBtn = Instance.new("TextButton")
 	clearBtn.Name = "ClearBtn"
-	clearBtn.Text = "✕"
+	clearBtn.Text = "x"
 	clearBtn.Size = UDim2.new(0, DIM.CLEAR_BTN_W - 6, 0, DIM.SEARCH_H - 12)
 	clearBtn.Position = UDim2.new(1, -(DIM.CLEAR_BTN_W - 2), 0.5, -(DIM.SEARCH_H - 12) / 2)
 	clearBtn.BackgroundColor3 = C.ClearBtn
@@ -2857,7 +2901,6 @@ end
 isMuted    = MenuConfig.UserSettings and MenuConfig.UserSettings.muteMusic or false
 userVolume = ((MenuConfig.UserSettings and MenuConfig.UserSettings.musicVolume or 100) / 100) * 0.5
 
--- Start at volume 0 so newly connecting players fade in smoothly once synchronized
 local startMg = getMusicGroup()
 if startMg and startMg:IsA("SoundGroup") then
 	startMg.Volume = 0

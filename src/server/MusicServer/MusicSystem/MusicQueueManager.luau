@@ -9,12 +9,20 @@ function MusicQueueManager.new(config)
 	return self
 end
 
+local function cleanId(raw)
+	if not raw then return "" end
+	local s = tostring(raw):gsub("%s+", "")
+	return s:match("%d+") or s
+end
+
 function MusicQueueManager:IsInQueue(musicId)
 	if not musicId then return false end
-	local targetId = tostring(musicId)
+	local targetId = cleanId(musicId)
+	if targetId == "" then return false end
 	for _, entry in ipairs(self.queue) do
-		local entryId = entry.musicData and entry.musicData.id
-		if entryId and tostring(entryId) == targetId then
+		local mData = entry.musicData or entry
+		local rawId = mData and (mData.id or mData.sound_id)
+		if rawId and cleanId(rawId) == targetId then
 			return true
 		end
 	end
@@ -22,8 +30,8 @@ function MusicQueueManager:IsInQueue(musicId)
 end
 
 function MusicQueueManager:AddToQueue(musicData, uploaderName, userId)
-	local musicId = musicData and musicData.id
-	if self:IsInQueue(musicId) then
+	local rawId = musicData and (musicData.id or musicData.sound_id)
+	if self:IsInQueue(rawId) then
 		return false, "Lagu ini sudah ada di antrean!"
 	end
 

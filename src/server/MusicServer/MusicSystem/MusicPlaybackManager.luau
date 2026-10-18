@@ -173,21 +173,18 @@ function MusicPlaybackManager:StartProgressBroadcast(remotes)
 		if not self.isTransitioning and self.autoNextCallback and self.songStartTime > 0 then
 			local songFinished = false
 
-			-- 1. If server sound stopped playing naturally after having played for at least 2 seconds
 			if wallElapsed > 2.0 and not self.audioHandler:IsPlaying() then
 				songFinished = true
 			end
 
-			-- 2. If TimePosition reached the end of the song
 			if self.songDuration > 0 and elapsed >= (self.songDuration - 0.25) and wallElapsed > 2.0 then
 				songFinished = true
 			end
 
-			-- 3. If wall clock exceeded duration AND sound is NOT playing (never kill an actively playing song!)
 			if self.songDuration > 0 and wallElapsed >= (self.songDuration + 2.0) and not self.audioHandler:IsPlaying() then
 				songFinished = true
 			elseif wallElapsed >= 600 then
-				-- Hard fallback: only after 10 full minutes of playing
+
 				songFinished = true
 			end
 
@@ -228,7 +225,6 @@ function MusicPlaybackManager:Play(remotes, songData, uploaderName, isFromPlayli
 
 	self.isTransitioning = true
 
-	-- Seamless instant transition: cancel any previous fade and play immediately without blocking
 	self.audioHandler:CancelFade()
 
 	self.currentSong      = musicData

@@ -1,6 +1,10 @@
 local ServerStorage     = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players           = game:GetService("Players")
+local HttpService       = game:GetService("HttpService")
+local DataStoreService  = game:GetService("DataStoreService")
+
+local musicFavoritesStore = DataStoreService:GetDataStore("MusicFavorites_v2")
 
 local RoleSystem          = require(ServerStorage.Modules.RoleSystem)
 local MusicModule         = require(ReplicatedStorage.Modules:WaitForChild("MusicModule"))
@@ -77,6 +81,7 @@ local musicBroadcast = getOrCreateRemote("MusicBroadcast", "RemoteEvent")
 local musicUpdate    = getOrCreateRemote("MusicUpdate",    "RemoteEvent")
 local requestSync    = getOrCreateRemote("RequestSync",    "RemoteEvent")
 local getPlaylist    = getOrCreateRemote("GetPlaylist",    "RemoteFunction")
+local getFavorites   = getOrCreateRemote("GetFavorites",   "RemoteFunction")
 
 local Remotes = {
 	DispatchAction = dispatchAction,
@@ -84,6 +89,7 @@ local Remotes = {
 	MusicBroadcast = musicBroadcast,
 	MusicUpdate    = musicUpdate,
 	RequestSync    = requestSync,
+	GetFavorites   = getFavorites,
 }
 
 getPlaylist.OnServerInvoke = function(player)
@@ -91,6 +97,23 @@ getPlaylist.OnServerInvoke = function(player)
 		songs     = MusicModule:GetAllMusic(),
 		playlists = MusicModule:GetPlaylists(),
 	}
+end
+
+getFavorites.OnServerInvoke = function(player)
+	local cached = player:GetAttribute("MusicFavorites")
+	if cached and type(cached) == "string" then
+		local ok, data = pcall(function() return HttpService:JSONDecode(cached) end)
+		if ok and type(data) == "table" then return data end
+	end
+	local success, saved = pcall(function()
+		return musicFavoritesStore:GetAsync("User_" .. player.UserId)
+	end)
+	if success and saved and type(saved) == "string" then
+		player:SetAttribute("MusicFavorites", saved)
+		local ok, data = pcall(function() return HttpService:JSONDecode(saved) end)
+		if ok and type(data) == "table" then return data end
+	end
+	return {}
 end
 
 local queueManager      = MusicQueueManager.new(CONFIG)
@@ -341,6 +364,12 @@ playNextSong = function()
 	end
 end
 
+local function cleanMusicId(raw)
+	if not raw then return "" end
+	local s = tostring(raw):gsub("%s+", "")
+	return s:match("%d+") or s
+end
+
 local ActionHandlers = {}
 
 function ActionHandlers:ADD_TO_QUEUE(player, data)
@@ -371,15 +400,18 @@ function ActionHandlers:ADD_TO_QUEUE(player, data)
 		return
 	end
 
-	-- 1. Cek apakah lagu ini sedang diputar
+	local reqCleanId = cleanMusicId(musicId)
+
 	local currentSong = playbackManager:GetCurrentSong()
-	if playbackManager:IsPlaying() and currentSong and tostring(currentSong.id) == tostring(musicId) then
-		Dispatcher:Notify(player, "Lagu ini sedang diputar!")
-		return
+	if currentSong then
+		local curCleanId = cleanMusicId(currentSong.id or currentSong.sound_id)
+		if curCleanId ~= "" and reqCleanId ~= "" and curCleanId == reqCleanId then
+			Dispatcher:Notify(player, "Lagu ini sedang diputar!")
+			return
+		end
 	end
 
-	-- 2. Cek apakah lagu ini sudah ada di antrean
-	if queueManager:IsInQueue(musicId) then
+	if queueManager:IsInQueue(reqCleanId) then
 		Dispatcher:Notify(player, "Lagu ini sudah ada di antrean!")
 		return
 	end
@@ -401,18 +433,20 @@ function ActionHandlers:ADD_TO_QUEUE(player, data)
 			musicData = vdata
 		end
 
-		-- Validasi ulang jika state berubah saat task.spawn
+		local songCleanId = cleanMusicId(musicData.id or musicData.sound_id)
 		local curPlaying = playbackManager:GetCurrentSong()
-		if playbackManager:IsPlaying() and curPlaying and tostring(curPlaying.id) == tostring(musicData.id) then
-			Dispatcher:Notify(player, "Lagu ini sedang diputar!")
-			return
+		if curPlaying then
+			local curCleanId = cleanMusicId(curPlaying.id or curPlaying.sound_id)
+			if curCleanId ~= "" and songCleanId ~= "" and curCleanId == songCleanId then
+				Dispatcher:Notify(player, "Lagu ini sedang diputar!")
+				return
+			end
 		end
-		if queueManager:IsInQueue(musicData.id) then
+		if queueManager:IsInQueue(songCleanId) then
 			Dispatcher:Notify(player, "Lagu ini sudah ada di antrean!")
 			return
 		end
 
-		-- Dapatkan durasi asli lagu secara sinkron
 		local sound, cachedDur = MusicStorageHandler:GetSound(musicData.id)
 		if cachedDur and cachedDur > 0 and cachedDur ~= CONFIG.DEFAULT_SONG_DURATION then
 			musicData.Duration = math.round(cachedDur)
@@ -475,15 +509,16 @@ function ActionHandlers:CONTROL_NEXT(player, data)
 		return
 	end
 
+	local totalPlayers = #Players:GetPlayers()
+	if totalPlayers <= 1 then
+		Dispatcher:NotifyAll(string.format("%s melewati lagu: %s", player.DisplayName, currentSong.judul or "Unknown"))
+		playNextSong()
+		return
+	end
+
 	local success, msg = skipVoteManager:StartVote(player, currentSong, Dispatcher)
 	if not success then
 		Dispatcher:Notify(player, msg)
-	else
-		Dispatcher:NotifyAll(string.format("%s memulai vote skip untuk: %s", player.DisplayName, currentSong.judul or "Unknown"))
-
-		if not skipVoteManager:IsActive() then
-			playNextSong()
-		end
 	end
 end
 
@@ -514,14 +549,36 @@ function ActionHandlers:SKIP_VOTE_NO(player, data)
 	end
 end
 
+function ActionHandlers:SAVE_FAVORITES(player, data)
+	if not validationService:ValidatePlayer(player) then return end
+	local favList = data and data.favorites
+	if type(favList) ~= "table" then return end
+
+	local sanitized = {}
+	for i = 1, math.min(#favList, 50) do
+		local item = favList[i]
+		if type(item) == "table" and (item.id or item.sound_id) then
+			table.insert(sanitized, {
+				id       = tostring(item.id or item.sound_id),
+				judul    = tostring(item.judul or item.title or "Unknown"):sub(1, 100),
+				sampul   = tostring(item.sampul or item.thumbnail or ""),
+				Duration = tonumber(item.Duration or item.duration or 0) or 0,
+			})
+		end
+	end
+	local json = HttpService:JSONEncode(sanitized)
+	player:SetAttribute("MusicFavorites", json)
+end
+
 dispatchAction.OnServerEvent:Connect(function(player, action)
 	if not validationService:ValidatePlayer(player) then return end
 	if type(action) ~= "table" or type(action.type) ~= "string" then return end
 	local validActions = {
-		ADD_TO_QUEUE  = true,
-		CONTROL_NEXT  = true,
-		SKIP_VOTE_YES = true,
-		SKIP_VOTE_NO  = true,
+		ADD_TO_QUEUE   = true,
+		CONTROL_NEXT   = true,
+		SKIP_VOTE_YES  = true,
+		SKIP_VOTE_NO   = true,
+		SAVE_FAVORITES = true,
 	}
 	if not validActions[action.type] then return end
 	local handler = ActionHandlers[action.type]
@@ -543,6 +600,15 @@ end)
 
 Players.PlayerAdded:Connect(function(player)
 	RoleSystem:InitializePlayer(player)
+	task.spawn(function()
+		local success, saved = pcall(function()
+			return musicFavoritesStore:GetAsync("User_" .. player.UserId)
+		end)
+		if success and saved and type(saved) == "string" then
+			player:SetAttribute("MusicFavorites", saved)
+		end
+	end)
+
 	task.delay(0.5, function()
 		if player and player.Parent and validationService:ValidatePlayer(player) then
 			Dispatcher:SyncToPlayer(player)
@@ -615,11 +681,28 @@ end)
 
 Players.PlayerRemoving:Connect(function(player)
 	local userId = player.UserId
+	local favJson = player:GetAttribute("MusicFavorites")
+	if favJson and type(favJson) == "string" then
+		pcall(function()
+			musicFavoritesStore:SetAsync("User_" .. userId, favJson)
+		end)
+	end
 	validationService:CleanupPlayer(userId)
 	skipVoteManager:UpdateVoteOnPlayerLeave(userId, Dispatcher)
 	RateLimiter:Cleanup(userId)
 	RetryTracker:Cleanup(userId)
 	scheduleBatchedSync("queue")
+end)
+
+game:BindToClose(function()
+	for _, plr in ipairs(Players:GetPlayers()) do
+		local favJson = plr:GetAttribute("MusicFavorites")
+		if favJson and type(favJson) == "string" then
+			pcall(function()
+				musicFavoritesStore:SetAsync("User_" .. plr.UserId, favJson)
+			end)
+		end
+	end
 end)
 
 MusicStorageHandler:StartAutoCleanup()
