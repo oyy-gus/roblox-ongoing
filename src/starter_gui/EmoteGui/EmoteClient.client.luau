@@ -247,9 +247,12 @@ searchWrapper.Parent           = mainframe
 corner(searchWrapper, 8)
 ThemeModule.CreateStaticStroke(searchWrapper, 1, C.BackgroundLighter, 0)
 
+local updateDisplay = nil
+local currentSort   = "AZ"
+
 local searchBox = Instance.new("TextBox")
 searchBox.Name              = "SearchBox"
-searchBox.Size              = UDim2.new(1, -30, 1, 0)
+searchBox.Size              = UDim2.new(1, -72, 1, 0)
 searchBox.Position          = UDim2.new(0, 0, 0, 0)
 searchBox.BackgroundTransparency = 1
 searchBox.TextColor3        = C.TextWhite
@@ -269,9 +272,50 @@ do
 	p.Parent = searchBox
 end
 
+local sortBtn = Instance.new("TextButton")
+sortBtn.Name                   = "SortBtn"
+sortBtn.Size                   = UDim2.new(0, 36, 0, 20)
+sortBtn.AnchorPoint            = Vector2.new(1, 0.5)
+sortBtn.Position               = UDim2.new(1, -30, 0.5, 0)
+sortBtn.BackgroundColor3       = C.BackgroundMedium
+sortBtn.BorderSizePixel        = 0
+sortBtn.Text                   = "A-Z "
+sortBtn.TextColor3             = C.TextMuted
+sortBtn.TextSize               = 10
+sortBtn.Font                   = Enum.Font.GothamBold
+sortBtn.ZIndex                 = 5
+sortBtn.Parent                 = searchWrapper
+corner(sortBtn, 6)
+
+sortBtn.MouseEnter:Connect(function()
+	TweenService:Create(sortBtn, TweenInfo.new(0.1), {
+		TextColor3 = C.TextWhite,
+		BackgroundColor3 = C.BackgroundLighter
+	}):Play()
+end)
+sortBtn.MouseLeave:Connect(function()
+	TweenService:Create(sortBtn, TweenInfo.new(0.1), {
+		TextColor3 = C.TextMuted,
+		BackgroundColor3 = C.BackgroundMedium
+	}):Play()
+end)
+
+sortBtn.MouseButton1Click:Connect(function()
+	if currentSort == "AZ" then
+		currentSort = "ZA"
+		sortBtn.Text = "Z-A "
+	else
+		currentSort = "AZ"
+		sortBtn.Text = "A-Z "
+	end
+	if updateDisplay then
+		updateDisplay()
+	end
+end)
+
 local resetBtn = Instance.new("ImageButton")
 resetBtn.Name                   = "ResetBtn"
-resetBtn.Size                   = UDim2.new(0, 20, 0, 20)
+resetBtn.Size                   = UDim2.new(0, 18, 0, 18)
 resetBtn.AnchorPoint            = Vector2.new(1, 0.5)
 resetBtn.Position               = UDim2.new(1, -6, 0.5, 0)
 resetBtn.BackgroundTransparency = 1
@@ -678,10 +722,16 @@ local currentSpeed        = 1
 local isSyncing           = false
 local currentLeaderName   = nil
 
+local currentPlayingTrack = nil
+local currentPlayingName  = nil
+
 local syncUpdateConnection = nil
 local leaderAnimationConnection = nil
+local leaderStoppedConnection = nil
+local leaderCharConnection = nil
 local currentDanceConnection = nil
 local currentlySelectedButton = nil
+local syncedFollowerDances = {}
 
 do
 	local sd = player:GetAttribute("SavedFavoritedAnimations")
@@ -758,6 +808,42 @@ local function updateButtonVisuals(currentDanceName)
 	end
 end
 
+local function stopLocalDance(notifyServer)
+	if currentPlayingTrack then
+		pcall(function() currentPlayingTrack:Stop(0.15) end)
+		currentPlayingTrack = nil
+	end
+	currentPlayingName = nil
+	selectButtonInstantly(nil)
+	if player.Character then
+		player.Character:SetAttribute("CurrentDance", nil)
+		player.Character:SetAttribute("DanceStartTime", nil)
+	end
+	table.clear(syncedFollowerDances)
+
+	for _, otherPlayer in ipairs(Players:GetPlayers()) do
+		if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:GetAttribute("Syncing") == player.Name then
+			local oHum = otherPlayer.Character:FindFirstChildOfClass("Humanoid")
+			local oAnim = oHum and oHum:FindFirstChildOfClass("Animator")
+			if oAnim then
+				local ok, oTracks = pcall(function() return oAnim:GetPlayingAnimationTracks() end)
+				if ok and oTracks then
+					for _, t in ipairs(oTracks) do
+						pcall(function() t:Stop(0.15) end)
+					end
+				end
+			end
+		end
+	end
+	if notifyServer then
+		task.spawn(function()
+			pcall(function()
+				animationStartRF:InvokeServer(nil, false, currentSpeed)
+			end)
+		end)
+	end
+end
+
 local function setupCurrentDanceListener()
 	if currentDanceConnection and currentDanceConnection.Connected then
 		currentDanceConnection:Disconnect()
@@ -774,53 +860,137 @@ local function setupCurrentDanceListener()
 	end)
 end
 
-local function getLeaderCurrentAnimation()
-	if not isSyncing or not currentLeaderName then return nil end
-
-	local lp = Players:FindFirstChild(currentLeaderName)
-	if not lp or not lp.Character then return nil end
-
+local function getLeaderTrackAndName(lp)
+	if not lp or not lp.Character then return nil, nil end
 	local humanoid = lp.Character:FindFirstChildOfClass("Humanoid")
-	if not humanoid then return nil end
-
+	if not humanoid then return nil, nil end
 	local anim = humanoid:FindFirstChildOfClass("Animator")
-	if not anim then return nil end
+	if not anim then return nil, nil end
 
 	local ok, tracks = pcall(function() return anim:GetPlayingAnimationTracks() end)
-	if not ok or not tracks then return nil end
+	if not ok or not tracks then return nil, nil end
 
 	for _, track in ipairs(tracks) do
 		if track.IsPlaying and track.Animation then
 			local id = track.Animation.AnimationId
-
 			local name = animIdToName[id]
 			if not name then
 				local num = tostring(id):match("%d+")
 				if num then name = animIdToName[num] end
 			end
-
-			if name then
-				return name
-			end
-
-			for _, a in ipairs(emotesFolder:GetChildren()) do
-				if a:IsA("Animation") and a.AnimationId == id then
-					return a.Name
-				end
-			end
-
-			local pf = emotesFolder:FindFirstChild("Pose")
-			if pf then
-				for _, a in ipairs(pf:GetChildren()) do
+			if not name then
+				for _, a in ipairs(emotesFolder:GetChildren()) do
 					if a:IsA("Animation") and a.AnimationId == id then
-						return a.Name
+						name = a.Name
+						break
 					end
 				end
+			end
+			if not name then
+				local pf = emotesFolder:FindFirstChild("Pose")
+				if pf then
+					for _, a in ipairs(pf:GetChildren()) do
+						if a:IsA("Animation") and a.AnimationId == id then
+							name = a.Name
+							break
+						end
+					end
+				end
+			end
+			if name then
+				return track, name
 			end
 		end
 	end
 
-	return nil
+	local leaderDanceAttr = lp.Character:GetAttribute("CurrentDance")
+	if leaderDanceAttr and leaderDanceAttr ~= "" then
+		local animObj = emotesFolder:FindFirstChild(leaderDanceAttr)
+		if not animObj then
+			local pf = emotesFolder:FindFirstChild("Pose")
+			if pf then animObj = pf:FindFirstChild(leaderDanceAttr) end
+		end
+		if animObj then
+			local loadedTrack = AnimatorUtils.getOrCreateTrack(anim, animObj)
+			return loadedTrack, leaderDanceAttr
+		end
+	end
+
+	return nil, nil
+end
+
+local function getLeaderCurrentAnimation()
+	if not isSyncing or not currentLeaderName then return nil end
+	local lp = Players:FindFirstChild(currentLeaderName)
+	local _, name = getLeaderTrackAndName(lp)
+	return name
+end
+
+local function syncFollowerToLeaderTrack(leaderTrack, animName)
+	if not leaderTrack or not leaderTrack.Animation then return end
+	local myAnimator = AnimatorUtils.getAnimator(player)
+	if not myAnimator then return end
+
+	local animObj = leaderTrack.Animation
+	local lp = Players:FindFirstChild(currentLeaderName or "")
+	local leaderStartTime = lp and lp.Character and lp.Character:GetAttribute("DanceStartTime")
+	local targetSpeed = (lp and lp.Character and lp.Character:GetAttribute("DanceSpeed")) or leaderTrack.Speed or 1
+
+	local function calculateTargetTime(track)
+		if leaderStartTime and track and track.Length and track.Length > 0 then
+			local elapsed = (workspace:GetServerTimeNow() - leaderStartTime) * targetSpeed
+			if elapsed >= 0 then
+				return elapsed % track.Length
+			end
+		end
+		return leaderTrack.TimePosition
+	end
+
+	if currentPlayingTrack and currentPlayingTrack.Animation and (currentPlayingTrack.Animation.AnimationId == animObj.AnimationId or currentPlayingName == animName) and currentPlayingTrack.IsPlaying then
+		if currentPlayingTrack.Length and currentPlayingTrack.Length > 0 then
+			local idealTime = calculateTargetTime(currentPlayingTrack)
+			local diff = currentPlayingTrack.TimePosition - idealTime
+			if diff > currentPlayingTrack.Length / 2 then diff = diff - currentPlayingTrack.Length end
+			if diff < -currentPlayingTrack.Length / 2 then diff = diff + currentPlayingTrack.Length end
+
+			local absDiff = math.abs(diff)
+			if absDiff > 0.45 then
+				currentPlayingTrack.TimePosition = idealTime
+			elseif absDiff > 0.06 then
+				local nudge = (diff < 0) and 1.06 or 0.94
+				currentPlayingTrack:AdjustSpeed(targetSpeed * nudge)
+			else
+				currentPlayingTrack:AdjustSpeed(targetSpeed)
+			end
+		end
+		return
+	end
+
+	if currentPlayingTrack and currentPlayingTrack.IsPlaying then
+		currentPlayingTrack:Stop(0.15)
+		currentPlayingTrack = nil
+	end
+
+	local myTrack = AnimatorUtils.getOrCreateTrack(myAnimator, animObj)
+	if not myTrack then
+		myTrack = myAnimator:LoadAnimation(animObj)
+	end
+	if not myTrack then return end
+
+	myTrack.Priority = Enum.AnimationPriority.Action4
+	myTrack.Looped = true
+	myTrack:Play(0.15, 1.0, targetSpeed)
+	myTrack:AdjustSpeed(targetSpeed)
+	myTrack.TimePosition = calculateTargetTime(myTrack)
+
+	currentPlayingTrack = myTrack
+	currentPlayingName = animName
+	selectButtonInstantly(animName)
+	if player.Character then
+		player.Character:SetAttribute("CurrentDance", animName)
+		player.Character:SetAttribute("DanceStartTime", leaderStartTime or workspace:GetServerTimeNow())
+		player.Character:SetAttribute("DanceSpeed", targetSpeed)
+	end
 end
 
 local function updateUnsyncFrame()
@@ -841,7 +1011,7 @@ local function updateUnsyncFrame()
 		unsyncBtn.Text = "Synced to " .. dn .. "\nTap to Unsync"
 
 		local an = getLeaderCurrentAnimation()
-		dancelabel.Text = an and ("♪ " .. an) or ("♪ " .. dn .. "'s Dance")
+		dancelabel.Text = an and ("♪ " .. an) or ("♪ Waiting for " .. dn)
 
 		unsyncframe.Visible = true
 	else
@@ -855,15 +1025,15 @@ unsyncBtn.MouseButton1Click:Connect(function()
 	if not isSyncing or not currentLeaderName then return end
 
 	local lp = Players:FindFirstChild(currentLeaderName)
-	if not lp then
-		if player.Character then
-			player.Character:SetAttribute("Syncing", nil)
-		end
-		updateUnsyncFrame()
-		return
+	stopLocalDance(false)
+
+	if player.Character then
+		player.Character:SetAttribute("Syncing", nil)
 	end
 
-	startSyncRE:FireServer(lp, false)
+	if lp then
+		startSyncRE:FireServer(lp, false)
+	end
 
 	local snd = ReplicatedStorage:FindFirstChild("Sounds")
 	if snd then
@@ -871,20 +1041,26 @@ unsyncBtn.MouseButton1Click:Connect(function()
 		if s then s:Play() end
 	end
 
-	task.wait(0.1)
 	updateUnsyncFrame()
 end)
 
 local function setupSyncMonitoring()
 	if syncUpdateConnection and syncUpdateConnection.Connected then
 		syncUpdateConnection:Disconnect()
+		syncUpdateConnection = nil
 	end
 	if leaderAnimationConnection and leaderAnimationConnection.Connected then
 		leaderAnimationConnection:Disconnect()
+		leaderAnimationConnection = nil
 	end
-
-	syncUpdateConnection = nil
-	leaderAnimationConnection = nil
+	if leaderStoppedConnection and leaderStoppedConnection.Connected then
+		leaderStoppedConnection:Disconnect()
+		leaderStoppedConnection = nil
+	end
+	if leaderCharConnection and leaderCharConnection.Connected then
+		leaderCharConnection:Disconnect()
+		leaderCharConnection = nil
+	end
 
 	if not player.Character then
 		player.CharacterAdded:Wait()
@@ -893,81 +1069,249 @@ local function setupSyncMonitoring()
 	updateUnsyncFrame()
 	setupCurrentDanceListener()
 
+	local function bindLeader(leaderPlayer)
+		if leaderAnimationConnection and leaderAnimationConnection.Connected then
+			leaderAnimationConnection:Disconnect()
+			leaderAnimationConnection = nil
+		end
+		if leaderStoppedConnection and leaderStoppedConnection.Connected then
+			leaderStoppedConnection:Disconnect()
+			leaderStoppedConnection = nil
+		end
+		if leaderCharConnection and leaderCharConnection.Connected then
+			leaderCharConnection:Disconnect()
+			leaderCharConnection = nil
+		end
+
+		if not leaderPlayer then
+			stopLocalDance(false)
+			return
+		end
+
+		leaderCharConnection = leaderPlayer.CharacterAdded:Connect(function()
+			task.wait(0.5)
+			if isSyncing and currentLeaderName == leaderPlayer.Name then
+				bindLeader(leaderPlayer)
+			end
+		end)
+
+		local dn = leaderPlayer.DisplayName or leaderPlayer.Name
+
+		if not leaderPlayer.Character then
+			stopLocalDance(false)
+			dancelabel.Text = "♪ Waiting for " .. dn
+			return
+		end
+		local h = leaderPlayer.Character:FindFirstChildOfClass("Humanoid")
+		local a = h and h:FindFirstChildOfClass("Animator")
+		if not a then
+			stopLocalDance(false)
+			dancelabel.Text = "♪ Waiting for " .. dn
+			return
+		end
+
+		local lTrack, lName = getLeaderTrackAndName(leaderPlayer)
+		if lTrack and lName then
+			dancelabel.Text = "♪ " .. lName
+			syncFollowerToLeaderTrack(lTrack, lName)
+		else
+			stopLocalDance(false)
+			dancelabel.Text = "♪ Waiting for " .. dn
+		end
+
+		leaderAnimationConnection = a.AnimationPlayed:Connect(function(track)
+			if not (isSyncing and currentLeaderName == leaderPlayer.Name and track and track.Animation) then return end
+			task.wait(0.02)
+			local freshTrack, freshName = getLeaderTrackAndName(leaderPlayer)
+			if freshTrack and freshName then
+				dancelabel.Text = "♪ " .. freshName
+				syncFollowerToLeaderTrack(freshTrack, freshName)
+			end
+		end)
+
+		leaderStoppedConnection = leaderPlayer.Character:GetAttributeChangedSignal("CurrentDance"):Connect(function()
+			if not (isSyncing and currentLeaderName == leaderPlayer.Name) then return end
+			local newDance = leaderPlayer.Character and leaderPlayer.Character:GetAttribute("CurrentDance")
+			local freshDn = leaderPlayer.DisplayName or leaderPlayer.Name
+			if not newDance or newDance == "" then
+				stopLocalDance(false)
+				dancelabel.Text = "♪ Waiting for " .. freshDn
+			else
+				task.wait(0.02)
+				local freshTrack, freshName = getLeaderTrackAndName(leaderPlayer)
+				if freshTrack and freshName then
+					dancelabel.Text = "♪ " .. freshName
+					syncFollowerToLeaderTrack(freshTrack, freshName)
+				else
+					dancelabel.Text = "♪ " .. newDance
+				end
+			end
+		end)
+	end
+
 	syncUpdateConnection = player.Character:GetAttributeChangedSignal("Syncing"):Connect(function()
 		updateUnsyncFrame()
 
 		if isSyncing and currentLeaderName then
 			local lp = Players:FindFirstChild(currentLeaderName)
-			if lp and lp.Character then
-				local h = lp.Character:FindFirstChildOfClass("Humanoid")
-				if h then
-					local a = h:FindFirstChildOfClass("Animator")
-					if a then
-						if leaderAnimationConnection and leaderAnimationConnection.Connected then
-							leaderAnimationConnection:Disconnect()
-						end
+			if lp then
+				bindLeader(lp)
+			end
+		else
+			if leaderAnimationConnection and leaderAnimationConnection.Connected then
+				leaderAnimationConnection:Disconnect()
+				leaderAnimationConnection = nil
+			end
+			if leaderStoppedConnection and leaderStoppedConnection.Connected then
+				leaderStoppedConnection:Disconnect()
+				leaderStoppedConnection = nil
+			end
+			if leaderCharConnection and leaderCharConnection.Connected then
+				leaderCharConnection:Disconnect()
+				leaderCharConnection = nil
+			end
+			stopLocalDance(false)
+		end
+	end)
 
-						leaderAnimationConnection = a.AnimationPlayed:Connect(function(track)
-							if not (isSyncing and track and track.Animation) then return end
+	if isSyncing and currentLeaderName then
+		local lp = Players:FindFirstChild(currentLeaderName)
+		if lp then
+			bindLeader(lp)
+		end
+	end
+end
 
-							local id = track.Animation.AnimationId
+local lastLeaderVisualSync = 0
+RunService.Heartbeat:Connect(function()
+	local now = os.clock()
+	if now - lastLeaderVisualSync < 0.05 then return end
+	lastLeaderVisualSync = now
 
-							local name = animIdToName[id]
-							if not name then
-								local num = tostring(id):match("%d+")
-								if num then name = animIdToName[num] end
-							end
+	if not player.Character then return end
+	local myDance = player.Character:GetAttribute("CurrentDance")
+	if not myDance or not currentPlayingTrack or not currentPlayingTrack.IsPlaying then return end
 
-							if name then
-								dancelabel.Text = "♪ " .. name
-								return
-							end
+	local myTime = currentPlayingTrack.TimePosition
+	local myLength = currentPlayingTrack.Length
+	if not myLength or myLength <= 0 then return end
 
-							for _, an in ipairs(emotesFolder:GetChildren()) do
-								if an:IsA("Animation") and an.AnimationId == id then
-									dancelabel.Text = "♪ " .. an.Name
-									return
-								end
-							end
+	for _, otherPlayer in ipairs(Players:GetPlayers()) do
+		if otherPlayer ~= player and otherPlayer.Character then
+			local syncTarget = otherPlayer.Character:GetAttribute("Syncing")
+			if syncTarget == player.Name then
+				local oHum = otherPlayer.Character:FindFirstChildOfClass("Humanoid")
+				local oAnim = oHum and oHum:FindFirstChildOfClass("Animator")
+				if oAnim then
+					local ok, oTracks = pcall(function() return oAnim:GetPlayingAnimationTracks() end)
+					if ok and oTracks then
+						for _, oTrack in ipairs(oTracks) do
+							if oTrack.IsPlaying and oTrack.Animation and currentPlayingTrack.Animation and (oTrack.Animation.AnimationId == currentPlayingTrack.Animation.AnimationId) then
+								local trackLen = oTrack.Length or myLength
+								if trackLen and trackLen > 0 then
+									if syncedFollowerDances[otherPlayer] ~= myDance then
 
-							local pf = emotesFolder:FindFirstChild("Pose")
-							if pf then
-								for _, an in ipairs(pf:GetChildren()) do
-									if an:IsA("Animation") and an.AnimationId == id then
-										dancelabel.Text = "♪ " .. an.Name
-										return
+										oTrack.TimePosition = myTime
+										syncedFollowerDances[otherPlayer] = myDance
+									else
+										local diff = oTrack.TimePosition - myTime
+										if diff > trackLen / 2 then diff = diff - trackLen end
+										if diff < -trackLen / 2 then diff = diff + trackLen end
+
+										if math.abs(diff) > 0.35 then
+											oTrack.TimePosition = myTime
+										end
 									end
 								end
 							end
-						end)
+						end
 					end
 				end
+			else
+				syncedFollowerDances[otherPlayer] = nil
 			end
 		end
-	end)
-end
+	end
+end)
 
 setupSyncMonitoring()
 
 player.CharacterAdded:Connect(function()
-	task.wait(1)
+	currentPlayingTrack = nil
+	currentPlayingName  = nil
+	selectButtonInstantly(nil)
+	task.wait(0.5)
 	setupSyncMonitoring()
 end)
 
 task.spawn(function()
 	while true do
-		task.wait(0.3)
-		if isSyncing and unsyncframe.Visible then
-			local an = getLeaderCurrentAnimation()
-			if an and dancelabel.Text ~= "♪ " .. an then
-				dancelabel.Text = "♪ " .. an
+		task.wait(0.4)
+		if isSyncing and currentLeaderName then
+			local lp = Players:FindFirstChild(currentLeaderName)
+			if lp and lp.Character then
+				local lTrack, lName = getLeaderTrackAndName(lp)
+				if lTrack and lName then
+					if dancelabel.Text ~= "♪ " .. lName then
+						dancelabel.Text = "♪ " .. lName
+					end
+					if currentPlayingTrack and currentPlayingTrack.IsPlaying and currentPlayingTrack.Animation then
+						local trackLen = currentPlayingTrack.Length
+						if trackLen and trackLen > 0 then
+							local leaderStartTime = lp.Character and lp.Character:GetAttribute("DanceStartTime")
+							local targetSpeed = (lp.Character and lp.Character:GetAttribute("DanceSpeed")) or lTrack.Speed or 1
+							local idealTime = lTrack.TimePosition
+							if leaderStartTime then
+								local elapsed = (workspace:GetServerTimeNow() - leaderStartTime) * targetSpeed
+								if elapsed >= 0 then
+									idealTime = elapsed % trackLen
+								end
+							end
+
+							local diff = currentPlayingTrack.TimePosition - idealTime
+							if diff > trackLen / 2 then diff = diff - trackLen end
+							if diff < -trackLen / 2 then diff = diff + trackLen end
+
+							local absDiff = math.abs(diff)
+							if absDiff > 0.45 then
+								currentPlayingTrack.TimePosition = idealTime
+							elseif absDiff > 0.06 then
+								local nudge = (diff < 0) and 1.06 or 0.94
+								currentPlayingTrack:AdjustSpeed(targetSpeed * nudge)
+							else
+								currentPlayingTrack:AdjustSpeed(targetSpeed)
+							end
+						end
+					else
+						syncFollowerToLeaderTrack(lTrack, lName)
+					end
+				else
+					if currentPlayingTrack and currentPlayingTrack.IsPlaying then
+						stopLocalDance(false)
+					end
+					local dn = lp.DisplayName or lp.Name
+					local waitingText = "♪ Waiting for " .. dn
+					if dancelabel.Text ~= waitingText then
+						dancelabel.Text = waitingText
+					end
+				end
+			else
+				if not lp then
+					isSyncing = false
+					currentLeaderName = nil
+					if player.Character then
+						player.Character:SetAttribute("Syncing", nil)
+					end
+					stopLocalDance(false)
+					updateUnsyncFrame()
+				end
 			end
 		end
 	end
 end)
 
 local function animationStarted(animation)
-	selectButtonInstantly(animation.Name)
+	local animName = animation.Name
 
 	local snd = ReplicatedStorage:FindFirstChild("Sounds")
 	if snd then
@@ -975,18 +1319,98 @@ local function animationStarted(animation)
 		if s then s:Play() end
 	end
 
+	if currentPlayingName == animName and currentPlayingTrack and currentPlayingTrack.IsPlaying then
+		stopLocalDance(true)
+		return
+	end
+
+	if isSyncing then
+		isSyncing = false
+		local prevLeader = currentLeaderName
+		currentLeaderName = nil
+		if player.Character then
+			player.Character:SetAttribute("Syncing", nil)
+		end
+		updateUnsyncFrame()
+		if prevLeader then
+			local lp = Players:FindFirstChild(prevLeader)
+			if lp then
+				startSyncRE:FireServer(lp, false)
+			end
+		end
+	end
+
+	if currentPlayingTrack and currentPlayingTrack.IsPlaying then
+		currentPlayingTrack:Stop(0.15)
+		currentPlayingTrack = nil
+	end
+
+	local animator = AnimatorUtils.getAnimator(player)
+	if not animator then return end
+
+	local track = AnimatorUtils.getOrCreateTrack(animator, animation)
+	if not track then
+		track = animator:LoadAnimation(animation)
+	end
+
+	if track then
+		track.Priority = Enum.AnimationPriority.Action4
+		track.Looped = true
+		track:Play(0.15, 1.0, currentSpeed)
+		track:AdjustSpeed(currentSpeed)
+
+		currentPlayingTrack = track
+		currentPlayingName = animName
+		selectButtonInstantly(animName)
+
+		if player.Character then
+			player.Character:SetAttribute("CurrentDance", animName)
+			player.Character:SetAttribute("DanceSpeed", currentSpeed)
+			player.Character:SetAttribute("DanceStartTime", workspace:GetServerTimeNow())
+		end
+
+		for _, otherPlayer in ipairs(Players:GetPlayers()) do
+			if otherPlayer ~= player and otherPlayer.Character and otherPlayer.Character:GetAttribute("Syncing") == player.Name then
+				syncedFollowerDances[otherPlayer] = animName
+				local oHum = otherPlayer.Character:FindFirstChildOfClass("Humanoid")
+				local oAnim = oHum and oHum:FindFirstChildOfClass("Animator")
+				if oAnim then
+					local fTrack = AnimatorUtils.getOrCreateTrack(oAnim, animation)
+					if not fTrack then
+						fTrack = oAnim:LoadAnimation(animation)
+					end
+					if fTrack then
+						fTrack.Priority = Enum.AnimationPriority.Action4
+						fTrack.Looped = true
+						fTrack:Play(0.15, 1.0, currentSpeed)
+						fTrack:AdjustSpeed(currentSpeed)
+						fTrack.TimePosition = 0
+
+						local ok, oTracks = pcall(function() return oAnim:GetPlayingAnimationTracks() end)
+						if ok and oTracks then
+							for _, t in ipairs(oTracks) do
+								if t ~= fTrack and t.IsPlaying and t.Animation and t.Animation.AnimationId ~= animation.AnimationId then
+									pcall(function() t:Stop(0.15) end)
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
 	task.spawn(function()
 		local ok, result = pcall(function()
 			return animationStartRF:InvokeServer(animation, true, currentSpeed)
 		end)
-
 		if not ok then
-			warn("[EmoteHandler] Panggilan server gagal:", result)
+			warn("[EmoteHandler] Server invoke error:", result)
 		end
 	end)
 end
 
-local function updateDisplay()
+updateDisplay = function()
 	containerlist.CanvasPosition = Vector2.new(0, 0)
 
 	local visibleData = {}
@@ -1003,7 +1427,7 @@ local function updateDisplay()
 		end
 
 		if show and searchQuery ~= "" then
-			show = string.lower(data.name):sub(1, #searchQuery) == string.lower(searchQuery)
+			show = string.find(string.lower(data.name), string.lower(searchQuery), 1, true) ~= nil
 		end
 
 		if show then
@@ -1012,7 +1436,11 @@ local function updateDisplay()
 	end
 
 	table.sort(visibleData, function(a, b)
-		return a.name:lower() < b.name:lower()
+		if currentSort == "ZA" then
+			return a.name:lower() > b.name:lower()
+		else
+			return a.name:lower() < b.name:lower()
+		end
 	end)
 
 	for i, data in ipairs(visibleData) do
@@ -1218,6 +1646,12 @@ do
 		if ns ~= currentSpeed then
 			currentSpeed = ns
 			speedtext.Text = string.format("%.1fx", currentSpeed)
+			if currentPlayingTrack and currentPlayingTrack.IsPlaying and not isSyncing then
+				currentPlayingTrack:AdjustSpeed(currentSpeed)
+				if player.Character then
+					player.Character:SetAttribute("DanceSpeed", currentSpeed)
+				end
+			end
 			if not isSyncing then
 				changeSpeedRE:FireServer(currentSpeed)
 			end
@@ -1345,6 +1779,17 @@ end
 setActiveCategory("Dance")
 
 Players.PlayerRemoving:Connect(function(rp)
+	syncedFollowerDances[rp] = nil
+	if isSyncing and currentLeaderName and rp.Name == currentLeaderName then
+		isSyncing = false
+		currentLeaderName = nil
+		if player.Character then
+			player.Character:SetAttribute("Syncing", nil)
+		end
+		stopLocalDance(false)
+		updateUnsyncFrame()
+	end
+
 	if rp ~= player then return end
 
 	for name in pairs(topbarConnections) do
@@ -1376,6 +1821,14 @@ script.Destroying:Connect(function()
 		leaderAnimationConnection:Disconnect()
 	end
 
+	if leaderStoppedConnection and leaderStoppedConnection.Connected then
+		leaderStoppedConnection:Disconnect()
+	end
+
+	if leaderCharConnection and leaderCharConnection.Connected then
+		leaderCharConnection:Disconnect()
+	end
+
 	if currentDanceConnection and currentDanceConnection.Connected then
 		currentDanceConnection:Disconnect()
 	end
@@ -1390,3 +1843,4 @@ script.Destroying:Connect(function()
 end)
 
 print("[EmoteHandler] Siap - AutoScale:", scaler:GetCurrentScale())
+

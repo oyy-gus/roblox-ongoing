@@ -115,13 +115,14 @@ MenuConfig.State = {
 }
 
 MenuConfig.UserSettings = {
-	musicVolume        = 100,
+	musicVolume        = 50,
 	muteMusic          = false,
 	hideBubbleChat     = false,
 	hidePlayerEffects  = false,
 	hidePlayers        = false,
 	hideOverhead       = false,
 	hideShadow         = false,
+	game_rank          = true,
 }
 
 MenuConfig.GUI = {
@@ -276,6 +277,13 @@ function MenuConfig.ChangeTheme(presetName)
 	if MenuConfig.ThemeModule then
 		local success = MenuConfig.ThemeModule.ApplyPreset(presetName)
 		if success then
+			pcall(function()
+				local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes")
+				local remote = remotes and remotes:FindFirstChild("SetCurrentTheme")
+				if remote then
+					remote:FireServer(presetName)
+				end
+			end)
 			MenuConfig.Events.OnThemeChanged:Fire(presetName)
 			MenuConfig.Events.OnColorChanged:Fire()
 		end

@@ -6,15 +6,15 @@ local SyncController = require(script.Parent.SyncController)
 
 local module = {}
 
-local FADE_IN = 0.5
-local FADE_OUT = 0.5
+local FADE_IN = 0.15
+local FADE_OUT = 0.15
 local DANCE_WALK_SPEED = 16
 
 local ANIMATION_PRIORITY = Enum.AnimationPriority.Action4
 
 local processingRequests = {}
 local lastRequestTime = {}
-local MIN_REQUEST_INTERVAL = 0.15
+local MIN_REQUEST_INTERVAL = 0.05
 
 local originalWalkSpeeds = {}
 
@@ -70,7 +70,6 @@ function module.executeAnimation(player, animation, shouldPlay, speed, loadedAni
 
 	local canProcess, reason = canProcessRequest(player)
 	if not canProcess then
-		warn("[AnimController] Request blocked for", player.Name, "-", reason)
 		return "rate_limited"
 	end
 
@@ -90,6 +89,7 @@ function module.executeAnimation(player, animation, shouldPlay, speed, loadedAni
 
 	speed = math.clamp(tonumber(speed) or 1, 0, 3)
 	local character = player.Character
+	local animationName = animation and animation.Name or nil
 
 	if character then
 		local syncTarget = character:GetAttribute("Syncing")
@@ -97,7 +97,6 @@ function module.executeAnimation(player, animation, shouldPlay, speed, loadedAni
 			character:SetAttribute("Syncing", nil)
 			AnimatorUtils.stopAllDances(animator, loadedAnimations, FADE_OUT)
 			restoreOriginalWalkSpeed(player)
-			task.wait(FADE_OUT)
 			SyncController.updateAllLeaderStatus()
 		end
 	end
@@ -107,6 +106,9 @@ function module.executeAnimation(player, animation, shouldPlay, speed, loadedAni
 
 		if character then
 			character:SetAttribute("Syncing", nil)
+			character:SetAttribute("CurrentDance", nil)
+			character:SetAttribute("DanceSpeed", nil)
+			character:SetAttribute("DanceStartTime", nil)
 		end
 
 		restoreOriginalWalkSpeed(player)
@@ -117,17 +119,18 @@ function module.executeAnimation(player, animation, shouldPlay, speed, loadedAni
 	end
 
 	local currentTrack, currentName = AnimatorUtils.getPlayingDanceTrack(animator, loadedAnimations)
-	local animationName = animation and animation.Name or nil
 
 	if currentTrack and currentName == animationName then
 		local isActuallyPlaying = currentTrack.IsPlaying and currentTrack.WeightCurrent > 0.1
 
 		if isActuallyPlaying then
-
 			AnimatorUtils.stopAllDances(animator, loadedAnimations, FADE_OUT)
 
 			if character then
 				character:SetAttribute("Syncing", nil)
+				character:SetAttribute("CurrentDance", nil)
+				character:SetAttribute("DanceSpeed", nil)
+				character:SetAttribute("DanceStartTime", nil)
 			end
 
 			restoreOriginalWalkSpeed(player)
@@ -140,6 +143,9 @@ function module.executeAnimation(player, animation, shouldPlay, speed, loadedAni
 
 	if character then
 		character:SetAttribute("Syncing", nil)
+		character:SetAttribute("CurrentDance", animationName)
+		character:SetAttribute("DanceSpeed", speed)
+		character:SetAttribute("DanceStartTime", workspace:GetServerTimeNow())
 	end
 
 	AnimatorUtils.stopAllDances(animator, loadedAnimations, FADE_OUT)

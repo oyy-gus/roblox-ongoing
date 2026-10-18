@@ -89,9 +89,10 @@ function module.getOrCreateTrack(animator, animation)
 			if isValid and preloadedTrack.Parent == animator then
 				return preloadedTrack
 			else
-
-				if module.AnimationPreloader then
-					module.AnimationPreloader.invalidateTrack(animation)
+				if module.AnimationPreloader and typeof(module.AnimationPreloader.invalidateTrack) == "function" then
+					pcall(function()
+						module.AnimationPreloader.invalidateTrack(animation)
+					end)
 				end
 			end
 		end

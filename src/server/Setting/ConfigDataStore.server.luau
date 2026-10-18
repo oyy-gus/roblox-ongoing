@@ -39,7 +39,9 @@ local DEFAULT_SETTINGS = {
 	hideOverhead      = false,
 	hideShadow        = false,
 	muteMusic         = false,
-	musicVolume       = 100,
+	musicVolume       = 50,
+	game_rank         = true,
+	currentTheme      = "White",
 }
 
 local MIGRATION_MAP = {
@@ -94,38 +96,43 @@ local function migrateFromV2(player)
 	return migrated
 end
 
+local sessionSettings = {}
 local pendingSaves = {}
 
-local SAVE_THROTTLE_TIME = 5
+local SAVE_THROTTLE_TIME = 3
 
 local function flushSave(userId)
-	local pending = pendingSaves[userId]
-	if not pending then return end
+	local dataToSave = sessionSettings[userId]
+	if not dataToSave then
+		local pending = pendingSaves[userId]
+		if pending and pending.data then
+			dataToSave = pending.data
+		end
+	end
 
 	pendingSaves[userId] = nil
+	if not dataToSave then return end
 
 	local key = "Player_" .. tostring(userId)
 
-	local ok, currentData = pcall(function()
-		return ConfigStore:GetAsync(key)
-	end)
-
-	local dataToSave = (ok and type(currentData) == "table") and currentData or {}
-
-	for settingKey, value in pairs(pending.data) do
-		dataToSave[settingKey] = value
-	end
-
 	local saveOk, saveErr = pcall(function()
-		ConfigStore:SetAsync(key, dataToSave)
+		ConfigStore:UpdateAsync(key, function(oldData)
+			local merged = (type(oldData) == "table") and oldData or {}
+			for k, v in pairs(dataToSave) do
+				merged[k] = v
+			end
+			return merged
+		end)
 	end)
 
 	if saveOk then
-		local count = 0
-		for _ in pairs(pending.data) do count = count + 1 end
-		print(string.format("💾 Tersimpan %d pengaturan untuk userId %d", count, userId))
+		print(string.format("💾 [ConfigDataStore] Pengaturan tersimpan ke DataStore untuk userId %d (Tema: %s)", userId, tostring(dataToSave.currentTheme or "White")))
 	else
-		warn("❌ Gagal menyimpan batch pengaturan untuk userId", userId, ":", saveErr)
+		if string.find(tostring(saveErr), "403") or string.find(tostring(saveErr), "API Services") then
+			warn("⚠️ [ConfigDataStore] Akses API DataStore di Roblox Studio belum diaktifkan! Buka Game Settings -> Security -> Aktifkan 'Enable Studio Access to API Services'.")
+		else
+			warn("❌ [ConfigDataStore] Gagal menyimpan ke DataStore untuk userId", userId, ":", saveErr)
+		end
 	end
 end
 
@@ -144,47 +151,51 @@ local function scheduleSave(userId, settingKey, value)
 	end
 end
 
-LoadSettingsEvent.OnServerInvoke = function(player)
-	local key = "Player_" .. tostring(player.UserId)
+local function loadPlayerSettings(player)
+	local userId = player.UserId
+	if sessionSettings[userId] then
+		return sessionSettings[userId]
+	end
+
+	local key = "Player_" .. tostring(userId)
 
 	local ok, data = pcall(function()
 		return ConfigStore:GetAsync(key)
 	end)
 
+	local settings = {}
 	if ok and type(data) == "table" then
-
-		local merged = {}
 		for k, v in pairs(DEFAULT_SETTINGS) do
 			if data[k] ~= nil then
-				merged[k] = data[k]
+				settings[k] = data[k]
 			else
-				merged[k] = v
+				settings[k] = v
 			end
 		end
-		print("✅ Pengaturan berhasil dimuat untuk", player.Name)
-		return merged
-	end
-
-	local migrated = migrateFromV2(player)
-	if migrated then
-		return migrated
-	end
-
-	print("📋 Tidak ada pengaturan tersimpan untuk", player.Name, "- menggunakan bawaan")
-
-	pcall(function()
-		local defaultCopy = {}
-		for k, v in pairs(DEFAULT_SETTINGS) do
-			defaultCopy[k] = v
+		print("✅ [ConfigDataStore] Pengaturan berhasil dimuat untuk", player.Name, "- Tema:", settings.currentTheme)
+	else
+		local migrated = migrateFromV2(player)
+		if migrated then
+			settings = migrated
+		else
+			for k, v in pairs(DEFAULT_SETTINGS) do
+				settings[k] = v
+			end
+			print("📋 [ConfigDataStore] Tidak ada pengaturan tersimpan untuk", player.Name, "- menggunakan bawaan")
 		end
-		ConfigStore:SetAsync(key, defaultCopy)
-	end)
+	end
 
-	return DEFAULT_SETTINGS
+	sessionSettings[userId] = settings
+	player:SetAttribute("CurrentTheme", settings.currentTheme or "White")
+	player:SetAttribute("SettingsLoaded", true)
+	return settings
+end
+
+LoadSettingsEvent.OnServerInvoke = function(player)
+	return loadPlayerSettings(player)
 end
 
 SaveSettingEvent.OnServerEvent:Connect(function(player, settingKey, value)
-
 	if type(settingKey) ~= "string" then
 		warn("⚠️ Tipe kunci pengaturan tidak valid dari", player.Name)
 		return
@@ -207,18 +218,35 @@ SaveSettingEvent.OnServerEvent:Connect(function(player, settingKey, value)
 		value = math.clamp(math.floor(value), 0, 100)
 	end
 
-	scheduleSave(player.UserId, settingKey, value)
+	local userId = player.UserId
+	if not sessionSettings[userId] then
+		sessionSettings[userId] = loadPlayerSettings(player)
+	end
+
+	sessionSettings[userId][settingKey] = value
+
+	if settingKey == "currentTheme" then
+		if type(value) == "string" and #value <= 50 then
+			player:SetAttribute("CurrentTheme", value)
+		end
+	end
+
+	scheduleSave(userId, settingKey, value)
 end)
 
 ResetSettingsEvent.OnServerEvent:Connect(function(player)
-	local key = "Player_" .. tostring(player.UserId)
+	local userId = player.UserId
+	local key = "Player_" .. tostring(userId)
 
-	pendingSaves[player.UserId] = nil
+	pendingSaves[userId] = nil
 
 	local resetData = {}
 	for k, v in pairs(DEFAULT_SETTINGS) do
 		resetData[k] = v
 	end
+
+	sessionSettings[userId] = resetData
+	player:SetAttribute("CurrentTheme", "White")
 
 	local ok, err = pcall(function()
 		ConfigStore:SetAsync(key, resetData)
@@ -231,30 +259,34 @@ ResetSettingsEvent.OnServerEvent:Connect(function(player)
 	end
 end)
 
+Players.PlayerAdded:Connect(function(player)
+	task.spawn(function()
+		loadPlayerSettings(player)
+	end)
+end)
+
+for _, player in ipairs(Players:GetPlayers()) do
+	task.spawn(function()
+		loadPlayerSettings(player)
+	end)
+end
+
 Players.PlayerRemoving:Connect(function(player)
 	local userId = player.UserId
 
-	if pendingSaves[userId] then
-		task.spawn(function()
-			flushSave(userId)
-		end)
-	end
-
-	print("👋", player.Name, "keluar")
+	flushSave(userId)
+	sessionSettings[userId] = nil
+	print("👋", player.Name, "keluar map (pengaturan tersimpan)")
 end)
 
 game:BindToClose(function()
-	local flushThreads = {}
-
-	for userId, _ in pairs(pendingSaves) do
-		table.insert(flushThreads, task.spawn(function()
-			flushSave(userId)
-		end))
+	print("🛑 Server menutup, menyimpan semua pengaturan pemain...")
+	for userId, _ in pairs(sessionSettings) do
+		flushSave(userId)
 	end
-
-	task.wait(5)
 end)
 
 print("✅ ConfigDataStore V3 (Tersinkronisasi dengan ConfigClient) Berhasil dimuat!")
 print("🔄 Migrasi otomatis dari V2 aktif")
 print("⏱️ Jeda penyimpanan:", SAVE_THROTTLE_TIME, "detik")
+

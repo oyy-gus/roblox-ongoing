@@ -68,6 +68,62 @@ local PROFILE_COLORS = {
 	Background = CONFIG.Colors.PlayerList.ProfileBg or Color3.fromRGB(40, 45, 55),
 }
 
+local ConfigRemotes = ReplicatedStorage:WaitForChild("ConfigRemotes", 15)
+local SaveSettingRemote = ConfigRemotes and ConfigRemotes:WaitForChild("SaveSetting", 15)
+local GROUP_ID = 550072302
+local groupRankCache = {}
+
+local function playClickSound()
+	if MenuConfig.SoundSystem and MenuConfig.SoundSystem.PlayClick then
+		MenuConfig.SoundSystem.PlayClick()
+	end
+end
+
+local function getPlayerGroupRank(plr, callback)
+	local userId = plr.UserId
+	if groupRankCache[userId] ~= nil then
+		return groupRankCache[userId]
+	end
+
+	task.spawn(function()
+		local success, role = pcall(function()
+			return plr:GetRoleInGroup(GROUP_ID)
+		end)
+		local rankText = nil
+		if success and role and role ~= "" and role ~= "Guest" then
+			if role:lower() == "member" or role:lower() == "members" then
+				rankText = "- MEMBER -"
+			else
+				rankText = "- " .. string.upper(role) .. " -"
+			end
+		end
+		groupRankCache[userId] = rankText
+		if callback then
+			callback(rankText)
+		end
+	end)
+
+	return nil
+end
+
+local function updateCharacterOverheadRank(character, isEnabled)
+	if not character then return end
+	for _, desc in ipairs(character:GetDescendants()) do
+		if desc.Name == "GuestLabel" and desc:IsA("TextLabel") then
+			local isRank = desc:GetAttribute("IsRank")
+			desc.Visible = (isEnabled and isRank == true)
+		end
+	end
+end
+
+local function updateAllOverheadsRank(isEnabled)
+	for _, plr in ipairs(Players:GetPlayers()) do
+		if plr.Character then
+			updateCharacterOverheadRank(plr.Character, isEnabled)
+		end
+	end
+end
+
 local function getFriendsInServer()
 	local friendsInServer = {}
 	for _, player in ipairs(Players:GetPlayers()) do
@@ -131,6 +187,127 @@ local function createSectionHeader(name, text, layoutOrder)
 	return header
 end
 
+local function createGameRankOption(layoutOrder)
+	local itemHeight = math.floor(MenuConfig.GetScaledValue(52, 46, 58))
+	local toggleWidth = math.floor(MenuConfig.GetScaledValue(46, 40, 50))
+	local toggleHeight = math.floor(MenuConfig.GetScaledValue(24, 20, 26))
+	local toggleKnobSize = toggleHeight - 4
+
+	local item = Instance.new("Frame")
+	item.Name = "GameRankSetting"
+	item.Size = UDim2.new(1, 0, 0, itemHeight)
+	item.BackgroundColor3 = PROFILE_COLORS.Background
+	item.BorderSizePixel = 0
+	item.LayoutOrder = layoutOrder
+	item.ClipsDescendants = true
+	item.Parent = playersScroll
+
+	ThemeModule.CreateCorner(item, CONFIG.Layout.SmallCorner)
+
+	local textContainer = Instance.new("Frame")
+	textContainer.Name = "TextContainer"
+	textContainer.Size = UDim2.new(1, -(toggleWidth + 28), 1, 0)
+	textContainer.Position = UDim2.new(0, 12, 0, 0)
+	textContainer.BackgroundTransparency = 1
+	textContainer.Parent = item
+
+	local title = Instance.new("TextLabel")
+	title.Name = "Title"
+	title.Text = "🎖️ Tampilkan Rank Grup"
+	title.Size = UDim2.new(1, 0, 0, 20)
+	title.Position = UDim2.new(0, 0, 0, 7)
+	title.BackgroundTransparency = 1
+	title.TextColor3 = Color3.fromRGB(255, 255, 255)
+	title.TextSize = getTextSize("displayName")
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.TextYAlignment = Enum.TextYAlignment.Center
+	title.Font = Enum.Font.GothamSemibold
+	title.Parent = textContainer
+
+	local desc = Instance.new("TextLabel")
+	desc.Name = "Description"
+	desc.Text = "Tampilkan status rank/member di overhead & list"
+	desc.Size = UDim2.new(1, 0, 0, 16)
+	desc.Position = UDim2.new(0, 0, 0, 28)
+	desc.BackgroundTransparency = 1
+	desc.TextColor3 = ThemeModule.Colors.TextGray or Color3.fromRGB(180, 180, 180)
+	desc.TextSize = getTextSize("username")
+	desc.TextXAlignment = Enum.TextXAlignment.Left
+	desc.TextYAlignment = Enum.TextYAlignment.Center
+	desc.Font = Enum.Font.Gotham
+	desc.Parent = textContainer
+
+	local isRankEnabled = MenuConfig.UserSettings.game_rank ~= false
+
+	local toggleBg = Instance.new("Frame")
+	toggleBg.Name = "ToggleBg"
+	toggleBg.Size = UDim2.new(0, toggleWidth, 0, toggleHeight)
+	toggleBg.Position = UDim2.new(1, -(toggleWidth + 14), 0.5, -toggleHeight / 2)
+	toggleBg.BackgroundColor3 = isRankEnabled and (ThemeModule.Colors.Primary1 or Color3.fromRGB(60, 150, 240)) or Color3.fromRGB(80, 80, 90)
+	toggleBg.BorderSizePixel = 0
+	toggleBg.Parent = item
+
+	ThemeModule.CreateCorner(toggleBg, toggleHeight / 2)
+
+	local knobPadding = 2
+	local knob = Instance.new("Frame")
+	knob.Name = "Knob"
+	knob.Size = UDim2.new(0, toggleKnobSize, 0, toggleKnobSize)
+	knob.Position = isRankEnabled
+		and UDim2.new(1, -(toggleKnobSize + knobPadding), 0.5, -toggleKnobSize / 2)
+		or UDim2.new(0, knobPadding, 0.5, -toggleKnobSize / 2)
+	knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	knob.BorderSizePixel = 0
+	knob.Parent = toggleBg
+
+	ThemeModule.CreateCorner(knob, toggleKnobSize / 2)
+
+	local toggleBtn = Instance.new("TextButton")
+	toggleBtn.Name = "ToggleBtn"
+	toggleBtn.Text = ""
+	toggleBtn.Size = UDim2.new(1, 0, 1, 0)
+	toggleBtn.BackgroundTransparency = 1
+	toggleBtn.Parent = toggleBg
+
+	local function setVisualState(enabled)
+		local targetPos = enabled
+			and UDim2.new(1, -(toggleKnobSize + knobPadding), 0.5, -toggleKnobSize / 2)
+			or UDim2.new(0, knobPadding, 0.5, -toggleKnobSize / 2)
+		local targetColor = enabled
+			and (ThemeModule.Colors.Primary1 or Color3.fromRGB(60, 150, 240))
+			or Color3.fromRGB(80, 80, 90)
+
+		TweenService:Create(knob, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { Position = targetPos }):Play()
+		TweenService:Create(toggleBg, TweenInfo.new(0.2, Enum.EasingStyle.Quad), { BackgroundColor3 = targetColor }):Play()
+	end
+
+	toggleBtn.MouseButton1Click:Connect(function()
+		playClickSound()
+
+		local newState = not (MenuConfig.UserSettings.game_rank ~= false)
+		MenuConfig.UserSettings.game_rank = newState
+
+		setVisualState(newState)
+
+		if SaveSettingRemote then
+			pcall(function()
+				SaveSettingRemote:FireServer("game_rank", newState)
+			end)
+		end
+
+		MenuConfig.Events.OnSettingChanged:Fire("game_rank", newState)
+		updateAllOverheadsRank(newState)
+
+		for _, child in ipairs(playersScroll:GetDescendants()) do
+			if child.Name == "RankLabel" and child:IsA("TextLabel") then
+				child.Visible = newState
+			end
+		end
+	end)
+
+	return item
+end
+
 local function createMyProfile(layoutOrder)
 	local profileHeight = getMyProfileHeight()
 
@@ -179,39 +356,83 @@ local function createMyProfile(layoutOrder)
 	infoContainer.BackgroundTransparency = 1
 	infoContainer.Parent = profileFrame
 
+	local infoLayout = Instance.new("UIListLayout")
+	infoLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	infoLayout.FillDirection = Enum.FillDirection.Vertical
+	infoLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	infoLayout.Padding = UDim.new(0, 2)
+	infoLayout.Parent = infoContainer
+
+	local isPremium = (localPlayer.MembershipType == Enum.MembershipType.Premium)
+	local isVerified = false
+	pcall(function()
+		isVerified = localPlayer.HasVerifiedBadge
+	end)
+	local premiumPrefix = isPremium and (utf8.char(57345) .. " ") or ""
+	local verifiedSuffix = isVerified and utf8.char(57344) or ""
+
 	local displayName = Instance.new("TextLabel")
 	displayName.Name = "DisplayName"
-	displayName.Text = localPlayer.DisplayName
-	displayName.Size = UDim2.new(1, 0, 0.55, 0)
-	displayName.Position = UDim2.new(0, 0, 0, 0)
+	displayName.Text = premiumPrefix .. localPlayer.DisplayName .. verifiedSuffix
+	displayName.Size = UDim2.new(1, 0, 0, getTextSize("profileName") + 2)
 	displayName.BackgroundTransparency = 1
-	displayName.TextColor3 = Color3.new(1, 1, 1)
-	displayName.TextScaled = true
+	displayName.TextColor3 = ThemeModule.GetThemeColor(localPlayer:GetAttribute("CurrentTheme"))
+	displayName.TextSize = getTextSize("profileName")
 	displayName.TextXAlignment = Enum.TextXAlignment.Left
-	displayName.TextYAlignment = Enum.TextYAlignment.Bottom
+	displayName.TextYAlignment = Enum.TextYAlignment.Center
 	displayName.Font = Enum.Font.GothamBold
 	displayName.TextTruncate = Enum.TextTruncate.AtEnd
+	displayName.LayoutOrder = 1
 	displayName.Parent = infoContainer
 
-	ThemeModule.CreatePrimaryGradient(displayName, 0, 1)
-
-	Instance.new("UITextSizeConstraint", displayName).MaxTextSize = getTextSize("profileName")
+	local localThemeConn = localPlayer:GetAttributeChangedSignal("CurrentTheme"):Connect(function()
+		displayName.TextColor3 = ThemeModule.GetThemeColor(localPlayer:GetAttribute("CurrentTheme"))
+	end)
 
 	local username = Instance.new("TextLabel")
 	username.Name = "Username"
 	username.Text = "@" .. localPlayer.Name
-	username.Size = UDim2.new(1, 0, 0.45, 0)
-	username.Position = UDim2.new(0, 0, 0.55, 0)
+	username.Size = UDim2.new(1, 0, 0, getTextSize("profileUsername") + 2)
 	username.BackgroundTransparency = 1
 	username.TextColor3 = CONFIG.Colors.PlayerList.UsernameText
-	username.TextScaled = true
+	username.TextSize = getTextSize("profileUsername")
 	username.TextXAlignment = Enum.TextXAlignment.Left
-	username.TextYAlignment = Enum.TextYAlignment.Top
-	username.Font = Enum.Font.GothamSemibold
+	username.TextYAlignment = Enum.TextYAlignment.Center
+	username.Font = Enum.Font.Gotham
 	username.TextTruncate = Enum.TextTruncate.AtEnd
+	username.LayoutOrder = 2
 	username.Parent = infoContainer
 
-	Instance.new("UITextSizeConstraint", username).MaxTextSize = getTextSize("profileUsername")
+	local rankLabel = Instance.new("TextLabel")
+	rankLabel.Name = "RankLabel"
+	rankLabel.Size = UDim2.new(1, 0, 0, getTextSize("profileUsername"))
+	rankLabel.BackgroundTransparency = 1
+	rankLabel.TextColor3 = ThemeModule.Colors.TextGray or Color3.fromRGB(180, 185, 195)
+	rankLabel.TextSize = math.max(10, getTextSize("profileUsername") - 1)
+	rankLabel.TextXAlignment = Enum.TextXAlignment.Left
+	rankLabel.TextYAlignment = Enum.TextYAlignment.Center
+	rankLabel.Font = Enum.Font.Gotham
+	rankLabel.TextTruncate = Enum.TextTruncate.AtEnd
+	rankLabel.LayoutOrder = 3
+	rankLabel.Parent = infoContainer
+
+	local myRank = getPlayerGroupRank(localPlayer, function(txt)
+		if rankLabel and rankLabel.Parent then
+			if txt and MenuConfig.UserSettings.game_rank ~= false then
+				rankLabel.Text = txt
+				rankLabel.Visible = true
+			else
+				rankLabel.Visible = false
+			end
+		end
+	end)
+
+	if myRank and MenuConfig.UserSettings.game_rank ~= false then
+		rankLabel.Text = myRank
+		rankLabel.Visible = true
+	else
+		rankLabel.Visible = false
+	end
 
 	profileFrame:SetAttribute("IsMyProfile", true)
 
@@ -226,6 +447,10 @@ local function createMyProfile(layoutOrder)
 	end)
 	profileFrame.MouseLeave:Connect(function()
 		TweenService:Create(profileFrame, TweenInfo.new(0.15), {BackgroundColor3 = PROFILE_COLORS.Background}):Play()
+	end)
+
+	profileFrame.Destroying:Connect(function()
+		localThemeConn:Disconnect()
 	end)
 
 	return profileFrame
@@ -279,40 +504,81 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 	infoContainer.BackgroundTransparency = 1
 	infoContainer.Parent = playerItem
 
+	local infoLayout = Instance.new("UIListLayout")
+	infoLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	infoLayout.FillDirection = Enum.FillDirection.Vertical
+	infoLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	infoLayout.Padding = UDim.new(0, 2)
+	infoLayout.Parent = infoContainer
+
+	local isPremium = (plr.MembershipType == Enum.MembershipType.Premium)
+	local isVerified = false
+	pcall(function()
+		isVerified = plr.HasVerifiedBadge
+	end)
+	local premiumPrefix = isPremium and (utf8.char(57345) .. " ") or ""
+	local verifiedSuffix = isVerified and utf8.char(57344) or ""
+
 	local displayName = Instance.new("TextLabel")
-	displayName.Text = plr.DisplayName
-	displayName.Size = UDim2.new(1, 0, 0.55, 0)
-	displayName.Position = UDim2.new(0, 0, 0, 0)
+	displayName.Text = premiumPrefix .. plr.DisplayName .. verifiedSuffix
+	displayName.Size = UDim2.new(1, 0, 0, getTextSize("displayName") + 2)
 	displayName.BackgroundTransparency = 1
-	displayName.TextColor3 = CONFIG.Colors.PlayerList.NameText
-	displayName.TextScaled = true
+	displayName.TextColor3 = ThemeModule.GetThemeColor(plr:GetAttribute("CurrentTheme"))
+	displayName.TextSize = getTextSize("displayName")
 	displayName.TextXAlignment = Enum.TextXAlignment.Left
-	displayName.TextYAlignment = Enum.TextYAlignment.Bottom
+	displayName.TextYAlignment = Enum.TextYAlignment.Center
 	displayName.Font = Enum.Font.GothamBold
 	displayName.TextTruncate = Enum.TextTruncate.AtEnd
+	displayName.LayoutOrder = 1
 	displayName.Parent = infoContainer
 
-	if isInConnectionSection then
-		displayName.TextColor3 = Color3.new(1, 1, 1)
-		ThemeModule.CreatePrimaryGradient(displayName, 0, 1)
-	end
-
-	Instance.new("UITextSizeConstraint", displayName).MaxTextSize = getTextSize("displayName")
+	local themeConn = plr:GetAttributeChangedSignal("CurrentTheme"):Connect(function()
+		displayName.TextColor3 = ThemeModule.GetThemeColor(plr:GetAttribute("CurrentTheme"))
+	end)
 
 	local username = Instance.new("TextLabel")
 	username.Text = "@" .. plr.Name
-	username.Size = UDim2.new(1, 0, 0.45, 0)
-	username.Position = UDim2.new(0, 0, 0.55, 0)
+	username.Size = UDim2.new(1, 0, 0, getTextSize("username") + 2)
 	username.BackgroundTransparency = 1
 	username.TextColor3 = CONFIG.Colors.PlayerList.UsernameText
-	username.TextScaled = true
+	username.TextSize = getTextSize("username")
 	username.TextXAlignment = Enum.TextXAlignment.Left
-	username.TextYAlignment = Enum.TextYAlignment.Top
+	username.TextYAlignment = Enum.TextYAlignment.Center
 	username.Font = Enum.Font.Gotham
 	username.TextTruncate = Enum.TextTruncate.AtEnd
+	username.LayoutOrder = 2
 	username.Parent = infoContainer
 
-	Instance.new("UITextSizeConstraint", username).MaxTextSize = getTextSize("username")
+	local rankLabel = Instance.new("TextLabel")
+	rankLabel.Name = "RankLabel"
+	rankLabel.Size = UDim2.new(1, 0, 0, getTextSize("username"))
+	rankLabel.BackgroundTransparency = 1
+	rankLabel.TextColor3 = ThemeModule.Colors.TextGray or Color3.fromRGB(180, 185, 195)
+	rankLabel.TextSize = math.max(10, getTextSize("username") - 1)
+	rankLabel.TextXAlignment = Enum.TextXAlignment.Left
+	rankLabel.TextYAlignment = Enum.TextYAlignment.Center
+	rankLabel.Font = Enum.Font.Gotham
+	rankLabel.TextTruncate = Enum.TextTruncate.AtEnd
+	rankLabel.LayoutOrder = 3
+	rankLabel.Parent = infoContainer
+
+	local plrRank = getPlayerGroupRank(plr, function(txt)
+		if rankLabel and rankLabel.Parent then
+			if txt and MenuConfig.UserSettings.game_rank ~= false then
+				rankLabel.Text = txt
+				rankLabel.Visible = true
+			else
+				rankLabel.Visible = false
+			end
+		end
+	end)
+
+	if plrRank and MenuConfig.UserSettings.game_rank ~= false then
+		rankLabel.Text = plrRank
+		rankLabel.Visible = true
+	else
+		rankLabel.Visible = false
+	end
 
 	local originalBgTransparency = playerItem.BackgroundTransparency
 	local originalBgColor = playerItem.BackgroundColor3
@@ -335,6 +601,10 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 			BackgroundTransparency = originalBgTransparency,
 			BackgroundColor3 = originalBgColor
 		}):Play()
+	end)
+
+	playerItem.Destroying:Connect(function()
+		themeConn:Disconnect()
 	end)
 
 	return playerItem
@@ -371,7 +641,6 @@ local function createSpacer(layoutOrder, height)
 end
 
 local function updatePlayerList()
-
 	for _, child in pairs(playersScroll:GetChildren()) do
 		if not child:IsA("UIListLayout") and not child:IsA("UICorner") and not child:IsA("UIPadding") then
 			child:Destroy()
@@ -392,6 +661,10 @@ local function updatePlayerList()
 	createSpacer(layoutOrder, 4)
 	layoutOrder = layoutOrder + 1
 	createMyProfile(layoutOrder)
+	layoutOrder = layoutOrder + 1
+	createSpacer(layoutOrder, 4)
+	layoutOrder = layoutOrder + 1
+	createGameRankOption(layoutOrder)
 	layoutOrder = layoutOrder + 1
 	createSpacer(layoutOrder, 8)
 	layoutOrder = layoutOrder + 1
@@ -464,13 +737,46 @@ MenuConfig.Events.OnColorChanged.Event:Connect(function()
 	end
 end)
 
-Players.PlayerAdded:Connect(function()
+MenuConfig.Events.OnSettingChanged.Event:Connect(function(key, value)
+	if key == "game_rank" then
+		updateAllOverheadsRank(value ~= false)
+		for _, child in ipairs(playersScroll:GetDescendants()) do
+			if child.Name == "RankLabel" and child:IsA("TextLabel") then
+				child.Visible = (value ~= false)
+			end
+		end
+	end
+end)
+
+workspace.DescendantAdded:Connect(function(desc)
+	if desc.Name == "GuestLabel" and desc:IsA("TextLabel") then
+		task.wait(0.05)
+		local isRankEnabled = MenuConfig.UserSettings.game_rank ~= false
+		local isRank = desc:GetAttribute("IsRank")
+		desc.Visible = (isRankEnabled and isRank == true)
+	end
+end)
+
+Players.PlayerAdded:Connect(function(plr)
+	plr.CharacterAdded:Connect(function(char)
+		task.wait(0.2)
+		updateCharacterOverheadRank(char, MenuConfig.UserSettings.game_rank ~= false)
+	end)
+
 	if MenuConfig.State.isMenuOpen and MenuConfig.State.currentMainTab == "Pemain" then
 		updatePlayerList()
 	end
 end)
 
+for _, plr in ipairs(Players:GetPlayers()) do
+	plr.CharacterAdded:Connect(function(char)
+		task.wait(0.2)
+		updateCharacterOverheadRank(char, MenuConfig.UserSettings.game_rank ~= false)
+	end)
+end
+
 Players.PlayerRemoving:Connect(function(leavingPlayer)
+	groupRankCache[leavingPlayer.UserId] = nil
 	task.wait(0.1)
 	if MenuConfig.State.isMenuOpen and MenuConfig.State.currentMainTab == "Pemain" then
 		updatePlayerList()
@@ -479,9 +785,27 @@ end)
 
 task.spawn(function()
 	task.wait(0.5)
+	updateAllOverheadsRank(MenuConfig.UserSettings.game_rank ~= false)
 	if MenuConfig.State.isMenuOpen and MenuConfig.State.currentMainTab == "Pemain" then
 		updatePlayerList()
 	end
 end)
 
+if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+	MenuConfig.Events.OnColorChanged.Event:Connect(function()
+		local isRankEnabled = MenuConfig.UserSettings.game_rank ~= false
+		local targetColor = isRankEnabled
+			and (ThemeModule.Colors.Primary1 or Color3.fromRGB(60, 150, 240))
+			or Color3.fromRGB(80, 80, 90)
+		for _, desc in ipairs(playersScroll:GetDescendants()) do
+			if desc.Name == "ToggleBg" and desc:IsA("Frame") then
+				desc.BackgroundColor3 = targetColor
+			elseif desc:IsA("UIGradient") and ThemeModule and ThemeModule.Gradients then
+				desc.Color = ThemeModule.Gradients.Primary
+			end
+		end
+	end)
+end
+
 print("✅ [PlayerClient] Berhasil Dimuat!")
+

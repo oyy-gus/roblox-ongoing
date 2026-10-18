@@ -1320,13 +1320,16 @@ local function buildNowPlaying()
 	npStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border; npStroke.Parent = np
 
 	local strokeGrad = Instance.new("UIGradient")
-	strokeGrad.Color = ColorSequence.new({
+	strokeGrad.Color = (ThemeModule and ThemeModule.Gradients and ThemeModule.Gradients.Primary) or ColorSequence.new({
 		ColorSequenceKeypoint.new(0, Color3.fromHex("#151515")),
 		ColorSequenceKeypoint.new(0.5, Color3.fromHex("#FFFFFF")),
 		ColorSequenceKeypoint.new(1, Color3.fromHex("#353535")),
 	})
 	strokeGrad.Rotation = 45; strokeGrad.Parent = npStroke
 	UI.npStrokeGrad = strokeGrad
+	if ThemeModule and ThemeModule.GradientSystem then
+		ThemeModule.GradientSystem.Register(strokeGrad, 1.2)
+	end
 
 	local thumb = Instance.new("ImageLabel")
 	thumb.Name = "Thumbnail"
@@ -2856,7 +2859,7 @@ end)
 if MenuConfig.Events and MenuConfig.Events.OnSettingChanged then
 	MenuConfig.Events.OnSettingChanged.Event:Connect(function(key, value)
 		if key == "muteMusic" then isMuted = value; applyVolume()
-		elseif key == "musicVolume" then userVolume = (value/100) * 0.5; if not isMuted then applyVolume() end end
+		elseif key == "musicVolume" then userVolume = value / 100; if not isMuted then applyVolume() end end
 	end)
 end
 
@@ -2899,7 +2902,7 @@ else
 end
 
 isMuted    = MenuConfig.UserSettings and MenuConfig.UserSettings.muteMusic or false
-userVolume = ((MenuConfig.UserSettings and MenuConfig.UserSettings.musicVolume or 100) / 100) * 0.5
+userVolume = (MenuConfig.UserSettings and MenuConfig.UserSettings.musicVolume or 50) / 100
 
 local startMg = getMusicGroup()
 if startMg and startMg:IsA("SoundGroup") then
@@ -2998,3 +3001,18 @@ SoundService.ChildAdded:Connect(function(child)
 		watchServerSound()
 	end
 end)
+
+if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+	MenuConfig.Events.OnColorChanged.Event:Connect(function()
+		if UI.npStrokeGrad and ThemeModule and ThemeModule.Gradients then
+			UI.npStrokeGrad.Color = ThemeModule.Gradients.Primary
+		end
+		if musicPage and ThemeModule and ThemeModule.Gradients then
+			for _, desc in ipairs(musicPage:GetDescendants()) do
+				if desc:IsA("UIGradient") and desc.Name == "StrokeGradient" then
+					desc.Color = ThemeModule.Gradients.Primary
+				end
+			end
+		end
+	end)
+end

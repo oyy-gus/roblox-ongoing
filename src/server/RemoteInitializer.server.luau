@@ -41,6 +41,7 @@ ensureRemoteFunction(Remotes, "GetFollowerCount")
 ensureRemoteFunction(Remotes, "GetFollowingCount")
 ensureRemoteFunction(Remotes, "GetSocialCounts")
 ensureRemoteFunction(Remotes, "GetFriendCountServer")
+ensureRemoteEvent(Remotes, "SetCurrentTheme")
 
 local SyncRemotes = getOrCreateFolder(ReplicatedStorage, "SyncRemotes")
 ensureRemoteFunction(SyncRemotes, "animationStart")

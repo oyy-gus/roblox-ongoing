@@ -231,10 +231,12 @@ function ThemeModule.GradientSystem.Start()
 			local data = ThemeModule.GradientSystem.Gradients[i]
 			local g = data and data.gradient
 			if g and g.Parent then
-				pcall(function()
-					local rawOffset = math.sin(ThemeModule.GradientSystem.Time * data.speed) * amp
-					g.Offset = Vector2.new(rawOffset, 0)
-				end)
+				if data.speed and data.speed > 0 then
+					pcall(function()
+						local rawOffset = math.sin(ThemeModule.GradientSystem.Time * data.speed) * amp
+						g.Offset = Vector2.new(rawOffset, 0)
+					end)
+				end
 			else
 				table.remove(ThemeModule.GradientSystem.Gradients, i)
 			end
@@ -290,6 +292,7 @@ function ThemeModule.CreateStaticGradient(parent, gradientName, rotation)
 	gradient.Color = ThemeModule.Gradients[gradientName] or ThemeModule.Gradients.Primary
 	gradient.Rotation = rotation or 0
 	gradient.Parent = parent
+	ThemeModule.GradientSystem.Register(gradient, 0)
 	return gradient
 end
 
@@ -338,6 +341,7 @@ function ThemeModule.CreateGradientStroke(parent, thickness, gradientName, rotat
 	gradient.Color = ThemeModule.Gradients[gradientName] or ThemeModule.Gradients.Primary
 	gradient.Rotation = rotation or 45
 	gradient.Parent = stroke
+	ThemeModule.GradientSystem.Register(gradient, 0)
 
 	return stroke, gradient
 end
@@ -493,8 +497,8 @@ ThemeModule.Presets.Red = {
 }
 
 ThemeModule.Presets.Cyan = {
-	Primary1 = Color3.fromRGB(100, 255, 255),
-	Primary2 = Color3.fromRGB(50, 200, 200),
+	Primary1 = Color3.fromRGB(0, 210, 255),
+	Primary2 = Color3.fromRGB(0, 160, 210),
 }
 
 ThemeModule.Presets.Pink = {
@@ -502,24 +506,47 @@ ThemeModule.Presets.Pink = {
 	Primary2 = Color3.fromRGB(255, 100, 150),
 }
 
+ThemeModule.Presets.White = {
+	Primary1 = Color3.fromRGB(255, 255, 255),
+	Primary2 = Color3.fromRGB(200, 200, 200),
+}
+
 function ThemeModule.ApplyPreset(presetName)
 	local preset = ThemeModule.Presets[presetName]
-	if not preset then
+	local accentColor = nil
+
+	if preset and preset.Primary1 then
+		accentColor = preset.Primary1
+		ThemeModule.Colors.Primary1 = preset.Primary1
+		ThemeModule.Colors.Primary2 = preset.Primary2 or preset.Primary1
+	elseif typeof(presetName) == "Color3" then
+		accentColor = presetName
+		ThemeModule.Colors.Primary1 = presetName
+		ThemeModule.Colors.Primary2 = presetName
+	elseif type(presetName) == "string" then
+		local ok, hexColor = pcall(function() return Color3.fromHex(presetName) end)
+		if ok and hexColor then
+			accentColor = hexColor
+			ThemeModule.Colors.Primary1 = hexColor
+			ThemeModule.Colors.Primary2 = hexColor
+		end
+	end
+
+	if not accentColor then
 		warn("ThemeModule: Preset '" .. tostring(presetName) .. "' tidak ditemukan")
 		return false
 	end
 
-	ThemeModule.Colors.Primary1 = preset.Primary1
-	ThemeModule.Colors.Primary2 = preset.Primary2
-
 	ThemeModule.Gradients.Primary = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, preset.Primary1),
-		ColorSequenceKeypoint.new(1, preset.Primary2)
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#151515")),
+		ColorSequenceKeypoint.new(0.5, accentColor),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#353535"))
 	})
 
 	ThemeModule.Gradients.PrimaryReversed = ColorSequence.new({
-		ColorSequenceKeypoint.new(0, preset.Primary2),
-		ColorSequenceKeypoint.new(1, preset.Primary1)
+		ColorSequenceKeypoint.new(0, Color3.fromHex("#353535")),
+		ColorSequenceKeypoint.new(0.5, accentColor),
+		ColorSequenceKeypoint.new(1, Color3.fromHex("#151515"))
 	})
 
 	for _, data in ipairs(ThemeModule.GradientSystem.Gradients) do
@@ -528,7 +555,7 @@ function ThemeModule.ApplyPreset(presetName)
 		end
 	end
 
-	print("ThemeModule: Tema '" .. presetName .. "' berhasil diterapkan")
+	print("ThemeModule: Tema '" .. tostring(presetName) .. "' berhasil diterapkan (Gradien diperbarui)")
 	return true
 end
 
@@ -571,4 +598,24 @@ function ThemeModule.GetContrastColor(backgroundColor)
 	end
 end
 
+function ThemeModule.GetThemeColor(themeName)
+	if typeof(themeName) == "Color3" then
+		return themeName
+	end
+	if type(themeName) == "string" and themeName ~= "" and themeName ~= "White" and themeName ~= "Default" then
+		if ThemeModule.Presets and ThemeModule.Presets[themeName] then
+			local preset = ThemeModule.Presets[themeName]
+			if preset and preset.Primary1 then
+				return preset.Primary1
+			end
+		end
+		local ok, hexColor = pcall(function() return Color3.fromHex(themeName) end)
+		if ok and hexColor then
+			return hexColor
+		end
+	end
+	return Color3.fromRGB(255, 255, 255)
+end
+
 return ThemeModule
+

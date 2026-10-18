@@ -6,7 +6,7 @@ ServerMusicAudioHandler.__index = ServerMusicAudioHandler
 
 local CONFIG = {
 	Audio = {
-		DefaultVolume   = 0.5,
+		DefaultVolume   = 1.0,
 		FadeInDuration  = 1.2,
 		FadeOutDuration = 1.0,
 

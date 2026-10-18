@@ -108,6 +108,16 @@ function module.getPreloadedTrack(animation)
 	return preloadedTracks[animation]
 end
 
+function module.invalidateTrack(animation)
+	if preloadedTracks[animation] then
+		pcall(function()
+			preloadedTracks[animation]:Stop(0)
+			preloadedTracks[animation]:Destroy()
+		end)
+		preloadedTracks[animation] = nil
+	end
+end
+
 function module.isPreloaded()
 	return isPreloaded
 end

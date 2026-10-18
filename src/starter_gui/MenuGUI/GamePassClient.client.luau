@@ -770,6 +770,21 @@ if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnTabChanged then
 	end)
 end
 
+if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+	MenuConfig.Events.OnColorChanged.Event:Connect(function()
+		for _, passType in ipairs({"VIP", "VVIP"}) do
+			local data = GamepassData[passType]
+			if data and data.Frame then
+				for _, desc in ipairs(data.Frame:GetDescendants()) do
+					if desc:IsA("UIGradient") and desc.Name == "StrokeGradient" and ThemeModule and ThemeModule.Gradients then
+						desc.Color = ThemeModule.Gradients.Primary
+					end
+				end
+			end
+		end
+	end)
+end
+
 task.spawn(function()
 	task.wait(0.5)
 	buildGamePassUI()

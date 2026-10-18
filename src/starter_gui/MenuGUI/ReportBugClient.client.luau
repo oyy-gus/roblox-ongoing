@@ -905,6 +905,16 @@ if MenuConfig.Events and MenuConfig.Events.OnTabChanged then
 	end)
 end
 
+if MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+	MenuConfig.Events.OnColorChanged.Event:Connect(function()
+		for _, desc in ipairs(reportPage:GetDescendants()) do
+			if desc:IsA("UIGradient") and desc.Name == "StrokeGradient" and ThemeModule and ThemeModule.Gradients then
+				desc.Color = ThemeModule.Gradients.Primary
+			end
+		end
+	end)
+end
+
 print("========================================")
 print("✅ ReportBugClient siap!")
 print("📡 Remote:", bugRemote:GetFullName())

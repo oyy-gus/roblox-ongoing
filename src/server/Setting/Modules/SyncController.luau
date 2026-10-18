@@ -18,8 +18,8 @@ end
 
 local module = {}
 
-local FADE_IN = 0.5
-local FADE_OUT = 0.5
+local FADE_IN = 0.15
+local FADE_OUT = 0.15
 local DANCE_WALK_SPEED = 16
 
 local ANIMATION_PRIORITY = Enum.AnimationPriority.Action4
@@ -211,10 +211,18 @@ function module.stopAllFollowers(leaderPlayer, loadedAnimations)
 				end
 
 				restoreOriginalWalkSpeed(follower)
+
+				follower.Character:SetAttribute("CurrentDance", nil)
+				follower.Character:SetAttribute("DanceStartTime", nil)
+				follower.Character:SetAttribute("DanceSpeed", nil)
 				stoppedCount = stoppedCount + 1
 			end
 		end
 	end
+
+	pcall(function()
+		module.updateAllLeaderStatus()
+	end)
 
 	return stoppedCount
 end
@@ -230,41 +238,14 @@ function module.syncPlayerToAnimation(player, sourcePlayer, animation, speed, lo
 		return false
 	end
 
-	local sourceAnimator = AnimatorUtils.getAnimator(sourcePlayer)
-	local leaderTimePosition = 0
-
-	if sourceAnimator then
-		local leaderTrack = AnimatorUtils.getPlayingDanceTrack(sourceAnimator, loadedAnimations)
-		if leaderTrack and leaderTrack.Animation == animation then
-			leaderTimePosition = leaderTrack.TimePosition
-		end
-	end
+	local leaderStartTime = sourcePlayer.Character and sourcePlayer.Character:GetAttribute("DanceStartTime")
 
 	if player.Character then
 		player.Character:SetAttribute("Syncing", sourcePlayer.Name)
+		player.Character:SetAttribute("CurrentDance", animation.Name)
+		player.Character:SetAttribute("DanceSpeed", speed or 1)
+		player.Character:SetAttribute("DanceStartTime", leaderStartTime or workspace:GetServerTimeNow())
 	end
-
-	local newTrack = AnimatorUtils.getOrCreateTrack(animator, animation)
-	if not newTrack then
-		newTrack = animator:LoadAnimation(animation)
-	end
-
-	if not newTrack then
-		warn("[SyncController] Gagal memuat animasi untuk:", player.Name)
-		return false
-	end
-
-	newTrack.Looped = true
-	newTrack.Priority = ANIMATION_PRIORITY
-
-	newTrack:Play(FADE_IN, 1.0, speed or 1)
-	newTrack:AdjustSpeed(speed or 1)
-
-	newTrack.TimePosition = leaderTimePosition
-
-	task.delay(0.05, function()
-		AnimatorUtils.stopOtherDances(animator, newTrack, loadedAnimations, FADE_OUT)
-	end)
 
 	setDanceWalkSpeed(player)
 
@@ -309,36 +290,24 @@ function module.syncPlayerToSource(player, sourcePlayer, loadedAnimations)
 	player.Character:SetAttribute("Syncing", sourcePlayer.Name)
 
 	if not sourceTrack then
+
 		AnimatorUtils.stopAllDances(animator, loadedAnimations, FADE_OUT)
 		restoreOriginalWalkSpeed(player)
+		player.Character:SetAttribute("CurrentDance", nil)
+		player.Character:SetAttribute("DanceStartTime", nil)
+		player.Character:SetAttribute("DanceSpeed", nil)
 
 		pcall(function()
 			module.updateAllLeaderStatus()
 		end)
-		return false
+		return true
 	end
 
-	local newTrack = AnimatorUtils.getOrCreateTrack(animator, sourceTrack.Animation)
-	if not newTrack then
-		newTrack = animator:LoadAnimation(sourceTrack.Animation)
-	end
-
-	if not newTrack then
-		warn("[SyncController] Gagal memuat animasi untuk:", player.Name)
-		return false
-	end
-
-	newTrack.Looped = true
-	newTrack.Priority = ANIMATION_PRIORITY
-
-	newTrack:Play(FADE_IN, 1.0, sourceTrack.Speed or 1)
-	newTrack:AdjustSpeed(sourceTrack.Speed or 1)
-
-	newTrack.TimePosition = sourceTrack.TimePosition
-
-	task.delay(0.05, function()
-		AnimatorUtils.stopOtherDances(animator, newTrack, loadedAnimations, FADE_OUT)
-	end)
+	local leaderStartTime = sourcePlayer.Character and sourcePlayer.Character:GetAttribute("DanceStartTime")
+	local targetSpeed = sourceTrack.Speed or 1
+	player.Character:SetAttribute("CurrentDance", sourceTrack.Animation.Name)
+	player.Character:SetAttribute("DanceSpeed", targetSpeed)
+	player.Character:SetAttribute("DanceStartTime", leaderStartTime or workspace:GetServerTimeNow())
 
 	setDanceWalkSpeed(player)
 
@@ -383,13 +352,15 @@ function module.unsyncPlayer(player, loadedAnimations)
 		pcall(function()
 			AnimatorUtils.stopAllDances(animator, loadedAnimations, FADE_OUT)
 		end)
-		task.wait(FADE_OUT)
 	end
 
 	restoreOriginalWalkSpeed(player)
 
 	if player.Character then
 		player.Character:SetAttribute("Syncing", nil)
+		player.Character:SetAttribute("CurrentDance", nil)
+		player.Character:SetAttribute("DanceStartTime", nil)
+		player.Character:SetAttribute("DanceSpeed", nil)
 	end
 
 	for _, otherPlayer in ipairs(Players:GetPlayers()) do
@@ -405,6 +376,9 @@ function module.unsyncPlayer(player, loadedAnimations)
 
 				restoreOriginalWalkSpeed(otherPlayer)
 				otherPlayer.Character:SetAttribute("Syncing", nil)
+				otherPlayer.Character:SetAttribute("CurrentDance", nil)
+				otherPlayer.Character:SetAttribute("DanceStartTime", nil)
+				otherPlayer.Character:SetAttribute("DanceSpeed", nil)
 			end
 		end
 	end
@@ -439,6 +413,9 @@ function module.unsyncAllFollowersOfLeader(leaderPlayer, loadedAnimations)
 
 					restoreOriginalWalkSpeed(followerPlayer)
 					followerPlayer.Character:SetAttribute("Syncing", nil)
+					followerPlayer.Character:SetAttribute("CurrentDance", nil)
+					followerPlayer.Character:SetAttribute("DanceStartTime", nil)
+					followerPlayer.Character:SetAttribute("DanceSpeed", nil)
 					unsyncedCount = unsyncedCount + 1
 				end
 			end
@@ -592,3 +569,4 @@ Players.PlayerAdded:Connect(function(player)
 end)
 
 return module
+

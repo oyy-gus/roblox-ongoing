@@ -44,6 +44,9 @@ local function forceUnsyncAllFollowers(leavingPlayer)
 				end
 
 				follower.Character:SetAttribute("Syncing", nil)
+				follower.Character:SetAttribute("CurrentDance", nil)
+				follower.Character:SetAttribute("DanceStartTime", nil)
+				follower.Character:SetAttribute("DanceSpeed", nil)
 				follower.Character:SetAttribute("IsLeader", nil)
 				follower.Character:SetAttribute("FollowerCount", nil)
 			end

@@ -301,6 +301,7 @@ local function createTabButton(def)
 	frameGradient.Rotation = 45
 	frameGradient.Enabled  = false
 	frameGradient.Parent   = btnFrame
+	ThemeModule.GradientSystem.Register(frameGradient, 1)
 
 	tabGradients[def.Name]   = frameGradient
 	tabFrames[def.Name]      = btnFrame
@@ -387,13 +388,19 @@ local function switchTab(tabName)
 		end
 
 		if name == tabName then
-			if gradient then gradient.Enabled = true; ThemeModule.GradientSystem.Register(gradient, 1) end
-			if frame    then frame.BackgroundColor3 = TAB_COLORS.ActiveBackground end
-			btn.TextColor3 = TAB_COLORS.ActiveText
+			if gradient then
+				gradient.Color = ThemeModule.Gradients.Primary
+				gradient.Enabled = true
+			end
+			if frame then frame.BackgroundColor3 = TAB_COLORS.ActiveBackground end
+			btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 			btn.Font       = Enum.Font.GothamBold
 		else
-			if gradient then gradient.Enabled = false; ThemeModule.GradientSystem.Unregister(gradient) end
-			if frame    then frame.BackgroundColor3 = TAB_COLORS.InactiveBackground end
+			if gradient then
+				gradient.Color = ThemeModule.Gradients.Primary
+				gradient.Enabled = false
+			end
+			if frame then frame.BackgroundColor3 = TAB_COLORS.InactiveBackground end
 			btn.TextColor3 = TAB_COLORS.InactiveText
 			btn.Font       = Enum.Font.GothamMedium
 		end
@@ -404,7 +411,39 @@ end
 
 for tabName, btn in pairs(tabButtons) do
 	btn.MouseButton1Click:Connect(function() switchTab(tabName) end)
+	btn.Activated:Connect(function() switchTab(tabName) end)
 end
+
+local function refreshAllTabGradients()
+	for name, gradient in pairs(tabGradients) do
+		if gradient then
+			gradient.Color = ThemeModule.Gradients.Primary
+		end
+	end
+	local currentTab = MenuConfig.State.currentTab or "Music"
+	local activeGradient = tabGradients[currentTab]
+	if activeGradient then
+		activeGradient.Color = ThemeModule.Gradients.Primary
+		activeGradient.Enabled = true
+	end
+end
+
+MenuConfig.Events.OnColorChanged.Event:Connect(refreshAllTabGradients)
+
+MenuConfig.Events.OnThemeChanged.Event:Connect(function(themeName)
+	if ThemeModule and ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(themeName)
+	end
+	refreshAllTabGradients()
+end)
+
+player:GetAttributeChangedSignal("CurrentTheme"):Connect(function()
+	local theme = player:GetAttribute("CurrentTheme")
+	if theme and ThemeModule and ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(theme)
+	end
+	refreshAllTabGradients()
+end)
 
 local function showNotification(message, messageType)
 	local title    = "Control Panel"

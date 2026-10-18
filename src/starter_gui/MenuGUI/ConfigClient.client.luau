@@ -104,14 +104,10 @@ end
 
 SoundSystem.Setup()
 
-local ConfigRemotes = ReplicatedStorage:FindFirstChild("ConfigRemotes")
-if not ConfigRemotes then
-	ConfigRemotes = ReplicatedStorage:WaitForChild("ConfigRemotes", 10)
-end
-
-local LoadSettingsRemote = ConfigRemotes and ConfigRemotes:FindFirstChild("LoadSettings")
-local SaveSettingRemote = ConfigRemotes and ConfigRemotes:FindFirstChild("SaveSetting")
-local ResetSettingsRemote = ConfigRemotes and ConfigRemotes:FindFirstChild("ResetSettings")
+local ConfigRemotes = ReplicatedStorage:WaitForChild("ConfigRemotes", 15)
+local LoadSettingsRemote = ConfigRemotes and ConfigRemotes:WaitForChild("LoadSettings", 15)
+local SaveSettingRemote = ConfigRemotes and ConfigRemotes:WaitForChild("SaveSetting", 15)
+local ResetSettingsRemote = ConfigRemotes and ConfigRemotes:WaitForChild("ResetSettings", 15)
 
 local UIElements = {
 	sections = {},
@@ -130,14 +126,19 @@ local DEFAULT_SETTINGS = {
 	hideOverhead = false,
 	hideShadow = false,
 	muteMusic = false,
-	musicVolume = 100
+	musicVolume = 50,
+	game_rank = true,
+	currentTheme = "White"
 }
 
 local settingsLoaded = false
 local userSettings = nil
 
 local function loadSettings()
-	for attempt = 1, 3 do
+	for attempt = 1, 5 do
+		if not LoadSettingsRemote and ConfigRemotes then
+			LoadSettingsRemote = ConfigRemotes:WaitForChild("LoadSettings", 5)
+		end
 		if LoadSettingsRemote then
 			local success, data = pcall(function()
 				return LoadSettingsRemote:InvokeServer()
@@ -154,7 +155,7 @@ local function loadSettings()
 			end
 		end
 
-		if attempt < 3 then
+		if attempt < 5 then
 			task.wait(0.5)
 		end
 	end
@@ -163,6 +164,10 @@ local function loadSettings()
 	local defaultCopy = {}
 	for k, v in pairs(DEFAULT_SETTINGS) do
 		defaultCopy[k] = v
+	end
+	local serverAttrTheme = player:GetAttribute("CurrentTheme")
+	if serverAttrTheme and serverAttrTheme ~= "" then
+		defaultCopy.currentTheme = serverAttrTheme
 	end
 	return defaultCopy
 end
@@ -180,10 +185,15 @@ local function syncUserSettings()
 end
 
 local function saveSetting(settingKey, value)
+	if not SaveSettingRemote and ConfigRemotes then
+		SaveSettingRemote = ConfigRemotes:WaitForChild("SaveSetting", 5)
+	end
 	if SaveSettingRemote then
 		pcall(function()
 			SaveSettingRemote:FireServer(settingKey, value)
 		end)
+	else
+		warn("⚠️ [ConfigClient] SaveSettingRemote tidak ditemukan untuk:", settingKey)
 	end
 end
 
@@ -256,6 +266,10 @@ local function refreshAllUI()
 			end
 		end
 	end
+
+	if UIElements.updateThemeSelector then
+		UIElements.updateThemeSelector()
+	end
 end
 
 local function resetAllSettings()
@@ -267,6 +281,23 @@ local function resetAllSettings()
 
 	for key, value in pairs(DEFAULT_SETTINGS) do
 		userSettings[key] = value
+	end
+
+	player:SetAttribute("CurrentTheme", "White")
+	local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+	local setCurrentThemeRemote = remotes and remotes:FindFirstChild("SetCurrentTheme")
+	if setCurrentThemeRemote then
+		pcall(function()
+			setCurrentThemeRemote:FireServer("White")
+		end)
+	end
+
+	if ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset("White")
+	end
+
+	if MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+		MenuConfig.Events.OnColorChanged:Fire()
 	end
 
 	MenuConfig.UserSettings = userSettings
@@ -745,7 +776,7 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 		Font = Enum.Font.GothamSemibold,
 	}, item)
 
-	local currentValue = userSettings[settingKey] or (DEFAULT_SETTINGS[settingKey] or 100)
+	local currentValue = userSettings[settingKey] or (DEFAULT_SETTINGS[settingKey] or 50)
 	local progress = (currentValue - minValue) / (maxValue - minValue)
 	local sliderY = 38
 
@@ -1059,6 +1090,269 @@ local function createResetButton(layoutOrder)
 	return btn
 end
 
+local THEME_LIST = {
+	{ id = "White",  name = "Putih",  color = Color3.fromRGB(255, 255, 255) },
+	{ id = "Cyan",   name = "Cyan",   color = Color3.fromRGB(0, 210, 255) },
+	{ id = "Gold",   name = "Gold",   color = Color3.fromRGB(255, 215, 0) },
+	{ id = "Blue",   name = "Blue",   color = Color3.fromRGB(100, 150, 255) },
+	{ id = "Green",  name = "Green",  color = Color3.fromRGB(100, 255, 150) },
+	{ id = "Purple", name = "Purple", color = Color3.fromRGB(200, 100, 255) },
+	{ id = "Red",    name = "Red",    color = Color3.fromRGB(255, 100, 100) },
+	{ id = "Pink",   name = "Pink",   color = Color3.fromRGB(255, 150, 200) },
+}
+
+local function createThemeSelector(layoutOrder)
+	local item = mk("Frame", {
+		Name = "ThemeSelectorCard",
+		Size = UDim2.new(1, 0, 0, 150),
+		BackgroundColor3 = ThemeModule.Colors.BackgroundMedium,
+		BorderSizePixel = 0,
+		LayoutOrder = layoutOrder,
+		ClipsDescendants = true,
+		Active = false,
+	}, configScroll)
+	crn(SIZES.CORNER_MD, item)
+
+	local headerContainer = mk("Frame", {
+		Name = "HeaderContainer",
+		Size = UDim2.new(1, -24, 0, 40),
+		Position = UDim2.new(0, SIZES.ITEM_PAD, 0, 8),
+		BackgroundTransparency = 1,
+		Active = false,
+	}, item)
+
+	local titleLabel = mk("TextLabel", {
+		Name = "Title",
+		Text = "🎨 Warna Nama & Tema",
+		Size = UDim2.new(1, 0, 0, 20),
+		Position = UDim2.new(0, 0, 0, 0),
+		BackgroundTransparency = 1,
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextSize = SIZES.TOGGLE_LABEL_TEXT,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Center,
+		Font = Enum.Font.GothamSemibold,
+		Active = false,
+	}, headerContainer)
+
+	local descLabel = mk("TextLabel", {
+		Name = "Description",
+		Text = "Pilih warna nama overhead dan nuansa visual menu Anda",
+		Size = UDim2.new(1, 0, 0, 16),
+		Position = UDim2.new(0, 0, 0, 22),
+		BackgroundTransparency = 1,
+		TextColor3 = ThemeModule.Colors.TextGray,
+		TextSize = SIZES.TOGGLE_DESC_TEXT,
+		TextXAlignment = Enum.TextXAlignment.Left,
+		TextYAlignment = Enum.TextYAlignment.Top,
+		Font = Enum.Font.Gotham,
+		Active = false,
+	}, headerContainer)
+
+	local gridContainer = mk("Frame", {
+		Name = "GridContainer",
+		Size = UDim2.new(1, -24, 0, 82),
+		Position = UDim2.new(0, SIZES.ITEM_PAD, 0, 56),
+		BackgroundTransparency = 1,
+		Active = false,
+	}, item)
+
+	local gridLayout = mk("UIGridLayout", {
+		CellSize = UDim2.new(0.235, 0, 0, 36),
+		CellPadding = UDim2.new(0.02, 0, 0, 8),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+	}, gridContainer)
+
+	local chipElements = {}
+
+	local function updateThemeChipsVisual(activeThemeId)
+		for _, chipData in ipairs(chipElements) do
+			local isActive = (chipData.themeId == activeThemeId) or (activeThemeId == nil and chipData.themeId == "White")
+			local stroke = chipData.stroke
+			local chip = chipData.chip
+			local label = chipData.label
+
+			if isActive then
+				stroke.Color = chipData.color
+				stroke.Thickness = 2
+				stroke.Transparency = 0
+				chip.BackgroundColor3 = Color3.fromRGB(36, 40, 50)
+				label.TextColor3 = Color3.fromRGB(255, 255, 255)
+				label.Font = Enum.Font.GothamBold
+			else
+				stroke.Color = Color3.fromRGB(55, 55, 65)
+				stroke.Thickness = 1
+				stroke.Transparency = 0.5
+				chip.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+				label.TextColor3 = Color3.fromRGB(190, 190, 200)
+				label.Font = Enum.Font.GothamMedium
+			end
+		end
+	end
+
+	for idx, theme in ipairs(THEME_LIST) do
+		local chip = mk("Frame", {
+			Name = "Chip_" .. theme.id,
+			BackgroundColor3 = Color3.fromRGB(25, 25, 30),
+			BorderSizePixel = 0,
+			LayoutOrder = idx,
+			Active = false,
+		}, gridContainer)
+		crn(6, chip)
+
+		local stroke = mk("UIStroke", {
+			Color = Color3.fromRGB(55, 55, 65),
+			Thickness = 1,
+			Transparency = 0.5,
+			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+		}, chip)
+
+		local dot = mk("Frame", {
+			Name = "ColorDot",
+			Size = UDim2.new(0, 12, 0, 12),
+			Position = UDim2.new(0, 8, 0.5, -6),
+			BackgroundColor3 = theme.color,
+			BorderSizePixel = 0,
+			Active = false,
+		}, chip)
+		crn(6, dot)
+
+		local nameLabel = mk("TextLabel", {
+			Name = "NameLabel",
+			Text = theme.name,
+			Size = UDim2.new(1, -26, 1, 0),
+			Position = UDim2.new(0, 24, 0, 0),
+			BackgroundTransparency = 1,
+			TextColor3 = Color3.fromRGB(190, 190, 200),
+			TextSize = 11,
+			Font = Enum.Font.GothamMedium,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			TextYAlignment = Enum.TextYAlignment.Center,
+			TextTruncate = Enum.TextTruncate.AtEnd,
+			Active = false,
+		}, chip)
+
+		local btn = mk("TextButton", {
+			Name = "ClickBtn",
+			Text = "",
+			Size = UDim2.new(1, 0, 1, 0),
+			Position = UDim2.new(0, 0, 0, 0),
+			BackgroundTransparency = 1,
+			ZIndex = 10,
+			Active = true,
+			Selectable = true,
+			AutoButtonColor = false,
+		}, chip)
+
+		table.insert(chipElements, {
+			themeId = theme.id,
+			color = theme.color,
+			chip = chip,
+			stroke = stroke,
+			label = nameLabel,
+		})
+
+		btn.MouseEnter:Connect(function()
+			local current = userSettings.currentTheme or player:GetAttribute("CurrentTheme") or "White"
+			if current ~= theme.id then
+				TweenService:Create(chip, TweenInfo.new(0.15), {
+					BackgroundColor3 = Color3.fromRGB(34, 34, 42)
+				}):Play()
+			end
+		end)
+
+		btn.MouseLeave:Connect(function()
+			local current = userSettings.currentTheme or player:GetAttribute("CurrentTheme") or "White"
+			if current ~= theme.id then
+				TweenService:Create(chip, TweenInfo.new(0.15), {
+					BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+				}):Play()
+			end
+		end)
+
+		btn.InputBegan:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+				TweenService:Create(chip, TweenInfo.new(0.08), {
+					BackgroundColor3 = Color3.fromRGB(45, 48, 60)
+				}):Play()
+			end
+		end)
+
+		btn.InputEnded:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+				local current = userSettings.currentTheme or player:GetAttribute("CurrentTheme") or "White"
+				local targetBg = (current == theme.id) and Color3.fromRGB(36, 40, 50) or Color3.fromRGB(25, 25, 30)
+				TweenService:Create(chip, TweenInfo.new(0.12), {
+					BackgroundColor3 = targetBg
+				}):Play()
+			end
+		end)
+
+		local isProcessing = false
+		local function selectTheme()
+			if isProcessing then return end
+			isProcessing = true
+			task.delay(0.2, function() isProcessing = false end)
+
+			SoundSystem.PlayClick()
+			userSettings.currentTheme = theme.id
+			saveSetting("currentTheme", theme.id)
+			player:SetAttribute("CurrentTheme", theme.id)
+
+			local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+			local setCurrentThemeRemote = remotes and remotes:FindFirstChild("SetCurrentTheme")
+			if setCurrentThemeRemote then
+				pcall(function()
+					setCurrentThemeRemote:FireServer(theme.id)
+				end)
+			end
+
+			if ThemeModule.ApplyPreset then
+				ThemeModule.ApplyPreset(theme.id)
+			end
+
+			if MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+				MenuConfig.Events.OnColorChanged:Fire()
+			end
+
+			MenuConfig.Events.OnSettingChanged:Fire("currentTheme", theme.id)
+			updateThemeChipsVisual(theme.id)
+			showNotification("Settings", "🎨 Tema & Warna", "Tema diubah ke " .. theme.name, 2)
+		end
+
+		btn.Activated:Connect(selectTheme)
+		btn.MouseButton1Click:Connect(selectTheme)
+	end
+
+	local function updateResponsiveGrid()
+		local width = gridContainer.AbsoluteSize.X
+		if width > 0 and width < 380 then
+			gridLayout.CellSize = UDim2.new(0.485, 0, 0, 38)
+			gridLayout.CellPadding = UDim2.new(0.03, 0, 0, 8)
+			gridContainer.Size = UDim2.new(1, -24, 0, 180)
+			item.Size = UDim2.new(1, 0, 0, 246)
+		else
+			gridLayout.CellSize = UDim2.new(0.235, 0, 0, 36)
+			gridLayout.CellPadding = UDim2.new(0.02, 0, 0, 8)
+			gridContainer.Size = UDim2.new(1, -24, 0, 82)
+			item.Size = UDim2.new(1, 0, 0, 150)
+		end
+	end
+
+	gridContainer:GetPropertyChangedSignal("AbsoluteSize"):Connect(updateResponsiveGrid)
+	task.defer(updateResponsiveGrid)
+
+	local initialTheme = userSettings.currentTheme or player:GetAttribute("CurrentTheme") or "White"
+	updateThemeChipsVisual(initialTheme)
+
+	UIElements.updateThemeSelector = function()
+		local active = userSettings.currentTheme or player:GetAttribute("CurrentTheme") or "White"
+		updateThemeChipsVisual(active)
+	end
+
+	return item
+end
+
 createSectionHeader("PENGATURAN TAMPILAN", 1)
 
 createToggleSetting("💬 Sembunyikan Bubble Chat", "Menyembunyikan chat bubble pemain lain", "hideBubbleChat", 2, function(isHidden)
@@ -1085,6 +1379,10 @@ createToggleSetting("🌑 Sembunyikan Bayangan", "Mematikan bayangan global game
 	setShadowHidden(isHidden)
 	showNotification("Settings", "🌑 Bayangan", isHidden and "Dimatikan" or "Dinyalakan", 2)
 end)
+
+createSectionHeader("PENGATURAN TEMA & NAMA", 7)
+
+createThemeSelector(8)
 
 createSectionHeader("PENGATURAN MUSIK", 10)
 
@@ -1128,6 +1426,50 @@ task.spawn(function()
 
 	setMusicMuted(userSettings.muteMusic)
 	setMusicVolume(userSettings.musicVolume)
+
+	local serverAttrTheme = player:GetAttribute("CurrentTheme")
+	local initialTheme = userSettings.currentTheme
+	if serverAttrTheme and serverAttrTheme ~= "" then
+		initialTheme = serverAttrTheme
+		userSettings.currentTheme = serverAttrTheme
+	elseif not initialTheme then
+		initialTheme = "White"
+		userSettings.currentTheme = "White"
+	end
+
+	player:SetAttribute("CurrentTheme", initialTheme)
+	local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+	local setCurrentThemeRemote = remotes and remotes:FindFirstChild("SetCurrentTheme")
+	if setCurrentThemeRemote then
+		pcall(function()
+			setCurrentThemeRemote:FireServer(initialTheme)
+		end)
+	end
+	if ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(initialTheme)
+	end
+	if MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+		MenuConfig.Events.OnColorChanged:Fire()
+	end
+	if UIElements.updateThemeSelector then
+		UIElements.updateThemeSelector()
+	end
+end)
+
+player:GetAttributeChangedSignal("CurrentTheme"):Connect(function()
+	local theme = player:GetAttribute("CurrentTheme") or "White"
+	if userSettings.currentTheme ~= theme then
+		userSettings.currentTheme = theme
+	end
+	if ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(theme)
+	end
+	if MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+		MenuConfig.Events.OnColorChanged:Fire()
+	end
+	if UIElements.updateThemeSelector then
+		UIElements.updateThemeSelector()
+	end
 end)
 
 MenuConfig.Events.OnSettingChanged.Event:Connect(function(key, value)
@@ -1172,8 +1514,13 @@ MenuConfig.Events.OnSettingChanged.Event:Connect(function(key, value)
 				break
 			end
 		end
+	elseif key == "currentTheme" then
+		if UIElements.updateThemeSelector then
+			UIElements.updateThemeSelector()
+		end
 	end
 end)
 
 print("✅ ConfigClient (Tata Letak Tetap) Berhasil Dimuat!")
 print("🎨 Dioptimalkan untuk panel 800×460")
+
