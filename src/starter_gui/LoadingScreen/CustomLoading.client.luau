@@ -173,43 +173,9 @@ centerStage.BackgroundTransparency = 1
 centerStage.ZIndex = 5
 centerStage.Parent = gui
 
-local vipBadge = Instance.new("Frame")
-vipBadge.Size = UDim2.new(0, 220, 0, 26)
-vipBadge.Position = UDim2.new(0.5, 0, 0, 0)
-vipBadge.AnchorPoint = Vector2.new(0.5, 0)
-vipBadge.BackgroundColor3 = Color3.fromHex("#0F121E")
-vipBadge.BackgroundTransparency = 0.2
-vipBadge.BorderSizePixel = 0
-vipBadge.ZIndex = 5
-vipBadge.Parent = centerStage
-Instance.new("UICorner", vipBadge).CornerRadius = UDim.new(1, 0)
-
-local vipBadgeStroke = Instance.new("UIStroke")
-vipBadgeStroke.Color = Color3.fromHex("#3E4668")
-vipBadgeStroke.Thickness = 1.2
-vipBadgeStroke.Parent = vipBadge
-
-local vipBadgeGrad = Instance.new("UIGradient")
-vipBadgeGrad.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromHex("#2A314E")),
-	ColorSequenceKeypoint.new(0.5, Color3.fromHex("#CBD5E1")),
-	ColorSequenceKeypoint.new(1, Color3.fromHex("#2A314E")),
-})
-vipBadgeGrad.Parent = vipBadgeStroke
-
-local vipBadgeText = Instance.new("TextLabel")
-vipBadgeText.Size = UDim2.new(1, 0, 1, 0)
-vipBadgeText.BackgroundTransparency = 1
-vipBadgeText.Text = "KOMUNITAS RESMI VIP"
-vipBadgeText.Font = Enum.Font.GothamBold
-vipBadgeText.TextSize = 10
-vipBadgeText.TextColor3 = Color3.fromHex("#E2E8F0")
-vipBadgeText.ZIndex = 6
-vipBadgeText.Parent = vipBadge
-
 local heroTitleGlow = Instance.new("TextLabel")
 heroTitleGlow.Size = UDim2.new(1, 0, 0, 64)
-heroTitleGlow.Position = UDim2.new(0.5, 0, 0, 36)
+heroTitleGlow.Position = UDim2.new(0.5, 0, 0, 26)
 heroTitleGlow.AnchorPoint = Vector2.new(0.5, 0)
 heroTitleGlow.BackgroundTransparency = 1
 heroTitleGlow.Text = "ROYAL DREAM"
@@ -222,7 +188,7 @@ heroTitleGlow.Parent = centerStage
 
 local heroTitle = Instance.new("TextLabel")
 heroTitle.Size = UDim2.new(1, 0, 0, 64)
-heroTitle.Position = UDim2.new(0.5, 0, 0, 34)
+heroTitle.Position = UDim2.new(0.5, 0, 0, 24)
 heroTitle.AnchorPoint = Vector2.new(0.5, 0)
 heroTitle.BackgroundTransparency = 1
 heroTitle.Text = "ROYAL DREAM"
@@ -243,7 +209,7 @@ heroTitleGrad.Parent = heroTitle
 
 local heroSubtitle = Instance.new("TextLabel")
 heroSubtitle.Size = UDim2.new(1, 0, 0, 20)
-heroSubtitle.Position = UDim2.new(0.5, 0, 0, 102)
+heroSubtitle.Position = UDim2.new(0.5, 0, 0, 92)
 heroSubtitle.AnchorPoint = Vector2.new(0.5, 0)
 heroSubtitle.BackgroundTransparency = 1
 heroSubtitle.Text = "SELAMAT DATANG"
@@ -255,7 +221,7 @@ heroSubtitle.Parent = centerStage
 
 local waveContainer = Instance.new("Frame")
 waveContainer.Size = UDim2.new(0, 180, 0, 18)
-waveContainer.Position = UDim2.new(0.5, 0, 0, 134)
+waveContainer.Position = UDim2.new(0.5, 0, 0, 124)
 waveContainer.AnchorPoint = Vector2.new(0.5, 0)
 waveContainer.BackgroundTransparency = 1
 waveContainer.ZIndex = 6
@@ -422,38 +388,22 @@ tipLabel.TextWrapped = true
 tipLabel.ZIndex = 6
 tipLabel.Parent = footerRow
 
-local skipBtn = Instance.new("TextButton")
-skipBtn.Name = "SkipBtn"
-skipBtn.Size = UDim2.new(0, 270, 0, 36)
-skipBtn.Position = UDim2.new(1, 0, 0.5, 0)
-skipBtn.AnchorPoint = Vector2.new(1, 0.5)
-skipBtn.BackgroundColor3 = Color3.fromHex("#111524")
-skipBtn.BackgroundTransparency = 1
-skipBtn.BorderSizePixel = 0
-skipBtn.Visible = false
-skipBtn.Text = "TEKAN SPASI / KETUK UNTUK LEWATI"
-skipBtn.Font = Enum.Font.GothamBold
-skipBtn.TextSize = 10
-skipBtn.TextColor3 = Color3.fromHex("#E2E8F0")
-skipBtn.TextTransparency = 1
-skipBtn.AutoButtonColor = false
-skipBtn.ZIndex = 7
-skipBtn.Parent = footerRow
-Instance.new("UICorner", skipBtn).CornerRadius = UDim.new(1, 0)
-
-local skipBtnStroke = Instance.new("UIStroke")
-skipBtnStroke.Color = Color3.fromHex("#3E476A")
-skipBtnStroke.Thickness = 1.2
-skipBtnStroke.Transparency = 1
-skipBtnStroke.Parent = skipBtn
-
-local skipGrad = Instance.new("UIGradient")
-skipGrad.Color = ColorSequence.new({
-	ColorSequenceKeypoint.new(0, Color3.fromHex("#2A314E")),
-	ColorSequenceKeypoint.new(0.5, Color3.fromHex("#CBD5E1")),
-	ColorSequenceKeypoint.new(1, Color3.fromHex("#2A314E")),
-})
-skipGrad.Parent = skipBtnStroke
+local skipNotice = Instance.new("TextLabel")
+skipNotice.Name = "SkipNotice"
+skipNotice.Size = UDim2.new(0.38, 0, 1, 0)
+skipNotice.Position = UDim2.new(1, 0, 0.5, 0)
+skipNotice.AnchorPoint = Vector2.new(1, 0.5)
+skipNotice.BackgroundTransparency = 1
+skipNotice.BorderSizePixel = 0
+skipNotice.Visible = false
+skipNotice.Text = "TEKAN SPASI / KETUK UNTUK LEWATI"
+skipNotice.Font = Enum.Font.GothamMedium
+skipNotice.TextSize = 11
+skipNotice.TextColor3 = Color3.fromHex("#CBD5E1")
+skipNotice.TextTransparency = 1
+skipNotice.TextXAlignment = Enum.TextXAlignment.Right
+skipNotice.ZIndex = 6
+skipNotice.Parent = footerRow
 
 local isLoading = true
 local canSkip = false
@@ -504,7 +454,7 @@ task.spawn(function()
 
 		local fadeOut = TweenService:Create(heroSubtitle, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 			TextTransparency = 1,
-			Position = UDim2.new(0.5, 0, 0, 97)
+			Position = UDim2.new(0.5, 0, 0, 87)
 		})
 		fadeOut:Play()
 		fadeOut.Completed:Wait()
@@ -513,11 +463,11 @@ task.spawn(function()
 
 		currentSubIdx = (currentSubIdx % #subtitleList) + 1
 		heroSubtitle.Text = subtitleList[currentSubIdx]
-		heroSubtitle.Position = UDim2.new(0.5, 0, 0, 107)
+		heroSubtitle.Position = UDim2.new(0.5, 0, 0, 97)
 
 		local fadeIn = TweenService:Create(heroSubtitle, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 			TextTransparency = 0,
-			Position = UDim2.new(0.5, 0, 0, 102)
+			Position = UDim2.new(0.5, 0, 0, 92)
 		})
 		fadeIn:Play()
 	end
@@ -532,8 +482,6 @@ heartbeatConn = RunService.Heartbeat:Connect(function(dt)
 	local t = os.clock()
 
 	heroTitleGrad.Offset = Vector2.new(math.sin(t * 1.4) * 0.45, 0)
-	vipBadgeGrad.Offset = Vector2.new(math.sin(t * 2.0) * 0.5, 0)
-	skipGrad.Offset = Vector2.new(math.sin(t * 2.2) * 0.5, 0)
 
 	local pulseScale = 1 + math.sin(t * 5.5) * 0.22
 	glowHalo.Size = UDim2.new(0, 22 * pulseScale, 0, 22 * pulseScale)
@@ -677,32 +625,7 @@ local function finish()
 	end)
 end
 
-skipBtn.MouseEnter:Connect(function()
-	TweenService:Create(skipBtn, TweenInfo.new(0.2), {
-		BackgroundColor3 = Color3.fromHex("#1C233B")
-	}):Play()
-	TweenService:Create(skipBtnStroke, TweenInfo.new(0.2), {
-		Color = Color3.fromHex("#64748B")
-	}):Play()
-end)
-
-skipBtn.MouseLeave:Connect(function()
-	TweenService:Create(skipBtn, TweenInfo.new(0.2), {
-		BackgroundColor3 = Color3.fromHex("#111524")
-	}):Play()
-	TweenService:Create(skipBtnStroke, TweenInfo.new(0.2), {
-		Color = Color3.fromHex("#3E476A")
-	}):Play()
-end)
-
-skipBtn.MouseButton1Click:Connect(function()
-	if canSkip then
-		finish()
-	end
-end)
-
-UserInputService.InputBegan:Connect(function(input, gp)
-	if gp then return end
+UserInputService.InputBegan:Connect(function(input)
 	if canSkip then
 		if input.UserInputType == Enum.UserInputType.Touch
 			or input.UserInputType == Enum.UserInputType.MouseButton1
@@ -757,9 +680,8 @@ task.spawn(function()
 
 		if i == 40 and not canSkip then
 			canSkip = true
-			skipBtn.Visible = true
-			TweenService:Create(skipBtn, TweenInfo.new(0.35), { BackgroundTransparency = 0.2, TextTransparency = 0 }):Play()
-			TweenService:Create(skipBtnStroke, TweenInfo.new(0.35), { Transparency = 0 }):Play()
+			skipNotice.Visible = true
+			TweenService:Create(skipNotice, TweenInfo.new(0.4), { TextTransparency = 0 }):Play()
 		end
 
 		task.wait(LOADING_TIME / 100)
