@@ -27,29 +27,29 @@ end
 local function getPlayerItemHeight()
 	local screenInfo = MenuConfig.GetScreenInfo()
 	if screenInfo.isMobile and screenInfo.isLandscape then
-		return math.floor(MenuConfig.GetScaledValue(50, 44, 58))
+		return math.floor(MenuConfig.GetScaledValue(70, 62, 78))
 	else
-		return math.floor(MenuConfig.GetScaledValue(60, 52, 70))
+		return math.floor(MenuConfig.GetScaledValue(82, 74, 92))
 	end
 end
 
 local function getMyProfileHeight()
 	local screenInfo = MenuConfig.GetScreenInfo()
 	if screenInfo.isMobile and screenInfo.isLandscape then
-		return math.floor(MenuConfig.GetScaledValue(60, 52, 70))
+		return math.floor(MenuConfig.GetScaledValue(80, 72, 90))
 	else
-		return math.floor(MenuConfig.GetScaledValue(70, 60, 82))
+		return math.floor(MenuConfig.GetScaledValue(94, 84, 106))
 	end
 end
 
 local function getTextSize(textType)
 	local screenInfo = MenuConfig.GetScreenInfo()
 	local sizes = {
-		header = {base = 15, min = 12, max = 18},
-		displayName = {base = 15, min = 11, max = 17},
-		username = {base = 12, min = 9, max = 14},
-		profileName = {base = 17, min = 13, max = 20},
-		profileUsername = {base = 13, min = 10, max = 15},
+		header = {base = 14, min = 11, max = 16},
+		displayName = {base = 13, min = 10.5, max = 15},
+		username = {base = 10.5, min = 8.5, max = 12},
+		profileName = {base = 15, min = 12, max = 17.5},
+		profileUsername = {base = 11.5, min = 9.5, max = 13},
 	}
 
 	local sizeConfig = sizes[textType] or sizes.displayName
@@ -327,11 +327,11 @@ local function createMyProfile(layoutOrder)
 	profileStroke.Name = "ProfileBorder"
 	profileStroke.Transparency = 0.2
 
-	local avatarSize = profileHeight - 16
+	local avatarSize = profileHeight - 20
 	local avatar = Instance.new("ImageLabel")
 	avatar.Name = "Avatar"
 	avatar.Size = UDim2.new(0, avatarSize, 0, avatarSize)
-	avatar.Position = UDim2.new(0, 8, 0.5, 0)
+	avatar.Position = UDim2.new(0, 12, 0.5, 0)
 	avatar.AnchorPoint = Vector2.new(0, 0.5)
 	avatar.BackgroundColor3 = CONFIG.Colors.PlayerList.ItemBg
 	avatar.BorderSizePixel = 0
@@ -350,8 +350,8 @@ local function createMyProfile(layoutOrder)
 
 	local infoContainer = Instance.new("Frame")
 	infoContainer.Name = "InfoContainer"
-	infoContainer.Size = UDim2.new(1, -avatarSize - 24, 0, avatarSize)
-	infoContainer.Position = UDim2.new(0, avatarSize + 16, 0.5, 0)
+	infoContainer.Size = UDim2.new(1, -avatarSize - 32, 1, -12)
+	infoContainer.Position = UDim2.new(0, avatarSize + 22, 0.5, 0)
 	infoContainer.AnchorPoint = Vector2.new(0, 0.5)
 	infoContainer.BackgroundTransparency = 1
 	infoContainer.Parent = profileFrame
@@ -360,7 +360,7 @@ local function createMyProfile(layoutOrder)
 	infoLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	infoLayout.FillDirection = Enum.FillDirection.Vertical
 	infoLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	infoLayout.Padding = UDim.new(0, 2)
+	infoLayout.Padding = UDim.new(0, 3)
 	infoLayout.Parent = infoContainer
 
 	local isPremium = (localPlayer.MembershipType == Enum.MembershipType.Premium)
@@ -477,10 +477,10 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 		connectionStroke.Transparency = 0.4
 	end
 
-	local avatarSize = itemHeight - 12
+	local avatarSize = itemHeight - 20
 	local avatar = Instance.new("ImageLabel")
 	avatar.Size = UDim2.new(0, avatarSize, 0, avatarSize)
-	avatar.Position = UDim2.new(0, 6, 0.5, 0)
+	avatar.Position = UDim2.new(0, 10, 0.5, 0)
 	avatar.AnchorPoint = Vector2.new(0, 0.5)
 	avatar.BackgroundColor3 = CONFIG.Colors.PlayerList.ItemBg
 	avatar.BorderSizePixel = 0
@@ -498,8 +498,8 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 	end)
 
 	local infoContainer = Instance.new("Frame")
-	infoContainer.Size = UDim2.new(1, -avatarSize - 18, 0, avatarSize)
-	infoContainer.Position = UDim2.new(0, avatarSize + 12, 0.5, 0)
+	infoContainer.Size = UDim2.new(1, -avatarSize - 28, 1, -10)
+	infoContainer.Position = UDim2.new(0, avatarSize + 18, 0.5, 0)
 	infoContainer.AnchorPoint = Vector2.new(0, 0.5)
 	infoContainer.BackgroundTransparency = 1
 	infoContainer.Parent = playerItem
@@ -508,7 +508,7 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 	infoLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	infoLayout.FillDirection = Enum.FillDirection.Vertical
 	infoLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-	infoLayout.Padding = UDim.new(0, 2)
+	infoLayout.Padding = UDim.new(0, 3)
 	infoLayout.Parent = infoContainer
 
 	local isPremium = (plr.MembershipType == Enum.MembershipType.Premium)

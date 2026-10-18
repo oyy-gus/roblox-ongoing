@@ -22,21 +22,21 @@ end
 
 local SIZES = {
 	HEADER_H = 54,
-	HEADER_TITLE_TEXT = 20,
-	HEADER_SUB_TEXT = 12,
+	HEADER_TITLE_TEXT = 17,
+	HEADER_SUB_TEXT = 10.5,
 
 	CARD_H = 200,
 	CARD_CORNER = 14,
 
 	LEFT_SECTION_W = 0.32,
 	ICON_SIZE = 60,
-	TITLE_TEXT = 15,
-	PRICE_TEXT = 13,
+	TITLE_TEXT = 13.5,
+	PRICE_TEXT = 11.5,
 
-	BENEFIT_CHECK_TEXT = 12,
-	BENEFIT_TEXT = 11,
+	BENEFIT_CHECK_TEXT = 10.5,
+	BENEFIT_TEXT = 10,
 	BUTTON_H = 40,
-	BUTTON_TEXT = 13,
+	BUTTON_TEXT = 11.5,
 
 	CORNER_SM = 6,
 	CORNER_MD = 10,
@@ -635,7 +635,7 @@ local function buildGamePassUI()
 		AnchorPoint        = Vector2.new(0.5, 0.5),
 		BackgroundTransparency = 1,
 		Text               = "",
-		TextSize           = 14,
+		TextSize           = 12,
 		Font               = Enum.Font.GothamMedium,
 		TextColor3         = COLORS.Text.Primary,
 		TextWrapped        = true,

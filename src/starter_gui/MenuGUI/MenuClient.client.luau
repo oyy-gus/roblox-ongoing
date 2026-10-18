@@ -321,7 +321,7 @@ local function createTabButton(def)
 	btn.BorderSizePixel    = 0
 	btn.Text               = def.Icon .. "  " .. def.DisplayName
 	btn.TextColor3         = TAB_COLORS.InactiveText
-	btn.TextSize           = 12
+	btn.TextSize           = 10.5
 	btn.Font               = Enum.Font.GothamMedium
 	btn.AutoButtonColor    = false
 	btn.Parent             = btnFrame

@@ -505,7 +505,7 @@ function MenuConfig.CreateButton(parent, name, text, size, position, bgColor, te
 	button.BorderSizePixel  = 0
 	button.Text             = text     or "Button"
 	button.TextColor3       = textColor or MenuConfig.Config.Colors.Text
-	button.TextSize         = 12
+	button.TextSize         = 10.5
 	button.Font             = Enum.Font.GothamBold
 	button.AutoButtonColor  = false
 	button.Parent = parent
@@ -558,7 +558,7 @@ function MenuConfig.CreateSectionHeader(parent, text, icon)
 	label.BackgroundTransparency = 1
 	label.Text               = (icon or "") .. " " .. (text or "Header")
 	label.TextColor3         = MenuConfig.Config.Colors.Text
-	label.TextSize           = 13
+	label.TextSize           = 11.5
 	label.Font               = Enum.Font.GothamBold
 	label.TextXAlignment     = Enum.TextXAlignment.Left
 	label.Parent = hdr
@@ -584,7 +584,7 @@ function MenuConfig.CreateInfoBox(parent, labelText, position, size)
 	label.BackgroundTransparency = 1
 	label.Text               = labelText or "Label:"
 	label.TextColor3         = MenuConfig.Config.Colors.TextSecondary
-	label.TextSize           = 10
+	label.TextSize           = 9
 	label.Font               = Enum.Font.Gotham
 	label.TextXAlignment     = Enum.TextXAlignment.Left
 	label.Parent = frame
@@ -596,7 +596,7 @@ function MenuConfig.CreateInfoBox(parent, labelText, position, size)
 	value.BackgroundTransparency = 1
 	value.Text               = "—"
 	value.TextColor3         = MenuConfig.Config.Colors.Text
-	value.TextSize           = 14
+	value.TextSize           = 12
 	value.Font               = Enum.Font.GothamBold
 	value.TextXAlignment     = Enum.TextXAlignment.Left
 	value.TextTruncate       = Enum.TextTruncate.AtEnd
@@ -644,7 +644,7 @@ function MenuConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 	nameLabel.BackgroundTransparency = 1
 	nameLabel.Text               = targetPlayer.DisplayName
 	nameLabel.TextColor3         = MenuConfig.Config.Colors.Text
-	nameLabel.TextSize           = 12
+	nameLabel.TextSize           = 10.5
 	nameLabel.Font               = Enum.Font.GothamBold
 	nameLabel.TextXAlignment     = Enum.TextXAlignment.Left
 	nameLabel.TextTruncate       = Enum.TextTruncate.AtEnd
@@ -657,7 +657,7 @@ function MenuConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 	usernameLabel.BackgroundTransparency = 1
 	usernameLabel.Text               = "@" .. targetPlayer.Name
 	usernameLabel.TextColor3         = MenuConfig.Config.Colors.TextSecondary
-	usernameLabel.TextSize           = 10
+	usernameLabel.TextSize           = 9
 	usernameLabel.Font               = Enum.Font.Gotham
 	usernameLabel.TextXAlignment     = Enum.TextXAlignment.Left
 	usernameLabel.TextTruncate       = Enum.TextTruncate.AtEnd

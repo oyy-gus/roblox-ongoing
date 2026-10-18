@@ -27,24 +27,24 @@ ThemeModule.GradientSystem.Start()
 local SIZES = {
 
 	SECTION_H = 28,
-	SECTION_TEXT = 13,
+	SECTION_TEXT = 11.5,
 
 	TOGGLE_H = 60,
-	TOGGLE_LABEL_TEXT = 14,
-	TOGGLE_DESC_TEXT = 11,
+	TOGGLE_LABEL_TEXT = 12.5,
+	TOGGLE_DESC_TEXT = 10,
 	TOGGLE_WIDTH = 50,
 	TOGGLE_HEIGHT = 26,
 	TOGGLE_KNOB = 22,
 
 	SLIDER_H = 70,
-	SLIDER_LABEL_TEXT = 14,
-	SLIDER_VALUE_TEXT = 13,
+	SLIDER_LABEL_TEXT = 12.5,
+	SLIDER_VALUE_TEXT = 11.5,
 	SLIDER_BAR_H = 10,
 	SLIDER_KNOB = 22,
 	SLIDER_VALUE_W = 55,
 
 	BUTTON_H = 48,
-	BUTTON_TEXT = 14,
+	BUTTON_TEXT = 12,
 
 	CORNER_SM = 6,
 	CORNER_MD = 8,
@@ -1224,7 +1224,7 @@ local function createThemeSelector(layoutOrder)
 			Position = UDim2.new(0, 24, 0, 0),
 			BackgroundTransparency = 1,
 			TextColor3 = Color3.fromRGB(190, 190, 200),
-			TextSize = 11,
+			TextSize = 10,
 			Font = Enum.Font.GothamMedium,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextYAlignment = Enum.TextYAlignment.Center,

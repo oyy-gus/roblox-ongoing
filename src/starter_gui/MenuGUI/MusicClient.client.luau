@@ -940,25 +940,25 @@ local function updateQueue()
 		local rightOffset = (dur > 0) and 70 or 10
 
 		local nameLbl = Instance.new("TextLabel")
-		nameLbl.Size = UDim2.new(1, -(40 + rightOffset), 0, 20)
-		nameLbl.Position = UDim2.new(0, 38, 0, 4)
+		nameLbl.Size = UDim2.new(1, -(40 + rightOffset), 0, 18)
+		nameLbl.Position = UDim2.new(0, 38, 0, 5)
 		nameLbl.BackgroundTransparency = 1
 		nameLbl.Text = songData.judul or T.Unknown
 		nameLbl.TextColor3 = Color3.fromHex("#FFFFFF")
-		nameLbl.TextSize = 12
+		nameLbl.TextSize = 10.5
 		nameLbl.Font = Enum.Font.GothamBold
 		nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
 		nameLbl.TextXAlignment = Enum.TextXAlignment.Left
 		nameLbl.Parent = item
-		addSC(nameLbl, 13)
+		addSC(nameLbl, 11)
 
 		local reqLbl = Instance.new("TextLabel")
-		reqLbl.Size = UDim2.new(1, -(40 + rightOffset), 0, 16)
-		reqLbl.Position = UDim2.new(0, 38, 0, 22)
+		reqLbl.Size = UDim2.new(1, -(40 + rightOffset), 0, 15)
+		reqLbl.Position = UDim2.new(0, 38, 0, 23)
 		reqLbl.BackgroundTransparency = 1
 		reqLbl.Text = "👤 "..(song.uploader or T.Unknown)
 		reqLbl.TextColor3 = Color3.fromHex("#8E8E93")
-		reqLbl.TextSize = 10
+		reqLbl.TextSize = 9
 		reqLbl.Font = Enum.Font.GothamMedium
 		reqLbl.TextTruncate = Enum.TextTruncate.AtEnd
 		reqLbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -1162,16 +1162,16 @@ local function updateSongs(list)
 
 		local nameLbl = Instance.new("TextLabel")
 		nameLbl.Text = songName
-		nameLbl.Size = UDim2.new(1, -(infoLeft + rightSpace), 0, 20)
-		nameLbl.Position = UDim2.new(0, infoLeft, 0, 4)
+		nameLbl.Size = UDim2.new(1, -(infoLeft + rightSpace), 0, 18)
+		nameLbl.Position = UDim2.new(0, infoLeft, 0, 5)
 		nameLbl.BackgroundTransparency = 1
 		nameLbl.TextColor3 = Color3.fromHex("#FFFFFF")
-		nameLbl.TextSize = 12
+		nameLbl.TextSize = 10.5
 		nameLbl.TextXAlignment = Enum.TextXAlignment.Left
 		nameLbl.Font = Enum.Font.GothamBold
 		nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
 		nameLbl.Parent = item
-		addSC(nameLbl, 13)
+		addSC(nameLbl, 11)
 
 		local subLbl = Instance.new("TextLabel")
 		if isCurrentPlaying then
@@ -1184,10 +1184,10 @@ local function updateSongs(list)
 			subLbl.Text = song.playlistName and ("📁  " .. song.playlistName) or "Lagu Pilihan Server"
 			subLbl.TextColor3 = Color3.fromHex("#737373")
 		end
-		subLbl.Size = UDim2.new(1, -(infoLeft + rightSpace), 0, 16)
+		subLbl.Size = UDim2.new(1, -(infoLeft + rightSpace), 0, 15)
 		subLbl.Position = UDim2.new(0, infoLeft, 0, 23)
 		subLbl.BackgroundTransparency = 1
-		subLbl.TextSize = 10
+		subLbl.TextSize = 9
 		subLbl.TextXAlignment = Enum.TextXAlignment.Left
 		subLbl.Font = Enum.Font.GothamMedium
 		subLbl.Parent = item
@@ -1371,7 +1371,7 @@ local function buildNowPlaying()
 
 	local npBadge = Instance.new("Frame")
 	npBadge.Name = "Badge"
-	npBadge.Size = UDim2.new(0, 90, 0, 18)
+	npBadge.Size = UDim2.new(0, 96, 0, 18)
 	npBadge.Position = UDim2.new(0, 8, 0, 8)
 	npBadge.BackgroundColor3 = Color3.fromHex("#080808")
 	npBadge.BackgroundTransparency = 0.15
@@ -1390,7 +1390,7 @@ local function buildNowPlaying()
 	local badgeDot = Instance.new("Frame")
 	badgeDot.Name = "Dot"
 	badgeDot.Size = UDim2.new(0, 5, 0, 5)
-	badgeDot.Position = UDim2.new(0, 8, 0.5, -2)
+	badgeDot.Position = UDim2.new(0, 7, 0.5, -2)
 	badgeDot.BackgroundColor3 = Color3.fromHex("#FFFFFF")
 	badgeDot.BorderSizePixel = 0
 	badgeDot.ZIndex = 5
@@ -1399,12 +1399,12 @@ local function buildNowPlaying()
 
 	local badgeText = Instance.new("TextLabel")
 	badgeText.Name = "Text"
-	badgeText.Size = UDim2.new(1, -20, 1, 0)
-	badgeText.Position = UDim2.new(0, 18, 0, 0)
+	badgeText.Size = UDim2.new(1, -18, 1, 0)
+	badgeText.Position = UDim2.new(0, 16, 0, 0)
 	badgeText.BackgroundTransparency = 1
 	badgeText.Text = "NOW PLAYING"
 	badgeText.TextColor3 = Color3.fromHex("#FFFFFF")
-	badgeText.TextSize = 9
+	badgeText.TextSize = 6.5
 	badgeText.Font = Enum.Font.GothamBold
 	badgeText.TextXAlignment = Enum.TextXAlignment.Left
 	badgeText.ZIndex = 5
@@ -2043,26 +2043,26 @@ local function makePlaylistCard(name, titleText, countText, thumbUrlOrIcon, layo
 	local tLbl = Instance.new("TextLabel")
 	tLbl.Name = "CardTitle"
 	tLbl.Text = titleText
-	tLbl.Size = UDim2.new(1, -16, 0, 20)
-	tLbl.Position = UDim2.new(0, 8, 1, -44)
+	tLbl.Size = UDim2.new(1, -16, 0, 18)
+	tLbl.Position = UDim2.new(0, 8, 1, -40)
 	tLbl.BackgroundTransparency = 1
 	tLbl.TextColor3 = Color3.fromHex("#FFFFFF")
-	tLbl.TextSize = 13
+	tLbl.TextSize = 11.5
 	tLbl.Font = Enum.Font.GothamBold
 	tLbl.TextXAlignment = Enum.TextXAlignment.Left
 	tLbl.TextTruncate = Enum.TextTruncate.AtEnd
 	tLbl.ZIndex = 3
 	tLbl.Parent = card
-	addSC(tLbl, 14)
+	addSC(tLbl, 12)
 
 	local sLbl = Instance.new("TextLabel")
 	sLbl.Name = "CardSub"
 	sLbl.Text = countText
-	sLbl.Size = UDim2.new(1, -16, 0, 16)
-	sLbl.Position = UDim2.new(0, 8, 1, -22)
+	sLbl.Size = UDim2.new(1, -16, 0, 14)
+	sLbl.Position = UDim2.new(0, 8, 1, -20)
 	sLbl.BackgroundTransparency = 1
 	sLbl.TextColor3 = Color3.fromHex("#D1D5DB")
-	sLbl.TextSize = 11
+	sLbl.TextSize = 9.5
 	sLbl.Font = Enum.Font.GothamMedium
 	sLbl.TextXAlignment = Enum.TextXAlignment.Left
 	sLbl.TextTruncate = Enum.TextTruncate.AtEnd

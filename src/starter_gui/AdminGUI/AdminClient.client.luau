@@ -176,7 +176,7 @@ titleLabel.Position           = UDim2.new(0, 16, 0, 0)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text               = "🛡️  Panel Kontrol Admin"
 titleLabel.TextColor3         = ThemeModule.Colors.TextWhite
-titleLabel.TextSize           = 16
+titleLabel.TextSize           = 13.5
 titleLabel.Font               = Enum.Font.GothamBold
 titleLabel.TextXAlignment     = Enum.TextXAlignment.Left
 titleLabel.Parent             = header
@@ -299,7 +299,7 @@ local function createTabButton(def)
 	btn.BorderSizePixel    = 0
 	btn.Text               = def.Icon .. "  " .. def.DisplayName
 	btn.TextColor3         = TAB_COLORS.InactiveText
-	btn.TextSize           = 11
+	btn.TextSize           = 10
 	btn.Font               = Enum.Font.GothamMedium
 	btn.AutoButtonColor    = false
 	btn.Parent             = btnFrame
