@@ -3,6 +3,7 @@ local SoundService      = game:GetService("SoundService")
 local RunService        = game:GetService("RunService")
 local TweenService      = game:GetService("TweenService")
 local Players           = game:GetService("Players")
+local ContentProvider   = game:GetService("ContentProvider")
 
 local Modules     = ReplicatedStorage:WaitForChild("Modules")
 local MenuConfig  = require(Modules:WaitForChild("MenuConfig"))
@@ -30,8 +31,8 @@ if not (dispatchAction and dispatchEvent and musicBroadcast) then
 end
 
 local DESYNC_THRESHOLD    = 0.5
-local CLIENT_FADE_IN_DUR  = 1.2
-local CLIENT_FADE_OUT_DUR = 1.0
+local CLIENT_FADE_IN_DUR  = 0.40
+local CLIENT_FADE_OUT_DUR = 0.18
 
 local function getPlayerHierarchy()
 	local roleValue = player:FindFirstChild("Role")
@@ -421,10 +422,25 @@ local function cleanupAudioAPINodes()
 end
 task.spawn(cleanupAudioAPINodes)
 
-local function getServerSound()
+local function getServerSound(waitSec)
 	local s = SoundService:FindFirstChild("ServerMusicSound")
-	if s and s:IsA("Sound") then return s end
-	return workspace:FindFirstChild("ServerMusicSound", true)
+	if s and s:IsA("Sound") then
+		s.Looped = false
+		return s
+	end
+	local wsSound = workspace:FindFirstChild("ServerMusicSound", true)
+	if wsSound and wsSound:IsA("Sound") then
+		wsSound.Looped = false
+		return wsSound
+	end
+	if waitSec and waitSec > 0 then
+		local waited = SoundService:WaitForChild("ServerMusicSound", waitSec)
+		if waited and waited:IsA("Sound") then
+			waited.Looped = false
+			return waited
+		end
+	end
+	return nil
 end
 
 pcall(function()
@@ -435,11 +451,22 @@ local function getMusicGroup()
 	return SoundService:FindFirstChild("mainEffects") or SoundService:FindFirstChild("MusicGroup")
 end
 
+local isSyncing = true
+local hasInitialSynced = false
+local currentSyncId = 0
+
 local function applyVolume()
+	if isSyncing or not hasInitialSynced then return end
 	cancelClientFade()
 	local musicGroup = getMusicGroup()
 	if musicGroup and musicGroup:IsA("SoundGroup") then
 		musicGroup.Volume = isMuted and 0 or userVolume
+	end
+	local ss = getServerSound()
+	if ss and ss:IsA("Sound") and musicGroup then
+		if ss.SoundGroup ~= musicGroup then
+			ss.SoundGroup = musicGroup
+		end
 	end
 end
 
@@ -448,10 +475,10 @@ local function clientFadeIn(duration)
 	cancelClientFade()
 	local musicGroup = getMusicGroup()
 	if not musicGroup or not musicGroup:IsA("SoundGroup") then return end
-	musicGroup.Volume = 0
+	local dur = duration or CLIENT_FADE_IN_DUR
 	local tween = TweenService:Create(
 		musicGroup,
-		TweenInfo.new(duration or CLIENT_FADE_IN_DUR, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+		TweenInfo.new(dur, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
 		{ Volume = userVolume }
 	)
 	currentFadeTween = tween
@@ -462,9 +489,10 @@ local function clientFadeOut(duration)
 	cancelClientFade()
 	local musicGroup = getMusicGroup()
 	if not musicGroup or not musicGroup:IsA("SoundGroup") then return end
+	local dur = duration or CLIENT_FADE_OUT_DUR
 	local tween = TweenService:Create(
 		musicGroup,
-		TweenInfo.new(duration or CLIENT_FADE_OUT_DUR, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+		TweenInfo.new(dur, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
 		{ Volume = 0 }
 	)
 	currentFadeTween = tween
@@ -475,88 +503,17 @@ local function calculateSyncPosition(serverStartTime, duration)
 	if not serverStartTime or serverStartTime <= 0 then return 0 end
 	local now = workspace:GetServerTimeNow()
 	local elapsed = now - serverStartTime
-	return math.clamp(elapsed, 0, duration or 9999)
+	if elapsed < 0 then return 0 end
+	local ss = getServerSound()
+	local realMax = (ss and ss:IsA("Sound") and ss.TimeLength > 0) and ss.TimeLength or (duration > 0 and duration or 9999)
+	return math.clamp(elapsed, 0, realMax)
 end
 
-local syncInProgress = false
-local currentSyncId = 0
 local lastDriftCorrection = 0
-
-local function syncServerSoundPosition(expectedSoundId, serverStartTime, duration)
-	currentSyncId = currentSyncId + 1
-	local mySyncId = currentSyncId
-	syncInProgress = true
-
-	local musicGroup = getMusicGroup()
-	if musicGroup and musicGroup:IsA("SoundGroup") then
-		cancelClientFade()
-		musicGroup.Volume = 0
-	end
-
-	task.spawn(function()
-		local function finishSync()
-			if mySyncId == currentSyncId then
-				syncInProgress = false
-				if not isMuted then
-					clientFadeIn(CLIENT_FADE_IN_DUR)
-				end
-			end
-		end
-
-		local serverSound = getServerSound()
-		if not serverSound or not serverSound:IsA("Sound") then
-			finishSync()
-			return
-		end
-
-		local targetSoundId = "rbxassetid://" .. tostring(expectedSoundId)
-
-		local waitStart = workspace:GetServerTimeNow()
-		while serverSound.SoundId ~= targetSoundId and (workspace:GetServerTimeNow() - waitStart) < 5 do
-			task.wait(0.05)
-			if mySyncId ~= currentSyncId then return end
-		end
-
-		if serverSound.SoundId ~= targetSoundId then
-			finishSync()
-			return
-		end
-
-		local loadStart = workspace:GetServerTimeNow()
-		while (not serverSound.IsLoaded or serverSound.TimeLength <= 0) and (workspace:GetServerTimeNow() - loadStart) < 6 do
-			task.wait(0.05)
-			if mySyncId ~= currentSyncId then return end
-		end
-
-		waitStart = workspace:GetServerTimeNow()
-		while not serverSound.IsPlaying and (workspace:GetServerTimeNow() - waitStart) < 5 do
-			task.wait(0.05)
-			if mySyncId ~= currentSyncId then return end
-		end
-
-		local maxLen = (serverSound.TimeLength > 0) and serverSound.TimeLength or duration
-		local correctPosition = calculateSyncPosition(serverStartTime, duration)
-		local actualPos = serverSound.TimePosition
-		local drift = math.abs(correctPosition - actualPos)
-
-		if serverSound.IsPlaying and drift > 1.2 and correctPosition > 0 and (maxLen <= 0 or correctPosition < maxLen - 0.5) then
-			pcall(function()
-				serverSound.TimePosition = correctPosition
-			end)
-			task.wait(0.35)
-			if mySyncId ~= currentSyncId then return end
-		end
-
-		lastDriftCorrection = workspace:GetServerTimeNow()
-		finishSync()
-	end)
-end
-
 local function gentleDriftCorrect(serverStartTime, duration)
-	if syncInProgress or isMuted then return end
+	if isSyncing or isMuted then return end
 	local now = workspace:GetServerTimeNow()
-
-	if (now - lastDriftCorrection) < 10 then return end
+	if (now - lastDriftCorrection) < 8 then return end
 
 	local serverSound = getServerSound()
 	if not serverSound or not serverSound:IsA("Sound") or not serverSound.IsPlaying then return end
@@ -565,7 +522,8 @@ local function gentleDriftCorrect(serverStartTime, duration)
 	local actualPos = serverSound.TimePosition
 	local drift = math.abs(expectedPos - actualPos)
 
-	if drift > 6.0 then
+	-- Koreksi jika drift > 0.5s (jarang terjadi setelah align awal per lagu)
+	if drift > 0.5 then
 		local maxLen = (serverSound.TimeLength > 0) and serverSound.TimeLength or duration
 		if expectedPos > 0 and (maxLen <= 0 or expectedPos < maxLen - 0.5) then
 			pcall(function()
@@ -574,6 +532,116 @@ local function gentleDriftCorrect(serverStartTime, duration)
 			lastDriftCorrection = now
 		end
 	end
+end
+
+local function syncServerSoundPosition(expectedSoundId, serverStartTime, duration, isNewSong)
+	local ss = getServerSound(2.5)
+	if not ss or not ss:IsA("Sound") then
+		isSyncing = false
+		hasInitialSynced = true
+		return
+	end
+
+	local musicGroup = getMusicGroup()
+	if musicGroup and ss.SoundGroup ~= musicGroup then
+		ss.SoundGroup = musicGroup
+	end
+
+	pcall(function()
+		ss.PlaybackSpeed = 1.0
+	end)
+
+	local curStartTime = clientState.serverStartTime or serverStartTime or 0
+	local curDuration = clientState.duration or duration or currentTimeLen or 0
+	local targetSoundId = expectedSoundId and ("rbxassetid://" .. tostring(expectedSoundId))
+
+	-- Sudah lagu yang sama, sedang main, dan drift kecil -> jangan ganggu audio
+	if not isNewSong and hasInitialSynced and ss.IsPlaying and ss.IsLoaded
+		and (not targetSoundId or ss.SoundId == targetSoundId) and curStartTime > 0 then
+		local expectedPos = workspace:GetServerTimeNow() - curStartTime
+		if math.abs(ss.TimePosition - expectedPos) < 0.15 then
+			isSyncing = false
+			return
+		end
+	end
+
+	currentSyncId = currentSyncId + 1
+	local mySyncId = currentSyncId
+
+	-- Sound replikasi Roblox mulai diputar di tiap device SETELAH asset selesai di-load,
+	-- jadi HP yang load-nya lambat akan tertinggal. Solusinya: tiap lagu, setelah load,
+	-- samakan TimePosition ke jam server (GetServerTimeNow sama di semua client) dalam kondisi senyap.
+	isSyncing = true
+	cancelClientFade()
+	if musicGroup and musicGroup:IsA("SoundGroup") then
+		musicGroup.Volume = 0
+	end
+
+	task.spawn(function()
+		local function finishSync()
+			if mySyncId == currentSyncId then
+				isSyncing = false
+				hasInitialSynced = true
+				if not isMuted then
+					clientFadeIn(CLIENT_FADE_IN_DUR)
+				end
+			end
+		end
+
+		task.delay(6.0, function()
+			if mySyncId == currentSyncId and isSyncing then
+				finishSync()
+			end
+		end)
+
+		-- 1. Tunggu SoundId dari server tereplikasi (JANGAN set dari client)
+		if targetSoundId then
+			local t0 = os.clock()
+			while ss.SoundId ~= targetSoundId and (os.clock() - t0) < 3.0 do
+				task.wait(0.03)
+				if mySyncId ~= currentSyncId then return end
+			end
+		end
+
+		-- 2. Tunggu asset ter-load dan sound mulai main di device ini
+		local t1 = os.clock()
+		while (not ss.IsLoaded or ss.TimeLength <= 0 or not ss.IsPlaying) and (os.clock() - t1) < 5.0 do
+			task.wait(0.03)
+			if mySyncId ~= currentSyncId then return end
+		end
+
+		if ss.TimeLength > 0 and clientState.duration ~= ss.TimeLength then
+			clientState.duration = ss.TimeLength
+			currentTimeLen = ss.TimeLength
+			if clientState.currentSong then
+				clientState.currentSong.Duration = ss.TimeLength
+			end
+		end
+
+		if clientState.isPlaying and ss.IsLoaded and not ss.IsPlaying then
+			pcall(function() ss:Play() end)
+		end
+
+		-- 3. Align sekali ke jam server (masih volume 0, tidak terdengar loncat)
+		local startT = clientState.serverStartTime or serverStartTime or curStartTime or 0
+		if startT > 0 then
+			local realMax = (ss.TimeLength > 0) and ss.TimeLength or curDuration
+			local expectedPos = workspace:GetServerTimeNow() - startT
+			if expectedPos >= 0 and (realMax <= 0 or expectedPos < realMax - 0.5) then
+				if math.abs(ss.TimePosition - expectedPos) > 0.08 then
+					pcall(function()
+						-- +0.05 kompensasi latensi seek decoder
+						ss.TimePosition = expectedPos + 0.05
+					end)
+					task.wait(0.08)
+					if mySyncId ~= currentSyncId then return end
+				end
+			end
+		end
+
+		lastDriftCorrection = workspace:GetServerTimeNow()
+		finishSync()
+	end)
 end
 
 local function getViewportHeight()
@@ -711,6 +779,14 @@ local function startProgressLoop()
 		local now = os.clock()
 		updateBeatAnalysis(dt, now)
 		if clientState.isPlaying and clientState.serverStartTime > 0 then
+			local ss = getServerSound()
+			if ss and ss:IsA("Sound") and ss.TimeLength > 0 and clientState.duration ~= ss.TimeLength then
+				clientState.duration = ss.TimeLength
+				currentTimeLen = ss.TimeLength
+				if clientState.currentSong then
+					clientState.currentSong.Duration = ss.TimeLength
+				end
+			end
 			local syncPos = calculateSyncPosition(clientState.serverStartTime, clientState.duration)
 			updateProgressBar(syncPos, clientState.duration)
 		end
@@ -2510,13 +2586,13 @@ dispatchEvent.OnClientEvent:Connect(function(event)
 	if type(event) ~= "table" or type(event.type) ~= "string" then return end
 	local payload = event.payload or {}
 
-	if event.type == "SYNC_STATE" then
+	if event.type == "SYNC_STATE" or event.type == "STATE_UPDATE" then
 		clientState.queue           = payload.queue or {}
 		clientState.currentSong     = payload.currentSong
-		clientState.currentUploader = payload.currentUploader
+		clientState.currentUploader = payload.currentUploader or payload.uploader
 		clientState.isPlaying       = payload.isPlaying or false
 		clientState.duration        = payload.duration or 0
-		clientState.serverStartTime = payload.serverStartTime or payload.startTime or 0
+		clientState.serverStartTime = payload.serverStartTime or payload.startTime or event.serverStartTime or 0
 
 		updateQueue()
 		if clientState.currentSong then
@@ -2538,9 +2614,11 @@ dispatchEvent.OnClientEvent:Connect(function(event)
 			updateProgressBar(syncPos, clientState.duration)
 
 			if clientState.currentSong.id then
-				syncServerSoundPosition(clientState.currentSong.id, clientState.serverStartTime, clientState.duration)
+				syncServerSoundPosition(clientState.currentSong.id, clientState.serverStartTime, clientState.duration, false)
 			end
 		else
+			isSyncing = false
+			hasInitialSynced = true
 			if UI.songNameLbl then UI.songNameLbl.Text = T.NoSongPlaying end
 			if UI.requesterLbl then UI.requesterLbl.Text = "" end
 			setThumb(nil)
@@ -2642,11 +2720,13 @@ musicBroadcast.OnClientEvent:Connect(function(broadcastType, payload)
 		task.defer(updateSongs)
 
 		if payload.SoundId then
-			syncServerSoundPosition(payload.SoundId, clientState.serverStartTime, clientState.duration)
+			syncServerSoundPosition(payload.SoundId, clientState.serverStartTime, clientState.duration, true)
 		end
 
 	elseif broadcastType == "StopMusic" then
 		clientFadeOut(CLIENT_FADE_OUT_DUR)
+		isSyncing = false
+		hasInitialSynced = true
 
 		clientState.currentSong     = nil
 		clientState.currentUploader = nil
@@ -2660,9 +2740,26 @@ musicBroadcast.OnClientEvent:Connect(function(broadcastType, payload)
 		updateProgressBar(0, 0); updateSkipButton()
 		task.defer(updateSongs)
 
+	elseif broadcastType == "SongDurationUpdate" then
+		if payload.Duration and payload.Duration > 0 then
+			clientState.duration = payload.Duration
+			currentTimeLen = payload.Duration
+			if clientState.currentSong then
+				clientState.currentSong.Duration = payload.Duration
+			end
+			local syncPos = calculateSyncPosition(clientState.serverStartTime, clientState.duration)
+			updateProgressBar(syncPos, clientState.duration)
+		end
+
 	elseif broadcastType == "Progress" then
 		currentTimePos = payload.Current or 0
-		currentTimeLen = payload.Duration or currentTimeLen
+		if payload.Duration and payload.Duration > 0 then
+			clientState.duration = payload.Duration
+			currentTimeLen = payload.Duration
+			if clientState.currentSong then
+				clientState.currentSong.Duration = payload.Duration
+			end
+		end
 
 		if payload.ServerStartTime and payload.ServerStartTime > 0 then
 			clientState.serverStartTime = payload.ServerStartTime
@@ -2707,7 +2804,7 @@ musicUpdate.OnClientEvent:Connect(function(syncType, data)
 		task.defer(updateSongs)
 
 		if data.SoundId then
-			syncServerSoundPosition(data.SoundId, data.ServerStartTime, data.Duration)
+			syncServerSoundPosition(data.SoundId, data.ServerStartTime, data.Duration, false)
 		end
 	end
 end)
@@ -2757,11 +2854,25 @@ else
 	end)
 end
 
+isMuted    = MenuConfig.UserSettings and MenuConfig.UserSettings.muteMusic or false
+userVolume = ((MenuConfig.UserSettings and MenuConfig.UserSettings.musicVolume or 100) / 100) * 0.5
+
+-- Start at volume 0 so newly connecting players fade in smoothly once synchronized
+local startMg = getMusicGroup()
+if startMg and startMg:IsA("SoundGroup") then
+	startMg.Volume = 0
+end
+
 task.spawn(function()
-	task.wait(1)
+	task.delay(4.0, function()
+		if not hasInitialSynced then
+			isSyncing = false
+			hasInitialSynced = true
+			applyVolume()
+		end
+	end)
+
 	loadFavorites()
-	isMuted    = MenuConfig.UserSettings and MenuConfig.UserSettings.muteMusic or false
-	userVolume = ((MenuConfig.UserSettings and MenuConfig.UserSettings.musicVolume or 100) / 100) * 0.5
 	refreshRoleUI()
 	requestSync:FireServer()
 	defaultSongs = MusicModule:GetAllMusic()
@@ -2771,7 +2882,6 @@ task.spawn(function()
 		rebuildPlaylistCards()
 	end
 
-	task.wait(0.5)
 	if MenuConfig.State.isMenuOpen and MenuConfig.State.currentMainTab == "Music" then
 		startProgressLoop()
 	end
@@ -2785,38 +2895,63 @@ task.spawn(function()
 	updateMusicLayout()
 end)
 
-local ssConn
+local ssPlayConn
+local ssLoadConn
+local ssIdConn
+local ssLenConn
 local function watchServerSound()
-	if ssConn then ssConn:Disconnect() end
+	if ssPlayConn then ssPlayConn:Disconnect(); ssPlayConn = nil end
+	if ssLoadConn then ssLoadConn:Disconnect(); ssLoadConn = nil end
+	if ssIdConn then ssIdConn:Disconnect(); ssIdConn = nil end
+	if ssLenConn then ssLenConn:Disconnect(); ssLenConn = nil end
+
 	local ss = getServerSound()
 	if ss then
-		ssConn = ss:GetPropertyChangedSignal("IsPlaying"):Connect(function()
-			if ss.IsPlaying then
-				task.wait(0.1)
-				if not syncInProgress then
-					applyVolume()
+		local function checkDuration()
+			if ss and ss:IsA("Sound") and ss.TimeLength > 0 then
+				if clientState.duration ~= ss.TimeLength then
+					clientState.duration = ss.TimeLength
+					currentTimeLen = ss.TimeLength
+					if clientState.currentSong then
+						clientState.currentSong.Duration = ss.TimeLength
+					end
 				end
 			end
+		end
+		checkDuration()
+
+		if not isSyncing and hasInitialSynced then
+			applyVolume()
+		end
+
+		ssPlayConn = ss:GetPropertyChangedSignal("IsPlaying"):Connect(function()
+			checkDuration()
+			if ss.IsPlaying and not isSyncing and hasInitialSynced then
+				applyVolume()
+			end
 		end)
+
+		ssLoadConn = ss:GetPropertyChangedSignal("IsLoaded"):Connect(function()
+			checkDuration()
+			if ss.IsLoaded and not isSyncing and hasInitialSynced then
+				applyVolume()
+			end
+		end)
+
+		ssLenConn = ss:GetPropertyChangedSignal("TimeLength"):Connect(checkDuration)
+
+		ssIdConn = ss:GetPropertyChangedSignal("SoundId"):Connect(checkDuration)
 	end
 end
 watchServerSound()
 
 workspace.DescendantAdded:Connect(function(child)
 	if child.Name == "ServerMusicSound" and child:IsA("Sound") then
-		task.wait(0.2)
-		if not syncInProgress then
-			applyVolume()
-		end
 		watchServerSound()
 	end
 end)
 SoundService.ChildAdded:Connect(function(child)
 	if child.Name == "ServerMusicSound" and child:IsA("Sound") then
-		task.wait(0.2)
-		if not syncInProgress then
-			applyVolume()
-		end
 		watchServerSound()
 	end
 end)

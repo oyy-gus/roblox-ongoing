@@ -68,10 +68,10 @@ function ServerMusicAudioHandler:CreateSoundGroup()
 		musicGroup        = Instance.new("SoundGroup")
 		musicGroup.Name   = "mainEffects"
 		musicGroup.Parent = SoundService
-		musicGroup.Volume = 0.5
+		musicGroup.Volume = 0
 	else
 		musicGroup.Name   = "mainEffects"
-		musicGroup.Volume = 0.5
+		musicGroup.Volume = 0
 	end
 	self.musicGroup = musicGroup
 
@@ -121,11 +121,12 @@ function ServerMusicAudioHandler:CreateServerSound()
 	local existing = SoundService:FindFirstChild("ServerMusicSound")
 	if existing and existing:IsA("Sound") then
 		self.serverSound = existing
+		self.serverSound.Looped = false
 	else
 		local sound = Instance.new("Sound")
 		sound.Name       = "ServerMusicSound"
 		sound.Parent     = SoundService
-		sound.Volume     = 0
+		sound.Volume     = 1
 		sound.Looped     = false
 		self.serverSound = sound
 	end
@@ -207,7 +208,8 @@ function ServerMusicAudioHandler:Play(soundId, timePosition)
 		pcall(function() self.serverSound:Stop() end)
 	end
 
-	self.serverSound.Volume       = 0
+	self.serverSound.Looped       = false
+	self.serverSound.Volume       = 1
 	self.serverSound.SoundId      = "rbxassetid://" .. tostring(soundId)
 	self.serverSound.TimePosition = timePosition or 0
 	self.serverSound.SoundGroup   = self.musicGroup
@@ -235,6 +237,12 @@ function ServerMusicAudioHandler:Play(soundId, timePosition)
 		pcall(function() comp:Destroy() end)
 	end
 
+	-- Tunggu asset ter-load di server agar songStartTime = waktu mulai sebenarnya
+	local loadStart = os.clock()
+	while not self.serverSound.IsLoaded and (os.clock() - loadStart) < 4 do
+		task.wait(0.03)
+	end
+
 	local success = pcall(function()
 		self.serverSound:Play()
 	end)
@@ -250,11 +258,7 @@ function ServerMusicAudioHandler:Play(soundId, timePosition)
 end
 
 function ServerMusicAudioHandler:PlayWithFade(soundId, timePosition, fadeDuration)
-	local success = self:Play(soundId, timePosition)
-	if success then
-		self:FadeIn(fadeDuration or CONFIG.Audio.FadeInDuration)
-	end
-	return success
+	return self:Play(soundId, timePosition)
 end
 
 function ServerMusicAudioHandler:StopWithFade(fadeDuration, callback)

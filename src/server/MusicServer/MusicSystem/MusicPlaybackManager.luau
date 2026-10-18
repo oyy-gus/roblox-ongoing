@@ -71,20 +71,71 @@ function MusicPlaybackManager:IsFromPlaylist()
 	return self.isPlaylistMode
 end
 
-function MusicPlaybackManager:ConnectEndedEvent()
+function MusicPlaybackManager:ConnectEndedEvent(remotes)
 	if self.endedConnection then
 		self.endedConnection:Disconnect()
 		self.endedConnection = nil
 	end
+	if self.timeLengthConnection then
+		self.timeLengthConnection:Disconnect()
+		self.timeLengthConnection = nil
+	end
+
 	local sound = self.audioHandler:GetSound()
 	if not sound then return end
+
+	sound.Looped = false
+
+	local function onDurationLoaded(len)
+		if len and len > 0 then
+			self.songDuration = len
+			if self.currentSong then self.currentSong.Duration = len end
+			if remotes then
+				self:UpdateProgress(remotes)
+				pcall(function()
+					remotes.MusicBroadcast:FireAllClients("SongDurationUpdate", {
+						SoundId  = self.currentSong and self.currentSong.id,
+						Duration = len,
+					})
+				end)
+			end
+		end
+	end
+
+	if sound.TimeLength > 0 then
+		onDurationLoaded(sound.TimeLength)
+	else
+		self.timeLengthConnection = sound:GetPropertyChangedSignal("TimeLength"):Connect(function()
+			if sound.TimeLength > 0 then
+				if self.timeLengthConnection then
+					self.timeLengthConnection:Disconnect()
+					self.timeLengthConnection = nil
+				end
+				onDurationLoaded(sound.TimeLength)
+			end
+		end)
+
+		task.spawn(function()
+			local waitStart = workspace:GetServerTimeNow()
+			while sound and sound.Parent and sound.TimeLength <= 0 and (workspace:GetServerTimeNow() - waitStart) < 8 do
+				task.wait(0.1)
+			end
+			if sound and sound.Parent and sound.TimeLength > 0 then
+				onDurationLoaded(sound.TimeLength)
+			end
+		end)
+	end
 
 	self.endedConnection = sound.Ended:Connect(function()
 		if self.isTransitioning then return end
 		if self.autoNextCallback and self.isPlaying then
+			self.isTransitioning = true
 			task.spawn(function()
 				local success, err = pcall(self.autoNextCallback)
-				if not success then warn("[PlaybackManager] Kesalahan AutoNext:", err) end
+				if not success then
+					warn("[PlaybackManager] Kesalahan AutoNext:", err)
+					self.isTransitioning = false
+				end
 			end)
 		end
 	end)
@@ -100,6 +151,7 @@ function MusicPlaybackManager:StartProgressBroadcast(remotes)
 
 		local elapsed = self.audioHandler:GetTimePosition()
 		local now     = workspace:GetServerTimeNow()
+		local wallElapsed = (self.songStartTime > 0) and (now - self.songStartTime) or 0
 
 		if not self.isFadingOut and self.songDuration > 0 then
 			local remaining = self.songDuration - elapsed
@@ -118,13 +170,35 @@ function MusicPlaybackManager:StartProgressBroadcast(remotes)
 			end
 		end
 
-		if not self.isTransitioning and self.songDuration > 0 and self.autoNextCallback then
-			local wallElapsed = (self.songStartTime > 0) and (now - self.songStartTime) or 0
-			if (elapsed >= self.songDuration + 0.5) or (wallElapsed >= self.songDuration + 2) then
+		if not self.isTransitioning and self.autoNextCallback and self.songStartTime > 0 then
+			local songFinished = false
+
+			-- 1. If server sound stopped playing naturally after having played for at least 2 seconds
+			if wallElapsed > 2.0 and not self.audioHandler:IsPlaying() then
+				songFinished = true
+			end
+
+			-- 2. If TimePosition reached the end of the song
+			if self.songDuration > 0 and elapsed >= (self.songDuration - 0.25) and wallElapsed > 2.0 then
+				songFinished = true
+			end
+
+			-- 3. If wall clock exceeded duration AND sound is NOT playing (never kill an actively playing song!)
+			if self.songDuration > 0 and wallElapsed >= (self.songDuration + 2.0) and not self.audioHandler:IsPlaying() then
+				songFinished = true
+			elseif wallElapsed >= 600 then
+				-- Hard fallback: only after 10 full minutes of playing
+				songFinished = true
+			end
+
+			if songFinished then
 				self.isTransitioning = true
 				task.spawn(function()
 					local success, err = pcall(self.autoNextCallback)
-					if not success then warn("[PlaybackManager] Kesalahan Watchdog AutoNext:", err) end
+					if not success then
+						warn("[PlaybackManager] Kesalahan Watchdog AutoNext:", err)
+						self.isTransitioning = false
+					end
 				end)
 				return
 			end
@@ -154,12 +228,8 @@ function MusicPlaybackManager:Play(remotes, songData, uploaderName, isFromPlayli
 
 	self.isTransitioning = true
 
-	if self.audioHandler:IsPlaying() and not self.isFadingOut then
-		self.audioHandler:FadeOut(FADE_OUT_DURATION)
-		task.wait(FADE_OUT_DURATION + 0.02)
-	elseif self.isFadingOut then
-		task.wait(0.05)
-	end
+	-- Seamless instant transition: cancel any previous fade and play immediately without blocking
+	self.audioHandler:CancelFade()
 
 	self.currentSong      = musicData
 	self.currentUploader  = uploaderName or "System"
@@ -169,7 +239,7 @@ function MusicPlaybackManager:Play(remotes, songData, uploaderName, isFromPlayli
 	self.preloadTriggered = false
 	self.isFadingOut      = false
 
-	local success = self.audioHandler:PlayWithFade(musicData.id, 0, FADE_IN_DURATION)
+	local success = self.audioHandler:Play(musicData.id, 0)
 	if not success then
 		self.isTransitioning = false
 		self:Stop(remotes)
@@ -179,7 +249,7 @@ function MusicPlaybackManager:Play(remotes, songData, uploaderName, isFromPlayli
 	self.songStartTime = workspace:GetServerTimeNow()
 
 	self.isTransitioning = false
-	self:ConnectEndedEvent()
+	self:ConnectEndedEvent(remotes)
 	self:StartProgressBroadcast(remotes)
 
 	self:BroadcastSongUpdate(remotes, musicData, uploaderName, duration)
@@ -188,6 +258,7 @@ end
 
 function MusicPlaybackManager:Stop(remotes)
 	if self.endedConnection then self.endedConnection:Disconnect(); self.endedConnection = nil end
+	if self.timeLengthConnection then self.timeLengthConnection:Disconnect(); self.timeLengthConnection = nil end
 	self:StopProgressBroadcast()
 	self.audioHandler:Stop()
 	self.currentSong      = nil
@@ -206,6 +277,7 @@ end
 
 function MusicPlaybackManager:StopWithFade(remotes, fadeDuration)
 	if self.endedConnection then self.endedConnection:Disconnect(); self.endedConnection = nil end
+	if self.timeLengthConnection then self.timeLengthConnection:Disconnect(); self.timeLengthConnection = nil end
 	self:StopProgressBroadcast()
 	self.audioHandler:StopWithFade(fadeDuration or FADE_OUT_DURATION, function()
 		self.currentSong      = nil
@@ -261,6 +333,11 @@ end
 
 function MusicPlaybackManager:SyncToPlayer(remotes, player)
 	if not self.isPlaying or not self.currentSong then return end
+	local sound = self.audioHandler:GetSound()
+	if sound and sound.TimeLength > 0 and self.songDuration ~= sound.TimeLength then
+		self.songDuration = sound.TimeLength
+		if self.currentSong then self.currentSong.Duration = sound.TimeLength end
+	end
 	local elapsed = self.audioHandler:GetTimePosition()
 	pcall(function()
 		remotes.MusicUpdate:FireClient(player, "SyncMusic", {
@@ -284,6 +361,7 @@ end
 
 function MusicPlaybackManager:Cleanup()
 	if self.endedConnection then self.endedConnection:Disconnect(); self.endedConnection = nil end
+	if self.timeLengthConnection then self.timeLengthConnection:Disconnect(); self.timeLengthConnection = nil end
 	self:StopProgressBroadcast()
 	self.audioHandler:Cleanup()
 	self.autoNextCallback = nil

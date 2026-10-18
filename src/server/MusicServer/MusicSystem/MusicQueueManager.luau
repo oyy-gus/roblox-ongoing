@@ -9,7 +9,24 @@ function MusicQueueManager.new(config)
 	return self
 end
 
+function MusicQueueManager:IsInQueue(musicId)
+	if not musicId then return false end
+	local targetId = tostring(musicId)
+	for _, entry in ipairs(self.queue) do
+		local entryId = entry.musicData and entry.musicData.id
+		if entryId and tostring(entryId) == targetId then
+			return true
+		end
+	end
+	return false
+end
+
 function MusicQueueManager:AddToQueue(musicData, uploaderName, userId)
+	local musicId = musicData and musicData.id
+	if self:IsInQueue(musicId) then
+		return false, "Lagu ini sudah ada di antrean!"
+	end
+
 	if #self.queue >= self.config.MAX_QUEUE_SIZE then
 		return false, "Queue penuh! Tunggu beberapa lagu selesai."
 	end

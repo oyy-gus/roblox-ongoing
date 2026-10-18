@@ -98,6 +98,7 @@ local playbackManager   = MusicPlaybackManager.new(CONFIG)
 local validationService = MusicValidationService.new(CONFIG)
 local skipVoteManager   = MusicSkipVoteManager.new(CONFIG, RoleSystem)
 local playlistManager   = MusicPlaylistManager.new(CONFIG)
+playlistManager:SetShuffleMode(true)
 
 local RateLimiter = {}
 RateLimiter.playerLimits = {}
@@ -231,31 +232,25 @@ local function scheduleBatchedSync(syncType)
 end
 
 local function loadSongOnDemand(musicId, musicTitle)
-	if SystemState.LoadingQueue[musicId] then
-		local startWait = workspace:GetServerTimeNow()
-		while SystemState.LoadingQueue[musicId] and (workspace:GetServerTimeNow() - startWait) < 20 do
-			task.wait(0.5)
-		end
-	end
-
+	if not musicId then return 0 end
 	local sound, duration = MusicStorageHandler:GetSound(musicId)
-	if duration > 0 then return duration end
+	if duration and duration > 0 and duration ~= CONFIG.DEFAULT_SONG_DURATION then return duration end
 
-	if SystemState.FailedLoads[musicId] then
-		local failData = SystemState.FailedLoads[musicId]
-		if workspace:GetServerTimeNow() - failData.timestamp < 300 then return 0 end
+	local musicEntry = MusicModule:GetMusicById(musicId)
+	if musicEntry and musicEntry.Duration and musicEntry.Duration > 0 and musicEntry.Duration ~= CONFIG.DEFAULT_SONG_DURATION then
+		MusicStorageHandler:PreloadSound(musicId, musicTitle)
+		return musicEntry.Duration
 	end
 
-	SystemState.LoadingQueue[musicId] = true
-	sound, duration = MusicStorageHandler:LoadSound(musicId, musicTitle)
-	SystemState.LoadingQueue[musicId] = nil
-
-	if duration > 0 then
-		return duration
-	else
-		SystemState.FailedLoads[musicId] = { title = musicTitle, timestamp = workspace:GetServerTimeNow() }
-		return 0
+	local loadedSound, loadedDuration = MusicStorageHandler:LoadSound(musicId, musicTitle)
+	if loadedDuration and loadedDuration > 0 then
+		if musicEntry then
+			musicEntry.Duration = loadedDuration
+		end
+		return loadedDuration
 	end
+
+	return CONFIG.DEFAULT_SONG_DURATION
 end
 
 local function preloadNextSong()
@@ -287,54 +282,62 @@ playNextSong = function()
 		isPlayingNext = false
 	end
 
-	if skipVoteManager:IsActive() then
-		skipVoteManager:EndVote(Dispatcher, true)
-	end
-	if not queueManager:IsEmpty() then
-		local nextSong = queueManager:GetNext()
-		local duration = loadSongOnDemand(nextSong.musicData.id, nextSong.musicData.judul)
-		if duration > 0 then
-			nextSong.musicData.Duration  = duration
-			nextSong.Duration            = duration
-			playbackManager.autoNextCallback = playNextSong
-			playbackManager.preloadCallback  = preloadNextSong
-			local success = playbackManager:Play(Remotes, nextSong, nextSong.uploader, false)
-			resetLock()
-			if success then scheduleBatchedSync("state")
-			else task.delay(0.5, playNextSong) end
-		else
-			warn(string.format("[MusicSystem] Gagal memuat lagu queue '%s' (ID: %s), melewati...", tostring(nextSong.musicData.judul), tostring(nextSong.musicData.id)))
-			resetLock()
-			task.delay(0.5, playNextSong)
+	local ok, err = pcall(function()
+		if skipVoteManager:IsActive() then
+			skipVoteManager:EndVote(Dispatcher, true)
 		end
-
-	elseif CONFIG.AUTO_PLAYLIST_ENABLED then
-		local playlistSong = playlistManager:GetNextSong()
-		if playlistSong then
-			local duration = loadSongOnDemand(playlistSong.id, playlistSong.judul)
+		if not queueManager:IsEmpty() then
+			local nextSong = queueManager:GetNext()
+			local duration = loadSongOnDemand(nextSong.musicData.id, nextSong.musicData.judul)
 			if duration > 0 then
-				playlistSong.Duration = duration
-				local songData = { musicData = playlistSong, uploader = "Auto-Playlist", Duration = duration }
+				nextSong.musicData.Duration  = duration
+				nextSong.Duration            = duration
 				playbackManager.autoNextCallback = playNextSong
 				playbackManager.preloadCallback  = preloadNextSong
-				local success = playbackManager:Play(Remotes, songData, "Auto-Playlist", true)
+				local success = playbackManager:Play(Remotes, nextSong, nextSong.uploader, false)
 				resetLock()
 				if success then scheduleBatchedSync("state")
 				else task.delay(0.5, playNextSong) end
 			else
-				warn(string.format("[MusicSystem] Gagal memuat lagu playlist '%s' (ID: %s), melewati...", tostring(playlistSong.judul), tostring(playlistSong.id)))
+				warn(string.format("[MusicSystem] Gagal memuat lagu queue '%s' (ID: %s), melewati...", tostring(nextSong.musicData.judul), tostring(nextSong.musicData.id)))
 				resetLock()
 				task.delay(0.5, playNextSong)
+			end
+
+		elseif CONFIG.AUTO_PLAYLIST_ENABLED then
+			local playlistSong = playlistManager:GetNextSong()
+			if playlistSong then
+				local duration = loadSongOnDemand(playlistSong.id, playlistSong.judul)
+				if duration > 0 then
+					playlistSong.Duration = duration
+					local songData = { musicData = playlistSong, uploader = "Auto-Playlist", Duration = duration }
+					playbackManager.autoNextCallback = playNextSong
+					playbackManager.preloadCallback  = preloadNextSong
+					local success = playbackManager:Play(Remotes, songData, "Auto-Playlist", true)
+					resetLock()
+					if success then scheduleBatchedSync("state")
+					else task.delay(0.5, playNextSong) end
+				else
+					warn(string.format("[MusicSystem] Gagal memuat lagu playlist '%s' (ID: %s), melewati...", tostring(playlistSong.judul), tostring(playlistSong.id)))
+					resetLock()
+					task.delay(0.5, playNextSong)
+				end
+			else
+				playbackManager:StopWithFade(Remotes)
+				resetLock()
+				scheduleBatchedSync("state")
 			end
 		else
 			playbackManager:StopWithFade(Remotes)
 			resetLock()
 			scheduleBatchedSync("state")
 		end
-	else
-		playbackManager:StopWithFade(Remotes)
+	end)
+
+	if not ok then
+		warn("[MusicSystem] Kesalahan fatal dalam playNextSong:", err)
 		resetLock()
-		scheduleBatchedSync("state")
+		task.delay(1, playNextSong)
 	end
 end
 
@@ -368,6 +371,19 @@ function ActionHandlers:ADD_TO_QUEUE(player, data)
 		return
 	end
 
+	-- 1. Cek apakah lagu ini sedang diputar
+	local currentSong = playbackManager:GetCurrentSong()
+	if playbackManager:IsPlaying() and currentSong and tostring(currentSong.id) == tostring(musicId) then
+		Dispatcher:Notify(player, "Lagu ini sedang diputar!")
+		return
+	end
+
+	-- 2. Cek apakah lagu ini sudah ada di antrean
+	if queueManager:IsInQueue(musicId) then
+		Dispatcher:Notify(player, "Lagu ini sudah ada di antrean!")
+		return
+	end
+
 	task.spawn(function()
 		local musicData
 		if isFromPlaylist then
@@ -385,11 +401,22 @@ function ActionHandlers:ADD_TO_QUEUE(player, data)
 			musicData = vdata
 		end
 
-		local sound, cachedDur = MusicStorageHandler:GetSound(musicData.id)
-		if cachedDur and cachedDur > 0 then
-			musicData.Duration = math.round(cachedDur)
-		elseif not musicData.Duration or musicData.Duration <= 0 then
+		-- Validasi ulang jika state berubah saat task.spawn
+		local curPlaying = playbackManager:GetCurrentSong()
+		if playbackManager:IsPlaying() and curPlaying and tostring(curPlaying.id) == tostring(musicData.id) then
+			Dispatcher:Notify(player, "Lagu ini sedang diputar!")
+			return
+		end
+		if queueManager:IsInQueue(musicData.id) then
+			Dispatcher:Notify(player, "Lagu ini sudah ada di antrean!")
+			return
+		end
 
+		-- Dapatkan durasi asli lagu secara sinkron
+		local sound, cachedDur = MusicStorageHandler:GetSound(musicData.id)
+		if cachedDur and cachedDur > 0 and cachedDur ~= CONFIG.DEFAULT_SONG_DURATION then
+			musicData.Duration = math.round(cachedDur)
+		else
 			local realDur = loadSongOnDemand(musicData.id, musicData.judul)
 			if realDur and realDur > 0 then
 				musicData.Duration = math.round(realDur)
@@ -410,22 +437,6 @@ function ActionHandlers:ADD_TO_QUEUE(player, data)
 		scheduleBatchedSync("queue")
 		local queuePosition = queueManager:GetSize()
 		Dispatcher:Notify(player, string.format("'%s' ditambahkan ke antrean (Posisi: #%d)", musicData.judul, queuePosition))
-
-		if musicData.Duration == CONFIG.DEFAULT_SONG_DURATION then
-			task.spawn(function()
-				local realDur = loadSongOnDemand(musicData.id, musicData.judul)
-				if realDur and realDur > 0 and realDur ~= CONFIG.DEFAULT_SONG_DURATION then
-					musicData.Duration = math.round(realDur)
-
-					queueManager:UpdateDuration(musicData.id, realDur)
-					if isFromPlaylist then
-						local found = MusicModule:GetMusicById(musicId)
-						if found then found.Duration = musicData.Duration end
-					end
-					scheduleBatchedSync("queue")
-				end
-			end)
-		end
 
 		if not playbackManager:IsPlaying() then
 			task.delay(0.5, playNextSong)
@@ -471,7 +482,6 @@ function ActionHandlers:CONTROL_NEXT(player, data)
 		Dispatcher:NotifyAll(string.format("%s memulai vote skip untuk: %s", player.DisplayName, currentSong.judul or "Unknown"))
 
 		if not skipVoteManager:IsActive() then
-			task.wait(0.5)
 			playNextSong()
 		end
 	end
@@ -487,7 +497,6 @@ function ActionHandlers:SKIP_VOTE_YES(player, data)
 	if passed then
 		local currentSong = playbackManager:GetCurrentSong()
 		Dispatcher:NotifyAll(string.format("Vote skip berhasil! Melewati: %s", currentSong and currentSong.judul or "Unknown"))
-		task.wait(1)
 		playNextSong()
 		skipVoteManager:EndVote(Dispatcher, true)
 	else
@@ -534,24 +543,9 @@ end)
 
 Players.PlayerAdded:Connect(function(player)
 	RoleSystem:InitializePlayer(player)
-	task.wait(0.5)
-	if validationService:ValidatePlayer(player) then
-		Dispatcher:SyncToPlayer(player)
-
-	end
-
-	player.CharacterAdded:Connect(function(character)
-		local hrp = character:WaitForChild("HumanoidRootPart", 5)
-		if not hrp then return end
-		task.wait(0.5)
-		if validationService:ValidatePlayer(player) then
+	task.delay(0.5, function()
+		if player and player.Parent and validationService:ValidatePlayer(player) then
 			Dispatcher:SyncToPlayer(player)
-
-			task.delay(1.5, function()
-				if validationService:ValidatePlayer(player) then
-					Dispatcher:SyncToPlayer(player)
-				end
-			end)
 		end
 	end)
 
@@ -648,7 +642,7 @@ task.spawn(function()
 	if #currentQueue > 0 then
 		for _, songData in ipairs(currentQueue) do
 			local duration = loadSongOnDemand(songData.musicData.id, songData.musicData.judul)
-			if duration > 0 then
+			if duration > 0 and duration ~= CONFIG.DEFAULT_SONG_DURATION then
 				songData.musicData.Duration = duration
 				songData.Duration           = duration
 			end
@@ -663,7 +657,7 @@ task.spawn(function()
 	for _, song in ipairs(topSongs) do
 		if not MusicStorageHandler:IsSoundReady(song.id) then
 			local duration = loadSongOnDemand(song.id, song.judul)
-			if duration > 0 then song.Duration = duration end
+			if duration > 0 and duration ~= CONFIG.DEFAULT_SONG_DURATION then song.Duration = duration end
 		end
 	end
 

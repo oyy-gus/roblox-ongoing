@@ -193,21 +193,21 @@ end
 
 local function setMusicMuted(muted)
 	userSettings.muteMusic = muted
-	local musicGroup = getMusicGroup()
-	if musicGroup then
-		if muted then
-			musicGroup.Volume = 0
-		else
-			musicGroup.Volume = ((userSettings.musicVolume or 100) / 100) * 0.5
-		end
+	if MenuConfig.UserSettings then
+		MenuConfig.UserSettings.muteMusic = muted
+	end
+	if MenuConfig.Events and MenuConfig.Events.OnSettingChanged then
+		MenuConfig.Events.OnSettingChanged:Fire("muteMusic", muted)
 	end
 end
 
 local function setMusicVolume(volume)
 	userSettings.musicVolume = volume
-	local musicGroup = getMusicGroup()
-	if musicGroup and not userSettings.muteMusic then
-		musicGroup.Volume = (volume / 100) * 0.5
+	if MenuConfig.UserSettings then
+		MenuConfig.UserSettings.musicVolume = volume
+	end
+	if MenuConfig.Events and MenuConfig.Events.OnSettingChanged then
+		MenuConfig.Events.OnSettingChanged:Fire("musicVolume", volume)
 	end
 end
 
