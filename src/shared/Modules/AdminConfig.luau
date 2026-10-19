@@ -16,12 +16,12 @@ AdminConfig.Config = {
 	ToggleKey = Enum.KeyCode.Insert,
 
 	PanelSize = {
-		Width = 550,
+		Width = 580,
 		Height = 450,
 	},
 
 	HeaderHeight = 46,
-	SidebarWidth = 130,
+	SidebarWidth = 148,
 	TabButtonHeight = 44,
 
 	Colors = {

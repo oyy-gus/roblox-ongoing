@@ -45,9 +45,9 @@ local T = {
 }
 
 local MAX_HAT_CLIENT = 5
-local PANEL_W        = 340
+local PANEL_W        = 356
 local HEADER_H       = 44
-local MAX_BODY_H     = 360
+local MAX_BODY_H     = 436
 
 local PANEL_H = {
 	vip       = HEADER_H + MAX_BODY_H,
@@ -93,6 +93,7 @@ screenGui.Enabled        = true
 screenGui.Parent         = playerGui
 
 local guiScaler = ScalingSystem.new(screenGui)
+UIStrings.EnforceContainer(screenGui)
 
 local function make(cls, props, parent)
 	local o = Instance.new(cls)
@@ -156,7 +157,7 @@ local header = make("Frame", {
 crn(14, header)
 
 local modeIcon = make("TextLabel", {
-	Size                   = UDim2.new(0, 32, 1, 0),
+	Size                   = UDim2.new(0, 24, 1, 0),
 	Position               = UDim2.new(0, 10, 0, 0),
 	BackgroundTransparency = 1,
 	Text                   = "[V]",
@@ -166,8 +167,8 @@ local modeIcon = make("TextLabel", {
 }, header)
 
 local titleLabel = make("TextLabel", {
-	Size                   = UDim2.new(1, -70, 1, 0),
-	Position               = UDim2.new(0, 36, 0, 0),
+	Size                   = UDim2.new(1, -74, 1, 0),
+	Position               = UDim2.new(0, 38, 0, 0),
 	BackgroundTransparency = 1,
 	Text                   = "VIP Commands",
 	TextColor3             = Color3.fromRGB(230, 230, 230),
@@ -382,7 +383,7 @@ local function buildVIP()
 	sk(T.Border, 1.5, 0.3, inCard)
 
 	local inBoxContainer = make("Frame", {
-		Size             = UDim2.new(1, -114, 0, 44),
+		Size             = UDim2.new(1, -98, 0, 42),
 		Position         = UDim2.new(0, 8, 0.5, 0),
 		AnchorPoint      = Vector2.new(0, 0.5),
 		BackgroundColor3 = T.Bg,
@@ -416,7 +417,7 @@ local function buildVIP()
 	end)
 
 	local runBtn = make("TextButton", {
-		Size             = UDim2.new(0, 94, 0, 44),
+		Size             = UDim2.new(0, 84, 0, 42),
 		Position         = UDim2.new(1, -6, 0.5, 0),
 		AnchorPoint      = Vector2.new(1, 0.5),
 		BackgroundColor3 = T.Accent,
@@ -539,19 +540,13 @@ local function buildVIP()
 	end
 
 	local helpRows = {
-		{ cmd = "/re",          desc = "→ Atur ulang avatar & aksesori" },
-		{ cmd = "/hat id1 id2", desc = "→ Pakai aksesori (maks 5 ID)" },
-		{ cmd = "/size [n]",    desc = "→ Ukuran karakter (0.3–1.0)" },
+		{ cmd = "/re",          desc = "Atur ulang avatar & aksesori" },
+		{ cmd = "/hat id1 id2", desc = "Pakai aksesori (maks 5 ID)" },
+		{ cmd = "/size [n]",    desc = "Ukuran karakter (0.3–1.0)" },
 	}
-	local CMD_H, DESC_H, ROW_GAP = 18, 18, 6
-	local BADGE_H, V_PAD = 32, 10
-
-	local textBlockH = 0
-	for i = 1, #helpRows do
-		textBlockH = textBlockH + CMD_H + DESC_H
-		if i < #helpRows then textBlockH = textBlockH + ROW_GAP end
-	end
-	local helpCardH = V_PAD + BADGE_H + 8 + textBlockH + V_PAD
+	local ROW_H = 20
+	local BADGE_H, V_PAD = 26, 8
+	local helpCardH = V_PAD + BADGE_H + 6 + (#helpRows * ROW_H) + V_PAD
 
 	local help = make("Frame", {
 		Name             = "HelpCard",
@@ -568,8 +563,8 @@ local function buildVIP()
 		BackgroundTransparency = 1,
 	}, help)
 	local ico = make("Frame", {
-		Size             = UDim2.new(0, 24, 0, 24),
-		Position         = UDim2.new(0, 10, 0.5, 0),
+		Size             = UDim2.new(0, 22, 0, 22),
+		Position         = UDim2.new(0, 8, 0.5, 0),
 		AnchorPoint      = Vector2.new(0, 0.5),
 		BackgroundColor3 = T.AccDim,
 	}, hdr)
@@ -579,8 +574,8 @@ local function buildVIP()
 		Text="💡", Font=Enum.Font.GothamBold, TextSize=UIStrings.TextSize.Caption, TextColor3=T.Accent,
 	}, ico)
 	local hTitle = make("TextLabel", {
-		Size                   = UDim2.new(1, -44, 1, 0),
-		Position               = UDim2.new(0, 42, 0, 0),
+		Size                   = UDim2.new(1, -40, 1, 0),
+		Position               = UDim2.new(0, 36, 0, 0),
 		BackgroundTransparency = 1,
 		Text                   = "VIP COMMANDS",
 		Font                   = Enum.Font.GothamBold,
@@ -590,11 +585,17 @@ local function buildVIP()
 	}, hdr)
 	addGrad(hTitle, 0, true)
 
-	local yOff = V_PAD + BADGE_H + 8
+	local yOff = V_PAD + BADGE_H + 6
 	for _, row in ipairs(helpRows) do
+		local rowFrame = make("Frame", {
+			Size                   = UDim2.new(1, -16, 0, ROW_H),
+			Position               = UDim2.new(0, 8, 0, yOff),
+			BackgroundTransparency = 1,
+		}, help)
+
 		make("TextLabel", {
-			Size                   = UDim2.new(1, -20, 0, CMD_H),
-			Position               = UDim2.new(0, 10, 0, yOff),
+			Size                   = UDim2.new(0, 92, 1, 0),
+			Position               = UDim2.new(0, 0, 0, 0),
 			BackgroundTransparency = 1,
 			Text                   = row.cmd,
 			Font                   = Enum.Font.Code,
@@ -602,20 +603,22 @@ local function buildVIP()
 			TextColor3             = T.Accent,
 			TextXAlignment         = Enum.TextXAlignment.Left,
 			TextYAlignment         = Enum.TextYAlignment.Center,
-		}, help)
-		yOff = yOff + CMD_H
+		}, rowFrame)
+
 		make("TextLabel", {
-			Size                   = UDim2.new(1, -20, 0, DESC_H),
-			Position               = UDim2.new(0, 10, 0, yOff),
+			Size                   = UDim2.new(1, -96, 1, 0),
+			Position               = UDim2.new(0, 96, 0, 0),
 			BackgroundTransparency = 1,
-			Text                   = "   "..row.desc,
+			Text                   = "→ " .. row.desc,
 			Font                   = Enum.Font.GothamMedium,
 			TextSize               = UIStrings.TextSize.Caption,
 			TextColor3             = T.TextDim,
 			TextXAlignment         = Enum.TextXAlignment.Left,
 			TextYAlignment         = Enum.TextYAlignment.Center,
-		}, help)
-		yOff = yOff + DESC_H + ROW_GAP
+			TextTruncate           = Enum.TextTruncate.AtEnd,
+		}, rowFrame)
+
+		yOff = yOff + ROW_H
 	end
 
 	local stat = make("Frame", {

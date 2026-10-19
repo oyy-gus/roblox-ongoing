@@ -289,11 +289,11 @@ local function addStroke(p, color, thickness, transparency)
 	return s
 end
 local function addSC(p, mx, mn)
-	local c = Instance.new("UITextSizeConstraint")
-	c.MaxTextSize = math.max(mx or 24, 36)
-	c.MinTextSize = 14
-	c.Parent = p
-	return c
+	local targetSize = (p and p:IsA("GuiObject") and (p :: any).TextSize) or mx or 14
+	if UIStrings and UIStrings.LockText then
+		UIStrings.LockText(p, targetSize)
+	end
+	return p
 end
 local function addGradient(parent, rotation, animated)
 	if ThemeModule then
@@ -729,6 +729,33 @@ local function scrollToSection(targetY)
 	}):Play()
 end
 
+local updateProgressLayout
+updateProgressLayout = function()
+	if not (UI.progressBg and UI.durationLbl) then return end
+	local hasSong = (clientState.currentSong ~= nil and clientState.isPlaying)
+	if not hasSong or currentTimeLen <= 0 then
+		UI.progressBg.Size = UDim2.new(1, 0, 0, DIM.PROGRESS_H)
+		return
+	end
+
+	local skipWidth = (UI.skipBtn and UI.skipBtn.Visible) and 34 or 0
+	local durText = UI.durationLbl.Text or "0:00 / 0:00"
+	local textBounds = TextService:GetTextSize(
+		durText,
+		UI.durationLbl.TextSize,
+		UI.durationLbl.Font,
+		Vector2.new(300, 30)
+	)
+	local durWidth = math.max(68, math.ceil(textBounds.X) + 6)
+
+	UI.durationLbl.AnchorPoint = Vector2.new(1, 0.5)
+	UI.durationLbl.Position = UDim2.new(1, -skipWidth, 0.5, 0)
+	UI.durationLbl.Size = UDim2.new(0, durWidth, 1, 0)
+
+	local totalRightOffset = skipWidth + durWidth + 10
+	UI.progressBg.Size = UDim2.new(1, -totalRightOffset, 0, DIM.PROGRESS_H)
+end
+
 local function updateProgressBar(timePos, timeLen)
 	currentTimePos = timePos or 0
 	currentTimeLen = timeLen or 0
@@ -737,7 +764,11 @@ local function updateProgressBar(timePos, timeLen)
 		local progress = math.clamp(timePos / timeLen, 0, 1)
 		TweenService:Create(UI.progressFill, TweenInfo.new(0.15, Enum.EasingStyle.Linear), { Size = UDim2.new(progress,0,1,0) }):Play()
 		if UI.durationLbl then
-			UI.durationLbl.Text    = string.format(T.DurationFormat, fmtTime(timePos), fmtTime(timeLen))
+			local newDurText = string.format(T.DurationFormat, fmtTime(timePos), fmtTime(timeLen))
+			if UI.durationLbl.Text ~= newDurText then
+				UI.durationLbl.Text    = newDurText
+				updateProgressLayout()
+			end
 			UI.durationLbl.Visible = true
 		end
 		if UI.progressDot then
@@ -747,6 +778,7 @@ local function updateProgressBar(timePos, timeLen)
 		UI.progressFill.Size = UDim2.new(0,0,1,0)
 		if UI.durationLbl then UI.durationLbl.Visible = false end
 		if UI.progressDot then UI.progressDot.Visible = false end
+		updateProgressLayout()
 	end
 end
 
@@ -876,6 +908,9 @@ local function updateSkipButton()
 			voteCountdownConn = nil
 		end
 	end
+	if updateProgressLayout then
+		updateProgressLayout()
+	end
 end
 
 local function updateFavoriteUI()
@@ -956,7 +991,7 @@ local function updateQueue()
 		nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
 		nameLbl.TextXAlignment = Enum.TextXAlignment.Left
 		nameLbl.Parent = item
-		addSC(nameLbl, 16)
+		addSC(nameLbl, UIStrings.TextSize.Body)
 
 		local reqLbl = Instance.new("TextLabel")
 		reqLbl.Size = UDim2.new(1, -(40 + rightOffset), 0, 15)
@@ -1177,7 +1212,7 @@ local function updateSongs(list)
 		nameLbl.Font = Enum.Font.GothamBold
 		nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
 		nameLbl.Parent = item
-		addSC(nameLbl, 16)
+		addSC(nameLbl, UIStrings.TextSize.Body)
 
 		local subLbl = Instance.new("TextLabel")
 		if isCurrentPlaying then
@@ -1376,13 +1411,11 @@ local function buildNowPlaying()
 	overlayGrad.Parent = darkOverlay
 
 	local npBadgeText = "NOW PLAYING"
-	local npTextCalc = TextService:GetTextSize(npBadgeText, UIStrings.TextSize.Caption, Enum.Font.GothamBold, Vector2.new(1000, 30))
-	local npBadgeWidth = math.max(100, 8 + 6 + 6 + npTextCalc.X + 10)
 
 	local npBadge = Instance.new("Frame")
 	npBadge.Name = "Badge"
 	npBadge.AutomaticSize = Enum.AutomaticSize.X
-	npBadge.Size = UDim2.new(0, npBadgeWidth, 0, 22)
+	npBadge.Size = UDim2.new(0, 0, 0, 22)
 	npBadge.Position = UDim2.new(0, 8, 0, 8)
 	npBadge.BackgroundColor3 = Color3.fromHex("#080808")
 	npBadge.BackgroundTransparency = 0.15
@@ -1400,7 +1433,7 @@ local function buildNowPlaying()
 
 	local badgePad = Instance.new("UIPadding")
 	badgePad.PaddingLeft = UDim.new(0, 8)
-	badgePad.PaddingRight = UDim.new(0, 10)
+	badgePad.PaddingRight = UDim.new(0, 8)
 	badgePad.PaddingTop = UDim.new(0, 0)
 	badgePad.PaddingBottom = UDim.new(0, 0)
 	badgePad.Parent = npBadge
@@ -1409,7 +1442,7 @@ local function buildNowPlaying()
 	badgeLayout.FillDirection = Enum.FillDirection.Horizontal
 	badgeLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 	badgeLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-	badgeLayout.Padding = UDim.new(0, 6)
+	badgeLayout.Padding = UDim.new(0, 5)
 	badgeLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	badgeLayout.Parent = npBadge
 
@@ -1437,6 +1470,7 @@ local function buildNowPlaying()
 	badgeText.LayoutOrder = 2
 	badgeText.ZIndex = 5
 	badgeText.Parent = npBadge
+	UIStrings.LockTextSize(badgeText, UIStrings.TextSize.Caption)
 
 	local favBtn = Instance.new("TextButton")
 	favBtn.Name = "AddFavBtn"
@@ -1510,11 +1544,11 @@ local function buildNowPlaying()
 	local songName = Instance.new("TextLabel")
 	songName.Name = "SongName"
 	songName.Text = T.NoSongPlaying
-	songName.Size = UDim2.new(1, 0, 0, 26)
+	songName.Size = UDim2.new(1, 0, 0, 24)
 	songName.Position = UDim2.new(0, 0, 0, 0)
 	songName.BackgroundTransparency = 1
 	songName.TextColor3 = Color3.fromHex("#FFFFFF")
-	songName.TextSize = UIStrings.TextSize.Title
+	songName.TextSize = UIStrings.TextSize.Header
 	songName.Font = Enum.Font.GothamBold
 	songName.TextTruncate = Enum.TextTruncate.AtEnd
 	songName.TextXAlignment = Enum.TextXAlignment.Left
@@ -1522,14 +1556,14 @@ local function buildNowPlaying()
 	songName.TextStrokeColor3 = Color3.new(0, 0, 0)
 	songName.ZIndex = 12
 	songName.Parent = npContent
-	addSC(songName, 18)
+	addSC(songName, UIStrings.TextSize.Header, 12)
 	UI.songNameLbl = songName
 
 	local reqLbl = Instance.new("TextLabel")
 	reqLbl.Name = "Requester"
 	reqLbl.Text = ""
-	reqLbl.Size = UDim2.new(1, 0, 0, 20)
-	reqLbl.Position = UDim2.new(0, 0, 0, 27)
+	reqLbl.Size = UDim2.new(1, 0, 0, 18)
+	reqLbl.Position = UDim2.new(0, 0, 0, 26)
 	reqLbl.BackgroundTransparency = 1
 	reqLbl.TextColor3 = C.RequesterText
 	reqLbl.TextSize = UIStrings.TextSize.Caption
@@ -1540,7 +1574,7 @@ local function buildNowPlaying()
 	reqLbl.TextStrokeColor3 = Color3.new(0, 0, 0)
 	reqLbl.ZIndex = 12
 	reqLbl.Parent = npContent
-	addSC(reqLbl, 16, 14)
+	addSC(reqLbl, UIStrings.TextSize.Caption, 9)
 	UI.requesterLbl = reqLbl
 
 	local vizContainer = Instance.new("Frame")
@@ -1576,7 +1610,7 @@ local function buildNowPlaying()
 
 	local progressBg = Instance.new("Frame")
 	progressBg.Name = "ProgressBg"
-	progressBg.Size = UDim2.new(1, -90, 0, DIM.PROGRESS_H)
+	progressBg.Size = UDim2.new(1, -120, 0, DIM.PROGRESS_H)
 	progressBg.Position = UDim2.new(0, 0, 0.5, -DIM.PROGRESS_H/2)
 	progressBg.BackgroundColor3 = Color3.fromHex("#303030")
 	progressBg.BackgroundTransparency = 0.3
@@ -1585,6 +1619,7 @@ local function buildNowPlaying()
 	progressBg.ZIndex = 11
 	progressBg.Parent = progressFrame
 	addCorner(progressBg, DIM.PROGRESS_H/2)
+	UI.progressBg = progressBg
 
 	local progressFill = Instance.new("Frame")
 	progressFill.Name = "ProgressFill"
@@ -1616,8 +1651,9 @@ local function buildNowPlaying()
 	local durLbl = Instance.new("TextLabel")
 	durLbl.Name = "Duration"
 	durLbl.Text = "0:00 / 0:00"
-	durLbl.Size = UDim2.new(0, 64, 1, 0)
-	durLbl.Position = UDim2.new(1, -96, 0, 0)
+	durLbl.Size = UDim2.new(0, 72, 1, 0)
+	durLbl.AnchorPoint = Vector2.new(1, 0.5)
+	durLbl.Position = UDim2.new(1, -34, 0.5, 0)
 	durLbl.BackgroundTransparency = 1
 	durLbl.TextColor3 = Color3.fromHex("#D1D5DB")
 	durLbl.TextSize = UIStrings.TextSize.Caption
@@ -1626,14 +1662,15 @@ local function buildNowPlaying()
 	durLbl.Visible = false
 	durLbl.ZIndex = 12
 	durLbl.Parent = progressFrame
-	addSC(durLbl, 14)
+	addSC(durLbl, UIStrings.TextSize.Caption, 9)
 	UI.durationLbl = durLbl
 
 	local skip = Instance.new("TextButton")
 	skip.Name = "SkipBtn"
 	skip.Text = "⏭"
-	skip.Size = UDim2.new(0, 28, 0, 24)
-	skip.Position = UDim2.new(1, -28, 0.5, -12)
+	skip.Size = UDim2.new(0, 26, 0, 22)
+	skip.AnchorPoint = Vector2.new(1, 0.5)
+	skip.Position = UDim2.new(1, 0, 0.5, 0)
 	skip.BackgroundColor3 = Color3.fromHex("#1A1A1A")
 	skip.BackgroundTransparency = 0.1
 	skip.BorderSizePixel = 0
@@ -1645,6 +1682,7 @@ local function buildNowPlaying()
 	skip.ZIndex = 12
 	skip.Parent = progressFrame
 	addCorner(skip, 5)
+	updateProgressLayout()
 
 	local skipStroke = Instance.new("UIStroke")
 	skipStroke.Thickness = 1
@@ -1694,7 +1732,7 @@ local function buildNowPlaying()
 	voteInfo.TextTruncate = Enum.TextTruncate.None
 	voteInfo.ZIndex = 16
 	voteInfo.Parent = votePanel
-	addSC(voteInfo, 14)
+	addSC(voteInfo, UIStrings.TextSize.Caption, 9)
 	UI.voteInfoLbl = voteInfo
 
 	local voteYes = Instance.new("TextButton")
@@ -1798,7 +1836,7 @@ local function buildQueueSection()
 	qTitle.TextXAlignment = Enum.TextXAlignment.Left
 	qTitle.Font = Enum.Font.GothamBold
 	qTitle.Parent = qHeader
-	addSC(qTitle, 18)
+	addSC(qTitle, UIStrings.TextSize.Title, 11)
 	addTextGradient(qTitle, true)
 
 	local qBadge = Instance.new("TextLabel")
@@ -2080,7 +2118,7 @@ local function makePlaylistCard(name, titleText, countText, thumbUrlOrIcon, layo
 	tLbl.TextTruncate = Enum.TextTruncate.AtEnd
 	tLbl.ZIndex = 3
 	tLbl.Parent = card
-	addSC(tLbl, 16)
+	addSC(tLbl, UIStrings.TextSize.Body, 10)
 
 	local sLbl = Instance.new("TextLabel")
 	sLbl.Name = "CardSub"
@@ -2095,23 +2133,6 @@ local function makePlaylistCard(name, titleText, countText, thumbUrlOrIcon, layo
 	sLbl.TextTruncate = Enum.TextTruncate.AtEnd
 	sLbl.ZIndex = 3
 	sLbl.Parent = card
-
-	local activeInd = Instance.new("TextLabel")
-	activeInd.Name = "ActiveIndicator"
-	activeInd.Size = UDim2.new(0, 56, 0, 20)
-	activeInd.Position = UDim2.new(1, -62, 0, 6)
-	activeInd.BackgroundColor3 = Color3.fromHex("#0F0F0F")
-	activeInd.BackgroundTransparency = 0.2
-	activeInd.Text = "● Aktif"
-	activeInd.TextColor3 = Color3.fromHex("#FFFFFF")
-	activeInd.TextSize = UIStrings.TextSize.Caption
-	activeInd.Font = Enum.Font.GothamBold
-	activeInd.Visible = isSelected
-	activeInd.BorderSizePixel = 0
-	activeInd.ZIndex = 4
-	activeInd.Parent = card
-	addCorner(activeInd, 4)
-	addStroke(activeInd, Color3.fromHex("#FFFFFF"), 1, 0.4)
 
 	card.MouseEnter:Connect(function()
 		local isSel = (activePlaylistType == playlistKey)
@@ -2140,7 +2161,6 @@ local function makePlaylistCard(name, titleText, countText, thumbUrlOrIcon, layo
 		card      = card,
 		stroke    = cardStroke,
 		subLbl    = sLbl,
-		activeInd = activeInd,
 	}
 
 	return card
@@ -2155,9 +2175,6 @@ updatePlaylistCardsState = function()
 		if data.stroke then
 			data.stroke.Color = isSel and Color3.fromHex("#FFFFFF") or Color3.fromHex("#262626")
 			data.stroke.Thickness = isSel and 2 or 1
-		end
-		if data.activeInd then
-			data.activeInd.Visible = isSel
 		end
 		if key == "favorites" and data.subLbl then
 			data.subLbl.Text = canFavorite and string.format("%d Lagu", #userFavorites) or "Khusus VIP+"
@@ -2236,7 +2253,7 @@ local function buildPlaylistSection()
 	titleLbl.TextXAlignment = Enum.TextXAlignment.Left
 	titleLbl.Font = Enum.Font.GothamBold
 	titleLbl.Parent = header
-	addSC(titleLbl, 14)
+	addSC(titleLbl, UIStrings.TextSize.Title, 11)
 	addTextGradient(titleLbl, true)
 
 	local badge = Instance.new("TextLabel")
@@ -2442,7 +2459,7 @@ local function buildLibrarySection()
 	titleLbl.TextXAlignment = Enum.TextXAlignment.Left
 	titleLbl.Font = Enum.Font.GothamBold
 	titleLbl.Parent = header
-	addSC(titleLbl, 18)
+	addSC(titleLbl, UIStrings.TextSize.Title, 11)
 	addTextGradient(titleLbl, true)
 	UI.songsTitleLbl = titleLbl
 

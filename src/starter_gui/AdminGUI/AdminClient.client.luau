@@ -182,8 +182,6 @@ titleLabel.Font               = Enum.Font.GothamBold
 titleLabel.TextXAlignment     = Enum.TextXAlignment.Left
 titleLabel.Parent             = header
 
-local titleGradient = ThemeModule.CreatePrimaryGradient(titleLabel, 0, 1)
-
 local closeButton = Instance.new("TextButton")
 closeButton.Name             = "CloseButton"
 closeButton.Size             = UDim2.new(0, 32, 0, 32)
@@ -192,7 +190,7 @@ closeButton.BackgroundColor3 = ThemeModule.Colors.CloseRed
 closeButton.BorderSizePixel  = 0
 closeButton.Text             = "x"
 closeButton.TextColor3       = ThemeModule.Colors.TextWhite
-closeButton.TextSize         = 16
+closeButton.TextSize         = 14
 closeButton.Font             = Enum.Font.GothamBold
 closeButton.TextXAlignment   = Enum.TextXAlignment.Center
 closeButton.TextYAlignment   = Enum.TextYAlignment.Center
@@ -313,7 +311,13 @@ local function createTabButton(def)
 	btn.TextSize           = UIStrings.TextSize.Caption
 	btn.Font               = Enum.Font.GothamMedium
 	btn.AutoButtonColor    = false
+	btn.TextXAlignment     = Enum.TextXAlignment.Left
 	btn.Parent             = btnFrame
+
+	local btnPad = Instance.new("UIPadding")
+	btnPad.PaddingLeft     = UDim.new(0, 10)
+	btnPad.PaddingRight    = UDim.new(0, 4)
+	btnPad.Parent          = btn
 
 	btn.MouseEnter:Connect(function()
 		if AdminConfig.State.currentTab == def.Name then return end

@@ -10,5 +10,6 @@ Config.SMALL_SCREEN_BOOST = 0.35
 Config.LARGE_SCREEN_SHRINK = 0.88
 
 Config.DEBUG_MODE = false
+Config.ENABLE_TEXT_SIZE_LOCK = true
 
 return Config

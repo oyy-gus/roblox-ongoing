@@ -1,3 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UIStrings = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("UIStrings"))
+
 return function(icon, Icon)
 
 	local widget = Instance.new("Frame")
@@ -165,6 +168,7 @@ return function(icon, Icon)
 	iconLabel.Active = false
 	iconLabel.AutoLocalize = true
 	iconLabel.Parent = iconLabelContainer
+	UIStrings.LockTextSize(iconLabel)
 
 	local iconImage = Instance.new("ImageLabel")
 	iconImage.Name = "IconImage"

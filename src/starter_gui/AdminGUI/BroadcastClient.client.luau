@@ -103,7 +103,7 @@ local function buildBroadcastGUI()
 	headerIcon.Position = UDim2.new(0, 0, 0.5, -20)
 	headerIcon.BackgroundTransparency = 1
 	headerIcon.Text = "📢"
-	headerIcon.TextSize = 28
+	headerIcon.TextSize = 20
 	headerIcon.Font = Enum.Font.GothamBold
 	headerIcon.Parent = headerSection
 
@@ -114,20 +114,17 @@ local function buildBroadcastGUI()
 	headerTitle.BackgroundTransparency = 1
 	headerTitle.Text = "Siaran Pesan"
 	headerTitle.TextColor3 = ThemeModule.Colors.TextWhite
-	headerTitle.TextSize = 18
+	headerTitle.TextSize = UIStrings.TextSize.Title
 	headerTitle.Font = Enum.Font.GothamBold
 	headerTitle.TextXAlignment = Enum.TextXAlignment.Left
 	headerTitle.Parent = headerSection
-
-	local headerGradient = ThemeModule.CreatePrimaryGradient(headerTitle, 0, 1)
-	table.insert(registeredGradients, headerGradient)
 
 	local headerSubtitle = Instance.new("TextLabel")
 	headerSubtitle.Name = "HeaderSubtitle"
 	headerSubtitle.Size = UDim2.new(1, -50, 0, 18)
 	headerSubtitle.Position = UDim2.new(0, 50, 0, 28)
 	headerSubtitle.BackgroundTransparency = 1
-	headerSubtitle.Text = "Kirim pesan ke seluruh pemain di dalam server"
+	headerSubtitle.Text = "Kirim pesan siaran ke semua pemain"
 	headerSubtitle.TextColor3 = ThemeModule.Colors.TextGray
 	headerSubtitle.TextSize = UIStrings.TextSize.Caption
 	headerSubtitle.Font = Enum.Font.GothamMedium
@@ -161,9 +158,6 @@ local function buildBroadcastGUI()
 	inputLabel.Font = Enum.Font.GothamBold
 	inputLabel.TextXAlignment = Enum.TextXAlignment.Left
 	inputLabel.Parent = inputSection
-
-	local inputLabelGradient = ThemeModule.CreatePrimaryGradient(inputLabel, 0, 1.2)
-	table.insert(registeredGradients, inputLabelGradient)
 
 	local textBoxContainer = Instance.new("Frame")
 	textBoxContainer.Name = "TextBoxContainer"
@@ -263,8 +257,8 @@ local function buildBroadcastGUI()
 	table.insert(registeredGradients, sendGradient)
 
 	local sendIcon = Instance.new("TextLabel")
-	sendIcon.Size = UDim2.new(0, 20, 1, 0)
-	sendIcon.Position = UDim2.new(0, 15, 0, 0)
+	sendIcon.Size = UDim2.new(0, 22, 1, 0)
+	sendIcon.Position = UDim2.new(0, 14, 0, 0)
 	sendIcon.BackgroundTransparency = 1
 	sendIcon.Text = "📤"
 	sendIcon.TextSize = 16
@@ -273,7 +267,7 @@ local function buildBroadcastGUI()
 
 	local sendText = Instance.new("TextLabel")
 	sendText.Size = UDim2.new(1, -50, 1, 0)
-	sendText.Position = UDim2.new(0, 40, 0, 0)
+	sendText.Position = UDim2.new(0, 44, 0, 0)
 	sendText.BackgroundTransparency = 1
 	sendText.Text = "Kirim Siaran"
 	sendText.TextColor3 = ThemeModule.Colors.BackgroundDark

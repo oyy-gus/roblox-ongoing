@@ -1,3 +1,6 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UIStrings = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("UIStrings"))
+
 return function(icon, Icon)
 
 	local notice = Instance.new("Frame")
@@ -34,6 +37,7 @@ return function(icon, Icon)
 	noticeLabel.TextWrap = true
 	noticeLabel.Font = Enum.Font.Arial
 	noticeLabel.Parent = notice
+	UIStrings.LockTextSize(noticeLabel)
 
 	local iconModule = script.Parent.Parent
 	local packages = iconModule.Packages

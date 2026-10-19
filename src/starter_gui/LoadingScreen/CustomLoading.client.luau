@@ -37,6 +37,7 @@ if gui:IsA("ScreenGui") then
 	gui.DisplayOrder = 10000
 end
 gui.Parent = playerGui
+UIStrings.EnforceContainer(gui)
 
 local bg = Instance.new("Frame")
 bg.Name = "CinematicBackground"
@@ -187,6 +188,7 @@ heroTitleGlow.TextColor3 = Color3.fromHex("#4A5884")
 heroTitleGlow.TextTransparency = 0.65
 heroTitleGlow.ZIndex = 5
 heroTitleGlow.Parent = centerStage
+UIStrings.LockTextSize(heroTitleGlow, 54)
 
 local heroTitle = Instance.new("TextLabel")
 heroTitle.Size = UDim2.new(1, 0, 0, 64)
@@ -199,6 +201,7 @@ heroTitle.TextSize = 54
 heroTitle.TextColor3 = Color3.fromHex("#FFFFFF")
 heroTitle.ZIndex = 6
 heroTitle.Parent = centerStage
+UIStrings.LockTextSize(heroTitle, 54)
 
 local heroTitleGrad = Instance.new("UIGradient")
 heroTitleGrad.Color = ColorSequence.new({
@@ -220,6 +223,7 @@ heroSubtitle.TextSize = UIStrings.TextSize.Caption
 heroSubtitle.TextColor3 = Color3.fromHex("#94A3B8")
 heroSubtitle.ZIndex = 6
 heroSubtitle.Parent = centerStage
+UIStrings.LockTextSize(heroSubtitle, UIStrings.TextSize.Caption)
 
 local waveContainer = Instance.new("Frame")
 waveContainer.Size = UDim2.new(0, 180, 0, 18)
@@ -270,6 +274,7 @@ stageLabel.TextColor3 = Color3.fromHex("#64748B")
 stageLabel.TextXAlignment = Enum.TextXAlignment.Left
 stageLabel.ZIndex = 6
 stageLabel.Parent = telemetryRow
+UIStrings.LockTextSize(stageLabel, UIStrings.TextSize.Caption)
 
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Size = UDim2.new(0.75, 0, 0, 22)
@@ -282,6 +287,7 @@ statusLabel.TextColor3 = Color3.fromHex("#F1F5F9")
 statusLabel.TextXAlignment = Enum.TextXAlignment.Left
 statusLabel.ZIndex = 6
 statusLabel.Parent = telemetryRow
+UIStrings.LockTextSize(statusLabel, UIStrings.TextSize.Body)
 
 local percentBox = Instance.new("Frame")
 percentBox.Size = UDim2.new(0, 120, 1, 0)
@@ -303,6 +309,7 @@ percentNum.TextColor3 = Color3.fromHex("#FFFFFF")
 percentNum.TextXAlignment = Enum.TextXAlignment.Right
 percentNum.ZIndex = 6
 percentNum.Parent = percentBox
+UIStrings.LockTextSize(percentNum, 24)
 
 local percentLabel = Instance.new("TextLabel")
 percentLabel.Size = UDim2.new(1, 0, 0, 16)
@@ -316,6 +323,7 @@ percentLabel.TextColor3 = Color3.fromHex("#64748B")
 percentLabel.TextXAlignment = Enum.TextXAlignment.Right
 percentLabel.ZIndex = 6
 percentLabel.Parent = percentBox
+UIStrings.LockTextSize(percentLabel, UIStrings.TextSize.Caption)
 
 local progressTrack = Instance.new("Frame")
 progressTrack.Name = "ProgressTrack"
@@ -389,6 +397,7 @@ tipLabel.TextXAlignment = Enum.TextXAlignment.Left
 tipLabel.TextWrapped = true
 tipLabel.ZIndex = 6
 tipLabel.Parent = footerRow
+UIStrings.LockTextSize(tipLabel, UIStrings.TextSize.Caption)
 
 local skipNotice = Instance.new("TextLabel")
 skipNotice.Name = "SkipNotice"
@@ -406,6 +415,7 @@ skipNotice.TextTransparency = 1
 skipNotice.TextXAlignment = Enum.TextXAlignment.Right
 skipNotice.ZIndex = 6
 skipNotice.Parent = footerRow
+UIStrings.LockTextSize(skipNotice, UIStrings.TextSize.Caption)
 
 local isLoading = true
 local canSkip = false

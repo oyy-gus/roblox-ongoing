@@ -1,17 +1,18 @@
 local UIStrings = {
 	TextSize = {
-		Header = 20,
-		Title = 18,
-		Button = 18,
-		Body = 16,
-		Caption = 14,
+		Header = 16,
+		Title = 14,
+		Button = 13,
+		Body = 12,
+		Caption = 11,
 	},
 
-	HeaderSize = 20,
-	TitleSize = 18,
-	ButtonSize = 18,
-	BodySize = 16,
-	CaptionSize = 14,
+	HeaderSize = 16,
+	TitleSize = 14,
+	ButtonSize = 13,
+	BodySize = 12,
+	CaptionSize = 11,
+
 
 	Fonts = {
 		Header = Enum.Font.GothamBold,
@@ -29,7 +30,7 @@ local UIStrings = {
 		GlowstickSubtitle = "Pilih warna  |  tekan R untuk siklus:",
 		GlowstickHint = "Klik / tap untuk toggle lampu",
 		InputPlaceholder = "/re  /hat id1 id2  /size 0.5",
-		ResetAvatar = "Atur Ulang Avatar",
+		ResetAvatar = "Atur Ulang",
 		TryHats = "Coba Aksesori",
 		ChangeSize = "Ubah Ukuran",
 		SuccessHat = "Aksesori berhasil dipasang",
@@ -176,5 +177,90 @@ local UIStrings = {
 		Empty = "Kosong",
 	},
 }
+
+local GuiService = game:GetService("GuiService")
+
+-- Mendapatkan preferensi text size Roblox saat ini secara aman
+function UIStrings.GetPreferredTextSize(): Enum.PreferredTextSize
+	local ok, val = pcall(function()
+		return GuiService.PreferredTextSize
+	end)
+	return (ok and val) or Enum.PreferredTextSize.Medium
+end
+
+-- Mengecek apakah player menggunakan ukuran teks di atas default
+function UIStrings.IsHighTextSize(): boolean
+	local pref = UIStrings.GetPreferredTextSize()
+	return pref == Enum.PreferredTextSize.Large
+		or pref == Enum.PreferredTextSize.Larger
+		or pref == Enum.PreferredTextSize.Largest
+end
+
+-- Mengunci mati ukuran teks menggunakan UITextSizeConstraint (MinTextSize == MaxTextSize)
+function UIStrings.LockTextSize(textElement: Instance, normalSize: number?): UITextSizeConstraint?
+	if not (textElement:IsA("TextLabel") or textElement:IsA("TextButton") or textElement:IsA("TextBox")) then
+		return nil
+	end
+	local textObj = textElement :: any
+
+	if textObj.TextScaled then
+		local existing = textObj:FindFirstChild("TextSizeLock")
+		if existing then existing:Destroy() end
+		return nil
+	end
+
+	if normalSize then
+		textObj.TextSize = normalSize
+	end
+
+	local function syncLock()
+		if not textObj.Parent or textObj.TextScaled then
+			local existing = textObj:FindFirstChild("TextSizeLock")
+			if existing and textObj.TextScaled then existing:Destroy() end
+			return
+		end
+
+		local size = textObj.TextSize
+		if size and size > 0 then
+			local constraint = textObj:FindFirstChild("TextSizeLock")
+				or textObj:FindFirstChildOfClass("UITextSizeConstraint")
+			if not constraint then
+				constraint = Instance.new("UITextSizeConstraint")
+				constraint.Name = "TextSizeLock"
+				constraint.Parent = textObj
+			end
+			constraint.MinTextSize = size
+			constraint.MaxTextSize = size
+		end
+	end
+
+	syncLock()
+
+	if not textObj:GetAttribute("TextSizeLockBound") then
+		textObj:SetAttribute("TextSizeLockBound", true)
+		textObj:GetPropertyChangedSignal("TextSize"):Connect(syncLock)
+		textObj:GetPropertyChangedSignal("TextScaled"):Connect(syncLock)
+	end
+
+	return textObj:FindFirstChild("TextSizeLock") or textObj:FindFirstChildOfClass("UITextSizeConstraint")
+end
+
+-- Alias untuk kemudahan pemanggilan
+UIStrings.LockText = UIStrings.LockTextSize
+
+-- Mengunci seluruh teks di dalam container secara rekursif dan berkelanjutan
+function UIStrings.EnforceContainer(container: Instance): RBXScriptConnection
+	local function checkAndLock(item: Instance)
+		if (item:IsA("TextLabel") or item:IsA("TextButton") or item:IsA("TextBox")) and not (item :: any).TextScaled then
+			UIStrings.LockTextSize(item)
+		end
+	end
+
+	for _, desc in ipairs(container:GetDescendants()) do
+		checkAndLock(desc)
+	end
+
+	return container.DescendantAdded:Connect(checkAndLock)
+end
 
 return UIStrings

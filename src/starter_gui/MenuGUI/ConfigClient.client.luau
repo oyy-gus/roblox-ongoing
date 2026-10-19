@@ -27,24 +27,24 @@ ThemeModule.GradientSystem.Start()
 
 local SIZES = {
 
-	SECTION_H = 32,
+	SECTION_H = 30,
 	SECTION_TEXT = UIStrings.TextSize.Header,
 
-	TOGGLE_H = 60,
+	TOGGLE_H = 54,
 	TOGGLE_LABEL_TEXT = UIStrings.TextSize.Title,
-	TOGGLE_DESC_TEXT = UIStrings.TextSize.Body,
-	TOGGLE_WIDTH = 54,
-	TOGGLE_HEIGHT = 30,
-	TOGGLE_KNOB = 24,
+	TOGGLE_DESC_TEXT = UIStrings.TextSize.Caption,
+	TOGGLE_WIDTH = 50,
+	TOGGLE_HEIGHT = 26,
+	TOGGLE_KNOB = 20,
 
-	SLIDER_H = 70,
+	SLIDER_H = 64,
 	SLIDER_LABEL_TEXT = UIStrings.TextSize.Title,
-	SLIDER_VALUE_TEXT = UIStrings.TextSize.Body,
-	SLIDER_BAR_H = 10,
-	SLIDER_KNOB = 22,
-	SLIDER_VALUE_W = 60,
+	SLIDER_VALUE_TEXT = UIStrings.TextSize.Caption,
+	SLIDER_BAR_H = 8,
+	SLIDER_KNOB = 20,
+	SLIDER_VALUE_W = 50,
 
-	BUTTON_H = 48,
+	BUTTON_H = 42,
 	BUTTON_TEXT = UIStrings.TextSize.Button,
 
 	CORNER_SM = 6,

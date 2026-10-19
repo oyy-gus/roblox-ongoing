@@ -1,5 +1,7 @@
 local CAPTION_COLOR = Color3.fromRGB(39, 41, 48)
 local TEXT_SIZE = 15
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UIStrings = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("UIStrings"))
 return function(icon)
 
 	local clickRegion = icon:getInstance("ClickRegion")
@@ -41,6 +43,7 @@ return function(icon)
 	header.Size = UDim2.fromOffset(0, 16)
 	header.ZIndex = 18
 	header.Parent = box
+	UIStrings.LockTextSize(header, TEXT_SIZE)
 
 	local layout = Instance.new("UIListLayout")
 	layout.Name = "Layout"
@@ -116,6 +119,7 @@ return function(icon)
 	labelContent.Size = UDim2.fromScale(1, 1)
 	labelContent.ZIndex = 16
 	labelContent.Parent = keyTag1
+	UIStrings.LockTextSize(labelContent, TEXT_SIZE)
 
 	local caret = Instance.new("ImageLabel")
 	caret.Name = "Caret"

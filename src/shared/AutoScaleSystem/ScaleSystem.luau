@@ -2,6 +2,7 @@ local ScaleSystem = {}
 ScaleSystem.__index = ScaleSystem
 
 local RunService   = game:GetService("RunService")
+local GuiService   = game:GetService("GuiService")
 local Config       = require(script.Parent:WaitForChild("Config"))
 local ScaleUtils   = require(script.Parent:WaitForChild("ScaleUtils"))
 
@@ -129,6 +130,62 @@ function ScaleSystem:Start()
 		self:Destroy()
 	end)
 	table.insert(self._connections, destroyConn)
+
+	self:_initTextProtection()
+end
+
+function ScaleSystem:_initTextProtection()
+	if not Config.ENABLE_TEXT_SIZE_LOCK or not self._gui then return end
+
+	local function lockElement(item: Instance)
+		if not (item:IsA("TextLabel") or item:IsA("TextButton") or item:IsA("TextBox")) then
+			return
+		end
+
+		local textElement = item :: any
+		if textElement.TextScaled then
+			return
+		end
+
+		local function syncLock()
+			if not textElement.Parent or textElement.TextScaled then
+				local existing = textElement:FindFirstChild("TextSizeLock")
+				if existing then existing:Destroy() end
+				return
+			end
+
+			local size = textElement.TextSize
+			if size and size > 0 then
+				local constraint = textElement:FindFirstChild("TextSizeLock")
+					or textElement:FindFirstChildOfClass("UITextSizeConstraint")
+				if not constraint then
+					constraint = Instance.new("UITextSizeConstraint")
+					constraint.Name = "TextSizeLock"
+					constraint.Parent = textElement
+				end
+				-- KUNCI MATI: MinTextSize dan MaxTextSize sama persis dengan TextSize
+				constraint.MinTextSize = size
+				constraint.MaxTextSize = size
+			end
+		end
+
+		syncLock()
+
+		if not textElement:GetAttribute("TextSizeLockBound") then
+			textElement:SetAttribute("TextSizeLockBound", true)
+			local sizeConn = textElement:GetPropertyChangedSignal("TextSize"):Connect(syncLock)
+			local scaledConn = textElement:GetPropertyChangedSignal("TextScaled"):Connect(syncLock)
+			table.insert(self._connections, sizeConn)
+			table.insert(self._connections, scaledConn)
+		end
+	end
+
+	for _, desc in ipairs(self._gui:GetDescendants()) do
+		lockElement(desc)
+	end
+
+	local descConn = self._gui.DescendantAdded:Connect(lockElement)
+	table.insert(self._connections, descConn)
 end
 
 function ScaleSystem:ForceUpdate()

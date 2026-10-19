@@ -25,6 +25,8 @@ local Utility = require(iconModule.Utility)
 local Themes = require(iconModule.Features.Themes)
 local Gamepad = require(iconModule.Features.Gamepad)
 local Overflow = require(iconModule.Features.Overflow)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UIStrings = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("UIStrings"))
 local Icon = {}
 Icon.__index = Icon
 
@@ -112,6 +114,7 @@ task.defer(function()
 	local playerGui = localPlayer:WaitForChild("PlayerGui")
 	for _, screenGui in pairs(Icon.container) do
 		screenGui.Parent = playerGui
+		UIStrings.EnforceContainer(screenGui)
 	end
 	require(iconModule.Attribute)
 end)
