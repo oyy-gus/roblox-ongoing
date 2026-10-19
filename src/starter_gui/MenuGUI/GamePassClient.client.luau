@@ -15,28 +15,30 @@ local success, err = pcall(function()
 	ThemeModule = require(Modules:WaitForChild("ThemeModule"))
 end)
 
+local UIStrings = require(Modules:WaitForChild("UIStrings"))
+
 if not success or not MenuConfig then
 	warn("[Toko] ❌ Gagal memuat MenuConfig:", err)
 	return
 end
 
 local SIZES = {
-	HEADER_H = 54,
-	HEADER_TITLE_TEXT = 17,
-	HEADER_SUB_TEXT = 10.5,
+	HEADER_H = 64,
+	HEADER_TITLE_TEXT = UIStrings.TextSize.Header,
+	HEADER_SUB_TEXT = UIStrings.TextSize.Caption,
 
-	CARD_H = 200,
+	CARD_H = 224,
 	CARD_CORNER = 14,
 
 	LEFT_SECTION_W = 0.32,
-	ICON_SIZE = 60,
-	TITLE_TEXT = 13.5,
-	PRICE_TEXT = 11.5,
+	ICON_SIZE = 56,
+	TITLE_TEXT = UIStrings.TextSize.Title,
+	PRICE_TEXT = UIStrings.TextSize.Body,
 
-	BENEFIT_CHECK_TEXT = 10.5,
-	BENEFIT_TEXT = 10,
-	BUTTON_H = 40,
-	BUTTON_TEXT = 11.5,
+	BENEFIT_CHECK_TEXT = UIStrings.TextSize.Caption,
+	BENEFIT_TEXT = UIStrings.TextSize.Caption,
+	BUTTON_H = 44,
+	BUTTON_TEXT = UIStrings.TextSize.Button,
 
 	CORNER_SM = 6,
 	CORNER_MD = 10,
@@ -574,33 +576,47 @@ local function buildGamePassUI()
 
 	local headerFrame = mk("Frame", {
 		Name               = "Header",
-		Size               = UDim2.new(1, 0, 0, SIZES.HEADER_H),
+		Size               = UDim2.new(1, 0, 0, 0),
+		AutomaticSize      = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		LayoutOrder        = 0,
 	}, scrollFrame)
 
+	local headerLayout = mk("UIListLayout", {
+		FillDirection = Enum.FillDirection.Vertical,
+		Padding = UDim.new(0, 4),
+		SortOrder = Enum.SortOrder.LayoutOrder,
+	}, headerFrame)
+
 	local headerTitle = mk("TextLabel", {
 		Name               = "Title",
-		Size               = UDim2.new(1, 0, 0, 28),
+		Size               = UDim2.new(1, 0, 0, 0),
+		AutomaticSize      = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		Text               = "👑 Toko VIP Premium",
 		TextSize           = SIZES.HEADER_TITLE_TEXT,
 		Font               = Enum.Font.GothamBold,
 		TextColor3         = Color3.fromRGB(255, 255, 255),
-		TextTruncate       = Enum.TextTruncate.AtEnd,
+		TextWrapped        = true,
+		TextTruncate       = Enum.TextTruncate.None,
+		TextXAlignment     = Enum.TextXAlignment.Center,
+		LayoutOrder        = 1,
 	}, headerFrame)
 	addTextGradient(headerTitle, true, 0.8)
 
 	mk("TextLabel", {
 		Name               = "Subtitle",
-		Size               = UDim2.new(1, 0, 0, 18),
-		Position           = UDim2.new(0, 0, 0, 32),
+		Size               = UDim2.new(1, 0, 0, 0),
+		AutomaticSize      = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		Text               = "Tingkatkan pengalamanmu dengan VIP premium!",
 		TextSize           = SIZES.HEADER_SUB_TEXT,
 		Font               = Enum.Font.GothamMedium,
 		TextColor3         = COLORS.Text.Secondary,
-		TextTruncate       = Enum.TextTruncate.AtEnd,
+		TextWrapped        = true,
+		TextTruncate       = Enum.TextTruncate.None,
+		TextXAlignment     = Enum.TextXAlignment.Center,
+		LayoutOrder        = 2,
 	}, headerFrame)
 
 	createGamePassCard("VIP", GamepassData.VIP, COLORS.VIP, scrollFrame)
@@ -635,7 +651,7 @@ local function buildGamePassUI()
 		AnchorPoint        = Vector2.new(0.5, 0.5),
 		BackgroundTransparency = 1,
 		Text               = "",
-		TextSize           = 12,
+		TextSize           = UIStrings.TextSize.Caption,
 		Font               = Enum.Font.GothamMedium,
 		TextColor3         = COLORS.Text.Primary,
 		TextWrapped        = true,

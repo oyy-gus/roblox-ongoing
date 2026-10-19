@@ -45,13 +45,13 @@ local T = {
 }
 
 local MAX_HAT_CLIENT = 5
-local PANEL_W        = 320
+local PANEL_W        = 340
 local HEADER_H       = 44
-local MAX_BODY_H     = 320
+local MAX_BODY_H     = 360
 
 local PANEL_H = {
 	vip       = HEADER_H + MAX_BODY_H,
-	glowstick = HEADER_H + 160,
+	glowstick = HEADER_H + 210,
 }
 
 local currentMode    = nil
@@ -156,23 +156,23 @@ local header = make("Frame", {
 crn(14, header)
 
 local modeIcon = make("TextLabel", {
-	Size                   = UDim2.new(0, 28, 1, 0),
-	Position               = UDim2.new(0, 12, 0, 0),
+	Size                   = UDim2.new(0, 32, 1, 0),
+	Position               = UDim2.new(0, 10, 0, 0),
 	BackgroundTransparency = 1,
 	Text                   = "[V]",
 	TextColor3             = Color3.fromRGB(230, 230, 230),
 	Font                   = Enum.Font.GothamBold,
-	TextSize               = 11,
+	TextSize               = UIStrings.TextSize.Caption,
 }, header)
 
 local titleLabel = make("TextLabel", {
-	Size                   = UDim2.new(1, -80, 1, 0),
-	Position               = UDim2.new(0, 44, 0, 0),
+	Size                   = UDim2.new(1, -70, 1, 0),
+	Position               = UDim2.new(0, 36, 0, 0),
 	BackgroundTransparency = 1,
 	Text                   = "VIP Commands",
 	TextColor3             = Color3.fromRGB(230, 230, 230),
 	Font                   = Enum.Font.GothamBold,
-	TextSize               = 11.5,
+	TextSize               = 13,
 	TextXAlignment         = Enum.TextXAlignment.Left,
 }, header)
 
@@ -183,11 +183,17 @@ local closeBtn = make("TextButton", {
 	Text             = "x",
 	TextColor3       = T.Text,
 	Font             = Enum.Font.GothamBold,
-	TextSize         = 14,
+	TextSize         = 15,
+	TextXAlignment   = Enum.TextXAlignment.Center,
+	TextYAlignment   = Enum.TextYAlignment.Center,
 	AutoButtonColor  = false,
 	BorderSizePixel  = 0,
 }, header)
 crn(6, closeBtn)
+
+local closePad = Instance.new("UIPadding")
+closePad.PaddingBottom = UDim.new(0, 2)
+closePad.Parent = closeBtn
 
 local body = make("Frame", {
 	Size                   = UDim2.new(1, 0, 1, -HEADER_H),
@@ -242,48 +248,48 @@ make("UIPadding", {
 }, glowContent)
 
 make("TextLabel", {
-	Size                   = UDim2.new(1, 0, 0, 15),
+	Size                   = UDim2.new(1, 0, 0, 20),
 	BackgroundTransparency = 1,
 	Text                   = "Pilih warna  |  tekan R untuk siklus:",
 	TextColor3             = Color3.fromRGB(140, 140, 160),
-	Font                   = Enum.Font.Gotham,
-	TextSize               = 11,
+	Font                   = Enum.Font.GothamMedium,
+	TextSize               = UIStrings.TextSize.Caption,
 	TextXAlignment         = Enum.TextXAlignment.Left,
 }, glowContent)
 
 local colorGrid = make("Frame", {
-	Size                   = UDim2.new(1, 0, 0, 68),
-	Position               = UDim2.new(0, 0, 0, 20),
+	Size                   = UDim2.new(1, 0, 0, 96),
+	Position               = UDim2.new(0, 0, 0, 24),
 	BackgroundTransparency = 1,
 }, glowContent)
 
 make("UIGridLayout", {
-	CellSize              = UDim2.new(0, 28, 0, 28),
-	CellPadding           = UDim2.new(0, 7, 0, 7),
-	FillDirectionMaxCells = 9,
-	HorizontalAlignment   = Enum.HorizontalAlignment.Left,
+	CellSize              = UDim2.new(0, 44, 0, 44),
+	CellPadding           = UDim2.new(0, 10, 0, 8),
+	FillDirectionMaxCells = 5,
+	HorizontalAlignment   = Enum.HorizontalAlignment.Center,
 	SortOrder             = Enum.SortOrder.LayoutOrder,
 }, colorGrid)
 
 local tooltipLabel = make("TextLabel", {
-	Size                   = UDim2.new(1, 0, 0, 14),
-	Position               = UDim2.new(0, 0, 0, 94),
+	Size                   = UDim2.new(1, 0, 0, 18),
+	Position               = UDim2.new(0, 0, 0, 126),
 	BackgroundTransparency = 1,
 	Text                   = "",
 	TextColor3             = Color3.fromRGB(200, 200, 200),
-	Font                   = Enum.Font.Gotham,
-	TextSize               = 11,
+	Font                   = Enum.Font.GothamMedium,
+	TextSize               = UIStrings.TextSize.Caption,
 	TextXAlignment         = Enum.TextXAlignment.Center,
 }, glowContent)
 
 make("TextLabel", {
-	Size                   = UDim2.new(1, 0, 0, 13),
-	Position               = UDim2.new(0, 0, 0, 110),
+	Size                   = UDim2.new(1, 0, 0, 18),
+	Position               = UDim2.new(0, 0, 0, 148),
 	BackgroundTransparency = 1,
 	Text                   = "Klik / tap untuk toggle lampu",
-	TextColor3             = Color3.fromRGB(90, 90, 110),
+	TextColor3             = Color3.fromRGB(140, 140, 160),
 	Font                   = Enum.Font.Gotham,
-	TextSize               = 10,
+	TextSize               = UIStrings.TextSize.Caption,
 	TextXAlignment         = Enum.TextXAlignment.Center,
 }, glowContent)
 
@@ -305,7 +311,7 @@ for i, data in ipairs(palette) do
 	local isBlack   = (col == Color3.fromRGB(0,0,0))
 	local btn = make("TextButton", {
 		LayoutOrder      = i,
-		Size             = UDim2.new(0, 28, 0, 28),
+		Size             = UDim2.new(0, 44, 0, 44),
 		Text             = "",
 		BackgroundColor3 = col,
 	}, colorGrid)
@@ -351,7 +357,7 @@ local function buildVIP()
 
 	local function secLabel(order, text)
 		local f = make("Frame", {
-			Size                   = UDim2.new(1, 0, 0, 16),
+			Size                   = UDim2.new(1, 0, 0, 22),
 			BackgroundTransparency = 1,
 			LayoutOrder            = order,
 		}, vipScroll)
@@ -360,7 +366,7 @@ local function buildVIP()
 			BackgroundTransparency = 1,
 			Text                   = text,
 			Font                   = Enum.Font.GothamBold,
-			TextSize               = 9.5,
+			TextSize               = UIStrings.TextSize.Caption,
 			TextColor3             = Color3.fromRGB(255,255,255),
 			TextXAlignment         = Enum.TextXAlignment.Left,
 		}, f)
@@ -368,7 +374,7 @@ local function buildVIP()
 	end
 
 	local inCard = make("Frame", {
-		Size             = UDim2.new(1, 0, 0, 42),
+		Size             = UDim2.new(1, 0, 0, 54),
 		BackgroundColor3 = T.Card,
 		LayoutOrder      = 1,
 	}, vipScroll)
@@ -376,7 +382,7 @@ local function buildVIP()
 	sk(T.Border, 1.5, 0.3, inCard)
 
 	local inBoxContainer = make("Frame", {
-		Size             = UDim2.new(1, -90, 0, 30),
+		Size             = UDim2.new(1, -114, 0, 44),
 		Position         = UDim2.new(0, 8, 0.5, 0),
 		AnchorPoint      = Vector2.new(0, 0.5),
 		BackgroundColor3 = T.Bg,
@@ -393,7 +399,7 @@ local function buildVIP()
 		Text                   = "",
 		PlaceholderText        = "/re  /hat id1 id2  /size 0.5",
 		Font                   = Enum.Font.Code,
-		TextSize               = 10.5,
+		TextSize               = UIStrings.TextSize.Caption,
 		TextColor3             = T.Text,
 		PlaceholderColor3      = T.Sub,
 		ClearTextOnFocus       = false,
@@ -410,13 +416,13 @@ local function buildVIP()
 	end)
 
 	local runBtn = make("TextButton", {
-		Size             = UDim2.new(0, 72, 0, 30),
+		Size             = UDim2.new(0, 94, 0, 44),
 		Position         = UDim2.new(1, -6, 0.5, 0),
 		AnchorPoint      = Vector2.new(1, 0.5),
 		BackgroundColor3 = T.Accent,
 		Text             = "▶ Jalankan",
 		Font             = Enum.Font.GothamBold,
-		TextSize         = 9.5,
+		TextSize         = UIStrings.TextSize.Caption,
 		TextColor3       = Color3.fromRGB(17,17,17),
 		AutoButtonColor  = false,
 	}, inCard)
@@ -457,12 +463,12 @@ local function buildVIP()
 	secLabel(2, "⚡  AKSI CEPAT")
 
 	local qGrid = make("Frame", {
-		Size                   = UDim2.new(1, 0, 0, 76),
+		Size                   = UDim2.new(1, 0, 0, 98),
 		BackgroundTransparency = 1,
 		LayoutOrder            = 3,
 	}, vipScroll)
 	make("UIGridLayout", {
-		CellSize            = UDim2.new(0.5, -5, 0, 34),
+		CellSize            = UDim2.new(0.5, -5, 0, 44),
 		CellPadding         = UDim2.new(0, 10, 0, 8),
 		SortOrder           = Enum.SortOrder.LayoutOrder,
 		HorizontalAlignment = Enum.HorizontalAlignment.Center,
@@ -479,7 +485,7 @@ local function buildVIP()
 			BackgroundColor3 = T.Card,
 			Text             = q[1].."  "..q[2],
 			Font             = Enum.Font.GothamMedium,
-			TextSize         = 9.5,
+			TextSize         = UIStrings.TextSize.Caption,
 			TextColor3       = T.TextDim,
 			AutoButtonColor  = false,
 			LayoutOrder      = i,
@@ -499,12 +505,12 @@ local function buildVIP()
 	secLabel(4, "📏  PRESET UKURAN")
 
 	local sGrid = make("Frame", {
-		Size                   = UDim2.new(1, 0, 0, 30),
+		Size                   = UDim2.new(1, 0, 0, 44),
 		BackgroundTransparency = 1,
 		LayoutOrder            = 5,
 	}, vipScroll)
 	make("UIGridLayout", {
-		CellSize            = UDim2.new(0.25, -8, 1, 0),
+		CellSize            = UDim2.new(0.25, -8, 0, 44),
 		CellPadding         = UDim2.new(0, 10, 0, 0),
 		SortOrder           = Enum.SortOrder.LayoutOrder,
 		HorizontalAlignment = Enum.HorizontalAlignment.Center,
@@ -515,7 +521,7 @@ local function buildVIP()
 			BackgroundColor3 = T.Card,
 			Text             = sp[1],
 			Font             = Enum.Font.GothamBold,
-			TextSize         = 10.5,
+			TextSize         = UIStrings.TextSize.Caption,
 			TextColor3       = T.TextDim,
 			AutoButtonColor  = false,
 			LayoutOrder      = i,
@@ -537,8 +543,8 @@ local function buildVIP()
 		{ cmd = "/hat id1 id2", desc = "→ Pakai aksesori (maks 5 ID)" },
 		{ cmd = "/size [n]",    desc = "→ Ukuran karakter (0.3–1.0)" },
 	}
-	local CMD_H, DESC_H, ROW_GAP = 13, 13, 6
-	local BADGE_H, V_PAD = 28, 10
+	local CMD_H, DESC_H, ROW_GAP = 18, 18, 6
+	local BADGE_H, V_PAD = 32, 10
 
 	local textBlockH = 0
 	for i = 1, #helpRows do
@@ -562,23 +568,23 @@ local function buildVIP()
 		BackgroundTransparency = 1,
 	}, help)
 	local ico = make("Frame", {
-		Size             = UDim2.new(0, 20, 0, 20),
+		Size             = UDim2.new(0, 24, 0, 24),
 		Position         = UDim2.new(0, 10, 0.5, 0),
 		AnchorPoint      = Vector2.new(0, 0.5),
 		BackgroundColor3 = T.AccDim,
 	}, hdr)
-	crn(5, ico)
+	crn(6, ico)
 	make("TextLabel", {
 		Size=UDim2.new(1,0,1,0), BackgroundTransparency=1,
-		Text="💡", Font=Enum.Font.GothamBold, TextSize=12, TextColor3=T.Accent,
+		Text="💡", Font=Enum.Font.GothamBold, TextSize=UIStrings.TextSize.Caption, TextColor3=T.Accent,
 	}, ico)
 	local hTitle = make("TextLabel", {
-		Size                   = UDim2.new(1, -40, 1, 0),
-		Position               = UDim2.new(0, 38, 0, 0),
+		Size                   = UDim2.new(1, -44, 1, 0),
+		Position               = UDim2.new(0, 42, 0, 0),
 		BackgroundTransparency = 1,
 		Text                   = "VIP COMMANDS",
 		Font                   = Enum.Font.GothamBold,
-		TextSize               = 9.5,
+		TextSize               = UIStrings.TextSize.Caption,
 		TextColor3             = Color3.fromRGB(255,255,255),
 		TextXAlignment         = Enum.TextXAlignment.Left,
 	}, hdr)
@@ -592,7 +598,7 @@ local function buildVIP()
 			BackgroundTransparency = 1,
 			Text                   = row.cmd,
 			Font                   = Enum.Font.Code,
-			TextSize               = 10.5,
+			TextSize               = UIStrings.TextSize.Caption,
 			TextColor3             = T.Accent,
 			TextXAlignment         = Enum.TextXAlignment.Left,
 			TextYAlignment         = Enum.TextYAlignment.Center,
@@ -603,8 +609,8 @@ local function buildVIP()
 			Position               = UDim2.new(0, 10, 0, yOff),
 			BackgroundTransparency = 1,
 			Text                   = "   "..row.desc,
-			Font                   = Enum.Font.Gotham,
-			TextSize               = 9.5,
+			Font                   = Enum.Font.GothamMedium,
+			TextSize               = UIStrings.TextSize.Caption,
 			TextColor3             = T.TextDim,
 			TextXAlignment         = Enum.TextXAlignment.Left,
 			TextYAlignment         = Enum.TextYAlignment.Center,
@@ -614,7 +620,7 @@ local function buildVIP()
 
 	local stat = make("Frame", {
 		Name             = "StatusCard",
-		Size             = UDim2.new(1, 0, 0, 42),
+		Size             = UDim2.new(1, 0, 0, 56),
 		BackgroundColor3 = T.Card,
 		LayoutOrder      = 7,
 	}, vipScroll)
@@ -622,19 +628,19 @@ local function buildVIP()
 	sk(T.Border, 1, 0.5, stat)
 
 	make("TextLabel", {
-		Size                   = UDim2.new(1, -16, 0, 13),
-		Position               = UDim2.new(0, 10, 0, 5),
+		Size                   = UDim2.new(1, -16, 0, 18),
+		Position               = UDim2.new(0, 10, 0, 6),
 		BackgroundTransparency = 1,
 		Text                   = "📊 STATUS",
 		Font                   = Enum.Font.GothamBold,
-		TextSize               = 8.5,
+		TextSize               = UIStrings.TextSize.Caption,
 		TextColor3             = T.Sub,
 		TextXAlignment         = Enum.TextXAlignment.Left,
 	}, stat)
 
 	local sc = make("Frame", {
-		Size                   = UDim2.new(1, -20, 0, 18),
-		Position               = UDim2.new(0, 10, 0, 20),
+		Size                   = UDim2.new(1, -20, 0, 22),
+		Position               = UDim2.new(0, 10, 0, 26),
 		BackgroundTransparency = 1,
 	}, stat)
 
@@ -643,7 +649,7 @@ local function buildVIP()
 		BackgroundTransparency = 1,
 		Text                   = "📏 Size: 1.00×",
 		Font                   = Enum.Font.GothamMedium,
-		TextSize               = 9.5,
+		TextSize               = UIStrings.TextSize.Caption,
 		TextColor3             = T.TextDim,
 		TextXAlignment         = Enum.TextXAlignment.Left,
 	}, sc)
@@ -654,7 +660,7 @@ local function buildVIP()
 		BackgroundTransparency = 1,
 		Text                   = "🎩 Hats: 0",
 		Font                   = Enum.Font.GothamMedium,
-		TextSize               = 9.5,
+		TextSize               = UIStrings.TextSize.Caption,
 		TextColor3             = T.TextDim,
 		TextXAlignment         = Enum.TextXAlignment.Left,
 	}, sc)

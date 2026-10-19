@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 local Modules = ReplicatedStorage:WaitForChild("Modules")
 local MenuConfig = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
+local UIStrings = require(Modules:WaitForChild("UIStrings"))
 
 MenuConfig.WaitForGUIReady(15)
 
@@ -27,41 +28,30 @@ end
 local function getPlayerItemHeight()
 	local screenInfo = MenuConfig.GetScreenInfo()
 	if screenInfo.isMobile and screenInfo.isLandscape then
-		return math.floor(MenuConfig.GetScaledValue(70, 62, 78))
+		return math.max(48, math.floor(MenuConfig.GetScaledValue(70, 62, 78)))
 	else
-		return math.floor(MenuConfig.GetScaledValue(82, 74, 92))
+		return math.max(54, math.floor(MenuConfig.GetScaledValue(82, 74, 92)))
 	end
 end
 
 local function getMyProfileHeight()
 	local screenInfo = MenuConfig.GetScreenInfo()
 	if screenInfo.isMobile and screenInfo.isLandscape then
-		return math.floor(MenuConfig.GetScaledValue(80, 72, 90))
+		return math.max(64, math.floor(MenuConfig.GetScaledValue(80, 72, 90)))
 	else
-		return math.floor(MenuConfig.GetScaledValue(94, 84, 106))
+		return math.max(72, math.floor(MenuConfig.GetScaledValue(94, 84, 106)))
 	end
 end
 
 local function getTextSize(textType)
-	local screenInfo = MenuConfig.GetScreenInfo()
 	local sizes = {
-		header = {base = 14, min = 11, max = 16},
-		displayName = {base = 13, min = 10.5, max = 15},
-		username = {base = 10.5, min = 8.5, max = 12},
-		profileName = {base = 15, min = 12, max = 17.5},
-		profileUsername = {base = 11.5, min = 9.5, max = 13},
+		header = UIStrings.TextSize.Header,
+		profileName = UIStrings.TextSize.Title,
+		displayName = UIStrings.TextSize.Body,
+		username = UIStrings.TextSize.Caption,
+		profileUsername = UIStrings.TextSize.Caption,
 	}
-
-	local sizeConfig = sizes[textType] or sizes.displayName
-	local scaleFactor = 1
-
-	if screenInfo.isMobile and screenInfo.isLandscape then
-		scaleFactor = 0.9
-	elseif screenInfo.isMobile then
-		scaleFactor = 0.95
-	end
-
-	return math.floor(MenuConfig.GetScaledValue(sizeConfig.base * scaleFactor, sizeConfig.min, sizeConfig.max))
+	return sizes[textType] or UIStrings.TextSize.Body
 end
 
 local PROFILE_COLORS = {
@@ -144,7 +134,6 @@ playersScroll.Name = "PlayersScroll"
 playersScroll.Size = UDim2.new(1, 0, 1, 0)
 playersScroll.Position = UDim2.new(0, 0, 0, 0)
 playersScroll.BackgroundColor3 = CONFIG.Colors.PlayerList.Background
-playersScroll.BorderSizePixel = 0
 playersScroll.ScrollBarThickness = 0
 playersScroll.ScrollBarImageTransparency = 1
 playersScroll.ScrollingEnabled = true
@@ -172,9 +161,12 @@ local function createSectionHeader(name, text, layoutOrder)
 	local header = Instance.new("TextLabel")
 	header.Name = name
 	header.Text = text
-	header.Size = UDim2.new(1, 0, 0, 22)
+	header.Size = UDim2.new(1, 0, 0, 0)
+	header.AutomaticSize = Enum.AutomaticSize.Y
 	header.BackgroundTransparency = 1
-	header.TextScaled = true
+	header.TextScaled = false
+	header.TextWrapped = true
+	header.TextSize = UIStrings.TextSize.Header
 	header.TextXAlignment = Enum.TextXAlignment.Left
 	header.Font = Enum.Font.GothamBold
 	header.LayoutOrder = layoutOrder
@@ -182,59 +174,74 @@ local function createSectionHeader(name, text, layoutOrder)
 	header.Parent = playersScroll
 
 	ThemeModule.CreatePrimaryGradient(header, 0, 1)
-
-	Instance.new("UITextSizeConstraint", header).MaxTextSize = getTextSize("header")
 	return header
 end
 
 local function createGameRankOption(layoutOrder)
-	local itemHeight = math.floor(MenuConfig.GetScaledValue(52, 46, 58))
 	local toggleWidth = math.floor(MenuConfig.GetScaledValue(46, 40, 50))
 	local toggleHeight = math.floor(MenuConfig.GetScaledValue(24, 20, 26))
 	local toggleKnobSize = toggleHeight - 4
 
 	local item = Instance.new("Frame")
 	item.Name = "GameRankSetting"
-	item.Size = UDim2.new(1, 0, 0, itemHeight)
+	item.Size = UDim2.new(1, 0, 0, 0)
+	item.AutomaticSize = Enum.AutomaticSize.Y
 	item.BackgroundColor3 = PROFILE_COLORS.Background
 	item.BorderSizePixel = 0
 	item.LayoutOrder = layoutOrder
-	item.ClipsDescendants = true
+	item.ClipsDescendants = false
 	item.Parent = playersScroll
 
 	ThemeModule.CreateCorner(item, CONFIG.Layout.SmallCorner)
 
+	local itemPad = Instance.new("UIPadding")
+	itemPad.PaddingTop = UDim.new(0, 10)
+	itemPad.PaddingBottom = UDim.new(0, 10)
+	itemPad.PaddingLeft = UDim.new(0, 12)
+	itemPad.PaddingRight = UDim.new(0, 12)
+	itemPad.Parent = item
+
 	local textContainer = Instance.new("Frame")
 	textContainer.Name = "TextContainer"
-	textContainer.Size = UDim2.new(1, -(toggleWidth + 28), 1, 0)
-	textContainer.Position = UDim2.new(0, 12, 0, 0)
+	textContainer.Size = UDim2.new(1, -(toggleWidth + 24), 0, 0)
+	textContainer.Position = UDim2.new(0, 0, 0, 0)
+	textContainer.AutomaticSize = Enum.AutomaticSize.Y
 	textContainer.BackgroundTransparency = 1
 	textContainer.Parent = item
+
+	local tLayout = Instance.new("UIListLayout")
+	tLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	tLayout.Padding = UDim.new(0, 3)
+	tLayout.Parent = textContainer
 
 	local title = Instance.new("TextLabel")
 	title.Name = "Title"
 	title.Text = "🎖️ Tampilkan Rank Grup"
-	title.Size = UDim2.new(1, 0, 0, 20)
-	title.Position = UDim2.new(0, 0, 0, 7)
+	title.Size = UDim2.new(1, 0, 0, 0)
+	title.AutomaticSize = Enum.AutomaticSize.Y
 	title.BackgroundTransparency = 1
 	title.TextColor3 = Color3.fromRGB(255, 255, 255)
 	title.TextSize = getTextSize("displayName")
+	title.TextWrapped = true
+	title.TextTruncate = Enum.TextTruncate.None
 	title.TextXAlignment = Enum.TextXAlignment.Left
-	title.TextYAlignment = Enum.TextYAlignment.Center
 	title.Font = Enum.Font.GothamSemibold
+	title.LayoutOrder = 1
 	title.Parent = textContainer
 
 	local desc = Instance.new("TextLabel")
 	desc.Name = "Description"
 	desc.Text = "Tampilkan status rank/member di overhead & list"
-	desc.Size = UDim2.new(1, 0, 0, 16)
-	desc.Position = UDim2.new(0, 0, 0, 28)
+	desc.Size = UDim2.new(1, 0, 0, 0)
+	desc.AutomaticSize = Enum.AutomaticSize.Y
 	desc.BackgroundTransparency = 1
 	desc.TextColor3 = ThemeModule.Colors.TextGray or Color3.fromRGB(180, 180, 180)
 	desc.TextSize = getTextSize("username")
+	desc.TextWrapped = true
+	desc.TextTruncate = Enum.TextTruncate.None
 	desc.TextXAlignment = Enum.TextXAlignment.Left
-	desc.TextYAlignment = Enum.TextYAlignment.Center
 	desc.Font = Enum.Font.Gotham
+	desc.LayoutOrder = 2
 	desc.Parent = textContainer
 
 	local isRankEnabled = MenuConfig.UserSettings.game_rank ~= false
@@ -242,7 +249,8 @@ local function createGameRankOption(layoutOrder)
 	local toggleBg = Instance.new("Frame")
 	toggleBg.Name = "ToggleBg"
 	toggleBg.Size = UDim2.new(0, toggleWidth, 0, toggleHeight)
-	toggleBg.Position = UDim2.new(1, -(toggleWidth + 14), 0.5, -toggleHeight / 2)
+	toggleBg.Position = UDim2.new(1, 0, 0.5, 0)
+	toggleBg.AnchorPoint = Vector2.new(1, 0.5)
 	toggleBg.BackgroundColor3 = isRankEnabled and (ThemeModule.Colors.Primary1 or Color3.fromRGB(60, 150, 240)) or Color3.fromRGB(80, 80, 90)
 	toggleBg.BorderSizePixel = 0
 	toggleBg.Parent = item
@@ -265,7 +273,9 @@ local function createGameRankOption(layoutOrder)
 	local toggleBtn = Instance.new("TextButton")
 	toggleBtn.Name = "ToggleBtn"
 	toggleBtn.Text = ""
-	toggleBtn.Size = UDim2.new(1, 0, 1, 0)
+	toggleBtn.Size = UDim2.new(1, 20, 1, 20)
+	toggleBtn.Position = UDim2.new(0.5, 0, 0.5, 0)
+	toggleBtn.AnchorPoint = Vector2.new(0.5, 0.5)
 	toggleBtn.BackgroundTransparency = 1
 	toggleBtn.Parent = toggleBg
 
@@ -408,7 +418,7 @@ local function createMyProfile(layoutOrder)
 	rankLabel.Size = UDim2.new(1, 0, 0, getTextSize("profileUsername"))
 	rankLabel.BackgroundTransparency = 1
 	rankLabel.TextColor3 = ThemeModule.Colors.TextGray or Color3.fromRGB(180, 185, 195)
-	rankLabel.TextSize = math.max(10, getTextSize("profileUsername") - 1)
+	rankLabel.TextSize = getTextSize("profileUsername")
 	rankLabel.TextXAlignment = Enum.TextXAlignment.Left
 	rankLabel.TextYAlignment = Enum.TextYAlignment.Center
 	rankLabel.Font = Enum.Font.Gotham
@@ -554,7 +564,7 @@ local function createPlayerItem(plr, layoutOrder, isFriend, isInConnectionSectio
 	rankLabel.Size = UDim2.new(1, 0, 0, getTextSize("username"))
 	rankLabel.BackgroundTransparency = 1
 	rankLabel.TextColor3 = ThemeModule.Colors.TextGray or Color3.fromRGB(180, 185, 195)
-	rankLabel.TextSize = math.max(10, getTextSize("username") - 1)
+	rankLabel.TextSize = getTextSize("username")
 	rankLabel.TextXAlignment = Enum.TextXAlignment.Left
 	rankLabel.TextYAlignment = Enum.TextYAlignment.Center
 	rankLabel.Font = Enum.Font.Gotham

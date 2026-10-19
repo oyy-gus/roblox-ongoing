@@ -350,11 +350,17 @@ closeBtn.Text = "x"
 closeBtn.TextColor3 = Color3.fromHex("#FFFFFF")
 closeBtn.TextSize = 12
 closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextXAlignment = Enum.TextXAlignment.Center
+closeBtn.TextYAlignment = Enum.TextYAlignment.Center
 closeBtn.AutoButtonColor = false
 closeBtn.ZIndex = 4
 closeBtn.Parent = invHeader
 
 addCorner(closeBtn, 6)
+
+local closePad = Instance.new("UIPadding")
+closePad.PaddingBottom = UDim.new(0, 2)
+closePad.Parent = closeBtn
 
 closeBtn.MouseEnter:Connect(function()
 	tweenProperty(closeBtn, {BackgroundColor3 = Color3.fromHex("#404040")}, 0.1)

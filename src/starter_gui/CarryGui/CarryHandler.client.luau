@@ -12,6 +12,7 @@ task.wait(1)
 
 local CarryConfig = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("CarryConfig"))
 local ThemeModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("ThemeModule"))
+local UIStrings = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("UIStrings"))
 
 local AutoScaleSystem = ReplicatedStorage:WaitForChild("AutoScaleSystem")
 local ScaleSystem = require(AutoScaleSystem:WaitForChild("ScaleSystem"))
@@ -267,9 +268,15 @@ closeBtn.BackgroundTransparency = 1
 closeBtn.Text = "x"
 closeBtn.TextSize = 28
 closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextXAlignment = Enum.TextXAlignment.Center
+closeBtn.TextYAlignment = Enum.TextYAlignment.Center
 closeBtn.TextColor3 = Theme.AccentRed
 closeBtn.ZIndex = 21
 closeBtn.Parent = centerCircle
+
+local closePad = Instance.new("UIPadding")
+closePad.PaddingBottom = UDim.new(0, 4)
+closePad.Parent = closeBtn
 
 closeBtn.MouseEnter:Connect(function()
 	TweenService:Create(centerCircle, TweenInfo.new(0.15), {
@@ -336,7 +343,7 @@ hoverLabel.Size = UDim2.new(1, 0, 0, 18)
 hoverLabel.Position = UDim2.new(0, 0, 0, 30)
 hoverLabel.BackgroundTransparency = 1
 hoverLabel.Text = "Bridal"
-hoverLabel.TextSize = 12
+hoverLabel.TextSize = UIStrings.TextSize.Caption
 hoverLabel.Font = Enum.Font.GothamBold
 hoverLabel.TextColor3 = Theme.AccentGold
 hoverLabel.ZIndex = 26
@@ -344,13 +351,13 @@ hoverLabel.Parent = hoverInfoFrame
 
 local targetLabel = Instance.new("TextLabel")
 targetLabel.Name = "TargetLabel"
-targetLabel.Size = UDim2.new(0, 200, 0, 25)
-targetLabel.Position = UDim2.new(0.5, 0, 0, -40)
+targetLabel.Size = UDim2.new(0, 240, 0, 30)
+targetLabel.Position = UDim2.new(0.5, 0, 0, -42)
 targetLabel.AnchorPoint = Vector2.new(0.5, 0)
 targetLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 targetLabel.BackgroundTransparency = 0.3
 targetLabel.Text = "Carry: PlayerName"
-targetLabel.TextSize = 14
+targetLabel.TextSize = UIStrings.TextSize.Caption
 targetLabel.Font = Enum.Font.GothamBold
 targetLabel.TextColor3 = Theme.AccentGold
 targetLabel.ZIndex = 25
@@ -406,11 +413,12 @@ local function createSegmentButton(styleData, index)
 
 	local nameLabel = Instance.new("TextLabel")
 	nameLabel.Name = "NameLabel"
-	nameLabel.Size = UDim2.new(1, 0, 0, 14)
-	nameLabel.Position = UDim2.new(0, 0, 0.78, 0)
+	nameLabel.Size = UDim2.new(1, 14, 0, 18)
+	nameLabel.Position = UDim2.new(0.5, 0, 0.76, 0)
+	nameLabel.AnchorPoint = Vector2.new(0.5, 0)
 	nameLabel.BackgroundTransparency = 1
 	nameLabel.Text = styleData.name
-	nameLabel.TextSize = 9
+	nameLabel.TextSize = UIStrings.TextSize.Caption
 	nameLabel.Font = Enum.Font.GothamBold
 	nameLabel.TextColor3 = Theme.TextMuted
 	nameLabel.ZIndex = 17
@@ -446,20 +454,22 @@ end
 
 local instructionLabel = Instance.new("TextLabel")
 instructionLabel.Name = "InstructionLabel"
-instructionLabel.Size = UDim2.new(0, 250, 0, 20)
+instructionLabel.Size = UDim2.new(0, 320, 0, 24)
 instructionLabel.Position = UDim2.new(0.5, 0, 1, 25)
 instructionLabel.AnchorPoint = Vector2.new(0.5, 0)
 instructionLabel.BackgroundTransparency = 1
 instructionLabel.Text = "Ketuk gaya untuk memilih • Tengah untuk menutup"
-instructionLabel.TextSize = 11
+instructionLabel.TextSize = UIStrings.TextSize.Caption
 instructionLabel.Font = Enum.Font.Gotham
+instructionLabel.TextWrapped = true
 instructionLabel.TextColor3 = Theme.TextMuted
 instructionLabel.ZIndex = 25
 instructionLabel.Parent = menuContainer
 
 local notificationFrame = Instance.new("Frame")
 notificationFrame.Name = "NotificationFrame"
-notificationFrame.Size = UDim2.new(0, 350, 0, 120)
+notificationFrame.Size = UDim2.new(0, 360, 0, 0)
+notificationFrame.AutomaticSize = Enum.AutomaticSize.Y
 notificationFrame.Position = UDim2.new(0.5, 0, 0.3, 0)
 notificationFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 notificationFrame.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
@@ -469,37 +479,52 @@ notificationFrame.Parent = gui
 corner(notificationFrame, 16)
 ThemeModule.CreateAnimatedStroke(notificationFrame, 1.5, "Primary", 1.2)
 
+local notifPadding = Instance.new("UIPadding")
+notifPadding.PaddingTop = UDim.new(0, 14)
+notifPadding.PaddingBottom = UDim.new(0, 14)
+notifPadding.PaddingLeft = UDim.new(0, 14)
+notifPadding.PaddingRight = UDim.new(0, 14)
+notifPadding.Parent = notificationFrame
+
+local notifListLayout = Instance.new("UIListLayout")
+notifListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+notifListLayout.FillDirection = Enum.FillDirection.Vertical
+notifListLayout.Padding = UDim.new(0, 10)
+notifListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+notifListLayout.Parent = notificationFrame
+
 local notifTitle = Instance.new("TextLabel")
 notifTitle.Name = "Title"
-notifTitle.Size = UDim2.new(1, -20, 0, 25)
-notifTitle.Position = UDim2.new(0, 10, 0, 10)
+notifTitle.Size = UDim2.new(1, 0, 0, 24)
 notifTitle.BackgroundTransparency = 1
 notifTitle.Text = "📩 PERMINTAAN GENDONG"
-notifTitle.TextSize = 14
+notifTitle.TextSize = UIStrings.TextSize.Title
 notifTitle.Font = Enum.Font.GothamBold
 notifTitle.TextColor3 = ThemeModule.Colors.Primary1
 notifTitle.TextXAlignment = Enum.TextXAlignment.Left
+notifTitle.LayoutOrder = 1
 notifTitle.ZIndex = 51
 notifTitle.Parent = notificationFrame
 
 local notifLabel = Instance.new("TextLabel")
 notifLabel.Name = "NotifLabel"
-notifLabel.Size = UDim2.new(1, -20, 0, 35)
-notifLabel.Position = UDim2.new(0, 10, 0, 38)
+notifLabel.Size = UDim2.new(1, 0, 0, 0)
+notifLabel.AutomaticSize = Enum.AutomaticSize.Y
 notifLabel.BackgroundTransparency = 1
 notifLabel.Text = "Pemain ingin menggendong Anda"
-notifLabel.TextSize = 13
+notifLabel.TextSize = UIStrings.TextSize.Body
 notifLabel.Font = Enum.Font.Gotham
 notifLabel.TextColor3 = ThemeModule.Colors.TextGray
 notifLabel.TextWrapped = true
 notifLabel.TextXAlignment = Enum.TextXAlignment.Left
+notifLabel.LayoutOrder = 2
 notifLabel.ZIndex = 51
 notifLabel.Parent = notificationFrame
 
 local notifBtnContainer = Instance.new("Frame")
-notifBtnContainer.Size = UDim2.new(1, -20, 0, 35)
-notifBtnContainer.Position = UDim2.new(0, 10, 1, -45)
+notifBtnContainer.Size = UDim2.new(1, 0, 0, 44)
 notifBtnContainer.BackgroundTransparency = 1
+notifBtnContainer.LayoutOrder = 3
 notifBtnContainer.ZIndex = 51
 notifBtnContainer.Parent = notificationFrame
 
@@ -511,10 +536,10 @@ notifBtnLayout.Parent = notifBtnContainer
 
 local acceptBtn = Instance.new("TextButton")
 acceptBtn.Name = "AcceptBtn"
-acceptBtn.Size = UDim2.new(0, 120, 0, 35)
+acceptBtn.Size = UDim2.new(0, 130, 0, 44)
 acceptBtn.BackgroundColor3 = ThemeModule.Colors.ButtonPrimaryBg
 acceptBtn.Text = "✓ Terima"
-acceptBtn.TextSize = 13
+acceptBtn.TextSize = UIStrings.TextSize.Button
 acceptBtn.Font = Enum.Font.GothamBold
 acceptBtn.TextColor3 = ThemeModule.Colors.ButtonPrimaryText
 acceptBtn.ZIndex = 52
@@ -523,10 +548,10 @@ corner(acceptBtn, 8)
 
 local rejectBtn = Instance.new("TextButton")
 rejectBtn.Name = "RejectBtn"
-rejectBtn.Size = UDim2.new(0, 120, 0, 35)
+rejectBtn.Size = UDim2.new(0, 130, 0, 44)
 rejectBtn.BackgroundColor3 = ThemeModule.Colors.CloseRed
 rejectBtn.Text = "✖️ Tolak"
-rejectBtn.TextSize = 13
+rejectBtn.TextSize = UIStrings.TextSize.Button
 rejectBtn.Font = Enum.Font.GothamBold
 rejectBtn.TextColor3 = ThemeModule.Colors.TextWhite
 rejectBtn.ZIndex = 52
@@ -540,7 +565,7 @@ getDownBtn.Position = UDim2.new(0.5, 0, 0.85, 0)
 getDownBtn.AnchorPoint = Vector2.new(0.5, 0.5)
 getDownBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
 getDownBtn.Text = "🚫 TURUN"
-getDownBtn.TextSize = 16
+getDownBtn.TextSize = UIStrings.TextSize.Button
 getDownBtn.Font = Enum.Font.GothamBold
 getDownBtn.TextColor3 = ThemeModule.Colors.TextWhite
 getDownBtn.Visible = false
@@ -894,7 +919,7 @@ local function setSegmentHover(styleId, isHovered)
 
 		TweenService:Create(nameLabel, TweenInfo.new(0.15), {
 			TextColor3 = Theme.AccentGold,
-			TextSize = 10
+			TextSize = UIStrings.TextSize.Caption
 		}):Play()
 
 		if strokeObj then
@@ -920,7 +945,7 @@ local function setSegmentHover(styleId, isHovered)
 
 		TweenService:Create(nameLabel, TweenInfo.new(0.15), {
 			TextColor3 = Theme.TextMuted,
-			TextSize = 9
+			TextSize = UIStrings.TextSize.Caption
 		}):Play()
 
 		if strokeObj then

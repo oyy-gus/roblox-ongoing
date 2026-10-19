@@ -12,6 +12,7 @@ local MenuConfig  = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
 local CarryConfig = require(Modules:WaitForChild("CarryConfig"))
 local FriendConfig = require(Modules:WaitForChild("FriendConfig"))
+local UIStrings   = require(Modules:WaitForChild("UIStrings"))
 
 local AutoScaleSystem = ReplicatedStorage:WaitForChild("AutoScaleSystem")
 local ScaleSystem     = require(AutoScaleSystem:WaitForChild("ScaleSystem"))
@@ -45,7 +46,7 @@ local BASE = {
 	BUTTON_HEIGHT     = 56,
 	BUTTON_CORNER     = 14,
 	BUTTON_SPACING    = 12,
-	BUTTON_TEXT_SIZE  = 17,
+	BUTTON_TEXT_SIZE  = UIStrings.TextSize.Button,
 
 	NAME_TEXT_SIZE     = 32,
 	USERNAME_TEXT_SIZE = 20,
@@ -482,7 +483,6 @@ local function openSheet(player)
 	scroll.Size = UDim2.new(1, 0, 1, 0)
 	scroll.Position = UDim2.new(0, 0, 0, 0)
 	scroll.BackgroundTransparency = 1
-	scroll.BorderSizePixel = 0
 	scroll.ScrollBarThickness = 0
 	scroll.ScrollBarImageTransparency = 1
 	scroll.ScrollingEnabled = true
@@ -962,12 +962,18 @@ local function openSheet(player)
 	closeBtn.BackgroundColor3 = C.CloseBtn
 	closeBtn.BorderSizePixel = 0
 	closeBtn.TextColor3 = Color3.new(1, 1, 1)
-	closeBtn.TextSize = B.CLOSE_TEXT_SIZE
+	closeBtn.TextSize = 16
 	closeBtn.Font = Enum.Font.GothamBold
+	closeBtn.TextXAlignment = Enum.TextXAlignment.Center
+	closeBtn.TextYAlignment = Enum.TextYAlignment.Center
 	closeBtn.AutoButtonColor = false
 	closeBtn.ZIndex = 10
 	closeBtn.Parent = canvasGroup
 	ThemeModule.CreateCorner(closeBtn, B.CLOSE_CORNER)
+
+	local closePad = Instance.new("UIPadding")
+	closePad.PaddingBottom = UDim.new(0, 3)
+	closePad.Parent = closeBtn
 
 	closeBtn.Activated:Connect(function()
 		playClick()

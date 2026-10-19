@@ -9,6 +9,7 @@ local AdminConfig = require(Modules:WaitForChild("AdminConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
 local NotifModule = require(Modules:WaitForChild("NotifModule"))
 local PanelAnimationController = require(Modules:WaitForChild("PanelAnimationController"))
+local UIStrings = require(Modules:WaitForChild("UIStrings"))
 
 local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -176,7 +177,7 @@ titleLabel.Position           = UDim2.new(0, 16, 0, 0)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text               = "🛡️  Panel Kontrol Admin"
 titleLabel.TextColor3         = ThemeModule.Colors.TextWhite
-titleLabel.TextSize           = 13.5
+titleLabel.TextSize           = UIStrings.TextSize.Title
 titleLabel.Font               = Enum.Font.GothamBold
 titleLabel.TextXAlignment     = Enum.TextXAlignment.Left
 titleLabel.Parent             = header
@@ -191,12 +192,18 @@ closeButton.BackgroundColor3 = ThemeModule.Colors.CloseRed
 closeButton.BorderSizePixel  = 0
 closeButton.Text             = "x"
 closeButton.TextColor3       = ThemeModule.Colors.TextWhite
-closeButton.TextSize         = 14
+closeButton.TextSize         = 16
 closeButton.Font             = Enum.Font.GothamBold
+closeButton.TextXAlignment   = Enum.TextXAlignment.Center
+closeButton.TextYAlignment   = Enum.TextYAlignment.Center
 closeButton.AutoButtonColor  = false
 closeButton.Parent           = header
 
 ThemeModule.CreateCorner(closeButton, 6)
+
+local closePad = Instance.new("UIPadding")
+closePad.PaddingBottom = UDim.new(0, 3)
+closePad.Parent = closeButton
 
 closeButton.MouseEnter:Connect(function()
 	TweenService:Create(closeButton, TweenInfo.new(0.2), { BackgroundColor3 = ThemeModule.Colors.CloseRedHover }):Play()
@@ -205,13 +212,17 @@ closeButton.MouseLeave:Connect(function()
 	TweenService:Create(closeButton, TweenInfo.new(0.2), { BackgroundColor3 = ThemeModule.Colors.CloseRed }):Play()
 end)
 
-local tabContainer = Instance.new("Frame")
+local tabContainer = Instance.new("ScrollingFrame")
 tabContainer.Name             = "TabContainer"
 tabContainer.Size             = UDim2.new(0, SIDEBAR_WIDTH, 1, -(HEADER_HEIGHT + 16))
 tabContainer.Position         = UDim2.new(0, 8, 0, HEADER_HEIGHT + 8)
 tabContainer.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 tabContainer.BorderSizePixel  = 0
-tabContainer.Active           = true
+tabContainer.ScrollBarThickness = 0
+tabContainer.ScrollBarImageTransparency = 1
+tabContainer.CanvasSize       = UDim2.new(0, 0, 0, 0)
+tabContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+tabContainer.ScrollingDirection = Enum.ScrollingDirection.Y
 tabContainer.Parent           = mainPanel
 
 ThemeModule.CreateCorner(tabContainer, 8)
@@ -299,7 +310,7 @@ local function createTabButton(def)
 	btn.BorderSizePixel    = 0
 	btn.Text               = def.Icon .. "  " .. def.DisplayName
 	btn.TextColor3         = TAB_COLORS.InactiveText
-	btn.TextSize           = 10
+	btn.TextSize           = UIStrings.TextSize.Caption
 	btn.Font               = Enum.Font.GothamMedium
 	btn.AutoButtonColor    = false
 	btn.Parent             = btnFrame
@@ -374,6 +385,17 @@ local function switchTab(tabName)
 			if frame then frame.BackgroundColor3 = TAB_COLORS.InactiveBackground end
 			btn.TextColor3 = TAB_COLORS.InactiveText
 			btn.Font       = Enum.Font.GothamMedium
+		end
+	end
+
+	local activeFrame = tabFrames[tabName]
+	if activeFrame and tabContainer and tabContainer:IsA("ScrollingFrame") then
+		local frameY = activeFrame.AbsolutePosition.Y - tabContainer.AbsolutePosition.Y + tabContainer.CanvasPosition.Y
+		local containerH = tabContainer.AbsoluteSize.Y
+		if frameY < tabContainer.CanvasPosition.Y or frameY + activeFrame.AbsoluteSize.Y > tabContainer.CanvasPosition.Y + containerH then
+			TweenService:Create(tabContainer, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				CanvasPosition = Vector2.new(0, math.max(0, frameY - 8))
+			}):Play()
 		end
 	end
 

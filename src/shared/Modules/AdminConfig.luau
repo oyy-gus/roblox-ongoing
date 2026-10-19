@@ -10,6 +10,8 @@ AdminConfig.Services = {
 	SoundService = game:GetService("SoundService"),
 }
 
+local UIStrings = require(game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("UIStrings"))
+
 AdminConfig.Config = {
 	ToggleKey = Enum.KeyCode.Insert,
 
@@ -20,7 +22,7 @@ AdminConfig.Config = {
 
 	HeaderHeight = 46,
 	SidebarWidth = 130,
-	TabButtonHeight = 34,
+	TabButtonHeight = 44,
 
 	Colors = {
 		Background    = Color3.fromHex("#080808"),
@@ -194,9 +196,8 @@ function AdminConfig.CreateScrollingFrame(parent, name, position, size)
 	scroll.Size = size or UDim2.new(1, 0, 1, 0)
 	scroll.Position = position or UDim2.new(0, 0, 0, 0)
 	scroll.BackgroundTransparency = 1
-	scroll.BorderSizePixel = 0
-	scroll.ScrollBarThickness = 4
-	scroll.ScrollBarImageColor3 = AdminConfig.Config.Colors.Primary
+	scroll.ScrollBarThickness = 0
+	scroll.ScrollBarImageTransparency = 1
 	scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 	scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 	scroll.ScrollingDirection = Enum.ScrollingDirection.Y
@@ -242,13 +243,13 @@ end
 function AdminConfig.CreateButton(parent, name, text, size, position, bgColor, textColor)
 	local button = Instance.new("TextButton")
 	button.Name = name or "Button"
-	button.Size = size or UDim2.new(0, 100, 0, 36)
+	button.Size = size or UDim2.new(0, 100, 0, 44)
 	button.Position = position or UDim2.new(0, 0, 0, 0)
 	button.BackgroundColor3 = bgColor or AdminConfig.Config.Colors.Primary
 	button.BorderSizePixel = 0
 	button.Text = text or "Button"
 	button.TextColor3 = textColor or AdminConfig.Config.Colors.Text
-	button.TextSize = 10.5
+	button.TextSize = UIStrings.TextSize.Button
 	button.Font = Enum.Font.GothamBold
 	button.AutoButtonColor = false
 	button.Parent = parent
@@ -281,7 +282,7 @@ end
 function AdminConfig.CreateSectionHeader(parent, text, icon)
 	local header = Instance.new("Frame")
 	header.Name = "Header"
-	header.Size = UDim2.new(1, 0, 0, 36)
+	header.Size = UDim2.new(1, 0, 0, 44)
 	header.BackgroundColor3 = AdminConfig.Config.Colors.Surface
 	header.BorderSizePixel = 0
 	header.Parent = parent
@@ -301,7 +302,7 @@ function AdminConfig.CreateSectionHeader(parent, text, icon)
 	label.BackgroundTransparency = 1
 	label.Text = (icon or "") .. " " .. (text or "Header")
 	label.TextColor3 = AdminConfig.Config.Colors.Text
-	label.TextSize = 11.5
+	label.TextSize = UIStrings.TextSize.Header
 	label.Font = Enum.Font.GothamBold
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.Parent = header
@@ -312,7 +313,7 @@ end
 function AdminConfig.CreateInfoBox(parent, labelText, position, size)
 	local frame = Instance.new("Frame")
 	frame.Name = "InfoBox"
-	frame.Size = size or UDim2.new(1, -20, 0, 55)
+	frame.Size = size or UDim2.new(1, -20, 0, 60)
 	frame.Position = position or UDim2.new(0, 10, 0, 0)
 	frame.BackgroundColor3 = AdminConfig.Config.Colors.Surface
 	frame.BorderSizePixel = 0
@@ -322,24 +323,24 @@ function AdminConfig.CreateInfoBox(parent, labelText, position, size)
 
 	local label = Instance.new("TextLabel")
 	label.Name = "Label"
-	label.Size = UDim2.new(1, -16, 0, 18)
+	label.Size = UDim2.new(1, -16, 0, 20)
 	label.Position = UDim2.new(0, 8, 0, 6)
 	label.BackgroundTransparency = 1
 	label.Text = labelText or "Label:"
 	label.TextColor3 = AdminConfig.Config.Colors.TextSecondary
-	label.TextSize = 9
+	label.TextSize = UIStrings.TextSize.Caption
 	label.Font = Enum.Font.Gotham
 	label.TextXAlignment = Enum.TextXAlignment.Left
 	label.Parent = frame
 
 	local value = Instance.new("TextLabel")
 	value.Name = "Value"
-	value.Size = UDim2.new(1, -16, 0, 22)
-	value.Position = UDim2.new(0, 8, 0, 26)
+	value.Size = UDim2.new(1, -16, 0, 24)
+	value.Position = UDim2.new(0, 8, 0, 28)
 	value.BackgroundTransparency = 1
 	value.Text = "—"
 	value.TextColor3 = AdminConfig.Config.Colors.Text
-	value.TextSize = 12
+	value.TextSize = UIStrings.TextSize.Body
 	value.Font = Enum.Font.GothamBold
 	value.TextXAlignment = Enum.TextXAlignment.Left
 	value.TextTruncate = Enum.TextTruncate.AtEnd
@@ -354,7 +355,7 @@ function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 
 	local btn = Instance.new("TextButton")
 	btn.Name = targetPlayer.Name
-	btn.Size = UDim2.new(1, -4, 0, 42)
+	btn.Size = UDim2.new(1, -4, 0, 48)
 	btn.BackgroundColor3 = AdminConfig.Config.Colors.Surface
 	btn.BorderSizePixel = 0
 	btn.Text = ""
@@ -366,12 +367,12 @@ function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 
 	local avatarImage = Instance.new("ImageLabel")
 	avatarImage.Name = "Avatar"
-	avatarImage.Size = UDim2.new(0, 30, 0, 30)
-	avatarImage.Position = UDim2.new(0, 6, 0.5, -15)
+	avatarImage.Size = UDim2.new(0, 34, 0, 34)
+	avatarImage.Position = UDim2.new(0, 6, 0.5, -17)
 	avatarImage.BackgroundColor3 = AdminConfig.Config.Colors.SurfaceLight
 	avatarImage.BorderSizePixel = 0
 	avatarImage.Parent = btn
-	AdminConfig.CreateCorner(avatarImage, 15)
+	AdminConfig.CreateCorner(avatarImage, 17)
 
 	task.spawn(function()
 		local success, result = pcall(function()
@@ -384,12 +385,12 @@ function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 
 	local nameLabel = Instance.new("TextLabel")
 	nameLabel.Name = "PlayerName"
-	nameLabel.Size = UDim2.new(1, -50, 0, 18)
-	nameLabel.Position = UDim2.new(0, 42, 0, 4)
+	nameLabel.Size = UDim2.new(1, -54, 0, 20)
+	nameLabel.Position = UDim2.new(0, 46, 0, 4)
 	nameLabel.BackgroundTransparency = 1
 	nameLabel.Text = targetPlayer.DisplayName
 	nameLabel.TextColor3 = AdminConfig.Config.Colors.Text
-	nameLabel.TextSize = 10.5
+	nameLabel.TextSize = UIStrings.TextSize.Body
 	nameLabel.Font = Enum.Font.GothamBold
 	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
 	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
@@ -397,12 +398,12 @@ function AdminConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 
 	local usernameLabel = Instance.new("TextLabel")
 	usernameLabel.Name = "Username"
-	usernameLabel.Size = UDim2.new(1, -50, 0, 14)
-	usernameLabel.Position = UDim2.new(0, 42, 0, 22)
+	usernameLabel.Size = UDim2.new(1, -54, 0, 18)
+	usernameLabel.Position = UDim2.new(0, 46, 0, 24)
 	usernameLabel.BackgroundTransparency = 1
 	usernameLabel.Text = "@" .. targetPlayer.Name
 	usernameLabel.TextColor3 = AdminConfig.Config.Colors.TextSecondary
-	usernameLabel.TextSize = 9
+	usernameLabel.TextSize = UIStrings.TextSize.Caption
 	usernameLabel.Font = Enum.Font.Gotham
 	usernameLabel.TextXAlignment = Enum.TextXAlignment.Left
 	usernameLabel.TextTruncate = Enum.TextTruncate.AtEnd

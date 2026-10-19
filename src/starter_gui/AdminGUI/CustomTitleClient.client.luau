@@ -6,6 +6,7 @@ local TweenService      = game:GetService("TweenService")
 local Modules     = ReplicatedStorage:WaitForChild("Modules")
 local AdminConfig = require(Modules:WaitForChild("AdminConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
+local UIStrings   = require(Modules:WaitForChild("UIStrings"))
 
 local player     = Players.LocalPlayer
 local TitleEvent = ReplicatedStorage:WaitForChild("TitleEvent", 10)
@@ -124,7 +125,7 @@ local function makeHeaderLabel(parent, text, size, pos, textSize)
 	lbl.BackgroundTransparency = 1
 	lbl.Text                 = text
 	lbl.TextColor3           = ThemeModule.Colors.TextWhite
-	lbl.TextSize             = textSize or 11
+	lbl.TextSize             = textSize or UIStrings.TextSize.Caption
 	lbl.Font                 = Enum.Font.GothamBold
 	lbl.TextXAlignment       = Enum.TextXAlignment.Left
 	lbl.Parent               = parent
@@ -142,7 +143,7 @@ local function makeInput(parent, placeholder, size, pos)
 	box.PlaceholderText      = placeholder
 	box.PlaceholderColor3    = ThemeModule.Colors.TextMuted
 	box.TextColor3           = ThemeModule.Colors.TextWhite
-	box.TextSize             = 13
+	box.TextSize             = UIStrings.TextSize.Caption
 	box.Font                 = Enum.Font.GothamMedium
 	box.ClearTextOnFocus     = false
 	box.Parent               = parent
@@ -203,12 +204,12 @@ local playerNameBox = makeInput(sec1, "Type player name...", UDim2.new(0.5, -12,
 
 local playerStatus = Instance.new("TextLabel")
 playerStatus.Name                 = "PlayerStatus"
-playerStatus.Size                 = UDim2.new(0.5, -12, 0, 16)
+playerStatus.Size                 = UDim2.new(0.5, -12, 0, 18)
 playerStatus.Position             = UDim2.new(0, 10, 0, 68)
 playerStatus.BackgroundTransparency = 1
 playerStatus.Text                 = ""
 playerStatus.TextColor3           = ThemeModule.Colors.TextMuted
-playerStatus.TextSize             = 10
+playerStatus.TextSize             = UIStrings.TextSize.Caption
 playerStatus.Font                 = Enum.Font.GothamMedium
 playerStatus.TextXAlignment       = Enum.TextXAlignment.Left
 playerStatus.Parent               = sec1
@@ -280,12 +281,12 @@ local modeLabels = { fixed="Fixed", rgb="RGB", gradient="Gradient", rainbow="Rai
 for _, modeName in ipairs(modeList) do
 	local btn = Instance.new("TextButton")
 	btn.Name             = "Mode_" .. modeName
-	btn.Size             = UDim2.new(0, 72, 0, 28)
+	btn.Size             = UDim2.new(0, 80, 0, 32)
 	btn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 	btn.BorderSizePixel  = 0
 	btn.Text             = modeLabels[modeName]
 	btn.TextColor3       = ThemeModule.Colors.TextGray
-	btn.TextSize         = 11
+	btn.TextSize         = UIStrings.TextSize.Caption
 	btn.Font             = Enum.Font.GothamMedium
 	btn.AutoButtonColor  = false
 	btn.Parent           = modeScrollFrame
@@ -294,7 +295,7 @@ for _, modeName in ipairs(modeList) do
 end
 
 local sec4 = makeSection("Font", 4, 88)
-makeHeaderLabel(sec4, "FONT", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 6), 10)
+makeHeaderLabel(sec4, "FONT", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 6), UIStrings.TextSize.Caption)
 
 local fontScrollFrame = Instance.new("ScrollingFrame")
 fontScrollFrame.Name = "FontScrollFrame"
@@ -327,12 +328,12 @@ local fontList = { "Gotham", "Source", "Fantasy", "Arcade", "SciFi", "Code" }
 for _, fontName in ipairs(fontList) do
 	local btn = Instance.new("TextButton")
 	btn.Name             = "Font_" .. fontName
-	btn.Size             = UDim2.new(0, 60, 0, 28)
+	btn.Size             = UDim2.new(0, 68, 0, 32)
 	btn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 	btn.BorderSizePixel  = 0
 	btn.Text             = fontName
 	btn.TextColor3       = ThemeModule.Colors.TextGray
-	btn.TextSize         = 10
+	btn.TextSize         = UIStrings.TextSize.Caption
 	btn.Font             = FontMap[fontName] or Enum.Font.GothamMedium
 	btn.AutoButtonColor  = false
 	btn.Parent           = fontScrollFrame
@@ -387,7 +388,7 @@ heightValueLabel.Position         = UDim2.new(0, 10, 0, 64)
 heightValueLabel.BackgroundTransparency = 1
 heightValueLabel.Text             = "0.0"
 heightValueLabel.TextColor3       = ThemeModule.Colors.TextWhite
-heightValueLabel.TextSize         = 12
+heightValueLabel.TextSize         = UIStrings.TextSize.Caption
 heightValueLabel.Font             = Enum.Font.GothamBold
 heightValueLabel.Parent           = sec6
 
@@ -395,7 +396,7 @@ local distanceBox = makeInput(sec6, "20", UDim2.new(0.5, -12, 0, 30), UDim2.new(
 distanceBox.Text = "20"
 
 local sec7 = makeSection("Preview", 7, 70)
-makeHeaderLabel(sec7, "PREVIEW", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 6), 10)
+makeHeaderLabel(sec7, "PREVIEW", UDim2.new(1, -20, 0, 20), UDim2.new(0, 10, 0, 6), UIStrings.TextSize.Caption)
 
 local preview = Instance.new("TextLabel")
 preview.Size                 = UDim2.new(1, -20, 0, 34)
@@ -404,15 +405,16 @@ preview.BackgroundColor3     = ThemeModule.Colors.BackgroundMedium
 preview.BorderSizePixel      = 0
 preview.Text                 = "Preview Text"
 preview.TextColor3           = ThemeModule.Colors.TextWhite
-preview.TextSize             = 18
+preview.TextSize             = UIStrings.TextSize.Title
 preview.Font                 = Enum.Font.GothamBold
-preview.TextScaled           = true
+preview.TextScaled           = false
+preview.TextWrapped          = true
 preview.TextStrokeTransparency = 0.6
 preview.TextStrokeColor3     = Color3.new(0, 0, 0)
 preview.Parent               = sec7
 makeCorner(preview, 6)
 
-local sec8 = makeSection("Actions", 8, 50)
+local sec8 = makeSection("Actions", 8, 56)
 sec8.BackgroundTransparency = 1
 for _, child in ipairs(sec8:GetChildren()) do
 	if child:IsA("UIStroke") then child:Destroy() end
@@ -427,14 +429,14 @@ buttonContainer.Parent = sec8
 
 local giveBtn = Instance.new("TextButton")
 giveBtn.Name             = "GiveBtn"
-giveBtn.Size             = UDim2.new(0.6, 0, 0, 36)
+giveBtn.Size             = UDim2.new(0.6, 0, 0, 44)
 giveBtn.AnchorPoint      = Vector2.new(0.5, 0)
-giveBtn.Position         = UDim2.new(0.5, 0, 0, 7)
+giveBtn.Position         = UDim2.new(0.5, 0, 0, 6)
 giveBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 giveBtn.BorderSizePixel  = 0
 giveBtn.Text             = "✨ GIVE TITLE"
 giveBtn.TextColor3       = ThemeModule.Colors.TextWhite
-giveBtn.TextSize         = 12
+giveBtn.TextSize         = UIStrings.TextSize.Button
 giveBtn.Font             = Enum.Font.GothamBold
 giveBtn.AutoButtonColor  = false
 giveBtn.Parent           = buttonContainer
@@ -450,14 +452,14 @@ end)
 
 local cancelBtn = Instance.new("TextButton")
 cancelBtn.Name             = "CancelBtn"
-cancelBtn.Size             = UDim2.new(0.35, 0, 0, 36)
+cancelBtn.Size             = UDim2.new(0.35, 0, 0, 44)
 cancelBtn.AnchorPoint      = Vector2.new(0, 0)
-cancelBtn.Position         = UDim2.new(0.65, 4, 0, 7)
+cancelBtn.Position         = UDim2.new(0.65, 4, 0, 6)
 cancelBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 cancelBtn.BorderSizePixel  = 0
 cancelBtn.Text             = "x CANCEL"
 cancelBtn.TextColor3       = ThemeModule.Colors.TextWhite
-cancelBtn.TextSize         = 12
+cancelBtn.TextSize         = UIStrings.TextSize.Button
 cancelBtn.Font             = Enum.Font.GothamBold
 cancelBtn.AutoButtonColor  = false
 cancelBtn.Visible          = false
@@ -478,20 +480,20 @@ noPlayerLabel.Size = UDim2.new(1, 0, 1, 0)
 noPlayerLabel.BackgroundTransparency = 1
 noPlayerLabel.Text = "⬆️ Ketik nama pemain untuk memberikan gelar"
 noPlayerLabel.TextColor3 = ThemeModule.Colors.TextMuted
-noPlayerLabel.TextSize = 12
+noPlayerLabel.TextSize = UIStrings.TextSize.Caption
 noPlayerLabel.Font = Enum.Font.GothamMedium
 noPlayerLabel.Parent = sec8
 
 local function updateButtonLayout(editMode)
 	if editMode then
 		giveBtn.AnchorPoint = Vector2.new(0, 0)
-		giveBtn.Size = UDim2.new(0.6, -4, 0, 36)
-		giveBtn.Position = UDim2.new(0, 0, 0, 7)
+		giveBtn.Size = UDim2.new(0.6, -4, 0, 44)
+		giveBtn.Position = UDim2.new(0, 0, 0, 6)
 		cancelBtn.Visible = true
 	else
 		giveBtn.AnchorPoint = Vector2.new(0.5, 0)
-		giveBtn.Size = UDim2.new(0.6, 0, 0, 36)
-		giveBtn.Position = UDim2.new(0.5, 0, 0, 7)
+		giveBtn.Size = UDim2.new(0.6, 0, 0, 44)
+		giveBtn.Position = UDim2.new(0.5, 0, 0, 6)
 		cancelBtn.Visible = false
 	end
 end
@@ -577,7 +579,7 @@ local function updateAutoComplete(text)
 		label.BackgroundTransparency = 1
 		label.Text                 = displayText
 		label.TextColor3           = ThemeModule.Colors.TextWhite
-		label.TextSize             = 11
+		label.TextSize             = UIStrings.TextSize.Caption
 		label.Font                 = Enum.Font.GothamMedium
 		label.TextXAlignment       = Enum.TextXAlignment.Left
 		label.TextTruncate         = Enum.TextTruncate.AtEnd
@@ -875,7 +877,7 @@ local function showTemplates()
 		nameLabel.Text             = templateName
 		nameLabel.TextColor3       = ThemeModule.Colors.TextWhite
 		nameLabel.Font             = Enum.Font.GothamBold
-		nameLabel.TextSize         = 12
+		nameLabel.TextSize         = UIStrings.TextSize.Caption
 		nameLabel.TextXAlignment   = Enum.TextXAlignment.Left
 		nameLabel.Parent           = row
 		ThemeModule.CreateStaticGradient(nameLabel, "Primary", 90)

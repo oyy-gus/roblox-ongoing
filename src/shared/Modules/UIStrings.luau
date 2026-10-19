@@ -1,4 +1,26 @@
 local UIStrings = {
+	TextSize = {
+		Header = 20,
+		Title = 18,
+		Button = 18,
+		Body = 16,
+		Caption = 14,
+	},
+
+	HeaderSize = 20,
+	TitleSize = 18,
+	ButtonSize = 18,
+	BodySize = 16,
+	CaptionSize = 14,
+
+	Fonts = {
+		Header = Enum.Font.GothamBold,
+		Title = Enum.Font.GothamBold,
+		Button = Enum.Font.GothamBold,
+		Body = Enum.Font.GothamMedium,
+		Caption = Enum.Font.Gotham,
+	},
+
 	VIP = {
 		Title = "Perintah VIP",
 		GlowstickTitle = "Tongkat Cahaya – Warna",

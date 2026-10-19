@@ -4,12 +4,14 @@ local RunService        = game:GetService("RunService")
 local TweenService      = game:GetService("TweenService")
 local Players           = game:GetService("Players")
 local ContentProvider   = game:GetService("ContentProvider")
+local TextService       = game:GetService("TextService")
 
 local Modules     = ReplicatedStorage:WaitForChild("Modules")
 local MenuConfig  = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
 local NotifModule = require(Modules:WaitForChild("NotifModule"))
 local MusicModule = require(Modules:WaitForChild("MusicModule"))
+local UIStrings   = require(Modules:WaitForChild("UIStrings"))
 
 local guiReady = MenuConfig.WaitForGUIReady(15)
 if not guiReady then warn("❌ MusicClient: GUI belum siap!"); return end
@@ -287,7 +289,11 @@ local function addStroke(p, color, thickness, transparency)
 	return s
 end
 local function addSC(p, mx, mn)
-	local c = Instance.new("UITextSizeConstraint"); c.MaxTextSize = mx; c.MinTextSize = mn or 8; c.Parent = p; return c
+	local c = Instance.new("UITextSizeConstraint")
+	c.MaxTextSize = math.max(mx or 24, 36)
+	c.MinTextSize = 14
+	c.Parent = p
+	return c
 end
 local function addGradient(parent, rotation, animated)
 	if ThemeModule then
@@ -930,7 +936,7 @@ local function updateQueue()
 		numLbl.BackgroundTransparency = 1
 		numLbl.Text = tostring(i)
 		numLbl.TextColor3 = Color3.fromHex("#D4D4D4")
-		numLbl.TextSize = 11
+		numLbl.TextSize = UIStrings.TextSize.Caption
 		numLbl.Font = Enum.Font.GothamBold
 		numLbl.TextXAlignment = Enum.TextXAlignment.Center
 		numLbl.TextYAlignment = Enum.TextYAlignment.Center
@@ -940,17 +946,17 @@ local function updateQueue()
 		local rightOffset = (dur > 0) and 70 or 10
 
 		local nameLbl = Instance.new("TextLabel")
+		nameLbl.Text = songName
 		nameLbl.Size = UDim2.new(1, -(40 + rightOffset), 0, 18)
 		nameLbl.Position = UDim2.new(0, 38, 0, 5)
 		nameLbl.BackgroundTransparency = 1
-		nameLbl.Text = songData.judul or T.Unknown
 		nameLbl.TextColor3 = Color3.fromHex("#FFFFFF")
-		nameLbl.TextSize = 10.5
+		nameLbl.TextSize = UIStrings.TextSize.Body
 		nameLbl.Font = Enum.Font.GothamBold
 		nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
 		nameLbl.TextXAlignment = Enum.TextXAlignment.Left
 		nameLbl.Parent = item
-		addSC(nameLbl, 11)
+		addSC(nameLbl, 16)
 
 		local reqLbl = Instance.new("TextLabel")
 		reqLbl.Size = UDim2.new(1, -(40 + rightOffset), 0, 15)
@@ -958,7 +964,7 @@ local function updateQueue()
 		reqLbl.BackgroundTransparency = 1
 		reqLbl.Text = "👤 "..(song.uploader or T.Unknown)
 		reqLbl.TextColor3 = Color3.fromHex("#8E8E93")
-		reqLbl.TextSize = 9
+		reqLbl.TextSize = UIStrings.TextSize.Caption
 		reqLbl.Font = Enum.Font.GothamMedium
 		reqLbl.TextTruncate = Enum.TextTruncate.AtEnd
 		reqLbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -973,7 +979,7 @@ local function updateQueue()
 			durBadge.BackgroundColor3 = Color3.fromHex("#1C1C1C")
 			durBadge.BorderSizePixel = 0
 			durBadge.TextColor3 = Color3.fromHex("#A3A3A3")
-			durBadge.TextSize = 10
+			durBadge.TextSize = UIStrings.TextSize.Caption
 			durBadge.Font = Enum.Font.GothamMedium
 			durBadge.TextXAlignment = Enum.TextXAlignment.Center
 			durBadge.Parent = item
@@ -1166,12 +1172,12 @@ local function updateSongs(list)
 		nameLbl.Position = UDim2.new(0, infoLeft, 0, 5)
 		nameLbl.BackgroundTransparency = 1
 		nameLbl.TextColor3 = Color3.fromHex("#FFFFFF")
-		nameLbl.TextSize = 10.5
+		nameLbl.TextSize = UIStrings.TextSize.Body
 		nameLbl.TextXAlignment = Enum.TextXAlignment.Left
 		nameLbl.Font = Enum.Font.GothamBold
 		nameLbl.TextTruncate = Enum.TextTruncate.AtEnd
 		nameLbl.Parent = item
-		addSC(nameLbl, 11)
+		addSC(nameLbl, 16)
 
 		local subLbl = Instance.new("TextLabel")
 		if isCurrentPlaying then
@@ -1187,22 +1193,22 @@ local function updateSongs(list)
 		subLbl.Size = UDim2.new(1, -(infoLeft + rightSpace), 0, 15)
 		subLbl.Position = UDim2.new(0, infoLeft, 0, 23)
 		subLbl.BackgroundTransparency = 1
-		subLbl.TextSize = 9
+		subLbl.TextSize = UIStrings.TextSize.Caption
 		subLbl.TextXAlignment = Enum.TextXAlignment.Left
 		subLbl.Font = Enum.Font.GothamMedium
 		subLbl.Parent = item
 
-		local btnH = 28
+		local btnH = 32
 		local pb = Instance.new("TextButton")
 		pb.Text = T.AddToQueue
-		pb.Size = UDim2.new(0, 64, 0, btnH)
-		local pbRight = isFavView and -(64 + btnH + 10) or -72
+		pb.Size = UDim2.new(0, 72, 0, btnH)
+		local pbRight = isFavView and -(72 + btnH + 10) or -80
 		pb.Position = UDim2.new(1, pbRight, 0.5, -btnH/2)
 		pb.BackgroundColor3 = Color3.fromHex("#222222")
 		pb.BorderSizePixel = 0
 		pb.TextColor3 = Color3.fromHex("#FFFFFF")
 		pb.Font = Enum.Font.GothamBold
-		pb.TextSize = 11
+		pb.TextSize = UIStrings.TextSize.Caption
 		pb.AutoButtonColor = false
 		pb.Parent = item
 		addCorner(pb, DIM.CORNER_SM)
@@ -1244,7 +1250,7 @@ local function updateSongs(list)
 			rb.BorderSizePixel = 0
 			rb.TextColor3 = Color3.fromHex("#9E9E9E")
 			rb.Font = Enum.Font.GothamBold
-			rb.TextSize = 12
+			rb.TextSize = UIStrings.TextSize.Caption
 			rb.AutoButtonColor = false
 			rb.Parent = item
 			addCorner(rb, DIM.CORNER_SM)
@@ -1369,16 +1375,21 @@ local function buildNowPlaying()
 	overlayGrad.Rotation = 90
 	overlayGrad.Parent = darkOverlay
 
+	local npBadgeText = "NOW PLAYING"
+	local npTextCalc = TextService:GetTextSize(npBadgeText, UIStrings.TextSize.Caption, Enum.Font.GothamBold, Vector2.new(1000, 30))
+	local npBadgeWidth = math.max(100, 8 + 6 + 6 + npTextCalc.X + 10)
+
 	local npBadge = Instance.new("Frame")
 	npBadge.Name = "Badge"
-	npBadge.Size = UDim2.new(0, 96, 0, 18)
+	npBadge.AutomaticSize = Enum.AutomaticSize.X
+	npBadge.Size = UDim2.new(0, npBadgeWidth, 0, 22)
 	npBadge.Position = UDim2.new(0, 8, 0, 8)
 	npBadge.BackgroundColor3 = Color3.fromHex("#080808")
 	npBadge.BackgroundTransparency = 0.15
 	npBadge.BorderSizePixel = 0
 	npBadge.ZIndex = 4
 	npBadge.Parent = np
-	addCorner(npBadge, 9)
+	addCorner(npBadge, 11)
 
 	local badgeStroke = Instance.new("UIStroke")
 	badgeStroke.Thickness = 1
@@ -1387,39 +1398,56 @@ local function buildNowPlaying()
 	badgeStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 	badgeStroke.Parent = npBadge
 
+	local badgePad = Instance.new("UIPadding")
+	badgePad.PaddingLeft = UDim.new(0, 8)
+	badgePad.PaddingRight = UDim.new(0, 10)
+	badgePad.PaddingTop = UDim.new(0, 0)
+	badgePad.PaddingBottom = UDim.new(0, 0)
+	badgePad.Parent = npBadge
+
+	local badgeLayout = Instance.new("UIListLayout")
+	badgeLayout.FillDirection = Enum.FillDirection.Horizontal
+	badgeLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+	badgeLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	badgeLayout.Padding = UDim.new(0, 6)
+	badgeLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	badgeLayout.Parent = npBadge
+
 	local badgeDot = Instance.new("Frame")
 	badgeDot.Name = "Dot"
-	badgeDot.Size = UDim2.new(0, 5, 0, 5)
-	badgeDot.Position = UDim2.new(0, 7, 0.5, -2)
+	badgeDot.Size = UDim2.new(0, 6, 0, 6)
 	badgeDot.BackgroundColor3 = Color3.fromHex("#FFFFFF")
 	badgeDot.BorderSizePixel = 0
+	badgeDot.LayoutOrder = 1
 	badgeDot.ZIndex = 5
 	badgeDot.Parent = npBadge
 	addCorner(badgeDot, 3)
 
 	local badgeText = Instance.new("TextLabel")
 	badgeText.Name = "Text"
-	badgeText.Size = UDim2.new(1, -18, 1, 0)
-	badgeText.Position = UDim2.new(0, 16, 0, 0)
+	badgeText.AutomaticSize = Enum.AutomaticSize.X
+	badgeText.Size = UDim2.new(0, 0, 1, 0)
 	badgeText.BackgroundTransparency = 1
-	badgeText.Text = "NOW PLAYING"
+	badgeText.Text = npBadgeText
 	badgeText.TextColor3 = Color3.fromHex("#FFFFFF")
-	badgeText.TextSize = 6.5
+	badgeText.TextSize = UIStrings.TextSize.Caption
 	badgeText.Font = Enum.Font.GothamBold
 	badgeText.TextXAlignment = Enum.TextXAlignment.Left
+	badgeText.TextYAlignment = Enum.TextYAlignment.Center
+	badgeText.LayoutOrder = 2
 	badgeText.ZIndex = 5
 	badgeText.Parent = npBadge
 
 	local favBtn = Instance.new("TextButton")
 	favBtn.Name = "AddFavBtn"
 	favBtn.Text = T.AddFavorite
-	favBtn.Size = UDim2.new(0, 28, 0, 28)
-	favBtn.Position = UDim2.new(1, -36, 0, 8)
+	favBtn.Size = UDim2.new(0, 36, 0, 36)
+	favBtn.Position = UDim2.new(1, -42, 0, 6)
 	favBtn.BackgroundColor3 = Color3.fromHex("#1A1A1A")
 	favBtn.BackgroundTransparency = 0.1
 	favBtn.BorderSizePixel = 0
 	favBtn.TextColor3 = Color3.fromHex("#FFFFFF")
-	favBtn.TextSize = 15
+	favBtn.TextSize = UIStrings.TextSize.Title
 	favBtn.Font = Enum.Font.GothamBold
 	favBtn.Visible = false
 	favBtn.AutoButtonColor = false
@@ -1482,11 +1510,11 @@ local function buildNowPlaying()
 	local songName = Instance.new("TextLabel")
 	songName.Name = "SongName"
 	songName.Text = T.NoSongPlaying
-	songName.Size = UDim2.new(1, 0, 0, 24)
+	songName.Size = UDim2.new(1, 0, 0, 26)
 	songName.Position = UDim2.new(0, 0, 0, 0)
 	songName.BackgroundTransparency = 1
 	songName.TextColor3 = Color3.fromHex("#FFFFFF")
-	songName.TextSize = 14
+	songName.TextSize = UIStrings.TextSize.Title
 	songName.Font = Enum.Font.GothamBold
 	songName.TextTruncate = Enum.TextTruncate.AtEnd
 	songName.TextXAlignment = Enum.TextXAlignment.Left
@@ -1494,17 +1522,17 @@ local function buildNowPlaying()
 	songName.TextStrokeColor3 = Color3.new(0, 0, 0)
 	songName.ZIndex = 12
 	songName.Parent = npContent
-	addSC(songName, 15)
+	addSC(songName, 18)
 	UI.songNameLbl = songName
 
 	local reqLbl = Instance.new("TextLabel")
 	reqLbl.Name = "Requester"
 	reqLbl.Text = ""
-	reqLbl.Size = UDim2.new(1, 0, 0, 18)
-	reqLbl.Position = UDim2.new(0, 0, 0, 25)
+	reqLbl.Size = UDim2.new(1, 0, 0, 20)
+	reqLbl.Position = UDim2.new(0, 0, 0, 27)
 	reqLbl.BackgroundTransparency = 1
 	reqLbl.TextColor3 = C.RequesterText
-	reqLbl.TextSize = 12
+	reqLbl.TextSize = UIStrings.TextSize.Caption
 	reqLbl.Font = Enum.Font.GothamMedium
 	reqLbl.TextTruncate = Enum.TextTruncate.AtEnd
 	reqLbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -1512,7 +1540,7 @@ local function buildNowPlaying()
 	reqLbl.TextStrokeColor3 = Color3.new(0, 0, 0)
 	reqLbl.ZIndex = 12
 	reqLbl.Parent = npContent
-	addSC(reqLbl, 13, 10)
+	addSC(reqLbl, 16, 14)
 	UI.requesterLbl = reqLbl
 
 	local vizContainer = Instance.new("Frame")
@@ -1588,29 +1616,29 @@ local function buildNowPlaying()
 	local durLbl = Instance.new("TextLabel")
 	durLbl.Name = "Duration"
 	durLbl.Text = "0:00 / 0:00"
-	durLbl.Size = UDim2.new(0, 52, 1, 0)
-	durLbl.Position = UDim2.new(1, -84, 0, 0)
+	durLbl.Size = UDim2.new(0, 64, 1, 0)
+	durLbl.Position = UDim2.new(1, -96, 0, 0)
 	durLbl.BackgroundTransparency = 1
 	durLbl.TextColor3 = Color3.fromHex("#D1D5DB")
-	durLbl.TextSize = 10
+	durLbl.TextSize = UIStrings.TextSize.Caption
 	durLbl.Font = Enum.Font.GothamSemibold
 	durLbl.TextXAlignment = Enum.TextXAlignment.Right
 	durLbl.Visible = false
 	durLbl.ZIndex = 12
 	durLbl.Parent = progressFrame
-	addSC(durLbl, 10)
+	addSC(durLbl, 14)
 	UI.durationLbl = durLbl
 
 	local skip = Instance.new("TextButton")
 	skip.Name = "SkipBtn"
 	skip.Text = "⏭"
-	skip.Size = UDim2.new(0, 24, 0, 20)
-	skip.Position = UDim2.new(1, -24, 0.5, -10)
+	skip.Size = UDim2.new(0, 28, 0, 24)
+	skip.Position = UDim2.new(1, -28, 0.5, -12)
 	skip.BackgroundColor3 = Color3.fromHex("#1A1A1A")
 	skip.BackgroundTransparency = 0.1
 	skip.BorderSizePixel = 0
 	skip.TextColor3 = Color3.fromHex("#FFFFFF")
-	skip.TextSize = 11
+	skip.TextSize = UIStrings.TextSize.Caption
 	skip.Font = Enum.Font.GothamBold
 	skip.AutoButtonColor = false
 	skip.Visible = false
@@ -1660,25 +1688,25 @@ local function buildNowPlaying()
 	voteInfo.BackgroundTransparency = 1
 	voteInfo.Text = "Vote Skip: 1/2"
 	voteInfo.TextColor3 = Color3.fromHex("#FFFFFF")
-	voteInfo.TextSize = 10
+	voteInfo.TextSize = UIStrings.TextSize.Caption
 	voteInfo.Font = Enum.Font.GothamMedium
 	voteInfo.TextXAlignment = Enum.TextXAlignment.Left
-	voteInfo.TextTruncate = Enum.TextTruncate.AtEnd
+	voteInfo.TextTruncate = Enum.TextTruncate.None
 	voteInfo.ZIndex = 16
 	voteInfo.Parent = votePanel
-	addSC(voteInfo, 11)
+	addSC(voteInfo, 14)
 	UI.voteInfoLbl = voteInfo
 
 	local voteYes = Instance.new("TextButton")
 	voteYes.Name = "VoteYesBtn"
 	voteYes.Text = "✓ Ya"
-	voteYes.Size = UDim2.new(0, 44, 0, 22)
-	voteYes.Position = UDim2.new(1, -102, 0.5, -11)
+	voteYes.Size = UDim2.new(0, 48, 0, 26)
+	voteYes.Position = UDim2.new(1, -108, 0.5, -13)
 	voteYes.BackgroundColor3 = Color3.fromHex("#15803D")
 	voteYes.BackgroundTransparency = 0.1
 	voteYes.BorderSizePixel = 0
 	voteYes.TextColor3 = Color3.fromHex("#FFFFFF")
-	voteYes.TextSize = 10
+	voteYes.TextSize = UIStrings.TextSize.Caption
 	voteYes.Font = Enum.Font.GothamBold
 	voteYes.AutoButtonColor = false
 	voteYes.ZIndex = 16
@@ -1695,13 +1723,13 @@ local function buildNowPlaying()
 	local voteNo = Instance.new("TextButton")
 	voteNo.Name = "VoteNoBtn"
 	voteNo.Text = "X Tidak"
-	voteNo.Size = UDim2.new(0, 48, 0, 22)
-	voteNo.Position = UDim2.new(1, -54, 0.5, -11)
+	voteNo.Size = UDim2.new(0, 54, 0, 26)
+	voteNo.Position = UDim2.new(1, -56, 0.5, -13)
 	voteNo.BackgroundColor3 = Color3.fromHex("#262626")
 	voteNo.BackgroundTransparency = 0.1
 	voteNo.BorderSizePixel = 0
 	voteNo.TextColor3 = Color3.fromHex("#E5E7EB")
-	voteNo.TextSize = 10
+	voteNo.TextSize = UIStrings.TextSize.Caption
 	voteNo.Font = Enum.Font.GothamBold
 	voteNo.AutoButtonColor = false
 	voteNo.ZIndex = 16
@@ -1718,11 +1746,11 @@ local function buildNowPlaying()
 	local voteStatus = Instance.new("TextLabel")
 	voteStatus.Name = "VoteStatusLbl"
 	voteStatus.Text = "✓ Sudah Vote"
-	voteStatus.Size = UDim2.new(0, 96, 1, 0)
-	voteStatus.Position = UDim2.new(1, -102, 0, 0)
+	voteStatus.Size = UDim2.new(0, 102, 1, 0)
+	voteStatus.Position = UDim2.new(1, -108, 0, 0)
 	voteStatus.BackgroundTransparency = 1
 	voteStatus.TextColor3 = Color3.fromHex("#10B981")
-	voteStatus.TextSize = 10
+	voteStatus.TextSize = UIStrings.TextSize.Caption
 	voteStatus.Font = Enum.Font.GothamMedium
 	voteStatus.TextXAlignment = Enum.TextXAlignment.Center
 	voteStatus.Visible = false
@@ -1766,22 +1794,22 @@ local function buildQueueSection()
 	qTitle.Position = UDim2.new(0, 0, 0, 0)
 	qTitle.BackgroundTransparency = 1
 	qTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-	qTitle.TextSize = 13
+	qTitle.TextSize = UIStrings.TextSize.Title
 	qTitle.TextXAlignment = Enum.TextXAlignment.Left
 	qTitle.Font = Enum.Font.GothamBold
 	qTitle.Parent = qHeader
-	addSC(qTitle, 14)
+	addSC(qTitle, 18)
 	addTextGradient(qTitle, true)
 
 	local qBadge = Instance.new("TextLabel")
 	qBadge.Name = "QueueBadge"
 	qBadge.Text = "Autoplay"
-	qBadge.Size = UDim2.new(0, 85, 0, 20)
-	qBadge.Position = UDim2.new(1, -85, 0.5, -10)
+	qBadge.Size = UDim2.new(0, 90, 0, 22)
+	qBadge.Position = UDim2.new(1, -90, 0.5, -11)
 	qBadge.BackgroundColor3 = Color3.fromHex("#181818")
 	qBadge.BorderSizePixel = 0
 	qBadge.TextColor3 = Color3.fromHex("#9E9E9E")
-	qBadge.TextSize = 10
+	qBadge.TextSize = UIStrings.TextSize.Caption
 	qBadge.Font = Enum.Font.GothamBold
 	qBadge.TextXAlignment = Enum.TextXAlignment.Center
 	qBadge.Parent = qHeader
@@ -1817,7 +1845,7 @@ local function buildQueueSection()
 	reqInput.BorderSizePixel = 0
 	reqInput.TextColor3 = C.InputText
 	reqInput.PlaceholderColor3 = Color3.fromHex("#737373")
-	reqInput.TextSize = 12
+	reqInput.TextSize = UIStrings.TextSize.Body
 	reqInput.Font = Enum.Font.GothamMedium
 	reqInput.TextXAlignment = Enum.TextXAlignment.Left
 	reqInput.TextYAlignment = Enum.TextYAlignment.Center
@@ -1874,7 +1902,7 @@ local function buildQueueSection()
 	reqBtn.BackgroundColor3 = Color3.fromHex("#FFFFFF")
 	reqBtn.BorderSizePixel = 0
 	reqBtn.TextColor3 = Color3.fromHex("#111111")
-	reqBtn.TextSize = 12
+	reqBtn.TextSize = UIStrings.TextSize.Button
 	reqBtn.Font = Enum.Font.GothamBold
 	reqBtn.AutoButtonColor = false
 	reqBtn.Parent = reqFrame
@@ -1894,9 +1922,8 @@ local function buildQueueSection()
 	qScroll.Size = UDim2.new(1, 0, 0, DIM.QUEUE_H)
 	qScroll.Position = UDim2.new(0, 0, 0, DIM.QTITLE_H + 8 + DIM.REQ_H + 8)
 	qScroll.BackgroundColor3 = Color3.fromHex("#141414")
-	qScroll.BorderSizePixel = 0
-	qScroll.ScrollBarThickness = 4
-	qScroll.ScrollBarImageColor3 = Color3.fromHex("#3E3E3E")
+	qScroll.ScrollBarThickness = 0
+	qScroll.ScrollBarImageTransparency = 1
 	qScroll.ClipsDescendants = true
 	qScroll.Parent = qs
 	addCorner(qScroll, DIM.CORNER_MD)
@@ -1934,11 +1961,11 @@ local function buildQueueSection()
 	local qeLbl = Instance.new("TextLabel")
 	qeLbl.Name = "QueueEmpty"
 	qeLbl.Text = T.QueueEmpty
-	qeLbl.Size = UDim2.new(1, -16, 0, 20)
-	qeLbl.Position = UDim2.new(0, 8, 0, 50)
+	qeLbl.Size = UDim2.new(1, -16, 0, 22)
+	qeLbl.Position = UDim2.new(0, 8, 0, 48)
 	qeLbl.BackgroundTransparency = 1
 	qeLbl.TextColor3 = Color3.fromHex("#D4D4D4")
-	qeLbl.TextSize = 12
+	qeLbl.TextSize = UIStrings.TextSize.Body
 	qeLbl.Font = Enum.Font.GothamBold
 	qeLbl.TextXAlignment = Enum.TextXAlignment.Center
 	qeLbl.Parent = qEmpty
@@ -1946,11 +1973,11 @@ local function buildQueueSection()
 	local qeSub = Instance.new("TextLabel")
 	qeSub.Name = "QueueEmptySub"
 	qeSub.Text = T.QueueEmptySub
-	qeSub.Size = UDim2.new(1, -20, 0, 18)
-	qeSub.Position = UDim2.new(0, 10, 0, 70)
+	qeSub.Size = UDim2.new(1, -20, 0, 20)
+	qeSub.Position = UDim2.new(0, 10, 0, 72)
 	qeSub.BackgroundTransparency = 1
 	qeSub.TextColor3 = Color3.fromHex("#737373")
-	qeSub.TextSize = 10
+	qeSub.TextSize = UIStrings.TextSize.Caption
 	qeSub.Font = Enum.Font.GothamMedium
 	qeSub.TextXAlignment = Enum.TextXAlignment.Center
 	qeSub.Parent = qEmpty
@@ -2047,13 +2074,13 @@ local function makePlaylistCard(name, titleText, countText, thumbUrlOrIcon, layo
 	tLbl.Position = UDim2.new(0, 8, 1, -40)
 	tLbl.BackgroundTransparency = 1
 	tLbl.TextColor3 = Color3.fromHex("#FFFFFF")
-	tLbl.TextSize = 11.5
+	tLbl.TextSize = UIStrings.TextSize.Body
 	tLbl.Font = Enum.Font.GothamBold
 	tLbl.TextXAlignment = Enum.TextXAlignment.Left
 	tLbl.TextTruncate = Enum.TextTruncate.AtEnd
 	tLbl.ZIndex = 3
 	tLbl.Parent = card
-	addSC(tLbl, 12)
+	addSC(tLbl, 16)
 
 	local sLbl = Instance.new("TextLabel")
 	sLbl.Name = "CardSub"
@@ -2062,7 +2089,7 @@ local function makePlaylistCard(name, titleText, countText, thumbUrlOrIcon, layo
 	sLbl.Position = UDim2.new(0, 8, 1, -20)
 	sLbl.BackgroundTransparency = 1
 	sLbl.TextColor3 = Color3.fromHex("#D1D5DB")
-	sLbl.TextSize = 9.5
+	sLbl.TextSize = UIStrings.TextSize.Caption
 	sLbl.Font = Enum.Font.GothamMedium
 	sLbl.TextXAlignment = Enum.TextXAlignment.Left
 	sLbl.TextTruncate = Enum.TextTruncate.AtEnd
@@ -2071,13 +2098,13 @@ local function makePlaylistCard(name, titleText, countText, thumbUrlOrIcon, layo
 
 	local activeInd = Instance.new("TextLabel")
 	activeInd.Name = "ActiveIndicator"
-	activeInd.Size = UDim2.new(0, 50, 0, 18)
-	activeInd.Position = UDim2.new(1, -56, 0, 6)
+	activeInd.Size = UDim2.new(0, 56, 0, 20)
+	activeInd.Position = UDim2.new(1, -62, 0, 6)
 	activeInd.BackgroundColor3 = Color3.fromHex("#0F0F0F")
 	activeInd.BackgroundTransparency = 0.2
 	activeInd.Text = "● Aktif"
 	activeInd.TextColor3 = Color3.fromHex("#FFFFFF")
-	activeInd.TextSize = 9
+	activeInd.TextSize = UIStrings.TextSize.Caption
 	activeInd.Font = Enum.Font.GothamBold
 	activeInd.Visible = isSelected
 	activeInd.BorderSizePixel = 0
@@ -2201,11 +2228,11 @@ local function buildPlaylistSection()
 	local titleLbl = Instance.new("TextLabel")
 	titleLbl.Name = "PlaylistTitle"
 	titleLbl.Text = "📂  Koleksi Playlist"
-	titleLbl.Size = UDim2.new(1, -110, 1, 0)
+	titleLbl.Size = UDim2.new(1, -120, 1, 0)
 	titleLbl.Position = UDim2.new(0, 0, 0, 0)
 	titleLbl.BackgroundTransparency = 1
 	titleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-	titleLbl.TextSize = 13
+	titleLbl.TextSize = UIStrings.TextSize.Title
 	titleLbl.TextXAlignment = Enum.TextXAlignment.Left
 	titleLbl.Font = Enum.Font.GothamBold
 	titleLbl.Parent = header
@@ -2215,12 +2242,12 @@ local function buildPlaylistSection()
 	local badge = Instance.new("TextLabel")
 	badge.Name = "PlaylistBadge"
 	badge.Text = "0 Playlist"
-	badge.Size = UDim2.new(0, 95, 0, 20)
-	badge.Position = UDim2.new(1, -95, 0.5, -10)
+	badge.Size = UDim2.new(0, 105, 0, 24)
+	badge.Position = UDim2.new(1, -105, 0.5, -12)
 	badge.BackgroundColor3 = Color3.fromHex("#181818")
 	badge.BorderSizePixel = 0
 	badge.TextColor3 = Color3.fromHex("#9E9E9E")
-	badge.TextSize = 10
+	badge.TextSize = UIStrings.TextSize.Caption
 	badge.Font = Enum.Font.GothamBold
 	badge.TextXAlignment = Enum.TextXAlignment.Center
 	badge.Parent = header
@@ -2295,7 +2322,7 @@ local function buildSearchSection()
 	searchIcon.Position = UDim2.new(0, 8, 0.5, -12)
 	searchIcon.BackgroundTransparency = 1
 	searchIcon.TextColor3 = Color3.fromHex("#888888")
-	searchIcon.TextSize = 13
+	searchIcon.TextSize = UIStrings.TextSize.Caption
 	searchIcon.Font = Enum.Font.Gotham
 	searchIcon.Parent = searchContainer
 
@@ -2309,7 +2336,7 @@ local function buildSearchSection()
 	searchInput.BorderSizePixel = 0
 	searchInput.TextColor3 = C.InputText
 	searchInput.PlaceholderColor3 = Color3.fromHex("#737373")
-	searchInput.TextSize = 12
+	searchInput.TextSize = UIStrings.TextSize.Caption
 	searchInput.Font = Enum.Font.GothamMedium
 	searchInput.TextXAlignment = Enum.TextXAlignment.Left
 	searchInput.TextYAlignment = Enum.TextYAlignment.Center
@@ -2336,10 +2363,16 @@ local function buildSearchSection()
 	clearBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	clearBtn.TextSize = 12
 	clearBtn.Font = Enum.Font.GothamBold
+	clearBtn.TextXAlignment = Enum.TextXAlignment.Center
+	clearBtn.TextYAlignment = Enum.TextYAlignment.Center
 	clearBtn.Visible = false
 	clearBtn.AutoButtonColor = false
 	clearBtn.Parent = searchContainer
 	addCorner(clearBtn, DIM.CORNER_SM)
+
+	local clearPad = Instance.new("UIPadding")
+	clearPad.PaddingBottom = UDim.new(0, 2)
+	clearPad.Parent = clearBtn
 
 	clearBtn.MouseEnter:Connect(function()
 		TweenService:Create(clearBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromHex("#333333") }):Play()
@@ -2405,23 +2438,23 @@ local function buildLibrarySection()
 	titleLbl.Position = UDim2.new(0, 0, 0, 0)
 	titleLbl.BackgroundTransparency = 1
 	titleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-	titleLbl.TextSize = 13
+	titleLbl.TextSize = UIStrings.TextSize.Title
 	titleLbl.TextXAlignment = Enum.TextXAlignment.Left
 	titleLbl.Font = Enum.Font.GothamBold
 	titleLbl.Parent = header
-	addSC(titleLbl, 14)
+	addSC(titleLbl, 18)
 	addTextGradient(titleLbl, true)
 	UI.songsTitleLbl = titleLbl
 
 	local badge = Instance.new("TextLabel")
 	badge.Name = "SongsBadge"
 	badge.Text = "0 Lagu"
-	badge.Size = UDim2.new(0, 85, 0, 20)
-	badge.Position = UDim2.new(1, -85, 0.5, -10)
+	badge.Size = UDim2.new(0, 90, 0, 22)
+	badge.Position = UDim2.new(1, -90, 0.5, -11)
 	badge.BackgroundColor3 = Color3.fromHex("#181818")
 	badge.BorderSizePixel = 0
 	badge.TextColor3 = Color3.fromHex("#9E9E9E")
-	badge.TextSize = 10
+	badge.TextSize = UIStrings.TextSize.Caption
 	badge.Font = Enum.Font.GothamBold
 	badge.TextXAlignment = Enum.TextXAlignment.Center
 	badge.Parent = header
@@ -2452,7 +2485,7 @@ local function buildLibrarySection()
 	nrIcon.Position = UDim2.new(0.5, -18, 0, 12)
 	nrIcon.BackgroundColor3 = Color3.fromHex("#181818")
 	nrIcon.Text = "🔍"
-	nrIcon.TextSize = 16
+	nrIcon.TextSize = 20
 	nrIcon.TextColor3 = Color3.fromHex("#FFFFFF")
 	nrIcon.BorderSizePixel = 0
 	nrIcon.Parent = noRes
@@ -2466,7 +2499,7 @@ local function buildLibrarySection()
 	nrLbl.Position = UDim2.new(0, 8, 0, 54)
 	nrLbl.BackgroundTransparency = 1
 	nrLbl.TextColor3 = Color3.fromHex("#D4D4D4")
-	nrLbl.TextSize = 12
+	nrLbl.TextSize = UIStrings.TextSize.Body
 	nrLbl.Font = Enum.Font.GothamBold
 	nrLbl.TextXAlignment = Enum.TextXAlignment.Center
 	nrLbl.Parent = noRes
@@ -2477,7 +2510,7 @@ local function buildLibrarySection()
 	nrSub.Position = UDim2.new(0, 10, 0, 74)
 	nrSub.BackgroundTransparency = 1
 	nrSub.TextColor3 = Color3.fromHex("#737373")
-	nrSub.TextSize = 10
+	nrSub.TextSize = UIStrings.TextSize.Caption
 	nrSub.Font = Enum.Font.GothamMedium
 	nrSub.TextXAlignment = Enum.TextXAlignment.Center
 	nrSub.Parent = noRes
@@ -2495,7 +2528,7 @@ local function buildLibrarySection()
 	feIcon.Position = UDim2.new(0.5, -19, 0, 12)
 	feIcon.BackgroundColor3 = Color3.fromHex("#1E1E1E")
 	feIcon.Text = "⭐"
-	feIcon.TextSize = 18
+	feIcon.TextSize = 20
 	feIcon.TextColor3 = Color3.fromHex("#FFFFFF")
 	feIcon.BorderSizePixel = 0
 	feIcon.Parent = favEmp
@@ -2509,7 +2542,7 @@ local function buildLibrarySection()
 	feLbl.Position = UDim2.new(0, 10, 0, 56)
 	feLbl.BackgroundTransparency = 1
 	feLbl.TextColor3 = Color3.fromHex("#D4D4D4")
-	feLbl.TextSize = 13
+	feLbl.TextSize = UIStrings.TextSize.Body
 	feLbl.Font = Enum.Font.GothamBold
 	feLbl.TextXAlignment = Enum.TextXAlignment.Center
 	feLbl.Parent = favEmp
@@ -2520,7 +2553,7 @@ local function buildLibrarySection()
 	feSub.Position = UDim2.new(0, 12, 0, 78)
 	feSub.BackgroundTransparency = 1
 	feSub.TextColor3 = Color3.fromHex("#737373")
-	feSub.TextSize = 10
+	feSub.TextSize = UIStrings.TextSize.Caption
 	feSub.Font = Enum.Font.GothamMedium
 	feSub.TextWrapped = true
 	feSub.TextXAlignment = Enum.TextXAlignment.Center
@@ -2539,7 +2572,7 @@ local function buildLibrarySection()
 	flIcon.Position = UDim2.new(0.5, -19, 0, 12)
 	flIcon.BackgroundColor3 = Color3.fromHex("#1E1E1E")
 	flIcon.Text = "🔒"
-	flIcon.TextSize = 18
+	flIcon.TextSize = 20
 	flIcon.TextColor3 = Color3.fromHex("#FFFFFF")
 	flIcon.BorderSizePixel = 0
 	flIcon.Parent = favLock
@@ -2553,7 +2586,7 @@ local function buildLibrarySection()
 	flLbl.Position = UDim2.new(0, 10, 0, 58)
 	flLbl.BackgroundTransparency = 1
 	flLbl.TextColor3 = Color3.fromHex("#FFFFFF")
-	flLbl.TextSize = 13
+	flLbl.TextSize = UIStrings.TextSize.Body
 	flLbl.Font = Enum.Font.GothamBold
 	flLbl.TextXAlignment = Enum.TextXAlignment.Center
 	flLbl.Parent = favLock
@@ -2564,7 +2597,7 @@ local function buildLibrarySection()
 	flSub.Position = UDim2.new(0, 12, 0, 80)
 	flSub.BackgroundTransparency = 1
 	flSub.TextColor3 = Color3.fromHex("#888888")
-	flSub.TextSize = 11
+	flSub.TextSize = UIStrings.TextSize.Caption
 	flSub.Font = Enum.Font.GothamMedium
 	flSub.TextWrapped = true
 	flSub.TextXAlignment = Enum.TextXAlignment.Center

@@ -1,4 +1,5 @@
 local MenuConfig = {}
+local UIStrings = require(script.Parent:WaitForChild("UIStrings"))
 
 MenuConfig.Services = {
 	Players              = game:GetService("Players"),
@@ -499,13 +500,13 @@ end
 function MenuConfig.CreateButton(parent, name, text, size, position, bgColor, textColor)
 	local button = Instance.new("TextButton")
 	button.Name             = name     or "Button"
-	button.Size             = size     or UDim2.new(0, 100, 0, 36)
+	button.Size             = size     or UDim2.new(0, 110, 0, 44)
 	button.Position         = position or UDim2.new(0, 0, 0, 0)
 	button.BackgroundColor3 = bgColor  or MenuConfig.Config.Colors.Primary
 	button.BorderSizePixel  = 0
 	button.Text             = text     or "Button"
 	button.TextColor3       = textColor or MenuConfig.Config.Colors.Text
-	button.TextSize         = 10.5
+	button.TextSize         = UIStrings.TextSize.Button
 	button.Font             = Enum.Font.GothamBold
 	button.AutoButtonColor  = false
 	button.Parent = parent
@@ -558,7 +559,7 @@ function MenuConfig.CreateSectionHeader(parent, text, icon)
 	label.BackgroundTransparency = 1
 	label.Text               = (icon or "") .. " " .. (text or "Header")
 	label.TextColor3         = MenuConfig.Config.Colors.Text
-	label.TextSize           = 11.5
+	label.TextSize           = UIStrings.TextSize.Header
 	label.Font               = Enum.Font.GothamBold
 	label.TextXAlignment     = Enum.TextXAlignment.Left
 	label.Parent = hdr
@@ -569,7 +570,7 @@ end
 function MenuConfig.CreateInfoBox(parent, labelText, position, size)
 	local frame = Instance.new("Frame")
 	frame.Name             = "InfoBox"
-	frame.Size             = size     or UDim2.new(1, -20, 0, 55)
+	frame.Size             = size     or UDim2.new(1, -20, 0, 60)
 	frame.Position         = position or UDim2.new(0, 10, 0, 0)
 	frame.BackgroundColor3 = MenuConfig.Config.Colors.Surface
 	frame.BorderSizePixel  = 0
@@ -579,27 +580,27 @@ function MenuConfig.CreateInfoBox(parent, labelText, position, size)
 
 	local label = Instance.new("TextLabel")
 	label.Name               = "Label"
-	label.Size               = UDim2.new(1, -16, 0, 18)
+	label.Size               = UDim2.new(1, -16, 0, 20)
 	label.Position           = UDim2.new(0, 8, 0, 6)
 	label.BackgroundTransparency = 1
 	label.Text               = labelText or "Label:"
 	label.TextColor3         = MenuConfig.Config.Colors.TextSecondary
-	label.TextSize           = 9
+	label.TextSize           = UIStrings.TextSize.Caption
 	label.Font               = Enum.Font.Gotham
 	label.TextXAlignment     = Enum.TextXAlignment.Left
 	label.Parent = frame
 
 	local value = Instance.new("TextLabel")
 	value.Name               = "Value"
-	value.Size               = UDim2.new(1, -16, 0, 22)
-	value.Position           = UDim2.new(0, 8, 0, 26)
+	value.Size               = UDim2.new(1, -16, 0, 26)
+	value.Position           = UDim2.new(0, 8, 0, 28)
 	value.BackgroundTransparency = 1
 	value.Text               = "—"
 	value.TextColor3         = MenuConfig.Config.Colors.Text
-	value.TextSize           = 12
+	value.TextSize           = UIStrings.TextSize.Body
 	value.Font               = Enum.Font.GothamBold
 	value.TextXAlignment     = Enum.TextXAlignment.Left
-	value.TextTruncate       = Enum.TextTruncate.AtEnd
+	value.TextTruncate       = Enum.TextTruncate.None
 	value.Parent = frame
 
 	return frame, label, value
@@ -611,7 +612,7 @@ function MenuConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 
 	local btn = Instance.new("TextButton")
 	btn.Name             = targetPlayer.Name
-	btn.Size             = UDim2.new(1, -4, 0, 42)
+	btn.Size             = UDim2.new(1, -4, 0, 48)
 	btn.BackgroundColor3 = MenuConfig.Config.Colors.Surface
 	btn.BorderSizePixel  = 0
 	btn.Text             = ""
@@ -623,12 +624,12 @@ function MenuConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 
 	local avatarImage = Instance.new("ImageLabel")
 	avatarImage.Name             = "Avatar"
-	avatarImage.Size             = UDim2.new(0, 30, 0, 30)
-	avatarImage.Position         = UDim2.new(0, 6, 0.5, -15)
+	avatarImage.Size             = UDim2.new(0, 36, 0, 36)
+	avatarImage.Position         = UDim2.new(0, 6, 0.5, -18)
 	avatarImage.BackgroundColor3 = MenuConfig.Config.Colors.SurfaceLight
 	avatarImage.BorderSizePixel  = 0
 	avatarImage.Parent = btn
-	MenuConfig.CreateCorner(avatarImage, 15)
+	MenuConfig.CreateCorner(avatarImage, 18)
 
 	task.spawn(function()
 		local ok, result = pcall(function()
@@ -639,12 +640,12 @@ function MenuConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 
 	local nameLabel = Instance.new("TextLabel")
 	nameLabel.Name               = "PlayerName"
-	nameLabel.Size               = UDim2.new(1, -50, 0, 18)
-	nameLabel.Position           = UDim2.new(0, 42, 0, 4)
+	nameLabel.Size               = UDim2.new(1, -54, 0, 22)
+	nameLabel.Position           = UDim2.new(0, 48, 0, 4)
 	nameLabel.BackgroundTransparency = 1
 	nameLabel.Text               = targetPlayer.DisplayName
 	nameLabel.TextColor3         = MenuConfig.Config.Colors.Text
-	nameLabel.TextSize           = 10.5
+	nameLabel.TextSize           = UIStrings.TextSize.Body
 	nameLabel.Font               = Enum.Font.GothamBold
 	nameLabel.TextXAlignment     = Enum.TextXAlignment.Left
 	nameLabel.TextTruncate       = Enum.TextTruncate.AtEnd
@@ -652,12 +653,12 @@ function MenuConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 
 	local usernameLabel = Instance.new("TextLabel")
 	usernameLabel.Name               = "Username"
-	usernameLabel.Size               = UDim2.new(1, -50, 0, 14)
-	usernameLabel.Position           = UDim2.new(0, 42, 0, 22)
+	usernameLabel.Size               = UDim2.new(1, -54, 0, 18)
+	usernameLabel.Position           = UDim2.new(0, 48, 0, 26)
 	usernameLabel.BackgroundTransparency = 1
 	usernameLabel.Text               = "@" .. targetPlayer.Name
 	usernameLabel.TextColor3         = MenuConfig.Config.Colors.TextSecondary
-	usernameLabel.TextSize           = 9
+	usernameLabel.TextSize           = UIStrings.TextSize.Caption
 	usernameLabel.Font               = Enum.Font.Gotham
 	usernameLabel.TextXAlignment     = Enum.TextXAlignment.Left
 	usernameLabel.TextTruncate       = Enum.TextTruncate.AtEnd

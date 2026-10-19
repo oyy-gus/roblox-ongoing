@@ -49,7 +49,7 @@ return function(icon, Icon)
 		local noticeDisplay = (exceeded99 and "99+") or totalNotices
 		noticeLabel.Text = noticeDisplay
 		if exceeded99 then
-			noticeLabel.TextSize = 11
+			noticeLabel.TextSize = 14
 		end
 
 		local enabled = true

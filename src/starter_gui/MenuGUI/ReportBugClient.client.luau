@@ -6,6 +6,7 @@ local Modules           = ReplicatedStorage:WaitForChild("Modules")
 local MenuConfig        = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule       = require(Modules:WaitForChild("ThemeModule"))
 local BugReportConfig   = require(Modules:WaitForChild("BugReportConfig"))
+local UIStrings         = require(Modules:WaitForChild("UIStrings"))
 
 local guiReady = MenuConfig.WaitForGUIReady(15)
 if not guiReady then
@@ -56,14 +57,14 @@ local SIZES = {
 	CORNER_SM  = 6,
 	CORNER_MD  = 8,
 	CORNER_LG  = 10,
-	SPACING    = 8,
+	SPACING    = 10,
 	PAD        = 10,
-	LABEL_H    = 20,
-	INPUT_H    = 36,
-	TEXTAREA_H = 90,
-	CHIP_H     = 28,
-	CHIP_W     = 118,
-	BOTTOM_H   = 54,
+	LABEL_H    = 24,
+	INPUT_H    = 44,
+	TEXTAREA_H = 100,
+	CHIP_H     = 44,
+	CHIP_W     = 128,
+	BOTTOM_H   = 58,
 }
 
 local COLORS = {
@@ -155,10 +156,10 @@ if ThemeModule and ThemeModule.GradientSystem then
 end
 
 local BOTTOM_H   = SIZES.BOTTOM_H
-local BTN_MARGIN = 10
-local SUBMIT_W   = 185
-local RESET_W    = 115
-local BTN_H      = BOTTOM_H - (BTN_MARGIN * 2)
+local BTN_MARGIN = 7
+local SUBMIT_W   = 195
+local RESET_W    = 120
+local BTN_H      = math.max(44, BOTTOM_H - (BTN_MARGIN * 2))
 
 local bottomBar = mk("Frame", {
 	Name             = "BottomBar",
@@ -183,12 +184,12 @@ mk("Frame", {
 local submitBtn = mk("TextButton", {
 	Name             = "SubmitBtn",
 	Size             = UDim2.new(0, SUBMIT_W, 0, BTN_H),
-	Position         = UDim2.new(0, BTN_MARGIN, 0, BTN_MARGIN),
+	Position         = UDim2.new(0, BTN_MARGIN, 0.5, -BTN_H / 2),
 	BackgroundColor3 = COLORS.SUBMIT,
 	BorderSizePixel  = 0,
 	Text             = "📤 Kirim Laporan Bug",
 	TextColor3       = ThemeModule.Colors.ButtonPrimaryText,
-	TextSize         = 11.5,
+	TextSize         = UIStrings.TextSize.Button,
 	Font             = Enum.Font.GothamBold,
 	AutoButtonColor  = false,
 	ZIndex           = 102,
@@ -202,12 +203,12 @@ local submitFrame = submitBtn
 local resetBtn = mk("TextButton", {
 	Name             = "ResetBtn",
 	Size             = UDim2.new(0, RESET_W, 0, BTN_H),
-	Position         = UDim2.new(1, -(RESET_W + BTN_MARGIN), 0, BTN_MARGIN),
+	Position         = UDim2.new(1, -(RESET_W + BTN_MARGIN), 0.5, -BTN_H / 2),
 	BackgroundColor3 = ThemeModule.Colors.CloseRed,
 	BorderSizePixel  = 0,
 	Text             = "🔄 Reset Form",
 	TextColor3       = ThemeModule.Colors.TextWhite,
-	TextSize         = 10.5,
+	TextSize         = UIStrings.TextSize.Caption,
 	Font             = Enum.Font.GothamSemibold,
 	AutoButtonColor  = false,
 	ZIndex           = 102,
@@ -225,12 +226,12 @@ local cooldownLabel = mk("TextLabel", {
 	),
 	Position               = UDim2.new(
 		0, SUBMIT_W + BTN_MARGIN * 2,
-		0, BTN_MARGIN
+		0.5, -BTN_H / 2
 	),
 	BackgroundTransparency = 1,
 	Text                   = "",
 	TextColor3             = COLORS.TEXT_HINT,
-	TextSize               = 9,
+	TextSize               = UIStrings.TextSize.Caption,
 	Font                   = Enum.Font.Gotham,
 	TextXAlignment         = Enum.TextXAlignment.Center,
 	TextYAlignment         = Enum.TextYAlignment.Center,
@@ -242,7 +243,6 @@ local rootScroll = mk("ScrollingFrame", {
 	Size                       = UDim2.new(1, 0, 1, -BOTTOM_H),
 	Position                   = UDim2.new(0, 0, 0, 0),
 	BackgroundColor3           = COLORS.BG,
-	BorderSizePixel            = 0,
 	ScrollBarThickness         = 0,
 	ScrollBarImageTransparency = 1,
 	ScrollingEnabled           = true,
@@ -287,7 +287,7 @@ local notifLabel = mk("TextLabel", {
 	BackgroundTransparency = 1,
 	Text                   = "",
 	TextColor3             = Color3.fromRGB(255, 255, 255),
-	TextSize               = 10.5,
+	TextSize               = UIStrings.TextSize.Caption,
 	Font                   = Enum.Font.GothamBold,
 	TextXAlignment         = Enum.TextXAlignment.Left,
 	TextWrapped            = true,
@@ -316,7 +316,7 @@ local function showNotif(message, isSuccess, duration)
 end
 
 local function makeSection(title, layoutOrder, contentHeight)
-	local totalH = 26 + SIZES.PAD + contentHeight + SIZES.PAD
+	local totalH = 30 + SIZES.PAD + contentHeight + SIZES.PAD
 
 	local frame = mk("Frame", {
 		Name             = "Section_" .. tostring(layoutOrder),
@@ -331,12 +331,12 @@ local function makeSection(title, layoutOrder, contentHeight)
 
 	local titleLabel = mk("TextLabel", {
 		Name                   = "SectionTitle",
-		Size                   = UDim2.new(1, -20, 0, 26),
+		Size                   = UDim2.new(1, -20, 0, 30),
 		Position               = UDim2.new(0, 10, 0, 0),
 		BackgroundTransparency = 1,
 		Text                   = title,
 		TextColor3             = COLORS.TEXT,
-		TextSize               = 10.5,
+		TextSize               = UIStrings.TextSize.Title,
 		Font                   = Enum.Font.GothamBold,
 		TextXAlignment         = Enum.TextXAlignment.Left,
 		TextYAlignment         = Enum.TextYAlignment.Center,
@@ -347,7 +347,7 @@ local function makeSection(title, layoutOrder, contentHeight)
 	mk("Frame", {
 		Name             = "Divider",
 		Size             = UDim2.new(1, -20, 0, 1),
-		Position         = UDim2.new(0, 10, 0, 26),
+		Position         = UDim2.new(0, 10, 0, 30),
 		BackgroundColor3 = ThemeModule.Colors.Border,
 		BorderSizePixel  = 0,
 		ZIndex           = 7,
@@ -356,7 +356,7 @@ local function makeSection(title, layoutOrder, contentHeight)
 	local content = mk("Frame", {
 		Name                   = "Content",
 		Size                   = UDim2.new(1, -20, 0, contentHeight),
-		Position               = UDim2.new(0, 10, 0, 26 + SIZES.PAD),
+		Position               = UDim2.new(0, 10, 0, 30 + SIZES.PAD),
 		BackgroundTransparency = 1,
 		ZIndex                 = 7,
 	}, frame)
@@ -371,7 +371,7 @@ local function makeLabel(parent, text, yPos)
 		BackgroundTransparency = 1,
 		Text                   = text,
 		TextColor3             = COLORS.TEXT_DIM,
-		TextSize               = 9.5,
+		TextSize               = UIStrings.TextSize.Caption,
 		Font                   = Enum.Font.GothamSemibold,
 		TextXAlignment         = Enum.TextXAlignment.Left,
 		TextYAlignment         = Enum.TextYAlignment.Center,
@@ -398,7 +398,7 @@ local function makeInput(parent, placeholder, yPos, height, multiline)
 		PlaceholderText   = placeholder or "",
 		TextColor3        = COLORS.TEXT,
 		PlaceholderColor3 = COLORS.TEXT_HINT,
-		TextSize          = 10.5,
+		TextSize          = UIStrings.TextSize.Caption,
 		Font              = Enum.Font.Gotham,
 		TextXAlignment    = Enum.TextXAlignment.Left,
 		TextYAlignment    = multiline
@@ -424,12 +424,12 @@ end
 
 local function makeCharCounter(parent, inputBox, maxLen, yPos)
 	local counter = mk("TextLabel", {
-		Size                   = UDim2.new(1, 0, 0, 14),
+		Size                   = UDim2.new(1, 0, 0, 16),
 		Position               = UDim2.new(0, 0, 0, yPos),
 		BackgroundTransparency = 1,
 		Text                   = "0 / " .. maxLen,
 		TextColor3             = COLORS.TEXT_HINT,
-		TextSize               = 10,
+		TextSize               = UIStrings.TextSize.Caption,
 		Font                   = Enum.Font.Gotham,
 		TextXAlignment         = Enum.TextXAlignment.Right,
 		ZIndex                 = 8,
@@ -474,7 +474,7 @@ local function makeChipGroup(parent, items, groupName, onSelect)
 			AutoButtonColor  = false,
 			ZIndex           = 9,
 		}, wrapFrame)
-		crn(SIZES.CHIP_H / 2, chip)
+		crn(SIZES.CORNER_SM, chip)
 		local chipStroke = addStroke(chip, 1, ThemeModule.Colors.Border, 0)
 
 		mk("TextLabel", {
@@ -484,9 +484,10 @@ local function makeChipGroup(parent, items, groupName, onSelect)
 			BackgroundTransparency = 1,
 			Text                   = item.label,
 			TextColor3             = COLORS.TEXT_DIM,
-			TextSize               = 9,
+			TextSize               = UIStrings.TextSize.Caption,
 			Font                   = Enum.Font.GothamSemibold,
-			TextTruncate           = Enum.TextTruncate.AtEnd,
+			TextTruncate           = Enum.TextTruncate.None,
+			TextWrapped            = true,
 			TextXAlignment         = Enum.TextXAlignment.Center,
 			ZIndex                 = 10,
 		}, chip)
@@ -542,13 +543,13 @@ local function makeChipGroup(parent, items, groupName, onSelect)
 	return wrapFrame, chips
 end
 
-local _, headerContent = makeSection("📋 Laporan Bug", 1, 52)
+local _, headerContent = makeSection("📋 Laporan Bug", 1, 74)
 mk("TextLabel", {
-	Size                   = UDim2.new(1, 0, 0, 34),
+	Size                   = UDim2.new(1, 0, 0, 42),
 	BackgroundTransparency = 1,
 	Text                   = "Temukan bug? Bantu kami memperbaikinya!\nIsi form dan laporan akan dikirim ke tim developer.",
 	TextColor3             = COLORS.TEXT_DIM,
-	TextSize               = 9.5,
+	TextSize               = UIStrings.TextSize.Caption,
 	Font                   = Enum.Font.Gotham,
 	TextXAlignment         = Enum.TextXAlignment.Left,
 	TextWrapped            = true,
@@ -556,8 +557,8 @@ mk("TextLabel", {
 }, headerContent)
 
 local playerBadge = mk("Frame", {
-	Size             = UDim2.new(1, 0, 0, 22),
-	Position         = UDim2.new(0, 0, 0, 36),
+	Size             = UDim2.new(1, 0, 0, 26),
+	Position         = UDim2.new(0, 0, 0, 46),
 	BackgroundColor3 = COLORS.PANEL2,
 	BorderSizePixel  = 0,
 	ZIndex           = 8,
@@ -572,7 +573,7 @@ mk("TextLabel", {
 		player.DisplayName, player.Name, player.UserId
 	),
 	TextColor3             = COLORS.TEXT_DIM,
-	TextSize               = 9,
+	TextSize               = UIStrings.TextSize.Caption,
 	Font                   = Enum.Font.Gotham,
 	TextXAlignment         = Enum.TextXAlignment.Left,
 	TextYAlignment         = Enum.TextYAlignment.Center,

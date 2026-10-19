@@ -8,6 +8,7 @@ local AdminConfig    = require(Modules:WaitForChild("AdminConfig"))
 local GiveRoleConfig = require(GiveModule:WaitForChild("GiveRoleConfig"))
 local ThemeModule    = require(Modules:WaitForChild("ThemeModule"))
 local NotifModule    = require(Modules:WaitForChild("NotifModule"))
+local UIStrings      = require(Modules:WaitForChild("UIStrings"))
 
 local LocalPlayer = Players.LocalPlayer
 local Config = AdminConfig.Config
@@ -85,17 +86,17 @@ AdminConfig.CreatePadding(mainContainer, 15, 15, 15, 15)
 
 local titleSection = Instance.new("Frame")
 titleSection.Name = "TitleSection"
-titleSection.Size = UDim2.new(1, 0, 0, 40)
+titleSection.Size = UDim2.new(1, 0, 0, 50)
 titleSection.BackgroundTransparency = 1
 titleSection.Parent = mainContainer
 
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "Title"
-titleLabel.Size = UDim2.new(1, 0, 1, 0)
+titleLabel.Size = UDim2.new(1, 0, 0, 26)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "🎭 Manajemen Role"
 titleLabel.TextColor3 = ThemeModule.Colors.TextWhite
-titleLabel.TextSize = 20
+titleLabel.TextSize = UIStrings.TextSize.Header
 titleLabel.Font = Enum.Font.GothamBold
 titleLabel.TextXAlignment = Enum.TextXAlignment.Left
 titleLabel.Parent = titleSection
@@ -105,13 +106,14 @@ State.Gradients.titleGradient = titleGradient
 
 local subtitleLabel = Instance.new("TextLabel")
 subtitleLabel.Name = "Subtitle"
-subtitleLabel.Size = UDim2.new(1, 0, 0, 18)
-subtitleLabel.Position = UDim2.new(0, 0, 1, 3)
+subtitleLabel.Size = UDim2.new(1, 0, 0, 20)
+subtitleLabel.Position = UDim2.new(0, 0, 0, 28)
 subtitleLabel.BackgroundTransparency = 1
 subtitleLabel.Text = "Halo @" .. LocalPlayer.DisplayName .. " - Pilih pemain dan role untuk diberikan"
 subtitleLabel.TextColor3 = ThemeModule.Colors.TextMuted
-subtitleLabel.TextSize = 12
+subtitleLabel.TextSize = UIStrings.TextSize.Caption
 subtitleLabel.Font = Enum.Font.Gotham
+subtitleLabel.TextWrapped = true
 subtitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 subtitleLabel.Parent = titleSection
 
@@ -136,7 +138,7 @@ ThemeModule.CreateAnimatedStroke(leftPanel, 1, "Primary", 1.2)
 
 local leftHeader = Instance.new("Frame")
 leftHeader.Name = "Header"
-leftHeader.Size = UDim2.new(1, -4, 0, 34)
+leftHeader.Size = UDim2.new(1, -4, 0, 44)
 leftHeader.Position = UDim2.new(0, 2, 0, 2)
 leftHeader.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 leftHeader.BorderSizePixel = 0
@@ -151,7 +153,7 @@ leftHeaderLabel.Position = UDim2.new(0, 10, 0, 0)
 leftHeaderLabel.BackgroundTransparency = 1
 leftHeaderLabel.Text = "👥 Daftar Player"
 leftHeaderLabel.TextColor3 = ThemeModule.Colors.TextWhite
-leftHeaderLabel.TextSize = 13
+leftHeaderLabel.TextSize = UIStrings.TextSize.Title
 leftHeaderLabel.Font = Enum.Font.GothamBold
 leftHeaderLabel.TextXAlignment = Enum.TextXAlignment.Left
 leftHeaderLabel.Parent = leftHeader
@@ -161,25 +163,25 @@ State.Gradients.leftHeaderGradient = leftHeaderGradient
 
 local playerCountLabel = Instance.new("TextLabel")
 playerCountLabel.Name = "PlayerCount"
-playerCountLabel.Size = UDim2.new(0, 30, 1, 0)
-playerCountLabel.Position = UDim2.new(1, -40, 0, 0)
+playerCountLabel.Size = UDim2.new(0, 36, 1, 0)
+playerCountLabel.Position = UDim2.new(1, -44, 0, 0)
 playerCountLabel.BackgroundTransparency = 1
 playerCountLabel.Text = "0"
 playerCountLabel.TextColor3 = ThemeModule.Colors.TextMuted
-playerCountLabel.TextSize = 11
+playerCountLabel.TextSize = UIStrings.TextSize.Caption
 playerCountLabel.Font = Enum.Font.GothamMedium
 playerCountLabel.TextXAlignment = Enum.TextXAlignment.Right
 playerCountLabel.Parent = leftHeader
 
 local playerListScroll = Instance.new("ScrollingFrame")
 playerListScroll.Name = "PlayerList"
-playerListScroll.Size = UDim2.new(1, -8, 1, -44)
-playerListScroll.Position = UDim2.new(0, 4, 0, 40)
+playerListScroll.Size = UDim2.new(1, -8, 1, -50)
+playerListScroll.Position = UDim2.new(0, 4, 0, 48)
 playerListScroll.BackgroundTransparency = 1
 playerListScroll.BorderSizePixel = 0
 playerListScroll.Active = true
-playerListScroll.ScrollBarThickness = 4
-playerListScroll.ScrollBarImageColor3 = ThemeModule.Colors.Primary1
+playerListScroll.ScrollBarThickness = 0
+playerListScroll.ScrollBarImageTransparency = 1
 playerListScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 playerListScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
 playerListScroll.ScrollingDirection = Enum.ScrollingDirection.Y
@@ -213,7 +215,7 @@ ThemeModule.CreateAnimatedStroke(rightPanel, 1, "Primary", 1.2)
 
 local rightHeader = Instance.new("Frame")
 rightHeader.Name = "Header"
-rightHeader.Size = UDim2.new(1, -8, 0, 34)
+rightHeader.Size = UDim2.new(1, -8, 0, 44)
 rightHeader.Position = UDim2.new(0, 4, 0, 4)
 rightHeader.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 rightHeader.BorderSizePixel = 0
@@ -228,7 +230,7 @@ rightHeaderLabel.Position = UDim2.new(0, 10, 0, 0)
 rightHeaderLabel.BackgroundTransparency = 1
 rightHeaderLabel.Text = "🎭 Pilih Role"
 rightHeaderLabel.TextColor3 = ThemeModule.Colors.TextWhite
-rightHeaderLabel.TextSize = 13
+rightHeaderLabel.TextSize = UIStrings.TextSize.Title
 rightHeaderLabel.Font = Enum.Font.GothamBold
 rightHeaderLabel.TextXAlignment = Enum.TextXAlignment.Left
 rightHeaderLabel.Parent = rightHeader
@@ -238,8 +240,8 @@ State.Gradients.rightHeaderGradient = rightHeaderGradient
 
 local selectedInfoFrame = Instance.new("Frame")
 selectedInfoFrame.Name = "SelectedInfo"
-selectedInfoFrame.Size = UDim2.new(1, -8, 0, 48)
-selectedInfoFrame.Position = UDim2.new(0, 4, 0, 42)
+selectedInfoFrame.Size = UDim2.new(1, -8, 0, 56)
+selectedInfoFrame.Position = UDim2.new(0, 4, 0, 52)
 selectedInfoFrame.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 selectedInfoFrame.BorderSizePixel = 0
 selectedInfoFrame.Parent = rightPanel
@@ -248,24 +250,24 @@ AdminConfig.CreateCorner(selectedInfoFrame, 6)
 
 local selectedLabel = Instance.new("TextLabel")
 selectedLabel.Name = "SelectedLabel"
-selectedLabel.Size = UDim2.new(1, -12, 0, 14)
+selectedLabel.Size = UDim2.new(1, -12, 0, 18)
 selectedLabel.Position = UDim2.new(0, 6, 0, 4)
 selectedLabel.BackgroundTransparency = 1
 selectedLabel.Text = "Player Terpilih:"
 selectedLabel.TextColor3 = ThemeModule.Colors.TextMuted
-selectedLabel.TextSize = 9
+selectedLabel.TextSize = UIStrings.TextSize.Caption
 selectedLabel.Font = Enum.Font.Gotham
 selectedLabel.TextXAlignment = Enum.TextXAlignment.Left
 selectedLabel.Parent = selectedInfoFrame
 
 local selectedPlayerName = Instance.new("TextLabel")
 selectedPlayerName.Name = "SelectedPlayerName"
-selectedPlayerName.Size = UDim2.new(1, -12, 0, 18)
-selectedPlayerName.Position = UDim2.new(0, 6, 0, 22)
+selectedPlayerName.Size = UDim2.new(1, -12, 0, 24)
+selectedPlayerName.Position = UDim2.new(0, 6, 0, 24)
 selectedPlayerName.BackgroundTransparency = 1
 selectedPlayerName.Text = "Belum ada yang dipilih"
 selectedPlayerName.TextColor3 = ThemeModule.Colors.TextWhite
-selectedPlayerName.TextSize = 11
+selectedPlayerName.TextSize = UIStrings.TextSize.Body
 selectedPlayerName.Font = Enum.Font.GothamBold
 selectedPlayerName.TextXAlignment = Enum.TextXAlignment.Left
 selectedPlayerName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -273,8 +275,8 @@ selectedPlayerName.Parent = selectedInfoFrame
 
 local selectedRoleFrame = Instance.new("Frame")
 selectedRoleFrame.Name = "SelectedRoleInfo"
-selectedRoleFrame.Size = UDim2.new(1, -8, 0, 48)
-selectedRoleFrame.Position = UDim2.new(0, 4, 0, 94)
+selectedRoleFrame.Size = UDim2.new(1, -8, 0, 56)
+selectedRoleFrame.Position = UDim2.new(0, 4, 0, 114)
 selectedRoleFrame.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 selectedRoleFrame.BorderSizePixel = 0
 selectedRoleFrame.Parent = rightPanel
@@ -283,24 +285,24 @@ AdminConfig.CreateCorner(selectedRoleFrame, 6)
 
 local selectedRoleLabel = Instance.new("TextLabel")
 selectedRoleLabel.Name = "SelectedRoleLabel"
-selectedRoleLabel.Size = UDim2.new(1, -12, 0, 14)
+selectedRoleLabel.Size = UDim2.new(1, -12, 0, 18)
 selectedRoleLabel.Position = UDim2.new(0, 6, 0, 4)
 selectedRoleLabel.BackgroundTransparency = 1
 selectedRoleLabel.Text = "Role Terpilih:"
 selectedRoleLabel.TextColor3 = ThemeModule.Colors.TextMuted
-selectedRoleLabel.TextSize = 9
+selectedRoleLabel.TextSize = UIStrings.TextSize.Caption
 selectedRoleLabel.Font = Enum.Font.Gotham
 selectedRoleLabel.TextXAlignment = Enum.TextXAlignment.Left
 selectedRoleLabel.Parent = selectedRoleFrame
 
 local selectedRoleName = Instance.new("TextLabel")
 selectedRoleName.Name = "SelectedRoleName"
-selectedRoleName.Size = UDim2.new(1, -12, 0, 18)
-selectedRoleName.Position = UDim2.new(0, 6, 0, 22)
+selectedRoleName.Size = UDim2.new(1, -12, 0, 24)
+selectedRoleName.Position = UDim2.new(0, 6, 0, 24)
 selectedRoleName.BackgroundTransparency = 1
 selectedRoleName.Text = "Belum ada yang dipilih"
 selectedRoleName.TextColor3 = ThemeModule.Colors.TextWhite
-selectedRoleName.TextSize = 11
+selectedRoleName.TextSize = UIStrings.TextSize.Body
 selectedRoleName.Font = Enum.Font.GothamBold
 selectedRoleName.TextXAlignment = Enum.TextXAlignment.Left
 selectedRoleName.TextTruncate = Enum.TextTruncate.AtEnd
@@ -308,8 +310,8 @@ selectedRoleName.Parent = selectedRoleFrame
 
 local roleButtonsContainer = Instance.new("ScrollingFrame")
 roleButtonsContainer.Name = "RoleButtons"
-roleButtonsContainer.Size = UDim2.new(1, -8, 1, -200)
-roleButtonsContainer.Position = UDim2.new(0, 4, 0, 146)
+roleButtonsContainer.Size = UDim2.new(1, -8, 1, -232)
+roleButtonsContainer.Position = UDim2.new(0, 4, 0, 176)
 roleButtonsContainer.BackgroundTransparency = 1
 roleButtonsContainer.BorderSizePixel = 0
 roleButtonsContainer.Active = true
@@ -341,12 +343,12 @@ roleButtonsPadding.Parent = roleButtonsContainer
 for i, roleDef in ipairs(RoleDefinitions) do
 	local roleBtn = Instance.new("TextButton")
 	roleBtn.Name = roleDef.Name .. "Btn"
-	roleBtn.Size = UDim2.new(1, -8, 0, 36)
+	roleBtn.Size = UDim2.new(1, -8, 0, 44)
 	roleBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 	roleBtn.BorderSizePixel = 0
 	roleBtn.Text = roleDef.Icon .. " " .. roleDef.Name
 	roleBtn.TextColor3 = ThemeModule.Colors.TextWhite
-	roleBtn.TextSize = 11
+	roleBtn.TextSize = UIStrings.TextSize.Body
 	roleBtn.Font = Enum.Font.GothamBold
 	roleBtn.AutoButtonColor = false
 	roleBtn.LayoutOrder = i
@@ -359,13 +361,13 @@ for i, roleDef in ipairs(RoleDefinitions) do
 
 	local freeBadge = Instance.new("TextLabel")
 	freeBadge.Name = "FreeBadge"
-	freeBadge.Size = UDim2.new(0, 26, 0, 10)
-	freeBadge.Position = UDim2.new(1, -28, 0, 2)
+	freeBadge.Size = UDim2.new(0, 54, 0, 20)
+	freeBadge.Position = UDim2.new(1, -60, 0.5, -10)
 	freeBadge.BackgroundColor3 = ThemeModule.Colors.BackgroundLighter
 	freeBadge.BorderSizePixel = 0
 	freeBadge.Text = "GRATIS"
 	freeBadge.TextColor3 = ThemeModule.Colors.TextWhite
-	freeBadge.TextSize = 6
+	freeBadge.TextSize = UIStrings.TextSize.Caption
 	freeBadge.Font = Enum.Font.GothamBold
 	freeBadge.Parent = roleBtn
 	AdminConfig.CreateCorner(freeBadge, 3)
@@ -417,8 +419,8 @@ end
 
 local actionContainer = Instance.new("Frame")
 actionContainer.Name = "ActionContainer"
-actionContainer.Size = UDim2.new(1, -8, 0, 40)
-actionContainer.Position = UDim2.new(0, 4, 1, -44)
+actionContainer.Size = UDim2.new(1, -8, 0, 48)
+actionContainer.Position = UDim2.new(0, 4, 1, -52)
 actionContainer.BackgroundTransparency = 1
 actionContainer.ClipsDescendants = true
 actionContainer.Parent = rightPanel
@@ -432,12 +434,12 @@ actionLayout.Parent = actionContainer
 
 local confirmBtn = Instance.new("TextButton")
 confirmBtn.Name = "ConfirmBtn"
-confirmBtn.Size = UDim2.new(0.5, -4, 1, 0)
+confirmBtn.Size = UDim2.new(0.5, -4, 0, 44)
 confirmBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 confirmBtn.BorderSizePixel = 0
 confirmBtn.Text = "✅ Berikan Role"
 confirmBtn.TextColor3 = ThemeModule.Colors.TextWhite
-confirmBtn.TextSize = 11
+confirmBtn.TextSize = UIStrings.TextSize.Caption
 confirmBtn.Font = Enum.Font.GothamBold
 confirmBtn.AutoButtonColor = false
 confirmBtn.LayoutOrder = 1
@@ -448,12 +450,12 @@ ThemeModule.CreateStaticGradient(confirmBtn, "Success", 90)
 
 local cancelBtn = Instance.new("TextButton")
 cancelBtn.Name = "CancelBtn"
-cancelBtn.Size = UDim2.new(0.5, -4, 1, 0)
+cancelBtn.Size = UDim2.new(0.5, -4, 0, 44)
 cancelBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 cancelBtn.BorderSizePixel = 0
 cancelBtn.Text = "❌ Batalkan"
 cancelBtn.TextColor3 = ThemeModule.Colors.TextWhite
-cancelBtn.TextSize = 11
+cancelBtn.TextSize = UIStrings.TextSize.Caption
 cancelBtn.Font = Enum.Font.GothamBold
 cancelBtn.AutoButtonColor = false
 cancelBtn.LayoutOrder = 2
@@ -519,7 +521,7 @@ end
 local function createPlayerButton(targetPlayer)
 	local btn = Instance.new("TextButton")
 	btn.Name = targetPlayer.Name
-	btn.Size = UDim2.new(1, -4, 0, 40)
+	btn.Size = UDim2.new(1, -4, 0, 48)
 	btn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 	btn.BorderSizePixel = 0
 	btn.Text = ""
@@ -531,13 +533,13 @@ local function createPlayerButton(targetPlayer)
 
 	local avatarImage = Instance.new("ImageLabel")
 	avatarImage.Name = "Avatar"
-	avatarImage.Size = UDim2.new(0, 28, 0, 28)
-	avatarImage.Position = UDim2.new(0, 6, 0.5, -14)
+	avatarImage.Size = UDim2.new(0, 36, 0, 36)
+	avatarImage.Position = UDim2.new(0, 6, 0.5, -18)
 	avatarImage.BackgroundColor3 = ThemeModule.Colors.BackgroundLight
 	avatarImage.BorderSizePixel = 0
 	avatarImage.Parent = btn
 
-	AdminConfig.CreateCorner(avatarImage, 14)
+	AdminConfig.CreateCorner(avatarImage, 18)
 
 	task.spawn(function()
 		local success, result = pcall(function()
@@ -555,12 +557,12 @@ local function createPlayerButton(targetPlayer)
 
 	local nameLabel = Instance.new("TextLabel")
 	nameLabel.Name = "PlayerName"
-	nameLabel.Size = UDim2.new(1, -46, 0, 16)
-	nameLabel.Position = UDim2.new(0, 40, 0, 4)
+	nameLabel.Size = UDim2.new(1, -54, 0, 20)
+	nameLabel.Position = UDim2.new(0, 48, 0, 4)
 	nameLabel.BackgroundTransparency = 1
 	nameLabel.Text = displayName
 	nameLabel.TextColor3 = ThemeModule.Colors.TextWhite
-	nameLabel.TextSize = 11
+	nameLabel.TextSize = UIStrings.TextSize.Body
 	nameLabel.Font = Enum.Font.GothamBold
 	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
 	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
@@ -568,12 +570,12 @@ local function createPlayerButton(targetPlayer)
 
 	local usernameLabel = Instance.new("TextLabel")
 	usernameLabel.Name = "Username"
-	usernameLabel.Size = UDim2.new(1, -46, 0, 12)
-	usernameLabel.Position = UDim2.new(0, 40, 0, 20)
+	usernameLabel.Size = UDim2.new(1, -54, 0, 18)
+	usernameLabel.Position = UDim2.new(0, 48, 0, 24)
 	usernameLabel.BackgroundTransparency = 1
 	usernameLabel.Text = "@" .. targetPlayer.Name
 	usernameLabel.TextColor3 = ThemeModule.Colors.TextMuted
-	usernameLabel.TextSize = 9
+	usernameLabel.TextSize = UIStrings.TextSize.Caption
 	usernameLabel.Font = Enum.Font.Gotham
 	usernameLabel.TextXAlignment = Enum.TextXAlignment.Left
 	usernameLabel.TextTruncate = Enum.TextTruncate.AtEnd
@@ -719,12 +721,14 @@ local function checkAdminAccess()
 			mainContainer:ClearAllChildren()
 
 			local noAccessLabel = Instance.new("TextLabel")
-			noAccessLabel.Size = UDim2.new(1, 0, 1, 0)
+			noAccessLabel.Size = UDim2.new(1, -20, 1, 0)
+			noAccessLabel.Position = UDim2.new(0, 10, 0, 0)
 			noAccessLabel.BackgroundTransparency = 1
 			noAccessLabel.Text = "🚫 Akses Ditolak\n\nAnda tidak memiliki izin untuk mengakses fitur ini.\nDiperlukan role Owner, Developer, atau Admin."
 			noAccessLabel.TextColor3 = ThemeModule.Colors.Error
-			noAccessLabel.TextSize = 16
+			noAccessLabel.TextSize = UIStrings.TextSize.Body
 			noAccessLabel.Font = Enum.Font.GothamMedium
+			noAccessLabel.TextWrapped = true
 			noAccessLabel.Parent = mainContainer
 
 			return false

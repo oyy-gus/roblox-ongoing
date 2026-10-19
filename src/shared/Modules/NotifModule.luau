@@ -6,14 +6,15 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ThemeModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("ThemeModule"))
+local UIStrings = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("UIStrings"))
 
 local CONFIG = {
 	MaxNotifications = 5,
-	Spacing = 6,
+	Spacing = 8,
 	Padding = 12,
-	Width = 200,
-	MinHeight = 48,
-	IconSize = 14,
+	Width = 280,
+	MinHeight = 56,
+	IconSize = 22,
 	SlideDistance = 40,
 	AnimationDuration = 0.25,
 	DefaultDuration = 3,
@@ -21,7 +22,7 @@ local CONFIG = {
 	BackgroundTransparency = 0.08,
 	EnableSounds = true,
 	SoundVolume = 0.4,
-	ProgressBarHeight = 2,
+	ProgressBarHeight = 3,
 	DisplayOrder = 2147483647,
 }
 
@@ -178,6 +179,7 @@ local function createNotifFrame(options)
 	local mainFrame = Instance.new("Frame")
 	mainFrame.Name = "Notification"
 	mainFrame.Size = UDim2.new(1, 0, 0, CONFIG.MinHeight)
+	mainFrame.AutomaticSize = Enum.AutomaticSize.Y
 	mainFrame.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
 	mainFrame.BackgroundTransparency = CONFIG.BackgroundTransparency
 	mainFrame.BorderSizePixel = 0
@@ -191,8 +193,8 @@ local function createNotifFrame(options)
 	local stroke, strokeGrad = ThemeModule.CreateAnimatedStroke(mainFrame, 1, "Primary", 1.2)
 
 	local accentBar = Instance.new("Frame")
-	accentBar.Size = UDim2.new(0, 3, 1, -8)
-	accentBar.Position = UDim2.new(0, 4, 0, 4)
+	accentBar.Size = UDim2.new(0, 4, 1, -12)
+	accentBar.Position = UDim2.new(0, 4, 0, 6)
 	accentBar.BackgroundColor3 = primaryColor
 	accentBar.BorderSizePixel = 0
 	accentBar.ZIndex = 999999 + 1
@@ -203,58 +205,77 @@ local function createNotifFrame(options)
 
 	local iconLabel = Instance.new("TextLabel")
 	iconLabel.Size = UDim2.new(0, CONFIG.IconSize, 0, CONFIG.IconSize)
-	iconLabel.Position = UDim2.new(0, 12, 0, 8)
+	iconLabel.Position = UDim2.new(0, 14, 0, 10)
 	iconLabel.BackgroundTransparency = 1
 	iconLabel.Text = options.Icon or notifType.Icon
 	iconLabel.TextColor3 = primaryColor
-	iconLabel.TextScaled = true
+	iconLabel.TextScaled = false
+	iconLabel.TextSize = UIStrings.TextSize.Body
 	iconLabel.Font = (ThemeModule.Fonts and ThemeModule.Fonts.BodyBold) or Enum.Font.GothamBold
 	iconLabel.ZIndex = 999999 + 1
 	iconLabel.Parent = mainFrame
 
-	local textX = 12 + CONFIG.IconSize + 6
+	local textX = 14 + CONFIG.IconSize + 8
 	local closeBtnSpace = 20
-	local textW = CONFIG.Width - textX - closeBtnSpace
+
+	local textContainer = Instance.new("Frame")
+	textContainer.Name = "TextContainer"
+	textContainer.Position = UDim2.new(0, textX, 0, 8)
+	textContainer.Size = UDim2.new(1, -(textX + closeBtnSpace), 0, 0)
+	textContainer.AutomaticSize = Enum.AutomaticSize.Y
+	textContainer.BackgroundTransparency = 1
+	textContainer.BorderSizePixel = 0
+	textContainer.ZIndex = 999999 + 1
+	textContainer.Parent = mainFrame
+
+	local textLayout = Instance.new("UIListLayout")
+	textLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	textLayout.Padding = UDim.new(0, 2)
+	textLayout.Parent = textContainer
 
 	local title = Instance.new("TextLabel")
-	title.Size = UDim2.new(0, textW, 0, 14)
-	title.Position = UDim2.new(0, textX, 0, 6)
+	title.Name = "Title"
+	title.Size = UDim2.new(1, 0, 0, 0)
+	title.AutomaticSize = Enum.AutomaticSize.Y
 	title.BackgroundTransparency = 1
 	title.Text = options.Title or "Notifikasi"
 	title.TextColor3 = ThemeModule.Colors.TextWhite
-	title.TextScaled = true
+	title.TextScaled = false
+	title.TextSize = UIStrings.TextSize.Body
+	title.TextWrapped = true
+	title.TextTruncate = Enum.TextTruncate.None
 	title.TextXAlignment = Enum.TextXAlignment.Left
-	title.TextTruncate = Enum.TextTruncate.AtEnd
 	title.Font = (ThemeModule.Fonts and ThemeModule.Fonts.Title) or Enum.Font.GothamBold
 	title.ZIndex = 999999 + 1
-	title.Parent = mainFrame
-
-	local titleConstraint = Instance.new("UITextSizeConstraint")
-	titleConstraint.MaxTextSize = 11
-	titleConstraint.MinTextSize = 8
-	titleConstraint.Parent = title
+	title.LayoutOrder = 1
+	title.Parent = textContainer
 
 	local message = Instance.new("TextLabel")
-	message.Size = UDim2.new(0, textW, 0, 12)
-	message.Position = UDim2.new(0, textX, 0, 20)
+	message.Name = "Message"
+	message.Size = UDim2.new(1, 0, 0, 0)
+	message.AutomaticSize = Enum.AutomaticSize.Y
 	message.BackgroundTransparency = 1
 	message.Text = options.Text or ""
 	message.TextColor3 = ThemeModule.Colors.TextGray
-	message.TextScaled = true
+	message.TextScaled = false
+	message.TextSize = UIStrings.TextSize.Caption
+	message.TextWrapped = true
+	message.TextTruncate = Enum.TextTruncate.None
 	message.TextXAlignment = Enum.TextXAlignment.Left
-	message.TextTruncate = Enum.TextTruncate.AtEnd
 	message.Font = (ThemeModule.Fonts and ThemeModule.Fonts.Body) or Enum.Font.Gotham
 	message.ZIndex = 999999 + 1
-	message.Parent = mainFrame
+	message.LayoutOrder = 2
+	message.Parent = textContainer
 
-	local msgConstraint = Instance.new("UITextSizeConstraint")
-	msgConstraint.MaxTextSize = 10
-	msgConstraint.MinTextSize = 7
-	msgConstraint.Parent = message
+	local spacer = Instance.new("Frame")
+	spacer.Size = UDim2.new(1, 0, 0, 8)
+	spacer.BackgroundTransparency = 1
+	spacer.LayoutOrder = 3
+	spacer.Parent = textContainer
 
 	local progressBg = Instance.new("Frame")
 	progressBg.Size = UDim2.new(1, -16, 0, CONFIG.ProgressBarHeight)
-	progressBg.Position = UDim2.new(0, 8, 1, -(CONFIG.ProgressBarHeight + 4))
+	progressBg.Position = UDim2.new(0, 8, 1, -(CONFIG.ProgressBarHeight + 3))
 	progressBg.BackgroundColor3 = ThemeModule.Colors.BackgroundLight
 	progressBg.BackgroundTransparency = 0.4
 	progressBg.BorderSizePixel = 0
@@ -280,8 +301,10 @@ local function createNotifFrame(options)
 	closeBtn.BackgroundTransparency = 0
 	closeBtn.Text = "x"
 	closeBtn.TextColor3 = ThemeModule.Colors.TextWhite
-	closeBtn.TextSize = 11
+	closeBtn.TextSize = 12
 	closeBtn.Font = (ThemeModule.Fonts and ThemeModule.Fonts.BodyBold) or Enum.Font.GothamBold
+	closeBtn.TextXAlignment = Enum.TextXAlignment.Center
+	closeBtn.TextYAlignment = Enum.TextYAlignment.Center
 	closeBtn.AutoButtonColor = false
 	closeBtn.BorderSizePixel = 0
 	closeBtn.ZIndex = 999999 + 3
@@ -290,6 +313,10 @@ local function createNotifFrame(options)
 	local closeBtnCorner = Instance.new("UICorner")
 	closeBtnCorner.CornerRadius = UDim.new(0, 4)
 	closeBtnCorner.Parent = closeBtn
+
+	local closePad = Instance.new("UIPadding")
+	closePad.PaddingBottom = UDim.new(0, 2)
+	closePad.Parent = closeBtn
 
 	closeBtn.MouseEnter:Connect(function()
 		TweenService:Create(closeBtn, TweenInfo.new(0.1), {

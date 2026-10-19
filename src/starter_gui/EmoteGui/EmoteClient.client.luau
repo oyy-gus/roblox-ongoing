@@ -72,15 +72,15 @@ local function gradient(parent, colorSeq, rot)
 	g.Parent   = parent
 end
 
-local FRAME_W  = 300
-local FRAME_H  = 440
+local FRAME_W  = 320
+local FRAME_H  = 480
 local PAD      = 10
 local INNER_W  = FRAME_W - PAD * 2
 
-local HDR_H    = 36
-local SRCH_H   = 28
-local TAB_H    = 32
-local SPEED_H  = 34
+local HDR_H    = 44
+local SRCH_H   = 36
+local TAB_H    = 40
+local SPEED_H  = 44
 local GAP      = 8
 
 local CONT_TOP = HDR_H + GAP + SRCH_H + GAP + TAB_H + GAP
@@ -200,7 +200,7 @@ headerLabel.Position         = UDim2.new(0, 20, 0, 0)
 headerLabel.BackgroundTransparency = 1
 headerLabel.Text             = UIStrings.Emote.Title
 headerLabel.TextColor3       = C.Primary1
-headerLabel.TextSize         = 13.5
+headerLabel.TextSize         = UIStrings.TextSize.Title
 headerLabel.Font             = Enum.Font.GothamBold
 headerLabel.TextXAlignment   = Enum.TextXAlignment.Center
 headerLabel.TextYAlignment   = Enum.TextYAlignment.Center
@@ -216,13 +216,19 @@ closeBtn.BackgroundColor3       = C.CloseRed
 closeBtn.BackgroundTransparency = 0
 closeBtn.Text                   = "x"
 closeBtn.TextColor3             = C.TextWhite or Color3.fromHex("#FFFFFF")
-closeBtn.TextSize               = 14
+closeBtn.TextSize               = 15
 closeBtn.Font                   = Enum.Font.GothamBold
+closeBtn.TextXAlignment         = Enum.TextXAlignment.Center
+closeBtn.TextYAlignment         = Enum.TextYAlignment.Center
 closeBtn.BorderSizePixel        = 0
 closeBtn.AutoButtonColor        = false
 closeBtn.ZIndex                 = 5
 closeBtn.Parent                 = headerFrame
 corner(closeBtn, 6)
+
+local closePad = Instance.new("UIPadding")
+closePad.PaddingBottom = UDim.new(0, 2)
+closePad.Parent = closeBtn
 
 closeBtn.MouseEnter:Connect(function()
 	TweenService:Create(closeBtn, TweenInfo.new(0.12), {
@@ -252,14 +258,14 @@ local currentSort   = "AZ"
 
 local searchBox = Instance.new("TextBox")
 searchBox.Name              = "SearchBox"
-searchBox.Size              = UDim2.new(1, -72, 1, 0)
+searchBox.Size              = UDim2.new(1, -80, 1, 0)
 searchBox.Position          = UDim2.new(0, 0, 0, 0)
 searchBox.BackgroundTransparency = 1
 searchBox.TextColor3        = C.TextWhite
 searchBox.PlaceholderText   = UIStrings.Emote.SearchPlaceholder
 searchBox.PlaceholderColor3 = C.TextMuted
 searchBox.Text              = ""
-searchBox.TextSize          = 11.5
+searchBox.TextSize          = UIStrings.TextSize.Caption
 searchBox.Font              = Enum.Font.Gotham
 searchBox.BorderSizePixel   = 0
 searchBox.ClearTextOnFocus  = false
@@ -274,14 +280,14 @@ end
 
 local sortBtn = Instance.new("TextButton")
 sortBtn.Name                   = "SortBtn"
-sortBtn.Size                   = UDim2.new(0, 36, 0, 20)
+sortBtn.Size                   = UDim2.new(0, 52, 0, 28)
 sortBtn.AnchorPoint            = Vector2.new(1, 0.5)
-sortBtn.Position               = UDim2.new(1, -30, 0.5, 0)
+sortBtn.Position               = UDim2.new(1, -6, 0.5, 0)
 sortBtn.BackgroundColor3       = C.BackgroundMedium
 sortBtn.BorderSizePixel        = 0
 sortBtn.Text                   = "A-Z "
 sortBtn.TextColor3             = C.TextMuted
-sortBtn.TextSize               = 9
+sortBtn.TextSize               = UIStrings.TextSize.Caption
 sortBtn.Font                   = Enum.Font.GothamBold
 sortBtn.ZIndex                 = 5
 sortBtn.Parent                 = searchWrapper
@@ -378,7 +384,7 @@ local function makeTabBtn(name, text, order)
 	btn.BackgroundColor3 = C.BackgroundMedium
 	btn.TextColor3       = C.TextGray
 	btn.Text             = text
-	btn.TextSize         = 10.5
+	btn.TextSize         = UIStrings.TextSize.Caption
 	btn.Font             = Enum.Font.GothamBold
 	btn.BorderSizePixel  = 0
 	btn.LayoutOrder      = order
@@ -460,7 +466,7 @@ templateBtnInner.Size                   = UDim2.new(1, -48, 1, 0)
 templateBtnInner.BackgroundTransparency = 1
 templateBtnInner.Text                   = "Emote Name"
 templateBtnInner.TextColor3             = C.TextWhite
-templateBtnInner.TextSize               = 12
+templateBtnInner.TextSize               = UIStrings.TextSize.Body
 templateBtnInner.Font                   = Enum.Font.GothamMedium
 templateBtnInner.TextXAlignment         = Enum.TextXAlignment.Left
 templateBtnInner.TextTruncate           = Enum.TextTruncate.AtEnd
@@ -473,13 +479,13 @@ end
 
 local templateFavBtn = Instance.new("TextButton")
 templateFavBtn.Name                   = "FavoriteBtn"
-templateFavBtn.Size                   = UDim2.new(0, 42, 1, 0)
+templateFavBtn.Size                   = UDim2.new(0, 44, 1, 0)
 templateFavBtn.AnchorPoint            = Vector2.new(1, 0)
 templateFavBtn.Position               = UDim2.new(1, -4, 0, 0)
 templateFavBtn.BackgroundTransparency = 1
 templateFavBtn.Text                   = "★"
 templateFavBtn.TextColor3             = C.TextDark
-templateFavBtn.TextSize               = 17
+templateFavBtn.TextSize               = UIStrings.TextSize.Title
 templateFavBtn.Font                   = Enum.Font.GothamBold
 templateFavBtn.Parent                 = templateframe
 
@@ -496,33 +502,33 @@ speedFrame.Parent           = mainframe
 corner(speedFrame, 8)
 
 local speedLabel = Instance.new("TextLabel")
-speedLabel.Size = UDim2.new(0, 42, 1, 0)
+speedLabel.Size = UDim2.new(0, 50, 1, 0)
 speedLabel.Position = UDim2.new(0, 8, 0, 0)
 speedLabel.BackgroundTransparency = 1
 speedLabel.Text = "Speed"
 speedLabel.TextColor3 = C.TextGray
-speedLabel.TextSize = 10
+speedLabel.TextSize = UIStrings.TextSize.Caption
 speedLabel.Font = Enum.Font.Gotham
 speedLabel.TextXAlignment = Enum.TextXAlignment.Left
 speedLabel.Parent = speedFrame
 
 local speedtext = Instance.new("TextLabel")
 speedtext.Name = "TextLabel"
-speedtext.Size = UDim2.new(0, 38, 1, 0)
+speedtext.Size = UDim2.new(0, 46, 1, 0)
 speedtext.AnchorPoint = Vector2.new(1, 0)
 speedtext.Position = UDim2.new(1, -6, 0, 0)
 speedtext.BackgroundTransparency = 1
 speedtext.Text = "1.0x"
 speedtext.TextColor3 = C.Primary1
-speedtext.TextSize = 10.5
+speedtext.TextSize = UIStrings.TextSize.Caption
 speedtext.Font = Enum.Font.GothamBold
 speedtext.Parent = speedFrame
 ThemeModule.CreatePrimaryGradient(speedtext, 0, 1.2)
 
 local speedBar = Instance.new("Frame")
 speedBar.Name = "speedBar"
-speedBar.Size = UDim2.new(1, -96, 0, 6)
-speedBar.Position = UDim2.new(0, 50, 0.5, -3)
+speedBar.Size = UDim2.new(1, -112, 0, 6)
+speedBar.Position = UDim2.new(0, 58, 0.5, -3)
 speedBar.BackgroundColor3 = C.BackgroundLight
 speedBar.BorderSizePixel = 0
 speedBar.Parent = speedFrame
@@ -539,7 +545,7 @@ ThemeModule.CreatePrimaryGradient(speedFill, 0, 1.2)
 
 local speedSlider = Instance.new("Frame")
 speedSlider.Name = "speedPosition"
-speedSlider.Size = UDim2.new(0, 14, 0, 14)
+speedSlider.Size = UDim2.new(0, 18, 0, 18)
 speedSlider.AnchorPoint = Vector2.new(0.5, 0.5)
 speedSlider.BackgroundColor3 = C.Primary1
 speedSlider.BorderSizePixel = 0
@@ -577,18 +583,19 @@ unsyncBtn.AnchorPoint            = Vector2.new(0, 0)
 unsyncBtn.BackgroundTransparency = 1
 unsyncBtn.Text                   = "Tersinkronisasi\nKetuk untuk Lepas"
 unsyncBtn.TextColor3             = C.Warning
-unsyncBtn.TextSize               = 10
+unsyncBtn.TextSize               = UIStrings.TextSize.Caption
 unsyncBtn.Font                   = Enum.Font.GothamBold
+unsyncBtn.TextWrapped            = true
 unsyncBtn.Parent                 = unsyncframe
 
 local dancelabel = Instance.new("TextLabel")
 dancelabel.Name                  = "DanceLabel"
-dancelabel.Size                  = UDim2.new(1, -10, 0, 18)
-dancelabel.Position              = UDim2.new(0, 5, 1, -22)
+dancelabel.Size                  = UDim2.new(1, -10, 0, 20)
+dancelabel.Position              = UDim2.new(0, 5, 1, -24)
 dancelabel.BackgroundTransparency = 1
 dancelabel.Text                  = "..."
 dancelabel.TextColor3            = C.TextMuted
-dancelabel.TextSize              = 9
+dancelabel.TextSize              = UIStrings.TextSize.Caption
 dancelabel.Font                  = Enum.Font.Gotham
 dancelabel.TextXAlignment        = Enum.TextXAlignment.Left
 dancelabel.TextTruncate          = Enum.TextTruncate.AtEnd
@@ -602,7 +609,7 @@ preloadLabel.BackgroundColor3 = C.BackgroundDark
 preloadLabel.BackgroundTransparency = 0.05
 preloadLabel.TextColor3 = C.TextWhite
 preloadLabel.Text = "Memuat data animasi..."
-preloadLabel.TextSize = 12
+preloadLabel.TextSize = UIStrings.TextSize.Caption
 preloadLabel.Font = Enum.Font.GothamBold
 preloadLabel.Visible = false
 preloadLabel.ZIndex = 10

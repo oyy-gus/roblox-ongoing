@@ -8,6 +8,7 @@ local MenuConfig  = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
 local NotifModule = require(Modules:WaitForChild("NotifModule"))
 local PanelAnimationController = require(Modules:WaitForChild("PanelAnimationController"))
+local UIStrings = require(Modules:WaitForChild("UIStrings"))
 
 local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -202,7 +203,6 @@ tabBar.Name                   = "TabBar"
 tabBar.Size                   = UDim2.new(1, 0, 1, 0)
 tabBar.Position               = UDim2.new(0, 0, 0, 0)
 tabBar.BackgroundTransparency = 1
-tabBar.BorderSizePixel        = 0
 tabBar.ScrollBarThickness     = 0
 tabBar.ScrollBarImageTransparency = 1
 tabBar.ScrollingEnabled       = true
@@ -212,14 +212,14 @@ tabBar.VerticalScrollBarInset = Enum.ScrollBarInset.None
 tabBar.ScrollingDirection     = Enum.ScrollingDirection.X
 tabBar.AutomaticCanvasSize    = Enum.AutomaticSize.X
 tabBar.CanvasSize             = UDim2.new(0, 0, 1, 0)
-tabBar.ElasticBehavior        = Enum.ElasticBehavior.Never
+tabBar.ElasticBehavior        = Enum.ElasticBehavior.Always
 tabBar.Parent                 = tabContainer
 
 local tabBarLayout = Instance.new("UIListLayout")
 tabBarLayout.FillDirection       = Enum.FillDirection.Horizontal
 tabBarLayout.VerticalAlignment   = Enum.VerticalAlignment.Center
 tabBarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
-tabBarLayout.Padding             = UDim.new(0, 4)
+tabBarLayout.Padding             = UDim.new(0, 6)
 tabBarLayout.SortOrder          = Enum.SortOrder.LayoutOrder
 tabBarLayout.Parent             = tabBar
 
@@ -231,12 +231,18 @@ closeButton.BackgroundColor3 = ThemeModule.Colors.CloseRed
 closeButton.BorderSizePixel  = 0
 closeButton.Text             = "x"
 closeButton.TextColor3       = ThemeModule.Colors.TextWhite
-closeButton.TextSize         = 14
+closeButton.TextSize         = 16
 closeButton.Font             = Enum.Font.GothamBold
+closeButton.TextXAlignment   = Enum.TextXAlignment.Center
+closeButton.TextYAlignment   = Enum.TextYAlignment.Center
 closeButton.AutoButtonColor  = false
 closeButton.Parent           = headerContent
 
 ThemeModule.CreateCorner(closeButton, 6)
+
+local closePad = Instance.new("UIPadding")
+closePad.PaddingBottom = UDim.new(0, 3)
+closePad.Parent = closeButton
 
 closeButton.MouseEnter:Connect(function()
 	TweenService:Create(closeButton, TweenInfo.new(0.2),
@@ -321,7 +327,7 @@ local function createTabButton(def)
 	btn.BorderSizePixel    = 0
 	btn.Text               = def.Icon .. "  " .. def.DisplayName
 	btn.TextColor3         = TAB_COLORS.InactiveText
-	btn.TextSize           = 10.5
+	btn.TextSize           = UIStrings.TextSize.Body
 	btn.Font               = Enum.Font.GothamMedium
 	btn.AutoButtonColor    = false
 	btn.Parent             = btnFrame
@@ -407,6 +413,24 @@ local function switchTab(tabName)
 	end
 
 	MenuConfig.Events.OnTabChanged:Fire(tabName)
+
+	local activeFrame = tabFrames[tabName]
+	if activeFrame and tabBar then
+		task.defer(function()
+			if activeFrame and activeFrame.Parent and tabBar and tabBar.Parent then
+				local frameLeft = activeFrame.AbsolutePosition.X - tabBar.AbsolutePosition.X + tabBar.CanvasPosition.X
+				local frameRight = frameLeft + activeFrame.AbsoluteSize.X
+				local viewLeft = tabBar.CanvasPosition.X
+				local viewRight = viewLeft + tabBar.AbsoluteSize.X
+
+				if frameLeft < viewLeft then
+					tabBar.CanvasPosition = Vector2.new(math.max(0, frameLeft - 8), 0)
+				elseif frameRight > viewRight then
+					tabBar.CanvasPosition = Vector2.new(frameRight - tabBar.AbsoluteSize.X + 8, 0)
+				end
+			end
+		end)
+	end
 end
 
 for tabName, btn in pairs(tabButtons) do

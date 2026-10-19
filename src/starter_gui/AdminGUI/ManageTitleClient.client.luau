@@ -5,6 +5,7 @@ local TweenService      = game:GetService("TweenService")
 local Modules     = ReplicatedStorage:WaitForChild("Modules")
 local AdminConfig = require(Modules:WaitForChild("AdminConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
+local UIStrings   = require(Modules:WaitForChild("UIStrings"))
 
 local player     = Players.LocalPlayer
 local TitleEvent = ReplicatedStorage:WaitForChild("TitleEvent", 10)
@@ -35,7 +36,7 @@ local function makeButton(parent, text, gradientName, size, pos)
 	btn.BorderSizePixel  = 0
 	btn.Text             = text
 	btn.TextColor3       = ThemeModule.Colors.TextWhite
-	btn.TextSize         = 11
+	btn.TextSize         = UIStrings.TextSize.Caption
 	btn.Font             = Enum.Font.GothamBold
 	btn.AutoButtonColor  = false
 	btn.Parent           = parent
@@ -68,7 +69,7 @@ containerPad.Parent        = container
 
 local headerBar = Instance.new("Frame")
 headerBar.Name             = "HeaderBar"
-headerBar.Size             = UDim2.new(1, 0, 0, 40)
+headerBar.Size             = UDim2.new(1, 0, 0, 44)
 headerBar.Position         = UDim2.new(0, 0, 0, 0)
 headerBar.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
 headerBar.BorderSizePixel  = 0
@@ -90,7 +91,7 @@ playerDropBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 playerDropBtn.BorderSizePixel  = 0
 playerDropBtn.Text             = "  Pilih Pemain ▼"
 playerDropBtn.TextColor3       = ThemeModule.Colors.TextMuted
-playerDropBtn.TextSize         = 12
+playerDropBtn.TextSize         = UIStrings.TextSize.Caption
 playerDropBtn.Font             = Enum.Font.GothamMedium
 playerDropBtn.TextXAlignment   = Enum.TextXAlignment.Left
 playerDropBtn.AutoButtonColor  = false
@@ -105,7 +106,7 @@ removeAllBtn.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 removeAllBtn.BorderSizePixel  = 0
 removeAllBtn.Text             = "x Hapus Semua"
 removeAllBtn.TextColor3       = ThemeModule.Colors.TextWhite
-removeAllBtn.TextSize         = 11
+removeAllBtn.TextSize         = UIStrings.TextSize.Caption
 removeAllBtn.Font             = Enum.Font.GothamBold
 removeAllBtn.AutoButtonColor  = false
 removeAllBtn.Parent           = headerBar
@@ -125,8 +126,8 @@ dropList.Size                 = UDim2.new(0.55, -4, 0, 0)
 dropList.Position             = UDim2.new(0, 0, 0, 44)
 dropList.BackgroundColor3     = ThemeModule.Colors.BackgroundDark
 dropList.BorderSizePixel      = 0
-dropList.ScrollBarThickness   = 4
-dropList.ScrollBarImageColor3 = ThemeModule.Colors.Primary1
+dropList.ScrollBarThickness   = 0
+dropList.ScrollBarImageTransparency = 1
 dropList.ZIndex               = 20
 dropList.Active               = true
 dropList.Visible              = false
@@ -153,8 +154,8 @@ titlesScroll.Size                 = UDim2.new(1, 0, 1, -48)
 titlesScroll.Position             = UDim2.new(0, 0, 0, 48)
 titlesScroll.BackgroundTransparency = 1
 titlesScroll.BorderSizePixel      = 0
-titlesScroll.ScrollBarThickness   = 4
-titlesScroll.ScrollBarImageColor3 = ThemeModule.Colors.Primary1
+titlesScroll.ScrollBarThickness   = 0
+titlesScroll.ScrollBarImageTransparency = 1
 titlesScroll.ScrollingDirection   = Enum.ScrollingDirection.Y
 titlesScroll.ElasticBehavior      = Enum.ElasticBehavior.Never
 titlesScroll.Active               = true
@@ -188,14 +189,15 @@ local function updateDropdown()
 	if #currentPlayerList == 0 then
 		local empty = Instance.new("TextLabel")
 		empty.Name               = "EmptyLabel"
-		empty.Size               = UDim2.new(1, -8, 0, 30)
+		empty.Size               = UDim2.new(1, -8, 0, 40)
 		empty.BackgroundTransparency = 1
 		empty.Text               = "⚠️ Tidak ada pemain online"
 		empty.TextColor3         = ThemeModule.Colors.Error
-		empty.TextSize           = 12
+		empty.TextSize           = UIStrings.TextSize.Caption
 		empty.Font               = Enum.Font.GothamMedium
+		empty.TextWrapped        = true
 		empty.Parent             = dropList
-		dropList.Size    = UDim2.new(0.55, -4, 0, 38)
+		dropList.Size    = UDim2.new(0.55, -4, 0, 48)
 		dropList.Visible = true
 		return
 	end
@@ -203,12 +205,12 @@ local function updateDropdown()
 	for idx, name in ipairs(currentPlayerList) do
 		local item = Instance.new("TextButton")
 		item.Name             = "Player_" .. name
-		item.Size             = UDim2.new(1, -8, 0, 30)
+		item.Size             = UDim2.new(1, -8, 0, 44)
 		item.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 		item.BorderSizePixel  = 0
 		item.Text             = "  " .. name
 		item.TextColor3       = ThemeModule.Colors.TextWhite
-		item.TextSize         = 12
+		item.TextSize         = UIStrings.TextSize.Caption
 		item.Font             = Enum.Font.GothamMedium
 		item.TextXAlignment   = Enum.TextXAlignment.Left
 		item.AutoButtonColor  = false
@@ -254,7 +256,7 @@ local function updateDropdown()
 
 	task.wait(0.05)
 	local count = math.min(#currentPlayerList, 5)
-	dropList.Size    = UDim2.new(0.55, -4, 0, count * 34 + 8)
+	dropList.Size    = UDim2.new(0.55, -4, 0, count * 46 + 8)
 	dropList.Visible = true
 	dropList.CanvasSize = UDim2.new(0, 0, 0, dropLayout.AbsoluteContentSize.Y + 8)
 end
@@ -294,12 +296,14 @@ local function displayTitles(titles)
 		ThemeModule.CreateGradientStroke(empty, 1, "Primary", 45)
 
 		local lbl = Instance.new("TextLabel")
-		lbl.Size                 = UDim2.new(1, 0, 1, 0)
+		lbl.Size                 = UDim2.new(1, -16, 1, 0)
+		lbl.Position             = UDim2.new(0, 8, 0, 0)
 		lbl.BackgroundTransparency = 1
 		lbl.Text                 = "📭  Tidak ada gelar khusus untuk pemain ini"
 		lbl.TextColor3           = ThemeModule.Colors.TextGray
-		lbl.TextSize             = 13
+		lbl.TextSize             = UIStrings.TextSize.Caption
 		lbl.Font                 = Enum.Font.GothamMedium
+		lbl.TextWrapped          = true
 		lbl.Parent               = empty
 		return
 	end
@@ -310,7 +314,8 @@ local function displayTitles(titles)
 
 		local card = Instance.new("Frame")
 		card.Name             = "Card_" .. slotNum
-		card.Size             = UDim2.new(1, -4, 0, 88)
+		card.Size             = UDim2.new(1, -4, 0, 100)
+		card.AutomaticSize    = Enum.AutomaticSize.Y
 		card.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
 		card.BorderSizePixel  = 0
 		card.LayoutOrder      = slotNum
@@ -319,7 +324,7 @@ local function displayTitles(titles)
 		ThemeModule.CreateGradientStroke(card, 1, "Primary", 45)
 
 		local slotBadge = Instance.new("Frame")
-		slotBadge.Size             = UDim2.new(0, 54, 0, 22)
+		slotBadge.Size             = UDim2.new(0, 68, 0, 26)
 		slotBadge.Position         = UDim2.new(0, 10, 0, 10)
 		slotBadge.BackgroundColor3 = ThemeModule.Colors.BackgroundMedium
 		slotBadge.BorderSizePixel  = 0
@@ -332,47 +337,51 @@ local function displayTitles(titles)
 		slotLbl.BackgroundTransparency = 1
 		slotLbl.Text                 = "SLOT " .. slotNum
 		slotLbl.TextColor3           = ThemeModule.Colors.TextWhite
-		slotLbl.TextSize             = 10
+		slotLbl.TextSize             = UIStrings.TextSize.Caption
 		slotLbl.Font                 = Enum.Font.GothamBold
 		slotLbl.Parent               = slotBadge
 
 		local titleLbl = Instance.new("TextLabel")
-		titleLbl.Size             = UDim2.new(1, -140, 0, 26)
-		titleLbl.Position         = UDim2.new(0, 10, 0, 36)
+		titleLbl.Size             = UDim2.new(1, -170, 0, 28)
+		titleLbl.Position         = UDim2.new(0, 10, 0, 40)
 		titleLbl.BackgroundTransparency = 1
 		titleLbl.Text             = titleInfo.Text
 		titleLbl.TextColor3       = ThemeModule.Colors.TextWhite
-		titleLbl.TextSize         = 15
+		titleLbl.TextSize         = UIStrings.TextSize.Title
 		titleLbl.Font             = Enum.Font.GothamBold
 		titleLbl.TextXAlignment   = Enum.TextXAlignment.Left
-		titleLbl.TextTruncate     = Enum.TextTruncate.AtEnd
+		titleLbl.TextWrapped      = true
+		titleLbl.TextTruncate     = Enum.TextTruncate.None
+		titleLbl.AutomaticSize    = Enum.AutomaticSize.Y
 		titleLbl.Parent           = card
 		ThemeModule.CreatePrimaryGradient(titleLbl, 90, 1.5)
 
 		local infoLbl = Instance.new("TextLabel")
-		infoLbl.Size             = UDim2.new(1, -140, 0, 18)
-		infoLbl.Position         = UDim2.new(0, 10, 0, 64)
+		infoLbl.Size             = UDim2.new(1, -170, 0, 22)
+		infoLbl.Position         = UDim2.new(0, 10, 0, 72)
 		infoLbl.BackgroundTransparency = 1
 		infoLbl.Text             = string.format("Mode: %s  |  Color: %s  |  Font: %s",
 			(titleInfo.Mode or "fixed"):upper(),
 			titleInfo.ColorTemplate or "White",
 			titleInfo.Font or "Gotham")
 		infoLbl.TextColor3       = ThemeModule.Colors.TextMuted
-		infoLbl.TextSize         = 10
+		infoLbl.TextSize         = UIStrings.TextSize.Caption
 		infoLbl.Font             = Enum.Font.GothamMedium
 		infoLbl.TextXAlignment   = Enum.TextXAlignment.Left
-		infoLbl.TextTruncate     = Enum.TextTruncate.AtEnd
+		infoLbl.TextWrapped      = true
+		infoLbl.TextTruncate     = Enum.TextTruncate.None
+		infoLbl.AutomaticSize    = Enum.AutomaticSize.Y
 		infoLbl.Parent           = card
 
 		local editBtn = makeButton(card, "✏️ Ubah", "Warning",
-			UDim2.new(0, 56, 0, 26),
-			UDim2.new(1, -124, 0, 10))
-		editBtn.TextSize = 10
+			UDim2.new(0, 75, 0, 44),
+			UDim2.new(1, -165, 0, 10))
+		editBtn.TextSize = UIStrings.TextSize.Caption
 
 		local removeBtn = makeButton(card, "x Hapus", "Error",
-			UDim2.new(0, 54, 0, 26),
-			UDim2.new(1, -64, 0, 10))
-		removeBtn.TextSize = 10
+			UDim2.new(0, 75, 0, 44),
+			UDim2.new(1, -82, 0, 10))
+		removeBtn.TextSize = UIStrings.TextSize.Caption
 
 		editBtn.MouseButton1Click:Connect(function()
 			if AdminConfig.CustomTitleUI then

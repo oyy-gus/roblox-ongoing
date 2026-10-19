@@ -2,12 +2,13 @@ local DisplayGUIBuilder = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ThemeModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("ThemeModule"))
+local UIStrings   = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("UIStrings"))
 
 local C = ThemeModule.Colors
 
 local CFG = {
-	FRAME_WIDTH = 220,
-	FRAME_HEIGHT = 70,
+	FRAME_WIDTH = 270,
+	FRAME_HEIGHT = 86,
 	CORNER_RADIUS = 10,
 	AVATAR_SIZE = 42,
 	AVATAR_BORDER = 2,
@@ -50,7 +51,7 @@ local function makeLabel(props)
 	l.BackgroundTransparency = 1
 	l.Text = props.Text or ""
 	l.TextColor3 = props.Color or C.TextWhite
-	l.TextSize = props.TextSize or 14
+	l.TextSize = props.TextSize or UIStrings.TextSize.Caption
 	l.Font = props.Font or CFG.FONT_BODY
 	l.TextXAlignment = props.XAlign or Enum.TextXAlignment.Left
 	l.TextYAlignment = props.YAlign or Enum.TextYAlignment.Center
@@ -164,10 +165,10 @@ function DisplayGUIBuilder.build(gui)
 
 	local nameLabel = makeLabel({
 		Name = "nameLabel",
-		Size = UDim2.new(1, 0, 0, 16),
+		Size = UDim2.new(1, 0, 0, 20),
 		Position = UDim2.new(0, 0, 0, 0),
 		Text = "Player Name",
-		TextSize = 12,
+		TextSize = UIStrings.TextSize.Body,
 		Font = CFG.FONT,
 		Color = C.TextWhite,
 		XAlign = Enum.TextXAlignment.Left,
@@ -178,10 +179,10 @@ function DisplayGUIBuilder.build(gui)
 
 	local infoLabel = makeLabel({
 		Name = "infoLabel",
-		Size = UDim2.new(1, 0, 0, 14),
-		Position = UDim2.new(0, 0, 0, 18),
+		Size = UDim2.new(1, 0, 0, 18),
+		Position = UDim2.new(0, 0, 0, 22),
 		Text = "donated 100 Robux!",
-		TextSize = 10,
+		TextSize = UIStrings.TextSize.Caption,
 		Font = CFG.FONT_BODY,
 		Color = C.TextGray,
 		XAlign = Enum.TextXAlignment.Left,
@@ -191,10 +192,10 @@ function DisplayGUIBuilder.build(gui)
 
 	local typeLabel = makeLabel({
 		Name = "typeLabel",
-		Size = UDim2.new(1, 0, 0, 14),
-		Position = UDim2.new(0, 0, 0, 34),
+		Size = UDim2.new(1, 0, 0, 18),
+		Position = UDim2.new(0, 0, 0, 42),
 		Text = "Thank You!",
-		TextSize = 9,
+		TextSize = UIStrings.TextSize.Caption,
 		Font = Enum.Font.GothamMedium,
 		Color = C.Primary1,
 		XAlign = Enum.TextXAlignment.Left,

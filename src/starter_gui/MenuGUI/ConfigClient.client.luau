@@ -4,6 +4,7 @@ local SoundService = game:GetService("SoundService")
 local MenuConfig  = require(Modules:WaitForChild("MenuConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
 local NotifModule = require(Modules:WaitForChild("NotifModule"))
+local UIStrings = require(Modules:WaitForChild("UIStrings"))
 
 repeat task.wait() until MenuConfig.GUI.PengaturanPage or MenuConfig.GUI.ConfigPage
 
@@ -26,25 +27,25 @@ ThemeModule.GradientSystem.Start()
 
 local SIZES = {
 
-	SECTION_H = 28,
-	SECTION_TEXT = 11.5,
+	SECTION_H = 32,
+	SECTION_TEXT = UIStrings.TextSize.Header,
 
 	TOGGLE_H = 60,
-	TOGGLE_LABEL_TEXT = 12.5,
-	TOGGLE_DESC_TEXT = 10,
-	TOGGLE_WIDTH = 50,
-	TOGGLE_HEIGHT = 26,
-	TOGGLE_KNOB = 22,
+	TOGGLE_LABEL_TEXT = UIStrings.TextSize.Title,
+	TOGGLE_DESC_TEXT = UIStrings.TextSize.Body,
+	TOGGLE_WIDTH = 54,
+	TOGGLE_HEIGHT = 30,
+	TOGGLE_KNOB = 24,
 
 	SLIDER_H = 70,
-	SLIDER_LABEL_TEXT = 12.5,
-	SLIDER_VALUE_TEXT = 11.5,
+	SLIDER_LABEL_TEXT = UIStrings.TextSize.Title,
+	SLIDER_VALUE_TEXT = UIStrings.TextSize.Body,
 	SLIDER_BAR_H = 10,
 	SLIDER_KNOB = 22,
-	SLIDER_VALUE_W = 55,
+	SLIDER_VALUE_W = 60,
 
 	BUTTON_H = 48,
-	BUTTON_TEXT = 12,
+	BUTTON_TEXT = UIStrings.TextSize.Button,
 
 	CORNER_SM = 6,
 	CORNER_MD = 8,
@@ -527,7 +528,6 @@ local configScroll = mk("ScrollingFrame", {
 	Size = UDim2.new(1, 0, 1, 0),
 	Position = UDim2.new(0, 0, 0, 0),
 	BackgroundColor3 = ThemeModule.Colors.BackgroundDark,
-	BorderSizePixel = 0,
 	ScrollBarThickness = 0,
 	ScrollBarImageTransparency = 1,
 	ScrollingEnabled = true,
@@ -560,7 +560,8 @@ UIElements.scrollFrame = configScroll
 local function createSectionHeader(text, layoutOrder)
 	local section = mk("Frame", {
 		Name = "Section_" .. text:gsub("%s+", ""),
-		Size = UDim2.new(1, 0, 0, SIZES.SECTION_H),
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		LayoutOrder = layoutOrder,
@@ -569,11 +570,13 @@ local function createSectionHeader(text, layoutOrder)
 	local sectionLabel = mk("TextLabel", {
 		Name = "Label",
 		Text = text,
-		Size = UDim2.new(1, -16, 1, 0),
-		Position = UDim2.new(0, 8, 0, 0),
+		Size = UDim2.new(1, -16, 0, 0),
+		Position = UDim2.new(0, 8, 0, 4),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextSize = SIZES.SECTION_TEXT,
+		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
 		Font = Enum.Font.GothamBold,
@@ -591,61 +594,74 @@ end
 
 local function createToggleSetting(labelText, description, settingKey, layoutOrder, onToggleCallback)
 	local hasDesc = description and description ~= ""
-	local toggleTotalWidth = SIZES.TOGGLE_WIDTH + SIZES.ITEM_PAD + 10
 
 	local item = mk("Frame", {
 		Name = "Toggle_" .. settingKey,
-		Size = UDim2.new(1, 0, 0, SIZES.TOGGLE_H),
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundColor3 = ThemeModule.Colors.BackgroundMedium,
 		BorderSizePixel = 0,
 		LayoutOrder = layoutOrder,
-		ClipsDescendants = true,
+		ClipsDescendants = false,
 	}, configScroll)
 	crn(SIZES.CORNER_MD, item)
 
-	local textContainer = mk("Frame", {
-		Name = "TextContainer",
-		Size = UDim2.new(1, -toggleTotalWidth, 1, 0),
-		Position = UDim2.new(0, 0, 0, 0),
-		BackgroundTransparency = 1,
-		ClipsDescendants = true,
+	mk("UIPadding", {
+		PaddingTop = UDim.new(0, 10),
+		PaddingBottom = UDim.new(0, 10),
+		PaddingLeft = UDim.new(0, SIZES.ITEM_PAD),
+		PaddingRight = UDim.new(0, SIZES.ITEM_PAD),
 	}, item)
 
-	local labelYPos = hasDesc and 10 or (SIZES.TOGGLE_H/2 - 10)
-	local labelHeight = 20
+	local textContainer = mk("Frame", {
+		Name = "TextContainer",
+		Size = UDim2.new(1, -(SIZES.TOGGLE_WIDTH + 16), 0, 0),
+		Position = UDim2.new(0, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
+		BackgroundTransparency = 1,
+		ClipsDescendants = false,
+	}, item)
+
+	mk("UIListLayout", {
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Padding = UDim.new(0, 4),
+		FillDirection = Enum.FillDirection.Vertical,
+	}, textContainer)
 
 	local label = mk("TextLabel", {
 		Name = "Label",
 		Text = labelText,
-		Size = UDim2.new(1, -20, 0, labelHeight),
-		Position = UDim2.new(0, SIZES.ITEM_PAD, 0, labelYPos),
+		Size = UDim2.new(1, 0, 0, 0),
+		Position = UDim2.new(0, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextSize = SIZES.TOGGLE_LABEL_TEXT,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
-		TextTruncate = Enum.TextTruncate.AtEnd,
+		TextWrapped = true,
+		TextTruncate = Enum.TextTruncate.None,
 		Font = Enum.Font.GothamSemibold,
+		LayoutOrder = 1,
 	}, textContainer)
 
 	local desc = nil
 	if hasDesc then
-		local descYPos = labelYPos + labelHeight + 4
-		local descHeight = SIZES.TOGGLE_H - descYPos - 10
-
 		desc = mk("TextLabel", {
 			Name = "Description",
 			Text = description,
-			Size = UDim2.new(1, -20, 0, descHeight),
-			Position = UDim2.new(0, SIZES.ITEM_PAD, 0, descYPos),
+			Size = UDim2.new(1, 0, 0, 0),
+			Position = UDim2.new(0, 0, 0, 0),
+			AutomaticSize = Enum.AutomaticSize.Y,
 			BackgroundTransparency = 1,
 			TextColor3 = ThemeModule.Colors.TextGray,
 			TextSize = SIZES.TOGGLE_DESC_TEXT,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextYAlignment = Enum.TextYAlignment.Top,
-			TextTruncate = Enum.TextTruncate.AtEnd,
 			TextWrapped = true,
+			TextTruncate = Enum.TextTruncate.None,
 			Font = Enum.Font.Gotham,
+			LayoutOrder = 2,
 		}, textContainer)
 	end
 
@@ -654,7 +670,8 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 	local toggleBg = mk("Frame", {
 		Name = "ToggleBg",
 		Size = UDim2.new(0, SIZES.TOGGLE_WIDTH, 0, SIZES.TOGGLE_HEIGHT),
-		Position = UDim2.new(1, -(SIZES.TOGGLE_WIDTH + SIZES.ITEM_PAD), 0.5, -SIZES.TOGGLE_HEIGHT/2),
+		AnchorPoint = Vector2.new(1, 0.5),
+		Position = UDim2.new(1, 0, 0.5, 0),
 		BackgroundColor3 = isOn and ThemeModule.Colors.Primary1 or ThemeModule.Colors.Disabled,
 		BorderSizePixel = 0,
 	}, item)
@@ -664,7 +681,7 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 		ThemeModule.CreatePrimaryGradient(toggleBg, 0, 1.2)
 	end
 
-	local knobPadding = 2
+	local knobPadding = 3
 	local toggleKnob = mk("Frame", {
 		Name = "Knob",
 		Size = UDim2.new(0, SIZES.TOGGLE_KNOB, 0, SIZES.TOGGLE_KNOB),
@@ -679,7 +696,9 @@ local function createToggleSetting(labelText, description, settingKey, layoutOrd
 	local toggleBtn = mk("TextButton", {
 		Name = "ToggleBtn",
 		Text = "",
-		Size = UDim2.new(1, 0, 1, 0),
+		Size = UDim2.new(1, 8, 1, 14),
+		Position = UDim2.new(0.5, 0, 0.5, 0),
+		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundTransparency = 1,
 	}, toggleBg)
 
@@ -754,52 +773,76 @@ local function createSliderSetting(labelText, settingKey, layoutOrder, minValue,
 
 	local item = mk("Frame", {
 		Name = "Slider_" .. settingKey,
-		Size = UDim2.new(1, 0, 0, SIZES.SLIDER_H),
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundColor3 = ThemeModule.Colors.BackgroundMedium,
 		BorderSizePixel = 0,
 		LayoutOrder = layoutOrder,
-		ClipsDescendants = true,
+		ClipsDescendants = false,
 	}, configScroll)
 	crn(SIZES.CORNER_MD, item)
+
+	mk("UIPadding", {
+		PaddingTop = UDim.new(0, 10),
+		PaddingBottom = UDim.new(0, 12),
+		PaddingLeft = UDim.new(0, SIZES.ITEM_PAD),
+		PaddingRight = UDim.new(0, SIZES.ITEM_PAD),
+	}, item)
+
+	mk("UIListLayout", {
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Padding = UDim.new(0, 8),
+		FillDirection = Enum.FillDirection.Vertical,
+	}, item)
 
 	local label = mk("TextLabel", {
 		Name = "Label",
 		Text = labelText,
-		Size = UDim2.new(1, -20, 0, 22),
-		Position = UDim2.new(0, SIZES.ITEM_PAD, 0, 8),
+		Size = UDim2.new(1, 0, 0, 0),
+		Position = UDim2.new(0, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextSize = SIZES.SLIDER_LABEL_TEXT,
+		TextWrapped = true,
+		TextTruncate = Enum.TextTruncate.None,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
-		TextTruncate = Enum.TextTruncate.AtEnd,
 		Font = Enum.Font.GothamSemibold,
+		LayoutOrder = 1,
 	}, item)
 
 	local currentValue = userSettings[settingKey] or (DEFAULT_SETTINGS[settingKey] or 50)
 	local progress = (currentValue - minValue) / (maxValue - minValue)
-	local sliderY = 38
+
+	local sliderRow = mk("Frame", {
+		Name = "SliderRow",
+		Size = UDim2.new(1, 0, 0, math.max(SIZES.SLIDER_KNOB + 16, 44)),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		LayoutOrder = 2,
+	}, item)
 
 	local valueLabel = mk("TextLabel", {
 		Name = "ValueLabel",
 		Text = tostring(math.floor(currentValue)) .. "%",
-		Size = UDim2.new(0, SIZES.SLIDER_VALUE_W, 0, SIZES.SLIDER_KNOB),
-		Position = UDim2.new(1, -(SIZES.SLIDER_VALUE_W + SIZES.ITEM_PAD), 0, sliderY),
+		Size = UDim2.new(0, SIZES.SLIDER_VALUE_W, 1, 0),
+		Position = UDim2.new(1, -SIZES.SLIDER_VALUE_W, 0, 0),
 		BackgroundTransparency = 1,
 		TextColor3 = ThemeModule.Colors.Primary1,
 		TextSize = SIZES.SLIDER_VALUE_TEXT,
 		TextXAlignment = Enum.TextXAlignment.Right,
 		TextYAlignment = Enum.TextYAlignment.Center,
 		Font = Enum.Font.GothamBold,
-	}, item)
+	}, sliderRow)
 
 	local sliderContainer = mk("Frame", {
 		Name = "SliderContainer",
-		Size = UDim2.new(1, -(SIZES.ITEM_PAD * 2 + SIZES.SLIDER_VALUE_W + 10), 0, SIZES.SLIDER_KNOB + 10),
-		Position = UDim2.new(0, SIZES.ITEM_PAD, 0, sliderY - 5),
+		Size = UDim2.new(1, -(SIZES.SLIDER_VALUE_W + 10), 1, 0),
+		Position = UDim2.new(0, 0, 0, 0),
 		BackgroundTransparency = 1,
 		ClipsDescendants = false,
-	}, item)
+	}, sliderRow)
 
 	local sliderBg = mk("Frame", {
 		Name = "SliderBg",
@@ -1104,61 +1147,89 @@ local THEME_LIST = {
 local function createThemeSelector(layoutOrder)
 	local item = mk("Frame", {
 		Name = "ThemeSelectorCard",
-		Size = UDim2.new(1, 0, 0, 150),
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundColor3 = ThemeModule.Colors.BackgroundMedium,
 		BorderSizePixel = 0,
 		LayoutOrder = layoutOrder,
-		ClipsDescendants = true,
+		ClipsDescendants = false,
 		Active = false,
 	}, configScroll)
 	crn(SIZES.CORNER_MD, item)
 
+	mk("UIPadding", {
+		PaddingTop = UDim.new(0, 10),
+		PaddingBottom = UDim.new(0, 12),
+		PaddingLeft = UDim.new(0, SIZES.ITEM_PAD),
+		PaddingRight = UDim.new(0, SIZES.ITEM_PAD),
+	}, item)
+
+	mk("UIListLayout", {
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Padding = UDim.new(0, 10),
+		FillDirection = Enum.FillDirection.Vertical,
+	}, item)
+
 	local headerContainer = mk("Frame", {
 		Name = "HeaderContainer",
-		Size = UDim2.new(1, -24, 0, 40),
-		Position = UDim2.new(0, SIZES.ITEM_PAD, 0, 8),
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		Active = false,
+		LayoutOrder = 1,
 	}, item)
+
+	mk("UIListLayout", {
+		SortOrder = Enum.SortOrder.LayoutOrder,
+		Padding = UDim.new(0, 4),
+		FillDirection = Enum.FillDirection.Vertical,
+	}, headerContainer)
 
 	local titleLabel = mk("TextLabel", {
 		Name = "Title",
 		Text = "🎨 Warna Nama & Tema",
-		Size = UDim2.new(1, 0, 0, 20),
-		Position = UDim2.new(0, 0, 0, 0),
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextSize = SIZES.TOGGLE_LABEL_TEXT,
+		TextWrapped = true,
+		TextTruncate = Enum.TextTruncate.None,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Center,
 		Font = Enum.Font.GothamSemibold,
 		Active = false,
+		LayoutOrder = 1,
 	}, headerContainer)
 
 	local descLabel = mk("TextLabel", {
 		Name = "Description",
 		Text = "Pilih warna nama overhead dan nuansa visual menu Anda",
-		Size = UDim2.new(1, 0, 0, 16),
-		Position = UDim2.new(0, 0, 0, 22),
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		TextColor3 = ThemeModule.Colors.TextGray,
 		TextSize = SIZES.TOGGLE_DESC_TEXT,
+		TextWrapped = true,
+		TextTruncate = Enum.TextTruncate.None,
 		TextXAlignment = Enum.TextXAlignment.Left,
 		TextYAlignment = Enum.TextYAlignment.Top,
 		Font = Enum.Font.Gotham,
 		Active = false,
+		LayoutOrder = 2,
 	}, headerContainer)
 
 	local gridContainer = mk("Frame", {
 		Name = "GridContainer",
-		Size = UDim2.new(1, -24, 0, 82),
-		Position = UDim2.new(0, SIZES.ITEM_PAD, 0, 56),
+		Size = UDim2.new(1, 0, 0, 0),
+		AutomaticSize = Enum.AutomaticSize.Y,
 		BackgroundTransparency = 1,
 		Active = false,
+		LayoutOrder = 2,
 	}, item)
 
 	local gridLayout = mk("UIGridLayout", {
-		CellSize = UDim2.new(0.235, 0, 0, 36),
+		CellSize = UDim2.new(0.235, 0, 0, 44),
 		CellPadding = UDim2.new(0.02, 0, 0, 8),
 		SortOrder = Enum.SortOrder.LayoutOrder,
 	}, gridContainer)
@@ -1224,11 +1295,11 @@ local function createThemeSelector(layoutOrder)
 			Position = UDim2.new(0, 24, 0, 0),
 			BackgroundTransparency = 1,
 			TextColor3 = Color3.fromRGB(190, 190, 200),
-			TextSize = 10,
+			TextSize = UIStrings.TextSize.Caption,
 			Font = Enum.Font.GothamMedium,
 			TextXAlignment = Enum.TextXAlignment.Left,
 			TextYAlignment = Enum.TextYAlignment.Center,
-			TextTruncate = Enum.TextTruncate.AtEnd,
+			TextTruncate = Enum.TextTruncate.None,
 			Active = false,
 		}, chip)
 

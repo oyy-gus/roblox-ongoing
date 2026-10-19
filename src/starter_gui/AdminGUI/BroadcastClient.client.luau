@@ -12,6 +12,7 @@ local Modules = RS:WaitForChild("Modules")
 local AdminConfig = require(Modules:WaitForChild("AdminConfig"))
 local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
 local NotifModule = require(Modules:WaitForChild("NotifModule"))
+local UIStrings = require(Modules:WaitForChild("UIStrings"))
 
 AdminConfig.WaitForGUIReady()
 
@@ -24,9 +25,9 @@ local Config = {
 	Notification = {
 		Duration = 6,
 		MaxVisible = 3,
-		Width = 300,
-		MinHeight = 72,
-		MaxHeight = 140,
+		Width = 340,
+		MinHeight = 88,
+		MaxHeight = 220,
 		TopOffset = 12,
 		Spacing = 6,
 		Animation = {
@@ -123,12 +124,12 @@ local function buildBroadcastGUI()
 
 	local headerSubtitle = Instance.new("TextLabel")
 	headerSubtitle.Name = "HeaderSubtitle"
-	headerSubtitle.Size = UDim2.new(1, -50, 0, 16)
+	headerSubtitle.Size = UDim2.new(1, -50, 0, 18)
 	headerSubtitle.Position = UDim2.new(0, 50, 0, 28)
 	headerSubtitle.BackgroundTransparency = 1
 	headerSubtitle.Text = "Kirim pesan ke seluruh pemain di dalam server"
 	headerSubtitle.TextColor3 = ThemeModule.Colors.TextGray
-	headerSubtitle.TextSize = 12
+	headerSubtitle.TextSize = UIStrings.TextSize.Caption
 	headerSubtitle.Font = Enum.Font.GothamMedium
 	headerSubtitle.TextXAlignment = Enum.TextXAlignment.Left
 	headerSubtitle.Parent = headerSection
@@ -151,12 +152,12 @@ local function buildBroadcastGUI()
 
 	local inputLabel = Instance.new("TextLabel")
 	inputLabel.Name = "InputLabel"
-	inputLabel.Size = UDim2.new(1, 0, 0, 20)
+	inputLabel.Size = UDim2.new(1, 0, 0, 24)
 	inputLabel.Position = UDim2.new(0, 0, 0, 0)
 	inputLabel.BackgroundTransparency = 1
 	inputLabel.Text = "📝 Isi Pesan"
 	inputLabel.TextColor3 = ThemeModule.Colors.TextWhite
-	inputLabel.TextSize = 13
+	inputLabel.TextSize = UIStrings.TextSize.Title
 	inputLabel.Font = Enum.Font.GothamBold
 	inputLabel.TextXAlignment = Enum.TextXAlignment.Left
 	inputLabel.Parent = inputSection
@@ -188,7 +189,7 @@ local function buildBroadcastGUI()
 	textBox.PlaceholderText = Config.TextBox.Placeholder
 	textBox.PlaceholderColor3 = ThemeModule.Colors.TextGray
 	textBox.TextColor3 = ThemeModule.Colors.TextWhite
-	textBox.TextSize = 14
+	textBox.TextSize = UIStrings.TextSize.Caption
 	textBox.Font = Enum.Font.Gotham
 	textBox.TextXAlignment = Enum.TextXAlignment.Left
 	textBox.TextYAlignment = Enum.TextYAlignment.Top
@@ -214,12 +215,12 @@ local function buildBroadcastGUI()
 
 	local charCounter = Instance.new("TextLabel")
 	charCounter.Name = "CharCounter"
-	charCounter.Size = UDim2.new(0, 100, 0, 16)
-	charCounter.Position = UDim2.new(1, -100, 0, 132)
+	charCounter.Size = UDim2.new(0, 120, 0, 18)
+	charCounter.Position = UDim2.new(1, -120, 0, 132)
 	charCounter.BackgroundTransparency = 1
 	charCounter.Text = "0/" .. Config.TextBox.MaxLength
 	charCounter.TextColor3 = ThemeModule.Colors.TextGray
-	charCounter.TextSize = 11
+	charCounter.TextSize = UIStrings.TextSize.Caption
 	charCounter.Font = Enum.Font.Gotham
 	charCounter.TextXAlignment = Enum.TextXAlignment.Right
 	charCounter.Parent = inputSection
@@ -241,15 +242,15 @@ local function buildBroadcastGUI()
 
 	local actionSection = Instance.new("Frame")
 	actionSection.Name = "ActionSection"
-	actionSection.Size = UDim2.new(1, 0, 0, 45)
+	actionSection.Size = UDim2.new(1, 0, 0, 48)
 	actionSection.Position = UDim2.new(0, 0, 0, 230)
 	actionSection.BackgroundTransparency = 1
 	actionSection.Parent = broadcastPage
 
 	local sendButton = Instance.new("TextButton")
 	sendButton.Name = "SendButton"
-	sendButton.Size = UDim2.new(0, 150, 0, 40)
-	sendButton.Position = UDim2.new(1, -150, 0, 0)
+	sendButton.Size = UDim2.new(0, 160, 0, 44)
+	sendButton.Position = UDim2.new(1, -160, 0, 0)
 	sendButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	sendButton.BorderSizePixel = 0
 	sendButton.Text = ""
@@ -276,7 +277,7 @@ local function buildBroadcastGUI()
 	sendText.BackgroundTransparency = 1
 	sendText.Text = "Kirim Siaran"
 	sendText.TextColor3 = ThemeModule.Colors.BackgroundDark
-	sendText.TextSize = 13
+	sendText.TextSize = UIStrings.TextSize.Button
 	sendText.Font = Enum.Font.GothamBold
 	sendText.TextXAlignment = Enum.TextXAlignment.Left
 	sendText.Parent = sendButton
@@ -284,16 +285,16 @@ local function buildBroadcastGUI()
 	broadcastGUIElements.SendButton = sendButton
 
 	sendButton.MouseEnter:Connect(function()
-		TS:Create(sendButton, TweenInfo.new(0.2), {Size = UDim2.new(0, 155, 0, 42)}):Play()
+		TS:Create(sendButton, TweenInfo.new(0.2), {Size = UDim2.new(0, 165, 0, 46)}):Play()
 	end)
 	sendButton.MouseLeave:Connect(function()
-		TS:Create(sendButton, TweenInfo.new(0.2), {Size = UDim2.new(0, 150, 0, 40)}):Play()
+		TS:Create(sendButton, TweenInfo.new(0.2), {Size = UDim2.new(0, 160, 0, 44)}):Play()
 	end)
 
 	local clearButton = Instance.new("TextButton")
 	clearButton.Name = "ClearButton"
-	clearButton.Size = UDim2.new(0, 100, 0, 40)
-	clearButton.Position = UDim2.new(1, -265, 0, 0)
+	clearButton.Size = UDim2.new(0, 105, 0, 44)
+	clearButton.Position = UDim2.new(1, -275, 0, 0)
 	clearButton.BackgroundColor3 = ThemeModule.Colors.BackgroundLight
 	clearButton.BorderSizePixel = 0
 	clearButton.Text = ""
@@ -307,7 +308,7 @@ local function buildBroadcastGUI()
 	clearIcon.Position = UDim2.new(0, 12, 0, 0)
 	clearIcon.BackgroundTransparency = 1
 	clearIcon.Text = "x"
-	clearIcon.TextSize = 14
+	clearIcon.TextSize = UIStrings.TextSize.Caption
 	clearIcon.TextColor3 = ThemeModule.Colors.TextWhite
 	clearIcon.Font = Enum.Font.GothamBold
 	clearIcon.Parent = clearButton
@@ -318,7 +319,7 @@ local function buildBroadcastGUI()
 	clearText.BackgroundTransparency = 1
 	clearText.Text = "Hapus"
 	clearText.TextColor3 = ThemeModule.Colors.TextWhite
-	clearText.TextSize = 12
+	clearText.TextSize = UIStrings.TextSize.Caption
 	clearText.Font = Enum.Font.GothamMedium
 	clearText.TextXAlignment = Enum.TextXAlignment.Left
 	clearText.Parent = clearButton
@@ -334,8 +335,8 @@ local function buildBroadcastGUI()
 
 	local infoSection = Instance.new("Frame")
 	infoSection.Name = "InfoSection"
-	infoSection.Size = UDim2.new(1, 0, 0, 50)
-	infoSection.Position = UDim2.new(0, 0, 1, -66)
+	infoSection.Size = UDim2.new(1, 0, 0, 56)
+	infoSection.Position = UDim2.new(0, 0, 1, -70)
 	infoSection.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
 	infoSection.BorderSizePixel = 0
 	infoSection.Parent = broadcastPage
@@ -347,17 +348,17 @@ local function buildBroadcastGUI()
 	infoIcon.Position = UDim2.new(0, 10, 0.5, -12)
 	infoIcon.BackgroundTransparency = 1
 	infoIcon.Text = "ℹ️"
-	infoIcon.TextSize = 14
+	infoIcon.TextSize = UIStrings.TextSize.Caption
 	infoIcon.Font = Enum.Font.GothamBold
 	infoIcon.Parent = infoSection
 
 	local infoText = Instance.new("TextLabel")
-	infoText.Size = UDim2.new(1, -50, 1, -16)
-	infoText.Position = UDim2.new(0, 40, 0, 8)
+	infoText.Size = UDim2.new(1, -50, 1, -12)
+	infoText.Position = UDim2.new(0, 40, 0, 6)
 	infoText.BackgroundTransparency = 1
 	infoText.Text = "Pesan dikirim ke seluruh pemain. Maks 200 karakter. Ctrl+Enter untuk mengirim."
 	infoText.TextColor3 = ThemeModule.Colors.TextGray
-	infoText.TextSize = 10
+	infoText.TextSize = UIStrings.TextSize.Caption
 	infoText.Font = Enum.Font.Gotham
 	infoText.TextXAlignment = Enum.TextXAlignment.Left
 	infoText.TextWrapped = true
@@ -441,10 +442,10 @@ local function createBroadcastNotification(messageData)
 	local message = messageData.Message or ""
 	local messageWidth = Config.Notification.Width - 24
 
-	local messageTextHeight = getTextHeight(message, Enum.Font.Gotham, 10, messageWidth)
-	local messageBoxHeight = math.max(22, messageTextHeight + 10)
+	local messageTextHeight = getTextHeight(message, Enum.Font.Gotham, UIStrings.TextSize.Body, messageWidth)
+	local messageBoxHeight = math.max(30, messageTextHeight + 12)
 
-	local totalHeight = 38 + messageBoxHeight + 6
+	local totalHeight = 52 + messageBoxHeight + 8
 	totalHeight = math.clamp(totalHeight, Config.Notification.MinHeight, Config.Notification.MaxHeight)
 
 	local startY = -totalHeight - 15
@@ -486,12 +487,12 @@ local function createBroadcastNotification(messageData)
 	local accentGradient = ThemeModule.CreateAnimatedGradient(accentBar, "Primary", 90, 1.5)
 
 	local avatarContainer = Instance.new("Frame")
-	avatarContainer.Size = UDim2.new(0, 26, 0, 26)
-	avatarContainer.Position = UDim2.new(0, 12, 0, 6)
+	avatarContainer.Size = UDim2.new(0, 28, 0, 28)
+	avatarContainer.Position = UDim2.new(0, 12, 0, 8)
 	avatarContainer.BackgroundColor3 = ThemeModule.Colors.BackgroundLight
 	avatarContainer.BorderSizePixel = 0
 	avatarContainer.Parent = notif
-	ThemeModule.CreateCorner(avatarContainer, 13)
+	ThemeModule.CreateCorner(avatarContainer, 14)
 
 	local avatarStroke = Instance.new("UIStroke")
 	avatarStroke.Color = ThemeModule.Colors.Primary1
@@ -503,7 +504,7 @@ local function createBroadcastNotification(messageData)
 	avatarImage.Position = UDim2.new(0, 1, 0, 1)
 	avatarImage.BackgroundTransparency = 1
 	avatarImage.Parent = avatarContainer
-	ThemeModule.CreateCorner(avatarImage, 12)
+	ThemeModule.CreateCorner(avatarImage, 13)
 
 	local success, content = pcall(function()
 		return Players:GetUserThumbnailAsync(messageData.SenderId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
@@ -511,20 +512,20 @@ local function createBroadcastNotification(messageData)
 	if success then avatarImage.Image = content end
 
 	local broadcastLabel = Instance.new("TextLabel")
-	broadcastLabel.Size = UDim2.new(0, 60, 0, 10)
-	broadcastLabel.Position = UDim2.new(0, 42, 0, 5)
+	broadcastLabel.Size = UDim2.new(0, 80, 0, 16)
+	broadcastLabel.Position = UDim2.new(0, 44, 0, 5)
 	broadcastLabel.BackgroundTransparency = 1
 	broadcastLabel.Text = "SIARAN"
 	broadcastLabel.TextColor3 = ThemeModule.Colors.Primary1
-	broadcastLabel.TextSize = 8
+	broadcastLabel.TextSize = UIStrings.TextSize.Caption
 	broadcastLabel.Font = Enum.Font.GothamBold
 	broadcastLabel.TextXAlignment = Enum.TextXAlignment.Left
 	broadcastLabel.Parent = notif
 
 	local badgeContainer = Instance.new("Frame")
 	badgeContainer.Name = "BadgeContainer"
-	badgeContainer.Size = UDim2.new(1, -70, 0, 16)
-	badgeContainer.Position = UDim2.new(0, 42, 0, 17)
+	badgeContainer.Size = UDim2.new(1, -96, 0, 22)
+	badgeContainer.Position = UDim2.new(0, 44, 0, 23)
 	badgeContainer.BackgroundTransparency = 1
 	badgeContainer.Parent = notif
 
@@ -537,7 +538,7 @@ local function createBroadcastNotification(messageData)
 
 	local nameBadge = Instance.new("Frame")
 	nameBadge.Name = "NameBadge"
-	nameBadge.Size = UDim2.new(0, 60, 0, 16)
+	nameBadge.Size = UDim2.new(0, 70, 0, 20)
 	nameBadge.BackgroundColor3 = ThemeModule.Colors.BackgroundLight
 	nameBadge.BorderSizePixel = 0
 	nameBadge.LayoutOrder = 1
@@ -550,7 +551,7 @@ local function createBroadcastNotification(messageData)
 	nameLabel.BackgroundTransparency = 1
 	nameLabel.Text = "• " .. (messageData.SenderName or "Unknown")
 	nameLabel.TextColor3 = ThemeModule.Colors.TextWhite
-	nameLabel.TextSize = 9
+	nameLabel.TextSize = UIStrings.TextSize.Caption
 	nameLabel.Font = Enum.Font.GothamBold
 	nameLabel.TextXAlignment = Enum.TextXAlignment.Center
 	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
@@ -558,7 +559,7 @@ local function createBroadcastNotification(messageData)
 
 	local roleBadge = Instance.new("Frame")
 	roleBadge.Name = "RoleBadge"
-	roleBadge.Size = UDim2.new(0, 50, 0, 16)
+	roleBadge.Size = UDim2.new(0, 60, 0, 20)
 	roleBadge.BackgroundColor3 = messageData.RoleColor or ThemeModule.Colors.Primary1
 	roleBadge.BackgroundTransparency = 0.8
 	roleBadge.BorderSizePixel = 0
@@ -572,7 +573,7 @@ local function createBroadcastNotification(messageData)
 	roleLabel.BackgroundTransparency = 1
 	roleLabel.Text = "• " .. (messageData.RoleText or "PLAYER")
 	roleLabel.TextColor3 = messageData.RoleColor or ThemeModule.Colors.Primary1
-	roleLabel.TextSize = 9
+	roleLabel.TextSize = UIStrings.TextSize.Caption
 	roleLabel.Font = Enum.Font.GothamBold
 	roleLabel.TextXAlignment = Enum.TextXAlignment.Center
 	roleLabel.Parent = roleBadge
@@ -580,14 +581,14 @@ local function createBroadcastNotification(messageData)
 	task.defer(function()
 		if nameLabel and nameLabel.Parent and nameBadge and nameBadge.Parent then
 			local nameText = "• " .. (messageData.SenderName or "Unknown")
-			local nameWidth = TextService:GetTextSize(nameText, 9, Enum.Font.GothamBold, Vector2.new(200, 16)).X
-			nameBadge.Size = UDim2.new(0, math.clamp(nameWidth + 10, 40, 100), 0, 16)
+			local nameWidth = TextService:GetTextSize(nameText, UIStrings.TextSize.Caption, Enum.Font.GothamBold, Vector2.new(200, 20)).X
+			nameBadge.Size = UDim2.new(0, math.clamp(nameWidth + 12, 50, 130), 0, 20)
 		end
 
 		if roleLabel and roleLabel.Parent and roleBadge and roleBadge.Parent then
 			local roleText = "• " .. (messageData.RoleText or "PLAYER")
-			local roleWidth = TextService:GetTextSize(roleText, 9, Enum.Font.GothamBold, Vector2.new(200, 16)).X
-			roleBadge.Size = UDim2.new(0, math.clamp(roleWidth + 10, 40, 80), 0, 16)
+			local roleWidth = TextService:GetTextSize(roleText, UIStrings.TextSize.Caption, Enum.Font.GothamBold, Vector2.new(200, 20)).X
+			roleBadge.Size = UDim2.new(0, math.clamp(roleWidth + 12, 50, 100), 0, 20)
 		end
 	end)
 
@@ -600,9 +601,15 @@ local function createBroadcastNotification(messageData)
 	closeBtn.TextColor3 = ThemeModule.Colors.TextWhite
 	closeBtn.TextSize = 12
 	closeBtn.Font = Enum.Font.GothamBold
+	closeBtn.TextXAlignment = Enum.TextXAlignment.Center
+	closeBtn.TextYAlignment = Enum.TextYAlignment.Center
 	closeBtn.AutoButtonColor = false
 	closeBtn.Parent = notif
-	ThemeModule.CreateCorner(closeBtn, 6)
+	ThemeModule.CreateCorner(closeBtn, 5)
+
+	local closePad = Instance.new("UIPadding")
+	closePad.PaddingBottom = UDim.new(0, 2)
+	closePad.Parent = closeBtn
 
 	closeBtn.MouseEnter:Connect(function()
 		TS:Create(closeBtn, TweenInfo.new(0.1), {BackgroundColor3 = ThemeModule.Colors.CloseRedHover}):Play()
@@ -614,7 +621,7 @@ local function createBroadcastNotification(messageData)
 	local messageContainer = Instance.new("Frame")
 	messageContainer.Name = "MessageContainer"
 	messageContainer.Size = UDim2.new(1, -20, 0, messageBoxHeight)
-	messageContainer.Position = UDim2.new(0, 10, 0, 36)
+	messageContainer.Position = UDim2.new(0, 10, 0, 48)
 	messageContainer.BackgroundColor3 = ThemeModule.Colors.BackgroundDark
 	messageContainer.BorderSizePixel = 0
 	messageContainer.Parent = notif
@@ -626,7 +633,7 @@ local function createBroadcastNotification(messageData)
 	messageContent.BackgroundTransparency = 1
 	messageContent.Text = message
 	messageContent.TextColor3 = ThemeModule.Colors.TextGray
-	messageContent.TextSize = 10
+	messageContent.TextSize = UIStrings.TextSize.Body
 	messageContent.Font = Enum.Font.Gotham
 	messageContent.TextXAlignment = Enum.TextXAlignment.Left
 	messageContent.TextYAlignment = Enum.TextYAlignment.Top

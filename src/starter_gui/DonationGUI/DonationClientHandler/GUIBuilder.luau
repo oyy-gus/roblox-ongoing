@@ -2,6 +2,7 @@ local GUIBuilder = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ThemeModule       = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("ThemeModule"))
+local UIStrings         = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("UIStrings"))
 local ScaleSystem       = require(ReplicatedStorage:WaitForChild("AutoScaleSystem"):WaitForChild("ScaleSystem"))
 
 local HEADER_TITLE = {
@@ -13,7 +14,9 @@ local CFG = {
 	CORNER_MAIN       = ThemeModule.Styles.Header.CornerRadius,
 	CORNER_BTN        = ThemeModule.Styles.Button.CornerRadius,
 	CORNER_SMALL      = ThemeModule.Styles.Input.CornerRadius,
+	CORNER_RADIUS     = 6,
 	FONT              = ThemeModule.Styles.Button.Font,
+	FONT_BOLD         = Enum.Font.GothamBold,
 	FONT_BODY         = Enum.Font.Gotham,
 	BORDER_THICKNESS  = 2,
 	ITEM_HEIGHT       = 54,
@@ -67,7 +70,7 @@ local function makeLabel(props)
 	l.BackgroundTransparency = 1
 	l.Text                   = props.Text or ""
 	l.TextColor3             = props.Color or C.TextWhite
-	l.TextSize               = props.TextSize or 14
+	l.TextSize               = props.TextSize or UIStrings.TextSize.Caption
 	l.Font                   = props.Font or CFG.FONT_BODY
 	l.TextXAlignment         = props.XAlign or Enum.TextXAlignment.Left
 	l.TextYAlignment         = props.YAlign or Enum.TextYAlignment.Center
@@ -81,14 +84,14 @@ end
 local function makeButton(props)
 	local b = Instance.new("TextButton")
 	b.Name                   = props.Name or "Button"
-	b.Size                   = props.Size or UDim2.new(1, 0, 0, 36)
+	b.Size                   = props.Size or UDim2.new(1, 0, 0, 44)
 	b.Position               = props.Position or UDim2.new(0, 0, 0, 0)
 	b.AnchorPoint            = props.AnchorPoint or Vector2.new(0, 0)
 	b.BackgroundColor3       = props.BG or C.BackgroundMedium
 	b.BackgroundTransparency = props.Transparency or 0
 	b.Text                   = props.Text or "Button"
 	b.TextColor3             = props.Color or C.TextWhite
-	b.TextSize               = props.TextSize or 14
+	b.TextSize               = props.TextSize or UIStrings.TextSize.Caption
 	b.Font                   = props.Font or CFG.FONT
 	b.BorderSizePixel        = 0
 	b.AutoButtonColor        = false
@@ -110,7 +113,7 @@ local function makeTextBox(props)
 	t.PlaceholderText   = props.Placeholder or "Ketik di sini..."
 	t.PlaceholderColor3 = C.TextMuted
 	t.TextColor3        = C.TextWhite
-	t.TextSize          = props.TextSize or 14
+	t.TextSize          = props.TextSize or UIStrings.TextSize.Caption
 	t.Font              = CFG.FONT_BODY
 	t.ClearTextOnFocus  = false
 	t.TextXAlignment    = Enum.TextXAlignment.Left
@@ -178,7 +181,7 @@ local function buildProductTemplate(container, zBase)
 		Position     = UDim2.new(0, 6, 0, 4),
 		Transparency = 1,
 		Text         = "R$ 100",
-		TextSize     = 14,
+		TextSize     = UIStrings.TextSize.Body,
 		Font         = CFG.FONT,
 		Color        = C.TextWhite,
 		ZIndex       = zBase + 2,
@@ -217,10 +220,10 @@ local function buildHeader(parent, titleText, zBase)
 
 	local titleLabel = makeLabel({
 		Name     = "Title",
-		Size     = UDim2.new(1, -56, 1, 0),
+		Size     = UDim2.new(1, -50, 1, 0),
 		Position = UDim2.new(0, 16, 0, 0),
 		Text     = titleText,
-		TextSize = 15,
+		TextSize = UIStrings.TextSize.Title,
 		Font     = CFG.FONT,
 		Color    = C.TextWhite,
 		ZIndex   = zBase + 3,
@@ -235,13 +238,20 @@ local function buildHeader(parent, titleText, zBase)
 		AnchorPoint  = Vector2.new(0, 0.5),
 		BG           = C.CloseRed,
 		Text         = "x",
-		TextSize     = 14,
-		Font         = CFG.FONT,
+		TextSize     = 16,
+		Font         = Enum.Font.GothamBold,
 		Color        = C.TextWhite,
 		CornerRadius = 6,
 		ZIndex       = zBase + 3,
 		Parent       = header,
 	})
+	closeBtn.TextXAlignment = Enum.TextXAlignment.Center
+	closeBtn.TextYAlignment = Enum.TextYAlignment.Center
+	corner(6, closeBtn)
+
+	local closePad = Instance.new("UIPadding")
+	closePad.PaddingBottom = UDim.new(0, 3)
+	closePad.Parent = closeBtn
 	closeBtn.MouseEnter:Connect(function() closeBtn.BackgroundColor3 = C.CloseRedHover end)
 	closeBtn.MouseLeave:Connect(function() closeBtn.BackgroundColor3 = C.CloseRed      end)
 
@@ -269,7 +279,7 @@ local function buildMainFrame(gui)
 		Size     = UDim2.new(1, -24, 0, 24),
 		Position = UDim2.new(0, 12, 0, 56),
 		Text     = "Pilih jumlah donasi kamu",
-		TextSize = 12,
+		TextSize = UIStrings.TextSize.Caption,
 		Color    = C.TextGray,
 		ZIndex   = 11,
 		Parent   = frame,
@@ -294,7 +304,7 @@ local function buildMessageFrame(gui)
 
 	local frame = makeFrame({
 		Name         = "MessageFrame",
-		Size         = UDim2.new(0, 340, 0, 240),
+		Size         = UDim2.new(0, 360, 0, 260),
 		Position     = UDim2.new(0.5, 0, 0.5, 0),
 		AnchorPoint  = Vector2.new(0.5, 0.5),
 		BG           = C.BackgroundDark,
@@ -310,7 +320,7 @@ local function buildMessageFrame(gui)
 		Size     = UDim2.new(1, -24, 0, 22),
 		Position = UDim2.new(0, 12, 0, 58),
 		Text     = "Pesan akan dikirim ke semua player",
-		TextSize = 11,
+		TextSize = UIStrings.TextSize.Caption,
 		Color    = C.TextMuted,
 		ZIndex   = 21,
 		Parent   = frame,
@@ -321,18 +331,18 @@ local function buildMessageFrame(gui)
 		Size        = UDim2.new(1, -24, 0, 70),
 		Position    = UDim2.new(0, 12, 0, 84),
 		Placeholder = "Tulis pesan kamu di sini... (maks 200 karakter)",
-		TextSize    = 13,
+		TextSize    = UIStrings.TextSize.Caption,
 		ZIndex      = 21,
 		Parent      = frame,
 	})
 
 	local sendBtn = makeButton({
 		Name         = "SendBtn",
-		Size         = UDim2.new(0.55, -8, 0, 36),
-		Position     = UDim2.new(0, 12, 0, 166),
+		Size         = UDim2.new(0.55, -8, 0, 44),
+		Position     = UDim2.new(0, 12, 0, 170),
 		BG           = C.Primary2,
 		Text         = "Kirim Pesan",
-		TextSize     = 13,
+		TextSize     = UIStrings.TextSize.Caption,
 		Color        = C.TextOnGradient,
 		CornerRadius = CFG.CORNER_BTN,
 		ZIndex       = 21,
@@ -344,11 +354,11 @@ local function buildMessageFrame(gui)
 
 	local cancelBtn = makeButton({
 		Name         = "CancelBtn",
-		Size         = UDim2.new(0.45, -8, 0, 36),
-		Position     = UDim2.new(0.55, 4, 0, 166),
+		Size         = UDim2.new(0.45, -8, 0, 44),
+		Position     = UDim2.new(0.55, 4, 0, 170),
 		BG           = C.BackgroundLight,
 		Text         = "Batal",
-		TextSize     = 13,
+		TextSize     = UIStrings.TextSize.Caption,
 		Color        = C.TextGray,
 		CornerRadius = CFG.CORNER_BTN,
 		ZIndex       = 21,
@@ -371,7 +381,7 @@ local function buildNotificationFrame(gui)
 
 	local frame = makeFrame({
 		Name         = "NotificationFrame",
-		Size         = UDim2.new(0, 400, 0, 95),
+		Size         = UDim2.new(0, 420, 0, 105),
 		Position     = UDim2.new(0.5, 0, 0, -130),
 		AnchorPoint  = Vector2.new(0.5, 0),
 		BG           = C.BackgroundDark,
@@ -471,10 +481,10 @@ local function buildNotificationFrame(gui)
 
 	makeLabel({
 		Name     = "HeaderLabel",
-		Size     = UDim2.new(1, 0, 0, 20),
+		Size     = UDim2.new(1, 0, 0, 22),
 		Position = UDim2.new(0, 0, 0, 0),
 		Text     = "Donasi Baru!",
-		TextSize = 14,
+		TextSize = UIStrings.TextSize.Title,
 		Font     = Enum.Font.GothamBold,
 		Color    = C.TextWhite,
 		Wrap     = false,
@@ -486,9 +496,9 @@ local function buildNotificationFrame(gui)
 	makeLabel({
 		Name     = "Infolabel",
 		Size     = UDim2.new(1, 0, 0, 18),
-		Position = UDim2.new(0, 0, 0, 22),
+		Position = UDim2.new(0, 0, 0, 24),
 		Text     = "Seseorang berdonasi",
-		TextSize = 12,
+		TextSize = UIStrings.TextSize.Caption,
 		Font     = CFG.FONT_BODY,
 		Color    = C.TextGray,
 		Wrap     = true,
@@ -499,8 +509,8 @@ local function buildNotificationFrame(gui)
 
 	local messageContainer = makeFrame({
 		Name         = "MessageContainer",
-		Size         = UDim2.new(1, 0, 0, 22),
-		Position     = UDim2.new(0, 0, 0, 44),
+		Size         = UDim2.new(1, 0, 0, 24),
+		Position     = UDim2.new(0, 0, 0, 46),
 		Transparency = 1,
 		ZIndex       = 32,
 		Visible      = false,
@@ -509,10 +519,10 @@ local function buildNotificationFrame(gui)
 
 	makeLabel({
 		Name     = "QuoteMark",
-		Size     = UDim2.new(0, 10, 0, 22),
+		Size     = UDim2.new(0, 12, 0, 22),
 		Position = UDim2.new(0, 0, 0, 0),
 		Text     = '"',
-		TextSize = 14,
+		TextSize = UIStrings.TextSize.Title,
 		Font     = Enum.Font.GothamBold,
 		Color    = C.Primary1,
 		XAlign   = Enum.TextXAlignment.Left,
@@ -522,10 +532,10 @@ local function buildNotificationFrame(gui)
 
 	makeLabel({
 		Name     = "Message",
-		Size     = UDim2.new(1, -12, 0, 22),
-		Position = UDim2.new(0, 10, 0, 0),
+		Size     = UDim2.new(1, -14, 0, 22),
+		Position = UDim2.new(0, 12, 0, 0),
 		Text     = "",
-		TextSize = 11,
+		TextSize = UIStrings.TextSize.Caption,
 		Font     = Enum.Font.GothamMedium,
 		Color    = C.TextGray,
 		Wrap     = true,
@@ -535,11 +545,11 @@ local function buildNotificationFrame(gui)
 
 	local tierBadge = makeFrame({
 		Name         = "TierBadge",
-		Size         = UDim2.new(0, 75, 0, 20),
+		Size         = UDim2.new(0, 85, 0, 24),
 		Position     = UDim2.new(1, -10, 0, 10),
 		AnchorPoint  = Vector2.new(1, 0),
 		BG           = C.Primary2,
-		CornerRadius = 10,
+		CornerRadius = 12,
 		Transparency = 0.15,
 		ZIndex       = 32,
 		Parent       = frame,
@@ -550,7 +560,7 @@ local function buildNotificationFrame(gui)
 		Name     = "TierText",
 		Size     = UDim2.new(1, 0, 1, 0),
 		Text     = "Thanks",
-		TextSize = 9,
+		TextSize = UIStrings.TextSize.Caption,
 		Font     = Enum.Font.GothamBold,
 		Color    = C.TextWhite,
 		XAlign   = Enum.TextXAlignment.Center,
