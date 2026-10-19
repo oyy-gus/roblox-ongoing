@@ -124,6 +124,17 @@ local function getScreenGui()
 	screenGui.Parent = playerGui
 
 	notificationScreenGui = screenGui
+
+	local AutoScaleSystem = ReplicatedStorage:FindFirstChild("AutoScaleSystem")
+	if AutoScaleSystem then
+		local ok, ScaleSystem = pcall(function()
+			return require(AutoScaleSystem:WaitForChild("ScaleSystem", 3))
+		end)
+		if ok and ScaleSystem then
+			ScaleSystem.new(screenGui)
+		end
+	end
+
 	startMonitoring()
 	ensureOnTop()
 
@@ -214,6 +225,7 @@ local function createNotifFrame(options)
 	iconLabel.Font = (ThemeModule.Fonts and ThemeModule.Fonts.BodyBold) or Enum.Font.GothamBold
 	iconLabel.ZIndex = 999999 + 1
 	iconLabel.Parent = mainFrame
+	UIStrings.LockTextSize(iconLabel, UIStrings.TextSize.Body)
 
 	local textX = 14 + CONFIG.IconSize + 8
 	local closeBtnSpace = 20
@@ -249,6 +261,7 @@ local function createNotifFrame(options)
 	title.ZIndex = 999999 + 1
 	title.LayoutOrder = 1
 	title.Parent = textContainer
+	UIStrings.LockTextSize(title, UIStrings.TextSize.Body)
 
 	local message = Instance.new("TextLabel")
 	message.Name = "Message"
@@ -266,6 +279,7 @@ local function createNotifFrame(options)
 	message.ZIndex = 999999 + 1
 	message.LayoutOrder = 2
 	message.Parent = textContainer
+	UIStrings.LockTextSize(message, UIStrings.TextSize.Caption)
 
 	local spacer = Instance.new("Frame")
 	spacer.Size = UDim2.new(1, 0, 0, 8)
@@ -309,6 +323,7 @@ local function createNotifFrame(options)
 	closeBtn.BorderSizePixel = 0
 	closeBtn.ZIndex = 999999 + 3
 	closeBtn.Parent = mainFrame
+	UIStrings.LockTextSize(closeBtn, 12)
 
 	local closeBtnCorner = Instance.new("UICorner")
 	closeBtnCorner.CornerRadius = UDim.new(0, 4)

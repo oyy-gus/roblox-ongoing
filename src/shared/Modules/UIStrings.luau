@@ -196,7 +196,7 @@ function UIStrings.IsHighTextSize(): boolean
 		or pref == Enum.PreferredTextSize.Largest
 end
 
--- Mengunci mati ukuran teks menggunakan UITextSizeConstraint (MinTextSize == MaxTextSize)
+-- Mengunci mati ukuran teks menggunakan UITextSizeConstraint (MinTextSize == MaxTextSize) agar tidak bisa membesar
 function UIStrings.LockTextSize(textElement: Instance, normalSize: number?): UITextSizeConstraint?
 	if not (textElement:IsA("TextLabel") or textElement:IsA("TextButton") or textElement:IsA("TextBox")) then
 		return nil
@@ -220,7 +220,7 @@ function UIStrings.LockTextSize(textElement: Instance, normalSize: number?): UIT
 			return
 		end
 
-		local size = textObj.TextSize
+		local size = normalSize or textObj.TextSize
 		if size and size > 0 then
 			local constraint = textObj:FindFirstChild("TextSizeLock")
 				or textObj:FindFirstChildOfClass("UITextSizeConstraint")
@@ -229,6 +229,7 @@ function UIStrings.LockTextSize(textElement: Instance, normalSize: number?): UIT
 				constraint.Name = "TextSizeLock"
 				constraint.Parent = textObj
 			end
+			-- KUNCI MATI: MinTextSize dan MaxTextSize sama persis dengan TextSize (anti-membesar)
 			constraint.MinTextSize = size
 			constraint.MaxTextSize = size
 		end
@@ -251,7 +252,7 @@ UIStrings.LockText = UIStrings.LockTextSize
 -- Mengunci seluruh teks di dalam container secara rekursif dan berkelanjutan
 function UIStrings.EnforceContainer(container: Instance): RBXScriptConnection
 	local function checkAndLock(item: Instance)
-		if (item:IsA("TextLabel") or item:IsA("TextButton") or item:IsA("TextBox")) and not (item :: any).TextScaled then
+		if item:IsA("TextLabel") or item:IsA("TextButton") or item:IsA("TextBox") then
 			UIStrings.LockTextSize(item)
 		end
 	end
