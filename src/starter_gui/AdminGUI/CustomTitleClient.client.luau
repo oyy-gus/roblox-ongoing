@@ -441,7 +441,7 @@ giveBtn.Font             = Enum.Font.GothamBold
 giveBtn.AutoButtonColor  = false
 giveBtn.Parent           = buttonContainer
 makeCorner(giveBtn, 6)
-ThemeModule.CreateStaticGradient(giveBtn, "Success", 90)
+ThemeModule.CreateStaticGradient(giveBtn, "Primary", 90)
 
 giveBtn.MouseEnter:Connect(function()
 	TweenService:Create(giveBtn, TweenInfo.new(0.15), { BackgroundTransparency = 0.1 }):Play()
@@ -1033,7 +1033,7 @@ giveBtn.MouseButton1Click:Connect(function()
 		for _, child in ipairs(giveBtn:GetChildren()) do
 			if child:IsA("UIGradient") then child:Destroy() end
 		end
-		ThemeModule.CreateStaticGradient(giveBtn, "Success", 90)
+		ThemeModule.CreateStaticGradient(giveBtn, "Primary", 90)
 
 		updateButtonLayout(false)
 		AdminConfig.ShowNotification("Gelar berhasil diperbarui!", "success")
@@ -1055,7 +1055,7 @@ cancelBtn.MouseButton1Click:Connect(function()
 	for _, child in ipairs(giveBtn:GetChildren()) do
 		if child:IsA("UIGradient") then child:Destroy() end
 	end
-	ThemeModule.CreateStaticGradient(giveBtn, "Success", 90)
+	ThemeModule.CreateStaticGradient(giveBtn, "Primary", 90)
 
 	updateButtonLayout(false)
 	AdminConfig.SwitchTab("ManageTitle")
@@ -1126,5 +1126,39 @@ updatePreview()
 updateSlider(0)
 updateButtonLayout(false)
 updateButtonVisibility()
+
+local function updateThemeGradients()
+	for _, child in ipairs(giveBtn:GetChildren()) do
+		if child:IsA("UIGradient") then
+			child.Color = ThemeModule.Gradients.Primary
+		end
+	end
+end
+
+if ThemeModule.OnThemeChanged then
+	ThemeModule.OnThemeChanged.Event:Connect(updateThemeGradients)
+end
+
+local MenuConfig = nil
+pcall(function()
+	MenuConfig = require(Modules:WaitForChild("MenuConfig", 5))
+end)
+if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+	MenuConfig.Events.OnColorChanged.Event:Connect(updateThemeGradients)
+end
+
+player:GetAttributeChangedSignal("CurrentTheme"):Connect(function()
+	local theme = player:GetAttribute("CurrentTheme")
+	if theme and ThemeModule and ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(theme)
+	end
+	updateThemeGradients()
+end)
+
+local cur = player:GetAttribute("CurrentTheme")
+if cur and ThemeModule and ThemeModule.ApplyPreset then
+	ThemeModule.ApplyPreset(cur)
+end
+updateThemeGradients()
 
 print("✅ [CustomTitleClient] Loaded!")

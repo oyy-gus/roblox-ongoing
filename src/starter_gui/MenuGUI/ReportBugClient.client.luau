@@ -90,7 +90,11 @@ local function mk(cls, props, parent)
 	local inst = Instance.new(cls)
 	for k, v in pairs(props) do inst[k] = v end
 	if inst:IsA("GuiObject") and not inst:IsA("UIComponent") and props.Active == nil then
-		inst.Active = true
+		if inst:IsA("TextButton") or inst:IsA("ImageButton") or inst:IsA("TextBox") or inst:IsA("ScrollingFrame") then
+			inst.Active = true
+		else
+			inst.Active = false
+		end
 	end
 	if parent then inst.Parent = parent end
 	return inst
@@ -238,6 +242,8 @@ local cooldownLabel = mk("TextLabel", {
 	ZIndex                 = 102,
 }, bottomBar)
 
+reportPage.Active = false
+
 local rootScroll = mk("ScrollingFrame", {
 	Name                       = "BugReportScroll",
 	Size                       = UDim2.new(1, 0, 1, -BOTTOM_H),
@@ -246,12 +252,14 @@ local rootScroll = mk("ScrollingFrame", {
 	ScrollBarThickness         = 0,
 	ScrollBarImageTransparency = 1,
 	ScrollingEnabled           = true,
+	Active                     = true,
 	CanvasSize                 = UDim2.new(0, 0, 0, 0),
 	AutomaticCanvasSize        = Enum.AutomaticSize.Y,
 	ClipsDescendants           = true,
 	ScrollingDirection         = Enum.ScrollingDirection.Y,
+	HorizontalScrollBarInset   = Enum.ScrollBarInset.None,
 	VerticalScrollBarInset     = Enum.ScrollBarInset.None,
-	ElasticBehavior            = Enum.ElasticBehavior.WhenScrollable,
+	ElasticBehavior            = Enum.ElasticBehavior.Always,
 	ZIndex                     = 5,
 }, reportPage)
 crn(SIZES.CORNER_MD, rootScroll)
@@ -643,6 +651,15 @@ makeCharCounter(stepsContent, stepsInput,
 	BugReportConfig.Validation.StepsMaxLength,
 	SIZES.LABEL_H + 4 + stepsH + 2)
 
+mk("Frame", {
+	Name                   = "BottomSpacer",
+	Size                   = UDim2.new(1, 0, 0, 16),
+	BackgroundTransparency = 1,
+	BorderSizePixel        = 0,
+	LayoutOrder            = 7,
+	ZIndex                 = 5,
+}, rootScroll)
+
 local function setSubmitState(loading)
 	State.isSubmitting = loading
 	if loading then
@@ -900,21 +917,41 @@ end
 
 if MenuConfig.Events and MenuConfig.Events.OnTabChanged then
 	MenuConfig.Events.OnTabChanged.Event:Connect(function(tab)
-		if tab == "Report" or tab == "Bug" or tab == "Kredit" then
+		if tab == "Report" or tab == "Bug" or tab == "Kredit" or tab == "Lapor" then
 			rootScroll.CanvasPosition = Vector2.new(0, 0)
 		end
 	end)
 end
 
-if MenuConfig.Events and MenuConfig.Events.OnColorChanged then
-	MenuConfig.Events.OnColorChanged.Event:Connect(function()
-		for _, desc in ipairs(reportPage:GetDescendants()) do
-			if desc:IsA("UIGradient") and desc.Name == "StrokeGradient" and ThemeModule and ThemeModule.Gradients then
-				desc.Color = ThemeModule.Gradients.Primary
-			end
+local function updateReportTheme()
+	for _, desc in ipairs(reportPage:GetDescendants()) do
+		if desc:IsA("UIGradient") and ThemeModule and ThemeModule.Gradients then
+			desc.Color = ThemeModule.Gradients.Primary
 		end
-	end)
+	end
 end
+
+if ThemeModule.OnThemeChanged then
+	ThemeModule.OnThemeChanged.Event:Connect(updateReportTheme)
+end
+
+if MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+	MenuConfig.Events.OnColorChanged.Event:Connect(updateReportTheme)
+end
+
+player:GetAttributeChangedSignal("CurrentTheme"):Connect(function()
+	local theme = player:GetAttribute("CurrentTheme")
+	if theme and ThemeModule and ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(theme)
+	end
+	updateReportTheme()
+end)
+
+local cur = player:GetAttribute("CurrentTheme")
+if cur and ThemeModule and ThemeModule.ApplyPreset then
+	ThemeModule.ApplyPreset(cur)
+end
+updateReportTheme()
 
 print("========================================")
 print("✅ ReportBugClient siap!")

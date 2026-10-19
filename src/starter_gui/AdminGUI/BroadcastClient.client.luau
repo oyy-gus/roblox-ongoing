@@ -732,12 +732,49 @@ local function cleanup()
 	activeNotifications = {}
 end
 
+local function updateThemeGradients()
+	local sendBtn = broadcastGUIElements.SendButton
+	if sendBtn then
+		local grad = sendBtn:FindFirstChildOfClass("UIGradient")
+		if grad then
+			grad.Color = ThemeModule.Gradients.Primary
+		end
+	end
+end
+
 local function initialize()
 	buildBroadcastGUI()
 	local broadcastPage = AdminConfig.GUI.BroadcastPage
 	if broadcastPage then
 		broadcastPage.Destroying:Connect(cleanup)
 	end
+
+	if ThemeModule.OnThemeChanged then
+		ThemeModule.OnThemeChanged.Event:Connect(updateThemeGradients)
+	end
+
+	local MenuConfig = nil
+	pcall(function()
+		MenuConfig = require(Modules:WaitForChild("MenuConfig", 5))
+	end)
+	if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+		MenuConfig.Events.OnColorChanged.Event:Connect(updateThemeGradients)
+	end
+
+	player:GetAttributeChangedSignal("CurrentTheme"):Connect(function()
+		local theme = player:GetAttribute("CurrentTheme")
+		if theme and ThemeModule and ThemeModule.ApplyPreset then
+			ThemeModule.ApplyPreset(theme)
+		end
+		updateThemeGradients()
+	end)
+
+	local cur = player:GetAttribute("CurrentTheme")
+	if cur and ThemeModule and ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(cur)
+	end
+	updateThemeGradients()
+
 	print("✅ [BroadcastClient] Loaded!")
 end
 

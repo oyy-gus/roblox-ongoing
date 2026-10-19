@@ -428,4 +428,36 @@ AdminConfig.Events.OnTabChanged.Event:Connect(function(tabName)
 	end
 end)
 
+if ThemeModule.OnThemeChanged then
+	ThemeModule.OnThemeChanged.Event:Connect(function()
+		if selectedPlayer ~= "" and currentTitles then
+			displayTitles(currentTitles)
+		end
+	end)
+end
+
+local MenuConfig = nil
+pcall(function()
+	MenuConfig = require(Modules:WaitForChild("MenuConfig", 5))
+end)
+if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+	MenuConfig.Events.OnColorChanged.Event:Connect(function()
+		if selectedPlayer ~= "" and currentTitles then
+			displayTitles(currentTitles)
+		end
+	end)
+end
+
+player:GetAttributeChangedSignal("CurrentTheme"):Connect(function()
+	local theme = player:GetAttribute("CurrentTheme")
+	if theme and ThemeModule and ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(theme)
+	end
+end)
+
+local cur = player:GetAttribute("CurrentTheme")
+if cur and ThemeModule and ThemeModule.ApplyPreset then
+	ThemeModule.ApplyPreset(cur)
+end
+
 print("✅ [ManageTitleClient] Berhasil dimuat!")

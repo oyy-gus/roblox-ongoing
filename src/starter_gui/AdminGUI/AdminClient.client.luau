@@ -176,11 +176,13 @@ titleLabel.Size               = UDim2.new(0, 300, 1, 0)
 titleLabel.Position           = UDim2.new(0, 16, 0, 0)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text               = "🛡️  Panel Kontrol Admin"
-titleLabel.TextColor3         = ThemeModule.Colors.TextWhite
+titleLabel.TextColor3         = Color3.fromRGB(255, 255, 255)
 titleLabel.TextSize           = UIStrings.TextSize.Title
 titleLabel.Font               = Enum.Font.GothamBold
 titleLabel.TextXAlignment     = Enum.TextXAlignment.Left
 titleLabel.Parent             = header
+
+local titleGradient = ThemeModule.CreatePrimaryGradient(titleLabel, 0, 1.2)
 
 local closeButton = Instance.new("TextButton")
 closeButton.Name             = "CloseButton"
@@ -380,12 +382,20 @@ local function switchTab(tabName)
 		end
 
 		if name == tabName then
-			if gradient then gradient.Enabled = true; ThemeModule.GradientSystem.Register(gradient, 1) end
+			if gradient then
+				gradient.Color = ThemeModule.Gradients.Primary
+				gradient.Enabled = true
+				ThemeModule.GradientSystem.Register(gradient, 1)
+			end
 			if frame then frame.BackgroundColor3 = TAB_COLORS.ActiveBackground end
 			btn.TextColor3 = TAB_COLORS.ActiveText
 			btn.Font       = Enum.Font.GothamBold
 		else
-			if gradient then gradient.Enabled = false; ThemeModule.GradientSystem.Unregister(gradient) end
+			if gradient then
+				gradient.Color = ThemeModule.Gradients.Primary
+				gradient.Enabled = false
+				ThemeModule.GradientSystem.Unregister(gradient)
+			end
 			if frame then frame.BackgroundColor3 = TAB_COLORS.InactiveBackground end
 			btn.TextColor3 = TAB_COLORS.InactiveText
 			btn.Font       = Enum.Font.GothamMedium
@@ -409,6 +419,52 @@ end
 for tabName, btn in pairs(tabButtons) do
 	btn.MouseButton1Click:Connect(function() switchTab(tabName) end)
 end
+
+local function updateAllTabGradients()
+	for _, grad in pairs(tabGradients) do
+		if grad and grad.Parent then
+			grad.Color = ThemeModule.Gradients.Primary
+		end
+	end
+	if mainStrokeGradient and mainStrokeGradient.Parent then
+		mainStrokeGradient.Color = ThemeModule.Gradients.Primary
+	end
+	if titleGradient and titleGradient.Parent then
+		titleGradient.Color = ThemeModule.Gradients.Primary
+	end
+end
+
+if ThemeModule.OnThemeChanged then
+	ThemeModule.OnThemeChanged.Event:Connect(function()
+		updateAllTabGradients()
+	end)
+end
+
+local MenuConfig = nil
+pcall(function()
+	MenuConfig = require(Modules:WaitForChild("MenuConfig", 5))
+end)
+if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+	MenuConfig.Events.OnColorChanged.Event:Connect(function()
+		updateAllTabGradients()
+	end)
+end
+
+player:GetAttributeChangedSignal("CurrentTheme"):Connect(function()
+	local theme = player:GetAttribute("CurrentTheme")
+	if theme and ThemeModule and ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(theme)
+	end
+	updateAllTabGradients()
+end)
+
+task.spawn(function()
+	local initialTheme = player:GetAttribute("CurrentTheme")
+	if initialTheme and ThemeModule and ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(initialTheme)
+	end
+	updateAllTabGradients()
+end)
 
 local function showNotification(message, messageType)
 	local title    = "Panel Admin"

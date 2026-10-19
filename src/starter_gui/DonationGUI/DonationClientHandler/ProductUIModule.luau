@@ -131,7 +131,7 @@ function ProductUIModule.loadProducts(elements, state)
 
 		state.productsLoaded = true
 		UIModule.notify(
-			ClientConfig.MESSAGES.LOAD_SUCCESS,
+			"Donasi",
 			#products .. " produk tersedia",
 			ClientConfig.NOTIFICATIONS.DURATION.INFO
 		)

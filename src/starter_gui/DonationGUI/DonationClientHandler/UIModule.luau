@@ -1,5 +1,14 @@
-local starterGui = game:GetService("StarterGui")
-local ClientConfig = require(script.Parent.ClientConfig)
+local starterGui        = game:GetService("StarterGui")
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local ClientConfig      = require(script.Parent.ClientConfig)
+
+local NotifModule = nil
+pcall(function()
+	local modules = replicatedStorage:WaitForChild("Modules", 5)
+	if modules then
+		NotifModule = require(modules:WaitForChild("NotifModule", 5))
+	end
+end)
 
 local UIModule = {}
 
@@ -13,11 +22,27 @@ end
 function UIModule.notify(title, text, duration)
 	if not ClientConfig.NOTIFICATIONS.ENABLED then return end
 
+	local dur = duration or ClientConfig.NOTIFICATIONS.DURATION.DEFAULT or 3
+
+	if NotifModule then
+		local tLower = tostring(title):lower()
+		if tLower:find("error") or tLower:find("gagal") or tLower:find("failed") then
+			NotifModule.Error(title, text, dur)
+		elseif tLower:find("warning") or tLower:find("cooldown") or tLower:find("peringatan") then
+			NotifModule.Warning(title, text, dur)
+		elseif tLower:find("sukses") or tLower:find("success") or tLower:find("berhasil") then
+			NotifModule.Success(title, text, dur)
+		else
+			NotifModule.Info(title, text, dur)
+		end
+		return
+	end
+
 	pcall(function()
 		starterGui:SetCore("SendNotification", {
 			Title = title,
 			Text = text,
-			Duration = duration or ClientConfig.NOTIFICATIONS.DURATION.DEFAULT
+			Duration = dur
 		})
 	end)
 end

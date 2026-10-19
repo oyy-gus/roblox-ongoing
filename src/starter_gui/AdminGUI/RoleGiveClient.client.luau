@@ -438,7 +438,8 @@ confirmBtn.LayoutOrder = 1
 confirmBtn.Parent = actionContainer
 
 AdminConfig.CreateCorner(confirmBtn, 6)
-ThemeModule.CreateStaticGradient(confirmBtn, "Success", 90)
+local confirmGradient = ThemeModule.CreateAnimatedGradient(confirmBtn, "Primary", 45, 1.2)
+State.Gradients.confirmGradient = confirmGradient
 
 local cancelBtn = Instance.new("TextButton")
 cancelBtn.Name = "CancelBtn"
@@ -753,6 +754,38 @@ else
 		end
 	end)
 end
+
+local function updateThemeGradients()
+	if confirmGradient and confirmGradient.Parent then
+		confirmGradient.Color = ThemeModule.Gradients.Primary
+	end
+end
+
+if ThemeModule.OnThemeChanged then
+	ThemeModule.OnThemeChanged.Event:Connect(updateThemeGradients)
+end
+
+local MenuConfig = nil
+pcall(function()
+	MenuConfig = require(Modules:WaitForChild("MenuConfig", 5))
+end)
+if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+	MenuConfig.Events.OnColorChanged.Event:Connect(updateThemeGradients)
+end
+
+LocalPlayer:GetAttributeChangedSignal("CurrentTheme"):Connect(function()
+	local theme = LocalPlayer:GetAttribute("CurrentTheme")
+	if theme and ThemeModule and ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(theme)
+	end
+	updateThemeGradients()
+end)
+
+local cur = LocalPlayer:GetAttribute("CurrentTheme")
+if cur and ThemeModule and ThemeModule.ApplyPreset then
+	ThemeModule.ApplyPreset(cur)
+end
+updateThemeGradients()
 
 roleGivePage.Destroying:Connect(function()
 	for _, gradient in pairs(State.Gradients) do

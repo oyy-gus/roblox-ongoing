@@ -158,6 +158,8 @@ ThemeModule.GradientSystem = {
 	BeatMultiplier = 1.0,
 }
 
+ThemeModule.OnThemeChanged = Instance.new("BindableEvent")
+
 function ThemeModule.GradientSystem.SetBeat(multiplier)
 	lastExternalBeat = os.clock()
 	ThemeModule.GradientSystem.BeatMultiplier = math.clamp(multiplier or 1.0, 0.5, 3.5)
@@ -549,11 +551,25 @@ function ThemeModule.ApplyPreset(presetName)
 		ColorSequenceKeypoint.new(1, Color3.fromHex("#151515"))
 	})
 
+	ThemeModule.Gradients.ButtonPrimary = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, accentColor),
+		ColorSequenceKeypoint.new(1, ThemeModule.DarkenColor(accentColor, 0.2))
+	})
+
+	ThemeModule.Gradients.Success = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, accentColor),
+		ColorSequenceKeypoint.new(1, ThemeModule.DarkenColor(accentColor, 0.25))
+	})
+
 	for _, data in ipairs(ThemeModule.GradientSystem.Gradients) do
 		if data.gradient and data.gradient.Parent then
 			data.gradient.Color = ThemeModule.Gradients.Primary
 		end
 	end
+
+	pcall(function()
+		ThemeModule.OnThemeChanged:Fire(presetName, accentColor)
+	end)
 
 	print("ThemeModule: Tema '" .. tostring(presetName) .. "' berhasil diterapkan (Gradien diperbarui)")
 	return true

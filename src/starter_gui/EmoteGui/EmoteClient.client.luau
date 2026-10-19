@@ -73,7 +73,7 @@ local function gradient(parent, colorSeq, rot)
 end
 
 local FRAME_W  = 320
-local FRAME_H  = 390
+local FRAME_H  = 440
 local PAD      = 10
 local INNER_W  = FRAME_W - PAD * 2
 

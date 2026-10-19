@@ -161,21 +161,23 @@ local modeIcon = make("TextLabel", {
 	Position               = UDim2.new(0, 10, 0, 0),
 	BackgroundTransparency = 1,
 	Text                   = "[V]",
-	TextColor3             = Color3.fromRGB(230, 230, 230),
+	TextColor3             = Color3.fromRGB(255, 255, 255),
 	Font                   = Enum.Font.GothamBold,
 	TextSize               = UIStrings.TextSize.Caption,
 }, header)
+local modeGradient = addGrad(modeIcon, 0, true)
 
 local titleLabel = make("TextLabel", {
 	Size                   = UDim2.new(1, -74, 1, 0),
 	Position               = UDim2.new(0, 38, 0, 0),
 	BackgroundTransparency = 1,
 	Text                   = "VIP Commands",
-	TextColor3             = Color3.fromRGB(230, 230, 230),
+	TextColor3             = Color3.fromRGB(255, 255, 255),
 	Font                   = Enum.Font.GothamBold,
 	TextSize               = 13,
 	TextXAlignment         = Enum.TextXAlignment.Left,
 }, header)
+local titleGradient = addGrad(titleLabel, 0, true)
 
 local closeBtn = make("TextButton", {
 	Size             = UDim2.new(0, 26, 0, 26),
@@ -821,6 +823,37 @@ task.spawn(function()
 
 	task.wait(0.6)
 	if RE.RequestIcon then RE.RequestIcon:FireServer() end
+end)
+
+local function updateToolbarTheme()
+	if modeGradient and modeGradient.Parent then
+		modeGradient.Color = ThemeModule.Gradients.Primary
+	end
+	if titleGradient and titleGradient.Parent then
+		titleGradient.Color = ThemeModule.Gradients.Primary
+	end
+end
+
+if ThemeModule.OnThemeChanged then
+	ThemeModule.OnThemeChanged.Event:Connect(updateToolbarTheme)
+end
+if MenuConfig and MenuConfig.Events and MenuConfig.Events.OnColorChanged then
+	MenuConfig.Events.OnColorChanged.Event:Connect(updateToolbarTheme)
+end
+player:GetAttributeChangedSignal("CurrentTheme"):Connect(function()
+	local theme = player:GetAttribute("CurrentTheme")
+	if theme and ThemeModule and ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(theme)
+	end
+	updateToolbarTheme()
+end)
+
+task.spawn(function()
+	local cur = player:GetAttribute("CurrentTheme")
+	if cur and ThemeModule and ThemeModule.ApplyPreset then
+		ThemeModule.ApplyPreset(cur)
+	end
+	updateToolbarTheme()
 end)
 
 print("✅ UnifiedToolbarUI — AutoScale + Tengah + Tergabung Siap")
