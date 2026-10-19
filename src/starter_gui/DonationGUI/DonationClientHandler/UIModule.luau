@@ -1,6 +1,7 @@
 local starterGui        = game:GetService("StarterGui")
 local replicatedStorage = game:GetService("ReplicatedStorage")
 local ClientConfig      = require(script.Parent.ClientConfig)
+local UIStrings         = require(replicatedStorage:WaitForChild("Modules"):WaitForChild("UIStrings"))
 
 local NotifModule = nil
 pcall(function()
@@ -72,6 +73,7 @@ function UIModule.showError(container, message)
 		errorLabel.Font = Enum.Font.Gotham
 		errorLabel.TextWrapped = true
 		errorLabel.Parent = container
+		UIStrings.LockTextSize(errorLabel, 14)
 	end
 
 	errorLabel.Text = message
@@ -101,6 +103,7 @@ function UIModule.setLoading(container, show)
 			loading.Font = Enum.Font.GothamSemibold
 			loading.TextWrapped = true
 			loading.Parent = container
+			UIStrings.LockTextSize(loading, 16)
 		end
 		loading.Visible = true
 	elseif loading then

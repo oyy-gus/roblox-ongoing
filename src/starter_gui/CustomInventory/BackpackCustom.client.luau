@@ -5,7 +5,11 @@ local ContextActionService = game:GetService("ContextActionService")
 local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ThemeModule = require(ReplicatedStorage:WaitForChild("Modules"):WaitForChild("ThemeModule"))
+local Modules = ReplicatedStorage:WaitForChild("Modules")
+local ThemeModule = require(Modules:WaitForChild("ThemeModule"))
+local UIStrings = require(Modules:WaitForChild("UIStrings"))
+local AutoScaleSystem = ReplicatedStorage:WaitForChild("AutoScaleSystem")
+local ScaleSystem = require(AutoScaleSystem:WaitForChild("ScaleSystem"))
 
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -67,6 +71,7 @@ local EnumKeys = {
 }
 
 local screenGui = playerGui:WaitForChild("CustomInventory")
+local guiScaler = ScaleSystem.new(screenGui)
 
 local function addCorner(parent, radius)
 	local corner = Instance.new("UICorner")
@@ -163,6 +168,7 @@ openBtn.AutoButtonColor = false
 openBtn.ZIndex = 5
 openBtn.Visible = false
 openBtn.Parent = screenGui
+UIStrings.LockTextSize(openBtn, 12)
 
 openBtn.MouseEnter:Connect(function()
 	tweenProperty(openBtn, {TextColor3 = SETTINGS.ACCENT_COLOR}, 0.15)
@@ -289,6 +295,7 @@ invTitle.Font = Enum.Font.GothamBold
 invTitle.TextXAlignment = Enum.TextXAlignment.Left
 invTitle.ZIndex = 4
 invTitle.Parent = invHeader
+UIStrings.LockTextSize(invTitle, 11)
 
 addGradient(invTitle, SETTINGS.ACCENT_COLOR, SETTINGS.ACCENT_COLOR_2, 0)
 
@@ -315,6 +322,7 @@ searchPlaceholder.Font = Enum.Font.Gotham
 searchPlaceholder.TextXAlignment = Enum.TextXAlignment.Left
 searchPlaceholder.ZIndex = 5
 searchPlaceholder.Parent = searchContainer
+UIStrings.LockTextSize(searchPlaceholder, 9)
 
 local searchBox = Instance.new("TextBox")
 searchBox.Name = "SearchBox"
@@ -330,6 +338,7 @@ searchBox.TextXAlignment = Enum.TextXAlignment.Left
 searchBox.ClearTextOnFocus = false
 searchBox.ZIndex = 6
 searchBox.Parent = searchContainer
+UIStrings.LockTextSize(searchBox, 9)
 
 local function updatePlaceholder()
 	searchPlaceholder.Visible = (searchBox.Text == "")
@@ -355,6 +364,7 @@ closeBtn.TextYAlignment = Enum.TextYAlignment.Center
 closeBtn.AutoButtonColor = false
 closeBtn.ZIndex = 4
 closeBtn.Parent = invHeader
+UIStrings.LockTextSize(closeBtn, 12)
 
 addCorner(closeBtn, 6)
 
@@ -555,6 +565,7 @@ local function createToolSlot(position, parent, isHotbar)
 	toolAmount.Font = Enum.Font.GothamBold
 	toolAmount.ZIndex = 4
 	toolAmount.Parent = amountBg
+	UIStrings.LockTextSize(toolAmount, 7)
 
 	return slotWrapper, slot
 end
@@ -705,6 +716,7 @@ function ToolObject:showDescription()
 	descText.AutomaticSize = Enum.AutomaticSize.XY
 	descText.TextWrapped = true
 	descText.Parent = descFrame
+	UIStrings.LockTextSize(descText, 9)
 
 	local constraint = Instance.new("UISizeConstraint")
 	constraint.MaxSize = Vector2.new(140, 50)

@@ -237,6 +237,7 @@ closeButton.TextXAlignment   = Enum.TextXAlignment.Center
 closeButton.TextYAlignment   = Enum.TextYAlignment.Center
 closeButton.AutoButtonColor  = false
 closeButton.Parent           = headerContent
+UIStrings.LockTextSize(closeButton, 14)
 
 ThemeModule.CreateCorner(closeButton, 6)
 
@@ -331,6 +332,7 @@ local function createTabButton(def)
 	btn.Font               = Enum.Font.GothamMedium
 	btn.AutoButtonColor    = false
 	btn.Parent             = btnFrame
+	UIStrings.LockTextSize(btn, UIStrings.TextSize.Body)
 
 	btn.MouseEnter:Connect(function()
 		if MenuConfig.State.currentTab == def.Name then return end

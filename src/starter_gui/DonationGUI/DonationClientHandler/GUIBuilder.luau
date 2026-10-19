@@ -78,6 +78,7 @@ local function makeLabel(props)
 	l.RichText               = props.RichText or false
 	l.ZIndex                 = props.ZIndex or 1
 	l.Parent                 = props.Parent
+	UIStrings.LockTextSize(l, l.TextSize)
 	return l
 end
 
@@ -98,6 +99,7 @@ local function makeButton(props)
 	b.ZIndex                 = props.ZIndex or 1
 	b.Parent                 = props.Parent
 	if props.CornerRadius then corner(props.CornerRadius, b) end
+	UIStrings.LockTextSize(b, b.TextSize)
 	return b
 end
 
@@ -122,6 +124,7 @@ local function makeTextBox(props)
 	corner(CFG.CORNER_SMALL, t)
 	padding(8, 12, 8, 12, t)
 	ThemeModule.CreateAnimatedStroke(t, 1, "Primary", 1)
+	UIStrings.LockTextSize(t, t.TextSize)
 	return t
 end
 

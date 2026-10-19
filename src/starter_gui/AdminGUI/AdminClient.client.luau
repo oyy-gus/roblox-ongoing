@@ -181,6 +181,7 @@ titleLabel.TextSize           = UIStrings.TextSize.Title
 titleLabel.Font               = Enum.Font.GothamBold
 titleLabel.TextXAlignment     = Enum.TextXAlignment.Left
 titleLabel.Parent             = header
+UIStrings.LockTextSize(titleLabel, UIStrings.TextSize.Title)
 
 local titleGradient = ThemeModule.CreatePrimaryGradient(titleLabel, 0, 1.2)
 
@@ -198,6 +199,7 @@ closeButton.TextXAlignment   = Enum.TextXAlignment.Center
 closeButton.TextYAlignment   = Enum.TextYAlignment.Center
 closeButton.AutoButtonColor  = false
 closeButton.Parent           = header
+UIStrings.LockTextSize(closeButton, 14)
 
 ThemeModule.CreateCorner(closeButton, 6)
 
@@ -315,6 +317,7 @@ local function createTabButton(def)
 	btn.AutoButtonColor    = false
 	btn.TextXAlignment     = Enum.TextXAlignment.Left
 	btn.Parent             = btnFrame
+	UIStrings.LockTextSize(btn, UIStrings.TextSize.Caption)
 
 	local btnPad = Instance.new("UIPadding")
 	btnPad.PaddingLeft     = UDim.new(0, 10)
@@ -761,6 +764,7 @@ for _, p in ipairs(placeholders) do
 	lbl.TextSize               = 14
 	lbl.Font                   = Enum.Font.GothamMedium
 	lbl.Parent                 = tabPages[p.page]
+	UIStrings.LockTextSize(lbl, 14)
 end
 
 task.spawn(function()

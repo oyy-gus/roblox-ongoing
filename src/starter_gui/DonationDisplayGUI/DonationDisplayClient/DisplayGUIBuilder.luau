@@ -60,6 +60,7 @@ local function makeLabel(props)
 	l.RichText = props.RichText or false
 	l.ZIndex = props.ZIndex or 1
 	l.Parent = props.Parent
+	UIStrings.LockTextSize(l, l.TextSize)
 	return l
 end
 

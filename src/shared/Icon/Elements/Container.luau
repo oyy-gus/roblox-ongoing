@@ -96,6 +96,11 @@ return function(Icon)
 	screenGui.ResetOnSpawn = false
 	screenGui.ScreenInsets = Enum.ScreenInsets.TopbarSafeInsets
 	container[screenGui.Name] = screenGui
+	pcall(function()
+		local ReplicatedStorage = game:GetService("ReplicatedStorage")
+		local UIStrings = require(ReplicatedStorage:WaitForChild("Modules", 5):WaitForChild("UIStrings", 5))
+		UIStrings.EnforceContainer(screenGui)
+	end)
 	Icon.baseDisplayOrderChanged:Connect(function()
 		screenGui.DisplayOrder = Icon.baseDisplayOrder
 	end)

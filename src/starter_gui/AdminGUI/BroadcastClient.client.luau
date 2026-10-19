@@ -106,6 +106,7 @@ local function buildBroadcastGUI()
 	headerIcon.TextSize = 20
 	headerIcon.Font = Enum.Font.GothamBold
 	headerIcon.Parent = headerSection
+	UIStrings.LockTextSize(headerIcon, 20)
 
 	local headerTitle = Instance.new("TextLabel")
 	headerTitle.Name = "HeaderTitle"
@@ -118,6 +119,7 @@ local function buildBroadcastGUI()
 	headerTitle.Font = Enum.Font.GothamBold
 	headerTitle.TextXAlignment = Enum.TextXAlignment.Left
 	headerTitle.Parent = headerSection
+	UIStrings.LockTextSize(headerTitle, UIStrings.TextSize.Title)
 
 	local headerSubtitle = Instance.new("TextLabel")
 	headerSubtitle.Name = "HeaderSubtitle"
@@ -130,6 +132,7 @@ local function buildBroadcastGUI()
 	headerSubtitle.Font = Enum.Font.GothamMedium
 	headerSubtitle.TextXAlignment = Enum.TextXAlignment.Left
 	headerSubtitle.Parent = headerSection
+	UIStrings.LockTextSize(headerSubtitle, UIStrings.TextSize.Caption)
 
 	local divider = Instance.new("Frame")
 	divider.Name = "Divider"
@@ -158,6 +161,7 @@ local function buildBroadcastGUI()
 	inputLabel.Font = Enum.Font.GothamBold
 	inputLabel.TextXAlignment = Enum.TextXAlignment.Left
 	inputLabel.Parent = inputSection
+	UIStrings.LockTextSize(inputLabel, UIStrings.TextSize.Title)
 
 	local textBoxContainer = Instance.new("Frame")
 	textBoxContainer.Name = "TextBoxContainer"
@@ -191,6 +195,7 @@ local function buildBroadcastGUI()
 	textBox.MultiLine = true
 	textBox.ClearTextOnFocus = false
 	textBox.Parent = textBoxContainer
+	UIStrings.LockTextSize(textBox, UIStrings.TextSize.Caption)
 
 	broadcastGUIElements.TextBox = textBox
 	broadcastGUIElements.TextBoxContainer = textBoxContainer
@@ -218,6 +223,7 @@ local function buildBroadcastGUI()
 	charCounter.Font = Enum.Font.Gotham
 	charCounter.TextXAlignment = Enum.TextXAlignment.Right
 	charCounter.Parent = inputSection
+	UIStrings.LockTextSize(charCounter, UIStrings.TextSize.Caption)
 
 	broadcastGUIElements.CharCounter = charCounter
 
@@ -264,6 +270,7 @@ local function buildBroadcastGUI()
 	sendIcon.TextSize = 16
 	sendIcon.Font = Enum.Font.GothamBold
 	sendIcon.Parent = sendButton
+	UIStrings.LockTextSize(sendIcon, 16)
 
 	local sendText = Instance.new("TextLabel")
 	sendText.Size = UDim2.new(1, -50, 1, 0)
@@ -275,6 +282,7 @@ local function buildBroadcastGUI()
 	sendText.Font = Enum.Font.GothamBold
 	sendText.TextXAlignment = Enum.TextXAlignment.Left
 	sendText.Parent = sendButton
+	UIStrings.LockTextSize(sendText, UIStrings.TextSize.Button)
 
 	broadcastGUIElements.SendButton = sendButton
 
@@ -306,6 +314,7 @@ local function buildBroadcastGUI()
 	clearIcon.TextColor3 = ThemeModule.Colors.TextWhite
 	clearIcon.Font = Enum.Font.GothamBold
 	clearIcon.Parent = clearButton
+	UIStrings.LockTextSize(clearIcon, UIStrings.TextSize.Caption)
 
 	local clearText = Instance.new("TextLabel")
 	clearText.Size = UDim2.new(1, -40, 1, 0)
@@ -317,6 +326,7 @@ local function buildBroadcastGUI()
 	clearText.Font = Enum.Font.GothamMedium
 	clearText.TextXAlignment = Enum.TextXAlignment.Left
 	clearText.Parent = clearButton
+	UIStrings.LockTextSize(clearText, UIStrings.TextSize.Caption)
 
 	broadcastGUIElements.ClearButton = clearButton
 
@@ -345,6 +355,7 @@ local function buildBroadcastGUI()
 	infoIcon.TextSize = UIStrings.TextSize.Caption
 	infoIcon.Font = Enum.Font.GothamBold
 	infoIcon.Parent = infoSection
+	UIStrings.LockTextSize(infoIcon, UIStrings.TextSize.Caption)
 
 	local infoText = Instance.new("TextLabel")
 	infoText.Size = UDim2.new(1, -50, 1, -12)
@@ -357,6 +368,7 @@ local function buildBroadcastGUI()
 	infoText.TextXAlignment = Enum.TextXAlignment.Left
 	infoText.TextWrapped = true
 	infoText.Parent = infoSection
+	UIStrings.LockTextSize(infoText, UIStrings.TextSize.Caption)
 
 	sendButton.MouseButton1Click:Connect(sendBroadcastMessage)
 	clearButton.MouseButton1Click:Connect(clearTextBox)
@@ -373,6 +385,16 @@ local function setupNotificationContainer()
 	notificationContainer.DisplayOrder = 150
 	notificationContainer.IgnoreGuiInset = true
 	notificationContainer.Parent = playerGui
+
+	local AutoScaleSystem = RS:FindFirstChild("AutoScaleSystem")
+	if AutoScaleSystem then
+		local ok, ScaleSystem = pcall(function()
+			return require(AutoScaleSystem:WaitForChild("ScaleSystem", 3))
+		end)
+		if ok and ScaleSystem then
+			ScaleSystem.new(notificationContainer)
+		end
+	end
 end
 
 local function playNotificationSound()
@@ -515,6 +537,7 @@ local function createBroadcastNotification(messageData)
 	broadcastLabel.Font = Enum.Font.GothamBold
 	broadcastLabel.TextXAlignment = Enum.TextXAlignment.Left
 	broadcastLabel.Parent = notif
+	UIStrings.LockTextSize(broadcastLabel, UIStrings.TextSize.Caption)
 
 	local badgeContainer = Instance.new("Frame")
 	badgeContainer.Name = "BadgeContainer"
@@ -550,6 +573,7 @@ local function createBroadcastNotification(messageData)
 	nameLabel.TextXAlignment = Enum.TextXAlignment.Center
 	nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
 	nameLabel.Parent = nameBadge
+	UIStrings.LockTextSize(nameLabel, UIStrings.TextSize.Caption)
 
 	local roleBadge = Instance.new("Frame")
 	roleBadge.Name = "RoleBadge"
@@ -571,6 +595,7 @@ local function createBroadcastNotification(messageData)
 	roleLabel.Font = Enum.Font.GothamBold
 	roleLabel.TextXAlignment = Enum.TextXAlignment.Center
 	roleLabel.Parent = roleBadge
+	UIStrings.LockTextSize(roleLabel, UIStrings.TextSize.Caption)
 
 	task.defer(function()
 		if nameLabel and nameLabel.Parent and nameBadge and nameBadge.Parent then
@@ -600,6 +625,7 @@ local function createBroadcastNotification(messageData)
 	closeBtn.AutoButtonColor = false
 	closeBtn.Parent = notif
 	ThemeModule.CreateCorner(closeBtn, 5)
+	UIStrings.LockTextSize(closeBtn, 12)
 
 	local closePad = Instance.new("UIPadding")
 	closePad.PaddingBottom = UDim.new(0, 2)
@@ -633,6 +659,7 @@ local function createBroadcastNotification(messageData)
 	messageContent.TextYAlignment = Enum.TextYAlignment.Top
 	messageContent.TextWrapped = true
 	messageContent.Parent = messageContainer
+	UIStrings.LockTextSize(messageContent, UIStrings.TextSize.Body)
 
 	local notifData = {
 		Frame = notif,

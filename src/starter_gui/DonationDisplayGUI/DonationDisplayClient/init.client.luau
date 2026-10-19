@@ -5,6 +5,16 @@ local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local gui = script.Parent
 
+local AutoScaleSystem = RS:FindFirstChild("AutoScaleSystem")
+if AutoScaleSystem and gui:IsA("ScreenGui") then
+	local ok, ScaleSystem = pcall(function()
+		return require(AutoScaleSystem:WaitForChild("ScaleSystem", 3))
+	end)
+	if ok and ScaleSystem then
+		ScaleSystem.new(gui)
+	end
+end
+
 local DisplayGUIBuilder = require(script.DisplayGUIBuilder)
 local elements = DisplayGUIBuilder.build(gui)
 

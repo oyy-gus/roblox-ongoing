@@ -510,6 +510,7 @@ function MenuConfig.CreateButton(parent, name, text, size, position, bgColor, te
 	button.Font             = Enum.Font.GothamBold
 	button.AutoButtonColor  = false
 	button.Parent = parent
+	UIStrings.LockTextSize(button, UIStrings.TextSize.Button)
 
 	MenuConfig.CreateCorner(button, 6)
 	MenuConfig.SetupButtonHover(button, bgColor or MenuConfig.Config.Colors.Primary)
@@ -563,6 +564,7 @@ function MenuConfig.CreateSectionHeader(parent, text, icon)
 	label.Font               = Enum.Font.GothamBold
 	label.TextXAlignment     = Enum.TextXAlignment.Left
 	label.Parent = hdr
+	UIStrings.LockTextSize(label, UIStrings.TextSize.Header)
 
 	return hdr, label
 end
@@ -589,6 +591,7 @@ function MenuConfig.CreateInfoBox(parent, labelText, position, size)
 	label.Font               = Enum.Font.Gotham
 	label.TextXAlignment     = Enum.TextXAlignment.Left
 	label.Parent = frame
+	UIStrings.LockTextSize(label, UIStrings.TextSize.Caption)
 
 	local value = Instance.new("TextLabel")
 	value.Name               = "Value"
@@ -602,6 +605,7 @@ function MenuConfig.CreateInfoBox(parent, labelText, position, size)
 	value.TextXAlignment     = Enum.TextXAlignment.Left
 	value.TextTruncate       = Enum.TextTruncate.None
 	value.Parent = frame
+	UIStrings.LockTextSize(value, UIStrings.TextSize.Body)
 
 	return frame, label, value
 end
@@ -650,6 +654,7 @@ function MenuConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 	nameLabel.TextXAlignment     = Enum.TextXAlignment.Left
 	nameLabel.TextTruncate       = Enum.TextTruncate.AtEnd
 	nameLabel.Parent = btn
+	UIStrings.LockTextSize(nameLabel, UIStrings.TextSize.Body)
 
 	local usernameLabel = Instance.new("TextLabel")
 	usernameLabel.Name               = "Username"
@@ -663,6 +668,7 @@ function MenuConfig.CreatePlayerButton(parent, targetPlayer, onClick)
 	usernameLabel.TextXAlignment     = Enum.TextXAlignment.Left
 	usernameLabel.TextTruncate       = Enum.TextTruncate.AtEnd
 	usernameLabel.Parent = btn
+	UIStrings.LockTextSize(usernameLabel, UIStrings.TextSize.Caption)
 
 	btn.MouseEnter:Connect(function()
 		TweenService:Create(btn, TweenInfo.new(0.15), {
