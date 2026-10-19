@@ -1,17 +1,17 @@
 local UIStrings = {
 	TextSize = {
-		Header = 16,
-		Title = 14,
-		Button = 13,
-		Body = 12,
-		Caption = 11,
+		Header = 14,
+		Title = 13,
+		Button = 12,
+		Body = 11,
+		Caption = 10,
 	},
 
-	HeaderSize = 16,
-	TitleSize = 14,
-	ButtonSize = 13,
-	BodySize = 12,
-	CaptionSize = 11,
+	HeaderSize = 14,
+	TitleSize = 13,
+	ButtonSize = 12,
+	BodySize = 11,
+	CaptionSize = 10,
 
 
 	Fonts = {

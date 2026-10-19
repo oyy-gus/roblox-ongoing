@@ -69,11 +69,11 @@ function UIModule.showError(container, message)
 		errorLabel.Position = UDim2.new(0, 10, 0, 50)
 		errorLabel.BackgroundTransparency = 1
 		errorLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
-		errorLabel.TextSize = 14
+		errorLabel.TextSize = 11
 		errorLabel.Font = Enum.Font.Gotham
 		errorLabel.TextWrapped = true
 		errorLabel.Parent = container
-		UIStrings.LockTextSize(errorLabel, 14)
+		UIStrings.LockTextSize(errorLabel, 11)
 	end
 
 	errorLabel.Text = message
@@ -99,11 +99,11 @@ function UIModule.setLoading(container, show)
 			loading.BackgroundTransparency = 1
 			loading.Text = ClientConfig.UI.LOADING_TEXT
 			loading.TextColor3 = Color3.fromRGB(255, 255, 255)
-			loading.TextSize = 16
+			loading.TextSize = 12
 			loading.Font = Enum.Font.GothamSemibold
 			loading.TextWrapped = true
 			loading.Parent = container
-			UIStrings.LockTextSize(loading, 16)
+			UIStrings.LockTextSize(loading, 12)
 		end
 		loading.Visible = true
 	elseif loading then

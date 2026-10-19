@@ -193,13 +193,13 @@ closeButton.BackgroundColor3 = ThemeModule.Colors.CloseRed
 closeButton.BorderSizePixel  = 0
 closeButton.Text             = "x"
 closeButton.TextColor3       = ThemeModule.Colors.TextWhite
-closeButton.TextSize         = 14
+closeButton.TextSize         = 12
 closeButton.Font             = Enum.Font.GothamBold
 closeButton.TextXAlignment   = Enum.TextXAlignment.Center
 closeButton.TextYAlignment   = Enum.TextYAlignment.Center
 closeButton.AutoButtonColor  = false
 closeButton.Parent           = header
-UIStrings.LockTextSize(closeButton, 14)
+UIStrings.LockTextSize(closeButton, 12)
 
 ThemeModule.CreateCorner(closeButton, 6)
 
@@ -312,12 +312,12 @@ local function createTabButton(def)
 	btn.BorderSizePixel    = 0
 	btn.Text               = def.Icon .. "  " .. def.DisplayName
 	btn.TextColor3         = TAB_COLORS.InactiveText
-	btn.TextSize           = UIStrings.TextSize.Caption
+	btn.TextSize           = UIStrings.TextSize.Body
 	btn.Font               = Enum.Font.GothamMedium
 	btn.AutoButtonColor    = false
 	btn.TextXAlignment     = Enum.TextXAlignment.Left
 	btn.Parent             = btnFrame
-	UIStrings.LockTextSize(btn, UIStrings.TextSize.Caption)
+	UIStrings.LockTextSize(btn, UIStrings.TextSize.Body)
 
 	local btnPad = Instance.new("UIPadding")
 	btnPad.PaddingLeft     = UDim.new(0, 10)
@@ -761,10 +761,10 @@ for _, p in ipairs(placeholders) do
 	lbl.BackgroundTransparency = 1
 	lbl.Text                   = p.text
 	lbl.TextColor3             = ThemeModule.Colors.TextGray
-	lbl.TextSize               = 14
+	lbl.TextSize               = 11
 	lbl.Font                   = Enum.Font.GothamMedium
 	lbl.Parent                 = tabPages[p.page]
-	UIStrings.LockTextSize(lbl, 14)
+	UIStrings.LockTextSize(lbl, 11)
 end
 
 task.spawn(function()

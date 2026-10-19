@@ -231,13 +231,13 @@ closeButton.BackgroundColor3 = ThemeModule.Colors.CloseRed
 closeButton.BorderSizePixel  = 0
 closeButton.Text             = "x"
 closeButton.TextColor3       = ThemeModule.Colors.TextWhite
-closeButton.TextSize         = 14
+closeButton.TextSize         = 12
 closeButton.Font             = Enum.Font.GothamBold
 closeButton.TextXAlignment   = Enum.TextXAlignment.Center
 closeButton.TextYAlignment   = Enum.TextYAlignment.Center
 closeButton.AutoButtonColor  = false
 closeButton.Parent           = headerContent
-UIStrings.LockTextSize(closeButton, 14)
+UIStrings.LockTextSize(closeButton, 12)
 
 ThemeModule.CreateCorner(closeButton, 6)
 

@@ -103,10 +103,10 @@ local function buildBroadcastGUI()
 	headerIcon.Position = UDim2.new(0, 0, 0.5, -20)
 	headerIcon.BackgroundTransparency = 1
 	headerIcon.Text = "📢"
-	headerIcon.TextSize = 20
+	headerIcon.TextSize = 16
 	headerIcon.Font = Enum.Font.GothamBold
 	headerIcon.Parent = headerSection
-	UIStrings.LockTextSize(headerIcon, 20)
+	UIStrings.LockTextSize(headerIcon, 16)
 
 	local headerTitle = Instance.new("TextLabel")
 	headerTitle.Name = "HeaderTitle"
@@ -267,10 +267,10 @@ local function buildBroadcastGUI()
 	sendIcon.Position = UDim2.new(0, 14, 0, 0)
 	sendIcon.BackgroundTransparency = 1
 	sendIcon.Text = "📤"
-	sendIcon.TextSize = 16
+	sendIcon.TextSize = 12
 	sendIcon.Font = Enum.Font.GothamBold
 	sendIcon.Parent = sendButton
-	UIStrings.LockTextSize(sendIcon, 16)
+	UIStrings.LockTextSize(sendIcon, 12)
 
 	local sendText = Instance.new("TextLabel")
 	sendText.Size = UDim2.new(1, -50, 1, 0)
@@ -618,14 +618,14 @@ local function createBroadcastNotification(messageData)
 	closeBtn.BorderSizePixel = 0
 	closeBtn.Text = "x"
 	closeBtn.TextColor3 = ThemeModule.Colors.TextWhite
-	closeBtn.TextSize = 12
+	closeBtn.TextSize = 11
 	closeBtn.Font = Enum.Font.GothamBold
 	closeBtn.TextXAlignment = Enum.TextXAlignment.Center
 	closeBtn.TextYAlignment = Enum.TextYAlignment.Center
 	closeBtn.AutoButtonColor = false
 	closeBtn.Parent = notif
 	ThemeModule.CreateCorner(closeBtn, 5)
-	UIStrings.LockTextSize(closeBtn, 12)
+	UIStrings.LockTextSize(closeBtn, 11)
 
 	local closePad = Instance.new("UIPadding")
 	closePad.PaddingBottom = UDim.new(0, 2)

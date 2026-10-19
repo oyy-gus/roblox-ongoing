@@ -1989,7 +1989,7 @@ local function buildQueueSection()
 	qeIcon.Position = UDim2.new(0.5, -17, 0, 10)
 	qeIcon.BackgroundColor3 = Color3.fromHex("#181818")
 	qeIcon.Text = "🎵"
-	qeIcon.TextSize = 16
+	qeIcon.TextSize = 13
 	qeIcon.TextColor3 = Color3.fromHex("#FFFFFF")
 	qeIcon.BorderSizePixel = 0
 	qeIcon.Parent = qEmpty
@@ -2502,7 +2502,7 @@ local function buildLibrarySection()
 	nrIcon.Position = UDim2.new(0.5, -18, 0, 12)
 	nrIcon.BackgroundColor3 = Color3.fromHex("#181818")
 	nrIcon.Text = "🔍"
-	nrIcon.TextSize = 20
+	nrIcon.TextSize = 15
 	nrIcon.TextColor3 = Color3.fromHex("#FFFFFF")
 	nrIcon.BorderSizePixel = 0
 	nrIcon.Parent = noRes
@@ -2545,7 +2545,7 @@ local function buildLibrarySection()
 	feIcon.Position = UDim2.new(0.5, -19, 0, 12)
 	feIcon.BackgroundColor3 = Color3.fromHex("#1E1E1E")
 	feIcon.Text = "⭐"
-	feIcon.TextSize = 20
+	feIcon.TextSize = 15
 	feIcon.TextColor3 = Color3.fromHex("#FFFFFF")
 	feIcon.BorderSizePixel = 0
 	feIcon.Parent = favEmp
@@ -2589,7 +2589,7 @@ local function buildLibrarySection()
 	flIcon.Position = UDim2.new(0.5, -19, 0, 12)
 	flIcon.BackgroundColor3 = Color3.fromHex("#1E1E1E")
 	flIcon.Text = "🔒"
-	flIcon.TextSize = 20
+	flIcon.TextSize = 15
 	flIcon.TextColor3 = Color3.fromHex("#FFFFFF")
 	flIcon.BorderSizePixel = 0
 	flIcon.Parent = favLock
